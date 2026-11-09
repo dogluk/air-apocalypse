@@ -131,7 +131,7 @@ python pull_weather.py   # -> data/weather_era5.parquet
 python fires.py          # -> data/fires_daily.parquet
 python analyze.py        # -> data/nightday.parquet, effects.csv, summary.csv
 python tempo.py          # -> data/tempo_hourly.csv, tempo_daily.csv
-python chart_week.py     # -> charts/diwali_week.png (the headline chart)
+python chart_week.py     # -> charts/diwali_week.png + diwali_week_night.png (headline chart, two themes)
 python charts_metros.py  # -> charts/chart_metros_summary.png, chart_metros_hourly.png
 python charts.py         # -> Bengaluru vs Delhi deep-dive charts
 python robustness.py     # hangover, rain and placebo checks for Bengaluru and Delhi
@@ -142,6 +142,7 @@ small enough to be included, so the analysis and chart steps run without the 4 G
 
 ## More charts
 
+- `charts/diwali_week_night.png`: the headline chart on a night-sky background
 - `charts/chart_metros_summary.png`: naive vs adjusted, festival nights and the week after, per city
 - `charts/chart_metros_hourly.png`: each city's hourly curve through Diwali
 - `charts/chart_hero.png`, `chart_prepost.png`, `chart_confounders.png`: the Bengaluru vs Delhi

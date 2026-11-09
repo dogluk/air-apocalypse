@@ -75,7 +75,7 @@ for t, c in zip(axes[0].get_yticklabels(), S.col):
     t.set_color(INK)
 axes[0].set_ylim(-0.6, len(S) - 0.2)
 
-fig.text(0.015, 0.965, "Diwali adds 25–100% to PM2.5 in every big Indian city. The 'post-Diwali smog' mostly isn't Diwali.",
+fig.text(0.015, 0.965, "Diwali raises PM2.5 by 25–100% in every big Indian city",
          fontsize=16.5, fontweight="bold", color=INK)
 fig.text(0.015, 0.925,
          "Hollow: naive comparison with 8–21 days either side. Filled: regression with year effects, a seasonal curve, weekday, "
