@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+.DS_Store
+# raw downloads (~4 GB) and the big intermediate; rebuild with ./download.sh && python extract.py
+data/raw/
+data/fires/
+data/hourly.parquet
