@@ -177,13 +177,18 @@ bending curve, a city at 90 and the same city at 220 are in different regimes, a
 intervention's benefit changes with it.
 
 **A note on the 1.5 million.** Jaganathan et al. 2024's 1.5 million deaths a year
-attributable to PM2.5 counts *registered* deaths only: the paper reports 4.5 million (2009)
+attributable to PM2.5 is a share of *registered* deaths: the paper reports 4.5 million (2009)
 to 7.3 million (2019) registered deaths a year, with death registration 30-100% complete
-depending on the state. Its own slope applied to all deaths gives a larger number: 2.1
-million a year for 2014 on AQLI's map (the `jaganathan2024_deaths` case in
-[`health/benchmarks/README.md`](../health/benchmarks/README.md)), and 2.7 million on the
-2023 map (`airhealth burden India`). The share, about a quarter of deaths, is the
-comparable figure; the count undercounts.
+depending on the state. So it is a count of registered deaths, not of all deaths. The
+paper's own share, 24.9%, applied to all deaths in 2014 as the Sample Registration System
+counts them (6.7 per 1,000, about 8.5 million) would be about 2.1 million. The `airhealth`
+tool, running the paper's slope on AQLI's map, gets a share of about 26% and 1.9 million for
+2014 (the `jaganathan2024_deaths` case in
+[`health/benchmarks/README.md`](../health/benchmarks/README.md); its 2014 death count is
+known to be low) and 2.3 million on the 2023 map (`airhealth burden India`). These counts
+move by a tenth or more with how many deaths India is taken to have, which the official
+sources themselves disagree on (see the health README, "How many deaths a year"). The
+share, about a quarter of deaths, is the comparable figure.
 
 ---
 
