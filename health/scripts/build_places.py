@@ -19,7 +19,7 @@ DATA = Path(__file__).resolve().parents[1] / "data"
 
 STATES = {  # canonical name: aliases
     "India": ["INDIA"],
-    "Andaman & Nicobar Islands": ["Andaman and Nicobar"],
+    "Andaman & Nicobar Islands": ["Andaman and Nicobar", "A & N Islands"],
     "Andhra Pradesh": [],
     "Arunachal Pradesh": [],
     "Assam": [],

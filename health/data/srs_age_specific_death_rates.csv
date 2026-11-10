@@ -1,0 +1,2186 @@
+state,year,age_start,rate_per_1000
+India,2020,0,32.3
+India,2020,1,1.0
+India,2020,5,0.3
+India,2020,10,0.5
+India,2020,15,0.8
+India,2020,20,1.1
+India,2020,25,1.3
+India,2020,30,1.8
+India,2020,35,2.2
+India,2020,40,3.5
+India,2020,45,4.9
+India,2020,50,7.6
+India,2020,55,13.4
+India,2020,60,18.6
+India,2020,65,29.7
+India,2020,70,47.5
+India,2020,75,67.6
+India,2020,80,101.8
+India,2020,85,180.6
+Andhra Pradesh,2020,0,23.4
+Andhra Pradesh,2020,1,0.7
+Andhra Pradesh,2020,5,0.3
+Andhra Pradesh,2020,10,0.5
+Andhra Pradesh,2020,15,0.4
+Andhra Pradesh,2020,20,0.6
+Andhra Pradesh,2020,25,1.1
+Andhra Pradesh,2020,30,1.7
+Andhra Pradesh,2020,35,1.8
+Andhra Pradesh,2020,40,4.0
+Andhra Pradesh,2020,45,5.3
+Andhra Pradesh,2020,50,8.4
+Andhra Pradesh,2020,55,12.6
+Andhra Pradesh,2020,60,23.0
+Andhra Pradesh,2020,65,27.1
+Andhra Pradesh,2020,70,48.6
+Andhra Pradesh,2020,75,71.6
+Andhra Pradesh,2020,80,96.8
+Andhra Pradesh,2020,85,121.0
+Assam,2020,0,36.4
+Assam,2020,1,0.9
+Assam,2020,5,0.1
+Assam,2020,10,0.3
+Assam,2020,15,0.6
+Assam,2020,20,1.6
+Assam,2020,25,1.6
+Assam,2020,30,2.7
+Assam,2020,35,2.3
+Assam,2020,40,5.0
+Assam,2020,45,4.9
+Assam,2020,50,10.8
+Assam,2020,55,19.1
+Assam,2020,60,26.0
+Assam,2020,65,36.6
+Assam,2020,70,57.4
+Assam,2020,75,78.3
+Assam,2020,80,73.6
+Assam,2020,85,140.9
+Bihar,2020,0,25.7
+Bihar,2020,1,0.8
+Bihar,2020,5,0.5
+Bihar,2020,10,0.5
+Bihar,2020,15,0.6
+Bihar,2020,20,0.8
+Bihar,2020,25,1.0
+Bihar,2020,30,1.9
+Bihar,2020,35,2.0
+Bihar,2020,40,2.7
+Bihar,2020,45,5.4
+Bihar,2020,50,5.5
+Bihar,2020,55,12.9
+Bihar,2020,60,18.8
+Bihar,2020,65,34.6
+Bihar,2020,70,61.4
+Bihar,2020,75,90.0
+Bihar,2020,80,154.8
+Bihar,2020,85,236.2
+Chhattisgarh,2020,0,42.2
+Chhattisgarh,2020,1,0.8
+Chhattisgarh,2020,5,0.3
+Chhattisgarh,2020,10,0.7
+Chhattisgarh,2020,15,0.7
+Chhattisgarh,2020,20,2.6
+Chhattisgarh,2020,25,2.3
+Chhattisgarh,2020,30,2.4
+Chhattisgarh,2020,35,3.4
+Chhattisgarh,2020,40,4.7
+Chhattisgarh,2020,45,7.1
+Chhattisgarh,2020,50,12.4
+Chhattisgarh,2020,55,20.3
+Chhattisgarh,2020,60,26.8
+Chhattisgarh,2020,65,41.5
+Chhattisgarh,2020,70,72.2
+Chhattisgarh,2020,75,107.0
+Chhattisgarh,2020,80,193.1
+Chhattisgarh,2020,85,307.5
+Delhi,2020,0,13.2
+Delhi,2020,1,0.6
+Delhi,2020,5,0.2
+Delhi,2020,10,0.0
+Delhi,2020,15,0.6
+Delhi,2020,20,0.6
+Delhi,2020,25,0.5
+Delhi,2020,30,0.4
+Delhi,2020,35,1.4
+Delhi,2020,40,2.3
+Delhi,2020,45,4.8
+Delhi,2020,50,6.5
+Delhi,2020,55,8.3
+Delhi,2020,60,14.5
+Delhi,2020,65,23.2
+Delhi,2020,70,44.1
+Delhi,2020,75,60.6
+Delhi,2020,80,77.8
+Delhi,2020,85,134.2
+Gujarat,2020,0,31.4
+Gujarat,2020,1,0.3
+Gujarat,2020,5,0.4
+Gujarat,2020,10,0.3
+Gujarat,2020,15,0.5
+Gujarat,2020,20,0.9
+Gujarat,2020,25,1.3
+Gujarat,2020,30,1.5
+Gujarat,2020,35,2.2
+Gujarat,2020,40,2.8
+Gujarat,2020,45,4.6
+Gujarat,2020,50,7.2
+Gujarat,2020,55,13.8
+Gujarat,2020,60,19.3
+Gujarat,2020,65,30.9
+Gujarat,2020,70,38.4
+Gujarat,2020,75,59.1
+Gujarat,2020,80,95.9
+Gujarat,2020,85,167.0
+Haryana,2020,0,32.5
+Haryana,2020,1,1.2
+Haryana,2020,5,0.4
+Haryana,2020,10,0.7
+Haryana,2020,15,0.5
+Haryana,2020,20,1.4
+Haryana,2020,25,1.0
+Haryana,2020,30,2.8
+Haryana,2020,35,2.8
+Haryana,2020,40,3.5
+Haryana,2020,45,4.8
+Haryana,2020,50,7.6
+Haryana,2020,55,14.0
+Haryana,2020,60,24.1
+Haryana,2020,65,31.1
+Haryana,2020,70,54.9
+Haryana,2020,75,72.3
+Haryana,2020,80,92.9
+Haryana,2020,85,193.8
+Himachal Pradesh,2020,0,23.0
+Himachal Pradesh,2020,1,1.7
+Himachal Pradesh,2020,5,0.0
+Himachal Pradesh,2020,10,0.7
+Himachal Pradesh,2020,15,0.3
+Himachal Pradesh,2020,20,0.8
+Himachal Pradesh,2020,25,0.8
+Himachal Pradesh,2020,30,0.8
+Himachal Pradesh,2020,35,1.0
+Himachal Pradesh,2020,40,2.8
+Himachal Pradesh,2020,45,4.8
+Himachal Pradesh,2020,50,6.1
+Himachal Pradesh,2020,55,10.3
+Himachal Pradesh,2020,60,19.6
+Himachal Pradesh,2020,65,31.6
+Himachal Pradesh,2020,70,41.5
+Himachal Pradesh,2020,75,69.7
+Himachal Pradesh,2020,80,62.7
+Himachal Pradesh,2020,85,160.9
+Jammu & Kashmir,2020,0,23.2
+Jammu & Kashmir,2020,1,0.2
+Jammu & Kashmir,2020,5,0.4
+Jammu & Kashmir,2020,10,0.2
+Jammu & Kashmir,2020,15,0.3
+Jammu & Kashmir,2020,20,0.6
+Jammu & Kashmir,2020,25,0.4
+Jammu & Kashmir,2020,30,1.6
+Jammu & Kashmir,2020,35,1.2
+Jammu & Kashmir,2020,40,3.5
+Jammu & Kashmir,2020,45,5.4
+Jammu & Kashmir,2020,50,6.5
+Jammu & Kashmir,2020,55,11.3
+Jammu & Kashmir,2020,60,17.5
+Jammu & Kashmir,2020,65,22.8
+Jammu & Kashmir,2020,70,31.1
+Jammu & Kashmir,2020,75,42.4
+Jammu & Kashmir,2020,80,66.9
+Jammu & Kashmir,2020,85,77.8
+Jharkhand,2020,0,29.4
+Jharkhand,2020,1,0.4
+Jharkhand,2020,5,0.9
+Jharkhand,2020,10,0.3
+Jharkhand,2020,15,1.0
+Jharkhand,2020,20,1.0
+Jharkhand,2020,25,1.3
+Jharkhand,2020,30,2.4
+Jharkhand,2020,35,2.8
+Jharkhand,2020,40,3.2
+Jharkhand,2020,45,4.9
+Jharkhand,2020,50,9.7
+Jharkhand,2020,55,13.0
+Jharkhand,2020,60,23.2
+Jharkhand,2020,65,29.7
+Jharkhand,2020,70,46.1
+Jharkhand,2020,75,99.5
+Jharkhand,2020,80,104.4
+Jharkhand,2020,85,180.8
+Karnataka,2020,0,22.3
+Karnataka,2020,1,0.6
+Karnataka,2020,5,0.4
+Karnataka,2020,10,0.6
+Karnataka,2020,15,1.0
+Karnataka,2020,20,1.0
+Karnataka,2020,25,1.3
+Karnataka,2020,30,2.3
+Karnataka,2020,35,2.2
+Karnataka,2020,40,3.7
+Karnataka,2020,45,5.2
+Karnataka,2020,50,8.7
+Karnataka,2020,55,13.4
+Karnataka,2020,60,18.0
+Karnataka,2020,65,29.1
+Karnataka,2020,70,58.3
+Karnataka,2020,75,68.4
+Karnataka,2020,80,121.2
+Karnataka,2020,85,249.4
+Kerala,2020,0,7.8
+Kerala,2020,1,0.5
+Kerala,2020,5,0.5
+Kerala,2020,10,0.5
+Kerala,2020,15,0.6
+Kerala,2020,20,1.0
+Kerala,2020,25,0.8
+Kerala,2020,30,1.2
+Kerala,2020,35,1.4
+Kerala,2020,40,2.8
+Kerala,2020,45,3.3
+Kerala,2020,50,6.4
+Kerala,2020,55,11.3
+Kerala,2020,60,14.7
+Kerala,2020,65,26.0
+Kerala,2020,70,37.1
+Kerala,2020,75,50.5
+Kerala,2020,80,98.1
+Kerala,2020,85,196.8
+Madhya Pradesh,2020,0,48.1
+Madhya Pradesh,2020,1,2.0
+Madhya Pradesh,2020,5,0.5
+Madhya Pradesh,2020,10,0.6
+Madhya Pradesh,2020,15,1.0
+Madhya Pradesh,2020,20,1.6
+Madhya Pradesh,2020,25,1.9
+Madhya Pradesh,2020,30,1.8
+Madhya Pradesh,2020,35,2.5
+Madhya Pradesh,2020,40,3.7
+Madhya Pradesh,2020,45,5.2
+Madhya Pradesh,2020,50,6.9
+Madhya Pradesh,2020,55,12.9
+Madhya Pradesh,2020,60,22.4
+Madhya Pradesh,2020,65,28.7
+Madhya Pradesh,2020,70,51.8
+Madhya Pradesh,2020,75,63.8
+Madhya Pradesh,2020,80,125.3
+Madhya Pradesh,2020,85,243.4
+Maharashtra,2020,0,15.4
+Maharashtra,2020,1,0.6
+Maharashtra,2020,5,0.3
+Maharashtra,2020,10,0.5
+Maharashtra,2020,15,0.8
+Maharashtra,2020,20,0.9
+Maharashtra,2020,25,1.1
+Maharashtra,2020,30,1.3
+Maharashtra,2020,35,1.9
+Maharashtra,2020,40,2.7
+Maharashtra,2020,45,4.2
+Maharashtra,2020,50,7.5
+Maharashtra,2020,55,11.8
+Maharashtra,2020,60,16.1
+Maharashtra,2020,65,25.1
+Maharashtra,2020,70,39.5
+Maharashtra,2020,75,66.8
+Maharashtra,2020,80,95.8
+Maharashtra,2020,85,167.7
+Odisha,2020,0,35.0
+Odisha,2020,1,0.9
+Odisha,2020,5,0.3
+Odisha,2020,10,0.6
+Odisha,2020,15,0.9
+Odisha,2020,20,1.2
+Odisha,2020,25,1.5
+Odisha,2020,30,1.6
+Odisha,2020,35,2.8
+Odisha,2020,40,4.5
+Odisha,2020,45,5.4
+Odisha,2020,50,6.7
+Odisha,2020,55,13.9
+Odisha,2020,60,16.6
+Odisha,2020,65,31.6
+Odisha,2020,70,43.4
+Odisha,2020,75,68.8
+Odisha,2020,80,64.4
+Odisha,2020,85,150.0
+Punjab,2020,0,20.8
+Punjab,2020,1,0.9
+Punjab,2020,5,0.3
+Punjab,2020,10,0.3
+Punjab,2020,15,0.8
+Punjab,2020,20,0.9
+Punjab,2020,25,1.5
+Punjab,2020,30,1.9
+Punjab,2020,35,2.5
+Punjab,2020,40,4.0
+Punjab,2020,45,6.1
+Punjab,2020,50,8.2
+Punjab,2020,55,15.4
+Punjab,2020,60,22.2
+Punjab,2020,65,33.7
+Punjab,2020,70,43.6
+Punjab,2020,75,57.9
+Punjab,2020,80,85.6
+Punjab,2020,85,158.5
+Rajasthan,2020,0,38.9
+Rajasthan,2020,1,1.9
+Rajasthan,2020,5,0.2
+Rajasthan,2020,10,0.4
+Rajasthan,2020,15,0.8
+Rajasthan,2020,20,1.2
+Rajasthan,2020,25,1.3
+Rajasthan,2020,30,1.4
+Rajasthan,2020,35,2.1
+Rajasthan,2020,40,3.2
+Rajasthan,2020,45,4.3
+Rajasthan,2020,50,7.0
+Rajasthan,2020,55,15.0
+Rajasthan,2020,60,19.1
+Rajasthan,2020,65,30.3
+Rajasthan,2020,70,38.2
+Rajasthan,2020,75,60.1
+Rajasthan,2020,80,108.5
+Rajasthan,2020,85,217.4
+Tamil Nadu,2020,0,16.6
+Tamil Nadu,2020,1,0.2
+Tamil Nadu,2020,5,0.2
+Tamil Nadu,2020,10,0.4
+Tamil Nadu,2020,15,0.5
+Tamil Nadu,2020,20,0.7
+Tamil Nadu,2020,25,0.9
+Tamil Nadu,2020,30,1.4
+Tamil Nadu,2020,35,1.6
+Tamil Nadu,2020,40,3.0
+Tamil Nadu,2020,45,4.2
+Tamil Nadu,2020,50,7.9
+Tamil Nadu,2020,55,10.4
+Tamil Nadu,2020,60,14.5
+Tamil Nadu,2020,65,21.7
+Tamil Nadu,2020,70,41.3
+Tamil Nadu,2020,75,50.7
+Tamil Nadu,2020,80,96.5
+Tamil Nadu,2020,85,127.7
+Telangana,2020,0,25.2
+Telangana,2020,1,0.4
+Telangana,2020,5,0.4
+Telangana,2020,10,0.4
+Telangana,2020,15,0.6
+Telangana,2020,20,1.1
+Telangana,2020,25,1.2
+Telangana,2020,30,2.0
+Telangana,2020,35,2.4
+Telangana,2020,40,4.1
+Telangana,2020,45,6.7
+Telangana,2020,50,9.0
+Telangana,2020,55,11.2
+Telangana,2020,60,20.0
+Telangana,2020,65,26.1
+Telangana,2020,70,53.4
+Telangana,2020,75,76.9
+Telangana,2020,80,114.9
+Telangana,2020,85,164.5
+Uttar Pradesh,2020,0,54.2
+Uttar Pradesh,2020,1,1.4
+Uttar Pradesh,2020,5,0.2
+Uttar Pradesh,2020,10,0.6
+Uttar Pradesh,2020,15,1.0
+Uttar Pradesh,2020,20,1.4
+Uttar Pradesh,2020,25,1.8
+Uttar Pradesh,2020,30,2.3
+Uttar Pradesh,2020,35,2.9
+Uttar Pradesh,2020,40,4.9
+Uttar Pradesh,2020,45,5.6
+Uttar Pradesh,2020,50,8.6
+Uttar Pradesh,2020,55,17.6
+Uttar Pradesh,2020,60,19.4
+Uttar Pradesh,2020,65,33.9
+Uttar Pradesh,2020,70,57.3
+Uttar Pradesh,2020,75,75.7
+Uttar Pradesh,2020,80,110.7
+Uttar Pradesh,2020,85,227.5
+Uttarakhand,2020,0,20.9
+Uttarakhand,2020,1,0.4
+Uttarakhand,2020,5,0.3
+Uttarakhand,2020,10,0.2
+Uttarakhand,2020,15,0.5
+Uttarakhand,2020,20,1.5
+Uttarakhand,2020,25,1.5
+Uttarakhand,2020,30,3.0
+Uttarakhand,2020,35,2.1
+Uttarakhand,2020,40,5.5
+Uttarakhand,2020,45,7.5
+Uttarakhand,2020,50,8.5
+Uttarakhand,2020,55,14.5
+Uttarakhand,2020,60,16.1
+Uttarakhand,2020,65,37.0
+Uttarakhand,2020,70,47.0
+Uttarakhand,2020,75,78.8
+Uttarakhand,2020,80,77.6
+Uttarakhand,2020,85,188.7
+West Bengal,2020,0,21.2
+West Bengal,2020,1,0.8
+West Bengal,2020,5,0.4
+West Bengal,2020,10,0.3
+West Bengal,2020,15,0.6
+West Bengal,2020,20,0.8
+West Bengal,2020,25,0.8
+West Bengal,2020,30,1.2
+West Bengal,2020,35,1.5
+West Bengal,2020,40,2.6
+West Bengal,2020,45,3.6
+West Bengal,2020,50,5.7
+West Bengal,2020,55,12.2
+West Bengal,2020,60,16.2
+West Bengal,2020,65,33.6
+West Bengal,2020,70,44.8
+West Bengal,2020,75,67.5
+West Bengal,2020,80,99.4
+West Bengal,2020,85,184.0
+India,2021,0,28.0
+India,2021,1,1.1
+India,2021,5,0.4
+India,2021,10,0.5
+India,2021,15,0.9
+India,2021,20,1.2
+India,2021,25,1.5
+India,2021,30,2.2
+India,2021,35,3.1
+India,2021,40,4.4
+India,2021,45,6.4
+India,2021,50,10.0
+India,2021,55,16.5
+India,2021,60,24.1
+India,2021,65,36.6
+India,2021,70,50.0
+India,2021,75,71.7
+India,2021,80,106.2
+India,2021,85,173.3
+Andhra Pradesh,2021,0,21.7
+Andhra Pradesh,2021,1,0.7
+Andhra Pradesh,2021,5,0.4
+Andhra Pradesh,2021,10,0.2
+Andhra Pradesh,2021,15,0.6
+Andhra Pradesh,2021,20,1.1
+Andhra Pradesh,2021,25,1.5
+Andhra Pradesh,2021,30,2.3
+Andhra Pradesh,2021,35,3.2
+Andhra Pradesh,2021,40,5.2
+Andhra Pradesh,2021,45,6.8
+Andhra Pradesh,2021,50,9.7
+Andhra Pradesh,2021,55,15.3
+Andhra Pradesh,2021,60,22.9
+Andhra Pradesh,2021,65,36.0
+Andhra Pradesh,2021,70,59.9
+Andhra Pradesh,2021,75,86.1
+Andhra Pradesh,2021,80,102.8
+Andhra Pradesh,2021,85,135.4
+Assam,2021,0,34.4
+Assam,2021,1,0.8
+Assam,2021,5,0.5
+Assam,2021,10,0.7
+Assam,2021,15,0.9
+Assam,2021,20,1.4
+Assam,2021,25,1.6
+Assam,2021,30,1.7
+Assam,2021,35,3.5
+Assam,2021,40,5.7
+Assam,2021,45,7.8
+Assam,2021,50,12.0
+Assam,2021,55,17.2
+Assam,2021,60,25.6
+Assam,2021,65,36.4
+Assam,2021,70,48.8
+Assam,2021,75,57.7
+Assam,2021,80,103.1
+Assam,2021,85,132.5
+Bihar,2021,0,26.6
+Bihar,2021,1,1.1
+Bihar,2021,5,0.5
+Bihar,2021,10,0.6
+Bihar,2021,15,1.1
+Bihar,2021,20,1.3
+Bihar,2021,25,1.5
+Bihar,2021,30,2.0
+Bihar,2021,35,3.4
+Bihar,2021,40,4.6
+Bihar,2021,45,6.2
+Bihar,2021,50,8.8
+Bihar,2021,55,14.8
+Bihar,2021,60,24.4
+Bihar,2021,65,40.4
+Bihar,2021,70,60.1
+Bihar,2021,75,87.1
+Bihar,2021,80,150.3
+Bihar,2021,85,246.1
+Chhattisgarh,2021,0,38.2
+Chhattisgarh,2021,1,0.8
+Chhattisgarh,2021,5,0.5
+Chhattisgarh,2021,10,0.8
+Chhattisgarh,2021,15,0.8
+Chhattisgarh,2021,20,2.9
+Chhattisgarh,2021,25,2.5
+Chhattisgarh,2021,30,2.6
+Chhattisgarh,2021,35,4.4
+Chhattisgarh,2021,40,5.6
+Chhattisgarh,2021,45,8.5
+Chhattisgarh,2021,50,15.3
+Chhattisgarh,2021,55,26.1
+Chhattisgarh,2021,60,34.1
+Chhattisgarh,2021,65,49.3
+Chhattisgarh,2021,70,76.5
+Chhattisgarh,2021,75,129.9
+Chhattisgarh,2021,80,234.4
+Chhattisgarh,2021,85,376.7
+Delhi,2021,0,11.5
+Delhi,2021,1,0.7
+Delhi,2021,5,0.2
+Delhi,2021,10,0.1
+Delhi,2021,15,0.7
+Delhi,2021,20,1.0
+Delhi,2021,25,1.3
+Delhi,2021,30,1.5
+Delhi,2021,35,2.2
+Delhi,2021,40,2.9
+Delhi,2021,45,5.2
+Delhi,2021,50,7.9
+Delhi,2021,55,14.3
+Delhi,2021,60,25.3
+Delhi,2021,65,35.6
+Delhi,2021,70,55.7
+Delhi,2021,75,71.4
+Delhi,2021,80,92.6
+Delhi,2021,85,138.1
+Gujarat,2021,0,21.6
+Gujarat,2021,1,0.8
+Gujarat,2021,5,0.2
+Gujarat,2021,10,0.4
+Gujarat,2021,15,0.8
+Gujarat,2021,20,1.2
+Gujarat,2021,25,1.8
+Gujarat,2021,30,2.4
+Gujarat,2021,35,3.3
+Gujarat,2021,40,5.8
+Gujarat,2021,45,7.9
+Gujarat,2021,50,11.4
+Gujarat,2021,55,23.5
+Gujarat,2021,60,29.8
+Gujarat,2021,65,44.4
+Gujarat,2021,70,55.8
+Gujarat,2021,75,79.4
+Gujarat,2021,80,115.6
+Gujarat,2021,85,188.0
+Haryana,2021,0,27.9
+Haryana,2021,1,1.3
+Haryana,2021,5,0.5
+Haryana,2021,10,0.5
+Haryana,2021,15,0.9
+Haryana,2021,20,1.4
+Haryana,2021,25,1.6
+Haryana,2021,30,2.8
+Haryana,2021,35,3.8
+Haryana,2021,40,5.1
+Haryana,2021,45,8.3
+Haryana,2021,50,12.6
+Haryana,2021,55,18.7
+Haryana,2021,60,27.4
+Haryana,2021,65,45.7
+Haryana,2021,70,59.2
+Haryana,2021,75,82.8
+Haryana,2021,80,132.6
+Haryana,2021,85,206.1
+Himachal Pradesh,2021,0,17.2
+Himachal Pradesh,2021,1,1.2
+Himachal Pradesh,2021,5,0.6
+Himachal Pradesh,2021,10,0.4
+Himachal Pradesh,2021,15,1.1
+Himachal Pradesh,2021,20,0.8
+Himachal Pradesh,2021,25,1.5
+Himachal Pradesh,2021,30,1.5
+Himachal Pradesh,2021,35,2.1
+Himachal Pradesh,2021,40,4.3
+Himachal Pradesh,2021,45,4.9
+Himachal Pradesh,2021,50,7.8
+Himachal Pradesh,2021,55,13.5
+Himachal Pradesh,2021,60,23.1
+Himachal Pradesh,2021,65,31.6
+Himachal Pradesh,2021,70,46.5
+Himachal Pradesh,2021,75,70.4
+Himachal Pradesh,2021,80,80.1
+Himachal Pradesh,2021,85,167.1
+Jammu & Kashmir,2021,0,15.7
+Jammu & Kashmir,2021,1,0.2
+Jammu & Kashmir,2021,5,0.1
+Jammu & Kashmir,2021,10,0.0
+Jammu & Kashmir,2021,15,0.4
+Jammu & Kashmir,2021,20,0.8
+Jammu & Kashmir,2021,25,0.4
+Jammu & Kashmir,2021,30,1.0
+Jammu & Kashmir,2021,35,1.6
+Jammu & Kashmir,2021,40,4.1
+Jammu & Kashmir,2021,45,4.7
+Jammu & Kashmir,2021,50,8.1
+Jammu & Kashmir,2021,55,13.7
+Jammu & Kashmir,2021,60,22.5
+Jammu & Kashmir,2021,65,29.4
+Jammu & Kashmir,2021,70,37.5
+Jammu & Kashmir,2021,75,43.2
+Jammu & Kashmir,2021,80,70.8
+Jammu & Kashmir,2021,85,79.5
+Jharkhand,2021,0,25.1
+Jharkhand,2021,1,0.8
+Jharkhand,2021,5,0.6
+Jharkhand,2021,10,0.9
+Jharkhand,2021,15,1.3
+Jharkhand,2021,20,1.3
+Jharkhand,2021,25,2.3
+Jharkhand,2021,30,2.6
+Jharkhand,2021,35,2.3
+Jharkhand,2021,40,3.9
+Jharkhand,2021,45,6.8
+Jharkhand,2021,50,9.8
+Jharkhand,2021,55,18.0
+Jharkhand,2021,60,25.6
+Jharkhand,2021,65,34.8
+Jharkhand,2021,70,44.2
+Jharkhand,2021,75,89.8
+Jharkhand,2021,80,117.9
+Jharkhand,2021,85,178.8
+Karnataka,2021,0,17.6
+Karnataka,2021,1,0.9
+Karnataka,2021,5,0.5
+Karnataka,2021,10,0.5
+Karnataka,2021,15,0.8
+Karnataka,2021,20,1.0
+Karnataka,2021,25,1.3
+Karnataka,2021,30,3.4
+Karnataka,2021,35,2.9
+Karnataka,2021,40,6.0
+Karnataka,2021,45,7.1
+Karnataka,2021,50,10.9
+Karnataka,2021,55,16.1
+Karnataka,2021,60,26.1
+Karnataka,2021,65,41.0
+Karnataka,2021,70,62.9
+Karnataka,2021,75,81.9
+Karnataka,2021,80,137.8
+Karnataka,2021,85,235.8
+Kerala,2021,0,5.6
+Kerala,2021,1,0.5
+Kerala,2021,5,0.3
+Kerala,2021,10,0.3
+Kerala,2021,15,0.6
+Kerala,2021,20,1.0
+Kerala,2021,25,0.8
+Kerala,2021,30,1.6
+Kerala,2021,35,2.0
+Kerala,2021,40,3.1
+Kerala,2021,45,4.0
+Kerala,2021,50,5.6
+Kerala,2021,55,12.3
+Kerala,2021,60,15.8
+Kerala,2021,65,30.2
+Kerala,2021,70,47.0
+Kerala,2021,75,69.1
+Kerala,2021,80,96.9
+Kerala,2021,85,217.7
+Madhya Pradesh,2021,0,42.2
+Madhya Pradesh,2021,1,1.9
+Madhya Pradesh,2021,5,0.7
+Madhya Pradesh,2021,10,0.8
+Madhya Pradesh,2021,15,1.2
+Madhya Pradesh,2021,20,1.6
+Madhya Pradesh,2021,25,2.3
+Madhya Pradesh,2021,30,3.1
+Madhya Pradesh,2021,35,3.9
+Madhya Pradesh,2021,40,5.5
+Madhya Pradesh,2021,45,7.9
+Madhya Pradesh,2021,50,11.1
+Madhya Pradesh,2021,55,20.2
+Madhya Pradesh,2021,60,28.6
+Madhya Pradesh,2021,65,35.6
+Madhya Pradesh,2021,70,51.7
+Madhya Pradesh,2021,75,64.9
+Madhya Pradesh,2021,80,110.9
+Madhya Pradesh,2021,85,185.7
+Maharashtra,2021,0,14.8
+Maharashtra,2021,1,0.4
+Maharashtra,2021,5,0.2
+Maharashtra,2021,10,0.2
+Maharashtra,2021,15,0.6
+Maharashtra,2021,20,1.0
+Maharashtra,2021,25,1.2
+Maharashtra,2021,30,1.9
+Maharashtra,2021,35,3.1
+Maharashtra,2021,40,3.9
+Maharashtra,2021,45,6.4
+Maharashtra,2021,50,10.4
+Maharashtra,2021,55,14.8
+Maharashtra,2021,60,23.8
+Maharashtra,2021,65,36.1
+Maharashtra,2021,70,48.8
+Maharashtra,2021,75,68.1
+Maharashtra,2021,80,88.6
+Maharashtra,2021,85,180.3
+Odisha,2021,0,34.6
+Odisha,2021,1,0.8
+Odisha,2021,5,0.6
+Odisha,2021,10,0.7
+Odisha,2021,15,1.0
+Odisha,2021,20,1.2
+Odisha,2021,25,1.7
+Odisha,2021,30,2.1
+Odisha,2021,35,3.7
+Odisha,2021,40,5.3
+Odisha,2021,45,7.1
+Odisha,2021,50,9.9
+Odisha,2021,55,15.8
+Odisha,2021,60,21.5
+Odisha,2021,65,34.8
+Odisha,2021,70,45.1
+Odisha,2021,75,64.8
+Odisha,2021,80,85.1
+Odisha,2021,85,162.9
+Punjab,2021,0,17.9
+Punjab,2021,1,1.2
+Punjab,2021,5,0.3
+Punjab,2021,10,0.5
+Punjab,2021,15,1.1
+Punjab,2021,20,1.3
+Punjab,2021,25,1.7
+Punjab,2021,30,2.5
+Punjab,2021,35,3.9
+Punjab,2021,40,4.0
+Punjab,2021,45,8.1
+Punjab,2021,50,12.0
+Punjab,2021,55,19.7
+Punjab,2021,60,28.1
+Punjab,2021,65,35.8
+Punjab,2021,70,46.1
+Punjab,2021,75,66.9
+Punjab,2021,80,91.9
+Punjab,2021,85,149.8
+Rajasthan,2021,0,33.2
+Rajasthan,2021,1,2.1
+Rajasthan,2021,5,0.2
+Rajasthan,2021,10,0.4
+Rajasthan,2021,15,0.7
+Rajasthan,2021,20,1.3
+Rajasthan,2021,25,1.6
+Rajasthan,2021,30,1.8
+Rajasthan,2021,35,2.9
+Rajasthan,2021,40,4.3
+Rajasthan,2021,45,6.2
+Rajasthan,2021,50,9.7
+Rajasthan,2021,55,17.9
+Rajasthan,2021,60,22.9
+Rajasthan,2021,65,34.7
+Rajasthan,2021,70,38.6
+Rajasthan,2021,75,52.1
+Rajasthan,2021,80,85.3
+Rajasthan,2021,85,154.4
+Tamil Nadu,2021,0,11.7
+Tamil Nadu,2021,1,0.6
+Tamil Nadu,2021,5,0.2
+Tamil Nadu,2021,10,0.4
+Tamil Nadu,2021,15,0.8
+Tamil Nadu,2021,20,1.1
+Tamil Nadu,2021,25,0.9
+Tamil Nadu,2021,30,1.9
+Tamil Nadu,2021,35,3.1
+Tamil Nadu,2021,40,4.2
+Tamil Nadu,2021,45,5.5
+Tamil Nadu,2021,50,9.8
+Tamil Nadu,2021,55,13.5
+Tamil Nadu,2021,60,20.4
+Tamil Nadu,2021,65,30.3
+Tamil Nadu,2021,70,44.1
+Tamil Nadu,2021,75,62.8
+Tamil Nadu,2021,80,105.0
+Tamil Nadu,2021,85,133.6
+Telangana,2021,0,20.1
+Telangana,2021,1,0.5
+Telangana,2021,5,0.3
+Telangana,2021,10,0.2
+Telangana,2021,15,0.3
+Telangana,2021,20,0.8
+Telangana,2021,25,1.0
+Telangana,2021,30,1.7
+Telangana,2021,35,2.7
+Telangana,2021,40,4.8
+Telangana,2021,45,6.5
+Telangana,2021,50,10.7
+Telangana,2021,55,14.0
+Telangana,2021,60,22.0
+Telangana,2021,65,31.7
+Telangana,2021,70,44.7
+Telangana,2021,75,76.8
+Telangana,2021,80,95.8
+Telangana,2021,85,133.9
+Uttar Pradesh,2021,0,41.5
+Uttar Pradesh,2021,1,1.5
+Uttar Pradesh,2021,5,0.4
+Uttar Pradesh,2021,10,0.5
+Uttar Pradesh,2021,15,0.9
+Uttar Pradesh,2021,20,1.4
+Uttar Pradesh,2021,25,1.7
+Uttar Pradesh,2021,30,2.4
+Uttar Pradesh,2021,35,2.9
+Uttar Pradesh,2021,40,3.5
+Uttar Pradesh,2021,45,5.6
+Uttar Pradesh,2021,50,9.2
+Uttar Pradesh,2021,55,18.2
+Uttar Pradesh,2021,60,25.7
+Uttar Pradesh,2021,65,38.5
+Uttar Pradesh,2021,70,48.1
+Uttar Pradesh,2021,75,72.3
+Uttar Pradesh,2021,80,113.7
+Uttar Pradesh,2021,85,186.6
+Uttarakhand,2021,0,22.7
+Uttarakhand,2021,1,0.8
+Uttarakhand,2021,5,0.3
+Uttarakhand,2021,10,0.4
+Uttarakhand,2021,15,0.8
+Uttarakhand,2021,20,0.9
+Uttarakhand,2021,25,1.5
+Uttarakhand,2021,30,1.4
+Uttarakhand,2021,35,3.6
+Uttarakhand,2021,40,5.8
+Uttarakhand,2021,45,8.3
+Uttarakhand,2021,50,7.8
+Uttarakhand,2021,55,16.0
+Uttarakhand,2021,60,19.2
+Uttarakhand,2021,65,40.1
+Uttarakhand,2021,70,50.5
+Uttarakhand,2021,75,74.2
+Uttarakhand,2021,80,89.5
+Uttarakhand,2021,85,157.5
+West Bengal,2021,0,18.0
+West Bengal,2021,1,0.6
+West Bengal,2021,5,0.2
+West Bengal,2021,10,0.6
+West Bengal,2021,15,0.8
+West Bengal,2021,20,0.6
+West Bengal,2021,25,1.3
+West Bengal,2021,30,1.6
+West Bengal,2021,35,2.5
+West Bengal,2021,40,3.2
+West Bengal,2021,45,5.2
+West Bengal,2021,50,9.7
+West Bengal,2021,55,14.7
+West Bengal,2021,60,22.2
+West Bengal,2021,65,37.4
+West Bengal,2021,70,48.8
+West Bengal,2021,75,74.0
+West Bengal,2021,80,96.5
+West Bengal,2021,85,150.9
+India,2022,0,26.5
+India,2022,1,1.0
+India,2022,5,0.6
+India,2022,10,0.7
+India,2022,15,1.0
+India,2022,20,1.4
+India,2022,25,1.5
+India,2022,30,2.0
+India,2022,35,2.8
+India,2022,40,3.8
+India,2022,45,5.5
+India,2022,50,8.2
+India,2022,55,12.7
+India,2022,60,20.2
+India,2022,65,30.3
+India,2022,70,48.6
+India,2022,75,69.1
+India,2022,80,101.5
+India,2022,85,162.5
+Andhra Pradesh,2022,0,20.2
+Andhra Pradesh,2022,1,0.9
+Andhra Pradesh,2022,5,0.7
+Andhra Pradesh,2022,10,1.0
+Andhra Pradesh,2022,15,1.2
+Andhra Pradesh,2022,20,1.2
+Andhra Pradesh,2022,25,1.7
+Andhra Pradesh,2022,30,2.2
+Andhra Pradesh,2022,35,2.9
+Andhra Pradesh,2022,40,4.4
+Andhra Pradesh,2022,45,6.5
+Andhra Pradesh,2022,50,8.7
+Andhra Pradesh,2022,55,14.4
+Andhra Pradesh,2022,60,21.1
+Andhra Pradesh,2022,65,29.3
+Andhra Pradesh,2022,70,53.5
+Andhra Pradesh,2022,75,91.0
+Andhra Pradesh,2022,80,100.2
+Andhra Pradesh,2022,85,137.6
+Assam,2022,0,32.1
+Assam,2022,1,0.8
+Assam,2022,5,0.4
+Assam,2022,10,0.5
+Assam,2022,15,1.2
+Assam,2022,20,0.9
+Assam,2022,25,1.6
+Assam,2022,30,2.0
+Assam,2022,35,3.6
+Assam,2022,40,4.7
+Assam,2022,45,7.5
+Assam,2022,50,9.9
+Assam,2022,55,16.3
+Assam,2022,60,23.9
+Assam,2022,65,29.9
+Assam,2022,70,47.4
+Assam,2022,75,69.8
+Assam,2022,80,122.5
+Assam,2022,85,168.6
+Bihar,2022,0,26.3
+Bihar,2022,1,0.9
+Bihar,2022,5,0.6
+Bihar,2022,10,1.0
+Bihar,2022,15,0.8
+Bihar,2022,20,1.6
+Bihar,2022,25,1.5
+Bihar,2022,30,2.4
+Bihar,2022,35,3.0
+Bihar,2022,40,4.2
+Bihar,2022,45,4.3
+Bihar,2022,50,9.1
+Bihar,2022,55,12.8
+Bihar,2022,60,23.4
+Bihar,2022,65,39.3
+Bihar,2022,70,64.5
+Bihar,2022,75,76.7
+Bihar,2022,80,134.5
+Bihar,2022,85,242.6
+Chhattisgarh,2022,0,39.3
+Chhattisgarh,2022,1,0.9
+Chhattisgarh,2022,5,1.2
+Chhattisgarh,2022,10,1.0
+Chhattisgarh,2022,15,2.2
+Chhattisgarh,2022,20,2.3
+Chhattisgarh,2022,25,1.8
+Chhattisgarh,2022,30,3.2
+Chhattisgarh,2022,35,5.3
+Chhattisgarh,2022,40,6.1
+Chhattisgarh,2022,45,7.2
+Chhattisgarh,2022,50,10.0
+Chhattisgarh,2022,55,20.1
+Chhattisgarh,2022,60,29.2
+Chhattisgarh,2022,65,41.8
+Chhattisgarh,2022,70,79.3
+Chhattisgarh,2022,75,104.0
+Chhattisgarh,2022,80,197.8
+Chhattisgarh,2022,85,268.7
+Delhi,2022,0,11.3
+Delhi,2022,1,0.8
+Delhi,2022,5,0.5
+Delhi,2022,10,0.7
+Delhi,2022,15,0.6
+Delhi,2022,20,0.8
+Delhi,2022,25,0.9
+Delhi,2022,30,1.3
+Delhi,2022,35,1.7
+Delhi,2022,40,1.8
+Delhi,2022,45,4.6
+Delhi,2022,50,6.3
+Delhi,2022,55,10.2
+Delhi,2022,60,15.0
+Delhi,2022,65,25.7
+Delhi,2022,70,45.1
+Delhi,2022,75,74.6
+Delhi,2022,80,95.6
+Delhi,2022,85,145.9
+Gujarat,2022,0,20.1
+Gujarat,2022,1,1.2
+Gujarat,2022,5,0.6
+Gujarat,2022,10,0.6
+Gujarat,2022,15,1.5
+Gujarat,2022,20,1.3
+Gujarat,2022,25,1.5
+Gujarat,2022,30,2.4
+Gujarat,2022,35,2.9
+Gujarat,2022,40,4.3
+Gujarat,2022,45,6.2
+Gujarat,2022,50,8.3
+Gujarat,2022,55,14.0
+Gujarat,2022,60,22.3
+Gujarat,2022,65,31.1
+Gujarat,2022,70,49.8
+Gujarat,2022,75,70.3
+Gujarat,2022,80,90.5
+Gujarat,2022,85,153.5
+Haryana,2022,0,26.6
+Haryana,2022,1,1.3
+Haryana,2022,5,0.4
+Haryana,2022,10,0.7
+Haryana,2022,15,0.8
+Haryana,2022,20,1.5
+Haryana,2022,25,1.7
+Haryana,2022,30,2.4
+Haryana,2022,35,3.5
+Haryana,2022,40,4.6
+Haryana,2022,45,6.0
+Haryana,2022,50,9.6
+Haryana,2022,55,15.0
+Haryana,2022,60,22.5
+Haryana,2022,65,39.8
+Haryana,2022,70,53.9
+Haryana,2022,75,73.5
+Haryana,2022,80,120.0
+Haryana,2022,85,199.1
+Himachal Pradesh,2022,0,15.4
+Himachal Pradesh,2022,1,1.1
+Himachal Pradesh,2022,5,0.6
+Himachal Pradesh,2022,10,0.4
+Himachal Pradesh,2022,15,0.6
+Himachal Pradesh,2022,20,0.9
+Himachal Pradesh,2022,25,1.1
+Himachal Pradesh,2022,30,0.7
+Himachal Pradesh,2022,35,1.0
+Himachal Pradesh,2022,40,2.4
+Himachal Pradesh,2022,45,4.0
+Himachal Pradesh,2022,50,5.6
+Himachal Pradesh,2022,55,7.8
+Himachal Pradesh,2022,60,17.8
+Himachal Pradesh,2022,65,31.3
+Himachal Pradesh,2022,70,40.0
+Himachal Pradesh,2022,75,55.7
+Himachal Pradesh,2022,80,68.1
+Himachal Pradesh,2022,85,152.4
+Jammu & Kashmir,2022,0,14.5
+Jammu & Kashmir,2022,1,0.7
+Jammu & Kashmir,2022,5,0.5
+Jammu & Kashmir,2022,10,0.3
+Jammu & Kashmir,2022,15,0.7
+Jammu & Kashmir,2022,20,0.8
+Jammu & Kashmir,2022,25,0.9
+Jammu & Kashmir,2022,30,1.5
+Jammu & Kashmir,2022,35,2.6
+Jammu & Kashmir,2022,40,3.0
+Jammu & Kashmir,2022,45,4.9
+Jammu & Kashmir,2022,50,7.2
+Jammu & Kashmir,2022,55,13.2
+Jammu & Kashmir,2022,60,16.9
+Jammu & Kashmir,2022,65,24.2
+Jammu & Kashmir,2022,70,40.0
+Jammu & Kashmir,2022,75,51.7
+Jammu & Kashmir,2022,80,86.3
+Jammu & Kashmir,2022,85,95.1
+Jharkhand,2022,0,25.1
+Jharkhand,2022,1,0.9
+Jharkhand,2022,5,0.8
+Jharkhand,2022,10,0.7
+Jharkhand,2022,15,0.9
+Jharkhand,2022,20,1.3
+Jharkhand,2022,25,1.8
+Jharkhand,2022,30,2.3
+Jharkhand,2022,35,2.9
+Jharkhand,2022,40,4.1
+Jharkhand,2022,45,4.5
+Jharkhand,2022,50,9.2
+Jharkhand,2022,55,12.1
+Jharkhand,2022,60,20.7
+Jharkhand,2022,65,28.3
+Jharkhand,2022,70,42.7
+Jharkhand,2022,75,83.2
+Jharkhand,2022,80,111.6
+Jharkhand,2022,85,177.6
+Karnataka,2022,0,15.5
+Karnataka,2022,1,0.5
+Karnataka,2022,5,0.8
+Karnataka,2022,10,0.9
+Karnataka,2022,15,1.2
+Karnataka,2022,20,1.4
+Karnataka,2022,25,1.5
+Karnataka,2022,30,2.1
+Karnataka,2022,35,3.2
+Karnataka,2022,40,4.3
+Karnataka,2022,45,6.9
+Karnataka,2022,50,10.0
+Karnataka,2022,55,12.7
+Karnataka,2022,60,19.8
+Karnataka,2022,65,31.5
+Karnataka,2022,70,52.4
+Karnataka,2022,75,76.0
+Karnataka,2022,80,124.2
+Karnataka,2022,85,202.6
+Kerala,2022,0,7.4
+Kerala,2022,1,0.4
+Kerala,2022,5,0.3
+Kerala,2022,10,0.5
+Kerala,2022,15,0.6
+Kerala,2022,20,0.8
+Kerala,2022,25,0.8
+Kerala,2022,30,1.3
+Kerala,2022,35,1.5
+Kerala,2022,40,2.1
+Kerala,2022,45,3.3
+Kerala,2022,50,5.6
+Kerala,2022,55,8.3
+Kerala,2022,60,12.8
+Kerala,2022,65,21.2
+Kerala,2022,70,39.7
+Kerala,2022,75,57.8
+Kerala,2022,80,94.0
+Kerala,2022,85,205.4
+Madhya Pradesh,2022,0,40.1
+Madhya Pradesh,2022,1,2.0
+Madhya Pradesh,2022,5,0.7
+Madhya Pradesh,2022,10,0.7
+Madhya Pradesh,2022,15,1.2
+Madhya Pradesh,2022,20,1.5
+Madhya Pradesh,2022,25,1.7
+Madhya Pradesh,2022,30,2.2
+Madhya Pradesh,2022,35,3.4
+Madhya Pradesh,2022,40,4.8
+Madhya Pradesh,2022,45,6.5
+Madhya Pradesh,2022,50,8.9
+Madhya Pradesh,2022,55,13.9
+Madhya Pradesh,2022,60,22.3
+Madhya Pradesh,2022,65,31.7
+Madhya Pradesh,2022,70,48.0
+Madhya Pradesh,2022,75,70.3
+Madhya Pradesh,2022,80,117.4
+Madhya Pradesh,2022,85,163.8
+Maharashtra,2022,0,13.5
+Maharashtra,2022,1,0.7
+Maharashtra,2022,5,0.6
+Maharashtra,2022,10,0.7
+Maharashtra,2022,15,0.8
+Maharashtra,2022,20,1.1
+Maharashtra,2022,25,1.1
+Maharashtra,2022,30,1.7
+Maharashtra,2022,35,2.3
+Maharashtra,2022,40,3.3
+Maharashtra,2022,45,4.8
+Maharashtra,2022,50,7.7
+Maharashtra,2022,55,11.5
+Maharashtra,2022,60,19.5
+Maharashtra,2022,65,29.6
+Maharashtra,2022,70,47.0
+Maharashtra,2022,75,66.2
+Maharashtra,2022,80,88.2
+Maharashtra,2022,85,171.5
+Odisha,2022,0,31.6
+Odisha,2022,1,1.3
+Odisha,2022,5,0.9
+Odisha,2022,10,0.8
+Odisha,2022,15,0.9
+Odisha,2022,20,1.5
+Odisha,2022,25,1.7
+Odisha,2022,30,2.6
+Odisha,2022,35,3.0
+Odisha,2022,40,4.1
+Odisha,2022,45,4.8
+Odisha,2022,50,8.2
+Odisha,2022,55,13.3
+Odisha,2022,60,19.8
+Odisha,2022,65,32.5
+Odisha,2022,70,48.0
+Odisha,2022,75,55.8
+Odisha,2022,80,85.8
+Odisha,2022,85,130.6
+Punjab,2022,0,16.5
+Punjab,2022,1,0.6
+Punjab,2022,5,0.8
+Punjab,2022,10,0.8
+Punjab,2022,15,1.0
+Punjab,2022,20,1.7
+Punjab,2022,25,2.2
+Punjab,2022,30,3.4
+Punjab,2022,35,3.2
+Punjab,2022,40,4.4
+Punjab,2022,45,6.1
+Punjab,2022,50,10.8
+Punjab,2022,55,14.2
+Punjab,2022,60,23.2
+Punjab,2022,65,31.3
+Punjab,2022,70,47.1
+Punjab,2022,75,62.8
+Punjab,2022,80,102.3
+Punjab,2022,85,147.1
+Rajasthan,2022,0,29.9
+Rajasthan,2022,1,1.4
+Rajasthan,2022,5,0.7
+Rajasthan,2022,10,0.5
+Rajasthan,2022,15,0.9
+Rajasthan,2022,20,1.2
+Rajasthan,2022,25,1.5
+Rajasthan,2022,30,2.1
+Rajasthan,2022,35,2.5
+Rajasthan,2022,40,4.1
+Rajasthan,2022,45,5.6
+Rajasthan,2022,50,7.4
+Rajasthan,2022,55,12.6
+Rajasthan,2022,60,18.3
+Rajasthan,2022,65,28.5
+Rajasthan,2022,70,39.8
+Rajasthan,2022,75,60.0
+Rajasthan,2022,80,87.8
+Rajasthan,2022,85,161.9
+Tamil Nadu,2022,0,10.9
+Tamil Nadu,2022,1,0.6
+Tamil Nadu,2022,5,0.5
+Tamil Nadu,2022,10,0.7
+Tamil Nadu,2022,15,0.9
+Tamil Nadu,2022,20,1.4
+Tamil Nadu,2022,25,1.3
+Tamil Nadu,2022,30,1.6
+Tamil Nadu,2022,35,2.2
+Tamil Nadu,2022,40,3.0
+Tamil Nadu,2022,45,5.2
+Tamil Nadu,2022,50,7.6
+Tamil Nadu,2022,55,11.0
+Tamil Nadu,2022,60,17.7
+Tamil Nadu,2022,65,24.6
+Tamil Nadu,2022,70,39.6
+Tamil Nadu,2022,75,55.8
+Tamil Nadu,2022,80,91.1
+Tamil Nadu,2022,85,127.1
+Telangana,2022,0,18.3
+Telangana,2022,1,1.0
+Telangana,2022,5,0.8
+Telangana,2022,10,0.9
+Telangana,2022,15,1.2
+Telangana,2022,20,1.3
+Telangana,2022,25,1.3
+Telangana,2022,30,2.2
+Telangana,2022,35,2.9
+Telangana,2022,40,3.5
+Telangana,2022,45,6.0
+Telangana,2022,50,8.6
+Telangana,2022,55,13.5
+Telangana,2022,60,17.9
+Telangana,2022,65,24.3
+Telangana,2022,70,45.5
+Telangana,2022,75,91.4
+Telangana,2022,80,115.8
+Telangana,2022,85,163.7
+Uttar Pradesh,2022,0,38.2
+Uttar Pradesh,2022,1,1.2
+Uttar Pradesh,2022,5,0.5
+Uttar Pradesh,2022,10,0.6
+Uttar Pradesh,2022,15,1.1
+Uttar Pradesh,2022,20,1.7
+Uttar Pradesh,2022,25,2.0
+Uttar Pradesh,2022,30,1.9
+Uttar Pradesh,2022,35,2.8
+Uttar Pradesh,2022,40,3.5
+Uttar Pradesh,2022,45,5.8
+Uttar Pradesh,2022,50,7.9
+Uttar Pradesh,2022,55,14.8
+Uttar Pradesh,2022,60,22.1
+Uttar Pradesh,2022,65,31.5
+Uttar Pradesh,2022,70,53.7
+Uttar Pradesh,2022,75,70.8
+Uttar Pradesh,2022,80,104.5
+Uttar Pradesh,2022,85,168.6
+Uttarakhand,2022,0,21.2
+Uttarakhand,2022,1,0.9
+Uttarakhand,2022,5,0.3
+Uttarakhand,2022,10,0.4
+Uttarakhand,2022,15,0.7
+Uttarakhand,2022,20,1.4
+Uttarakhand,2022,25,1.5
+Uttarakhand,2022,30,1.7
+Uttarakhand,2022,35,2.6
+Uttarakhand,2022,40,4.4
+Uttarakhand,2022,45,5.6
+Uttarakhand,2022,50,8.0
+Uttarakhand,2022,55,11.4
+Uttarakhand,2022,60,20.6
+Uttarakhand,2022,65,35.3
+Uttarakhand,2022,70,48.7
+Uttarakhand,2022,75,73.2
+Uttarakhand,2022,80,77.7
+Uttarakhand,2022,85,147.1
+West Bengal,2022,0,17.2
+West Bengal,2022,1,0.6
+West Bengal,2022,5,0.7
+West Bengal,2022,10,0.6
+West Bengal,2022,15,0.9
+West Bengal,2022,20,0.9
+West Bengal,2022,25,1.1
+West Bengal,2022,30,1.7
+West Bengal,2022,35,2.3
+West Bengal,2022,40,3.0
+West Bengal,2022,45,4.5
+West Bengal,2022,50,7.9
+West Bengal,2022,55,10.9
+West Bengal,2022,60,19.1
+West Bengal,2022,65,31.3
+West Bengal,2022,70,45.7
+West Bengal,2022,75,72.6
+West Bengal,2022,80,94.9
+West Bengal,2022,85,146.0
+India,2023,0,26.1
+India,2023,1,1.0
+India,2023,5,0.6
+India,2023,10,0.6
+India,2023,15,0.9
+India,2023,20,1.3
+India,2023,25,1.5
+India,2023,30,1.8
+India,2023,35,2.6
+India,2023,40,3.5
+India,2023,45,4.9
+India,2023,50,7.4
+India,2023,55,10.7
+India,2023,60,18.9
+India,2023,65,29.3
+India,2023,70,44.9
+India,2023,75,61.5
+India,2023,80,80.6
+India,2023,85,114.4
+Andhra Pradesh,2023,0,19.5
+Andhra Pradesh,2023,1,0.5
+Andhra Pradesh,2023,5,0.6
+Andhra Pradesh,2023,10,0.4
+Andhra Pradesh,2023,15,0.7
+Andhra Pradesh,2023,20,0.8
+Andhra Pradesh,2023,25,1.3
+Andhra Pradesh,2023,30,1.7
+Andhra Pradesh,2023,35,2.0
+Andhra Pradesh,2023,40,3.4
+Andhra Pradesh,2023,45,5.4
+Andhra Pradesh,2023,50,8.1
+Andhra Pradesh,2023,55,11.0
+Andhra Pradesh,2023,60,19.0
+Andhra Pradesh,2023,65,27.8
+Andhra Pradesh,2023,70,47.6
+Andhra Pradesh,2023,75,73.0
+Andhra Pradesh,2023,80,83.6
+Andhra Pradesh,2023,85,119.8
+Assam,2023,0,27.9
+Assam,2023,1,0.7
+Assam,2023,5,0.2
+Assam,2023,10,0.6
+Assam,2023,15,0.4
+Assam,2023,20,0.9
+Assam,2023,25,1.5
+Assam,2023,30,1.6
+Assam,2023,35,2.5
+Assam,2023,40,4.7
+Assam,2023,45,6.1
+Assam,2023,50,8.9
+Assam,2023,55,12.9
+Assam,2023,60,23.0
+Assam,2023,65,31.5
+Assam,2023,70,45.2
+Assam,2023,75,67.1
+Assam,2023,80,109.2
+Assam,2023,85,139.1
+Bihar,2023,0,22.5
+Bihar,2023,1,1.0
+Bihar,2023,5,0.5
+Bihar,2023,10,0.7
+Bihar,2023,15,1.0
+Bihar,2023,20,1.6
+Bihar,2023,25,1.3
+Bihar,2023,30,2.2
+Bihar,2023,35,2.2
+Bihar,2023,40,3.5
+Bihar,2023,45,4.6
+Bihar,2023,50,6.3
+Bihar,2023,55,7.8
+Bihar,2023,60,16.9
+Bihar,2023,65,35.8
+Bihar,2023,70,64.2
+Bihar,2023,75,74.1
+Bihar,2023,80,113.0
+Bihar,2023,85,177.7
+Chhattisgarh,2023,0,41.4
+Chhattisgarh,2023,1,1.1
+Chhattisgarh,2023,5,1.4
+Chhattisgarh,2023,10,0.9
+Chhattisgarh,2023,15,1.3
+Chhattisgarh,2023,20,2.3
+Chhattisgarh,2023,25,2.1
+Chhattisgarh,2023,30,2.6
+Chhattisgarh,2023,35,4.9
+Chhattisgarh,2023,40,5.0
+Chhattisgarh,2023,45,6.3
+Chhattisgarh,2023,50,10.6
+Chhattisgarh,2023,55,17.5
+Chhattisgarh,2023,60,26.5
+Chhattisgarh,2023,65,35.5
+Chhattisgarh,2023,70,60.8
+Chhattisgarh,2023,75,84.4
+Chhattisgarh,2023,80,134.9
+Chhattisgarh,2023,85,234.1
+Delhi,2023,0,11.8
+Delhi,2023,1,0.6
+Delhi,2023,5,0.3
+Delhi,2023,10,0.4
+Delhi,2023,15,0.5
+Delhi,2023,20,0.9
+Delhi,2023,25,0.8
+Delhi,2023,30,1.2
+Delhi,2023,35,1.5
+Delhi,2023,40,2.3
+Delhi,2023,45,3.0
+Delhi,2023,50,4.9
+Delhi,2023,55,4.7
+Delhi,2023,60,15.7
+Delhi,2023,65,27.3
+Delhi,2023,70,51.5
+Delhi,2023,75,80.1
+Delhi,2023,80,94.0
+Delhi,2023,85,100.8
+Gujarat,2023,0,22.7
+Gujarat,2023,1,0.8
+Gujarat,2023,5,0.7
+Gujarat,2023,10,0.6
+Gujarat,2023,15,0.9
+Gujarat,2023,20,1.2
+Gujarat,2023,25,1.6
+Gujarat,2023,30,1.7
+Gujarat,2023,35,2.9
+Gujarat,2023,40,3.2
+Gujarat,2023,45,5.0
+Gujarat,2023,50,7.0
+Gujarat,2023,55,11.6
+Gujarat,2023,60,21.1
+Gujarat,2023,65,30.0
+Gujarat,2023,70,46.3
+Gujarat,2023,75,56.9
+Gujarat,2023,80,76.1
+Gujarat,2023,85,109.1
+Haryana,2023,0,27.5
+Haryana,2023,1,1.0
+Haryana,2023,5,0.7
+Haryana,2023,10,0.6
+Haryana,2023,15,0.9
+Haryana,2023,20,1.4
+Haryana,2023,25,1.5
+Haryana,2023,30,2.2
+Haryana,2023,35,2.8
+Haryana,2023,40,3.5
+Haryana,2023,45,5.3
+Haryana,2023,50,9.0
+Haryana,2023,55,13.3
+Haryana,2023,60,21.6
+Haryana,2023,65,34.5
+Haryana,2023,70,53.2
+Haryana,2023,75,69.0
+Haryana,2023,80,95.5
+Haryana,2023,85,124.6
+Himachal Pradesh,2023,0,10.9
+Himachal Pradesh,2023,1,0.5
+Himachal Pradesh,2023,5,0.3
+Himachal Pradesh,2023,10,0.4
+Himachal Pradesh,2023,15,0.6
+Himachal Pradesh,2023,20,0.6
+Himachal Pradesh,2023,25,0.9
+Himachal Pradesh,2023,30,1.0
+Himachal Pradesh,2023,35,1.8
+Himachal Pradesh,2023,40,1.9
+Himachal Pradesh,2023,45,3.7
+Himachal Pradesh,2023,50,4.1
+Himachal Pradesh,2023,55,7.3
+Himachal Pradesh,2023,60,16.8
+Himachal Pradesh,2023,65,26.8
+Himachal Pradesh,2023,70,34.6
+Himachal Pradesh,2023,75,49.8
+Himachal Pradesh,2023,80,68.0
+Himachal Pradesh,2023,85,129.8
+Jammu & Kashmir,2023,0,12.1
+Jammu & Kashmir,2023,1,0.5
+Jammu & Kashmir,2023,5,0.4
+Jammu & Kashmir,2023,10,0.6
+Jammu & Kashmir,2023,15,0.8
+Jammu & Kashmir,2023,20,0.9
+Jammu & Kashmir,2023,25,0.9
+Jammu & Kashmir,2023,30,1.4
+Jammu & Kashmir,2023,35,1.4
+Jammu & Kashmir,2023,40,3.0
+Jammu & Kashmir,2023,45,3.9
+Jammu & Kashmir,2023,50,6.5
+Jammu & Kashmir,2023,55,10.9
+Jammu & Kashmir,2023,60,16.8
+Jammu & Kashmir,2023,65,21.2
+Jammu & Kashmir,2023,70,35.6
+Jammu & Kashmir,2023,75,42.1
+Jammu & Kashmir,2023,80,78.9
+Jammu & Kashmir,2023,85,82.8
+Jharkhand,2023,0,25.4
+Jharkhand,2023,1,0.8
+Jharkhand,2023,5,0.8
+Jharkhand,2023,10,0.7
+Jharkhand,2023,15,1.3
+Jharkhand,2023,20,1.5
+Jharkhand,2023,25,2.1
+Jharkhand,2023,30,2.3
+Jharkhand,2023,35,3.2
+Jharkhand,2023,40,4.2
+Jharkhand,2023,45,5.8
+Jharkhand,2023,50,10.2
+Jharkhand,2023,55,13.1
+Jharkhand,2023,60,22.9
+Jharkhand,2023,65,28.9
+Jharkhand,2023,70,52.1
+Jharkhand,2023,75,75.5
+Jharkhand,2023,80,82.9
+Jharkhand,2023,85,134.7
+Karnataka,2023,0,13.8
+Karnataka,2023,1,0.6
+Karnataka,2023,5,0.7
+Karnataka,2023,10,0.7
+Karnataka,2023,15,1.3
+Karnataka,2023,20,1.1
+Karnataka,2023,25,1.4
+Karnataka,2023,30,2.1
+Karnataka,2023,35,3.5
+Karnataka,2023,40,4.3
+Karnataka,2023,45,6.7
+Karnataka,2023,50,7.5
+Karnataka,2023,55,14.3
+Karnataka,2023,60,16.5
+Karnataka,2023,65,29.5
+Karnataka,2023,70,44.0
+Karnataka,2023,75,66.7
+Karnataka,2023,80,83.1
+Karnataka,2023,85,115.6
+Kerala,2023,0,5.6
+Kerala,2023,1,0.6
+Kerala,2023,5,0.4
+Kerala,2023,10,0.4
+Kerala,2023,15,0.5
+Kerala,2023,20,0.8
+Kerala,2023,25,0.8
+Kerala,2023,30,0.7
+Kerala,2023,35,1.1
+Kerala,2023,40,2.1
+Kerala,2023,45,2.6
+Kerala,2023,50,4.6
+Kerala,2023,55,8.7
+Kerala,2023,60,12.6
+Kerala,2023,65,20.1
+Kerala,2023,70,39.6
+Kerala,2023,75,56.5
+Kerala,2023,80,74.4
+Kerala,2023,85,131.4
+Madhya Pradesh,2023,0,44.7
+Madhya Pradesh,2023,1,1.9
+Madhya Pradesh,2023,5,0.6
+Madhya Pradesh,2023,10,0.6
+Madhya Pradesh,2023,15,0.8
+Madhya Pradesh,2023,20,1.3
+Madhya Pradesh,2023,25,1.9
+Madhya Pradesh,2023,30,2.3
+Madhya Pradesh,2023,35,2.8
+Madhya Pradesh,2023,40,3.8
+Madhya Pradesh,2023,45,4.9
+Madhya Pradesh,2023,50,8.4
+Madhya Pradesh,2023,55,11.2
+Madhya Pradesh,2023,60,21.7
+Madhya Pradesh,2023,65,34.0
+Madhya Pradesh,2023,70,46.7
+Madhya Pradesh,2023,75,64.9
+Madhya Pradesh,2023,80,91.6
+Madhya Pradesh,2023,85,125.8
+Maharashtra,2023,0,14.3
+Maharashtra,2023,1,0.7
+Maharashtra,2023,5,0.3
+Maharashtra,2023,10,0.4
+Maharashtra,2023,15,0.6
+Maharashtra,2023,20,0.8
+Maharashtra,2023,25,1.2
+Maharashtra,2023,30,1.5
+Maharashtra,2023,35,2.3
+Maharashtra,2023,40,3.0
+Maharashtra,2023,45,4.2
+Maharashtra,2023,50,6.0
+Maharashtra,2023,55,8.1
+Maharashtra,2023,60,19.4
+Maharashtra,2023,65,29.5
+Maharashtra,2023,70,44.2
+Maharashtra,2023,75,61.0
+Maharashtra,2023,80,74.0
+Maharashtra,2023,85,115.4
+Odisha,2023,0,31.5
+Odisha,2023,1,1.3
+Odisha,2023,5,0.6
+Odisha,2023,10,0.5
+Odisha,2023,15,1.1
+Odisha,2023,20,1.6
+Odisha,2023,25,1.3
+Odisha,2023,30,2.0
+Odisha,2023,35,3.0
+Odisha,2023,40,4.6
+Odisha,2023,45,5.9
+Odisha,2023,50,7.5
+Odisha,2023,55,11.7
+Odisha,2023,60,18.4
+Odisha,2023,65,33.2
+Odisha,2023,70,48.4
+Odisha,2023,75,62.1
+Odisha,2023,80,73.3
+Odisha,2023,85,102.9
+Punjab,2023,0,18.2
+Punjab,2023,1,1.1
+Punjab,2023,5,0.5
+Punjab,2023,10,0.7
+Punjab,2023,15,1.2
+Punjab,2023,20,1.6
+Punjab,2023,25,1.6
+Punjab,2023,30,1.8
+Punjab,2023,35,2.8
+Punjab,2023,40,3.4
+Punjab,2023,45,5.1
+Punjab,2023,50,8.2
+Punjab,2023,55,11.5
+Punjab,2023,60,21.7
+Punjab,2023,65,29.2
+Punjab,2023,70,40.1
+Punjab,2023,75,54.5
+Punjab,2023,80,68.8
+Punjab,2023,85,122.3
+Rajasthan,2023,0,29.6
+Rajasthan,2023,1,1.3
+Rajasthan,2023,5,0.8
+Rajasthan,2023,10,0.5
+Rajasthan,2023,15,0.8
+Rajasthan,2023,20,1.2
+Rajasthan,2023,25,1.6
+Rajasthan,2023,30,1.5
+Rajasthan,2023,35,2.5
+Rajasthan,2023,40,4.1
+Rajasthan,2023,45,5.6
+Rajasthan,2023,50,6.7
+Rajasthan,2023,55,10.2
+Rajasthan,2023,60,18.8
+Rajasthan,2023,65,28.4
+Rajasthan,2023,70,35.1
+Rajasthan,2023,75,52.3
+Rajasthan,2023,80,77.3
+Rajasthan,2023,85,95.5
+Tamil Nadu,2023,0,13.1
+Tamil Nadu,2023,1,0.4
+Tamil Nadu,2023,5,0.5
+Tamil Nadu,2023,10,0.5
+Tamil Nadu,2023,15,0.8
+Tamil Nadu,2023,20,1.1
+Tamil Nadu,2023,25,1.2
+Tamil Nadu,2023,30,1.6
+Tamil Nadu,2023,35,2.2
+Tamil Nadu,2023,40,3.2
+Tamil Nadu,2023,45,4.8
+Tamil Nadu,2023,50,7.8
+Tamil Nadu,2023,55,10.2
+Tamil Nadu,2023,60,16.8
+Tamil Nadu,2023,65,22.2
+Tamil Nadu,2023,70,37.3
+Tamil Nadu,2023,75,47.5
+Tamil Nadu,2023,80,67.2
+Tamil Nadu,2023,85,88.8
+Telangana,2023,0,17.8
+Telangana,2023,1,1.0
+Telangana,2023,5,0.7
+Telangana,2023,10,0.9
+Telangana,2023,15,1.0
+Telangana,2023,20,1.2
+Telangana,2023,25,1.3
+Telangana,2023,30,2.1
+Telangana,2023,35,3.1
+Telangana,2023,40,3.3
+Telangana,2023,45,5.9
+Telangana,2023,50,8.4
+Telangana,2023,55,13.2
+Telangana,2023,60,18.0
+Telangana,2023,65,23.9
+Telangana,2023,70,42.0
+Telangana,2023,75,69.3
+Telangana,2023,80,81.0
+Telangana,2023,85,117.0
+Uttar Pradesh,2023,0,37.2
+Uttar Pradesh,2023,1,1.4
+Uttar Pradesh,2023,5,0.6
+Uttar Pradesh,2023,10,0.6
+Uttar Pradesh,2023,15,1.1
+Uttar Pradesh,2023,20,1.6
+Uttar Pradesh,2023,25,1.8
+Uttar Pradesh,2023,30,2.2
+Uttar Pradesh,2023,35,3.0
+Uttar Pradesh,2023,40,3.7
+Uttar Pradesh,2023,45,5.1
+Uttar Pradesh,2023,50,8.3
+Uttar Pradesh,2023,55,12.4
+Uttar Pradesh,2023,60,21.4
+Uttar Pradesh,2023,65,32.0
+Uttar Pradesh,2023,70,46.0
+Uttar Pradesh,2023,75,64.1
+Uttar Pradesh,2023,80,83.0
+Uttar Pradesh,2023,85,110.4
+Uttarakhand,2023,0,19.0
+Uttarakhand,2023,1,0.6
+Uttarakhand,2023,5,0.6
+Uttarakhand,2023,10,0.5
+Uttarakhand,2023,15,0.8
+Uttarakhand,2023,20,1.1
+Uttarakhand,2023,25,1.7
+Uttarakhand,2023,30,2.0
+Uttarakhand,2023,35,3.3
+Uttarakhand,2023,40,4.3
+Uttarakhand,2023,45,5.5
+Uttarakhand,2023,50,7.6
+Uttarakhand,2023,55,10.8
+Uttarakhand,2023,60,18.7
+Uttarakhand,2023,65,30.5
+Uttarakhand,2023,70,44.4
+Uttarakhand,2023,75,59.4
+Uttarakhand,2023,80,66.3
+Uttarakhand,2023,85,101.7
+West Bengal,2023,0,16.3
+West Bengal,2023,1,0.4
+West Bengal,2023,5,0.7
+West Bengal,2023,10,0.6
+West Bengal,2023,15,0.8
+West Bengal,2023,20,1.0
+West Bengal,2023,25,1.2
+West Bengal,2023,30,1.4
+West Bengal,2023,35,2.1
+West Bengal,2023,40,2.6
+West Bengal,2023,45,3.7
+West Bengal,2023,50,7.6
+West Bengal,2023,55,9.9
+West Bengal,2023,60,17.4
+West Bengal,2023,65,29.6
+West Bengal,2023,70,40.8
+West Bengal,2023,75,59.4
+West Bengal,2023,80,69.6
+West Bengal,2023,85,97.1
+India,2024,0,24.7
+India,2024,1,1.0
+India,2024,5,0.5
+India,2024,10,0.5
+India,2024,15,0.9
+India,2024,20,1.1
+India,2024,25,1.5
+India,2024,30,1.8
+India,2024,35,2.5
+India,2024,40,3.6
+India,2024,45,4.9
+India,2024,50,7.5
+India,2024,55,10.4
+India,2024,60,19.4
+India,2024,65,28.1
+India,2024,70,45.3
+India,2024,75,60.6
+India,2024,80,82.6
+India,2024,85,111.6
+Andhra Pradesh,2024,0,17.5
+Andhra Pradesh,2024,1,0.8
+Andhra Pradesh,2024,5,0.5
+Andhra Pradesh,2024,10,0.6
+Andhra Pradesh,2024,15,0.9
+Andhra Pradesh,2024,20,0.8
+Andhra Pradesh,2024,25,1.1
+Andhra Pradesh,2024,30,1.5
+Andhra Pradesh,2024,35,1.9
+Andhra Pradesh,2024,40,3.2
+Andhra Pradesh,2024,45,5.4
+Andhra Pradesh,2024,50,8.1
+Andhra Pradesh,2024,55,10.4
+Andhra Pradesh,2024,60,18.9
+Andhra Pradesh,2024,65,25.1
+Andhra Pradesh,2024,70,45.5
+Andhra Pradesh,2024,75,70.5
+Andhra Pradesh,2024,80,81.9
+Andhra Pradesh,2024,85,113.2
+Assam,2024,0,28.7
+Assam,2024,1,1.1
+Assam,2024,5,0.5
+Assam,2024,10,0.5
+Assam,2024,15,1.3
+Assam,2024,20,1.1
+Assam,2024,25,1.6
+Assam,2024,30,1.6
+Assam,2024,35,2.5
+Assam,2024,40,4.4
+Assam,2024,45,5.8
+Assam,2024,50,8.5
+Assam,2024,55,12.8
+Assam,2024,60,21.4
+Assam,2024,65,29.3
+Assam,2024,70,43.9
+Assam,2024,75,65.2
+Assam,2024,80,103.9
+Assam,2024,85,133.4
+Bihar,2024,0,23.7
+Bihar,2024,1,0.6
+Bihar,2024,5,0.6
+Bihar,2024,10,0.8
+Bihar,2024,15,1.2
+Bihar,2024,20,1.4
+Bihar,2024,25,1.6
+Bihar,2024,30,1.9
+Bihar,2024,35,2.2
+Bihar,2024,40,3.5
+Bihar,2024,45,4.7
+Bihar,2024,50,6.5
+Bihar,2024,55,7.6
+Bihar,2024,60,17.3
+Bihar,2024,65,33.4
+Bihar,2024,70,61.7
+Bihar,2024,75,72.7
+Bihar,2024,80,115.5
+Bihar,2024,85,163.2
+Chhattisgarh,2024,0,36.6
+Chhattisgarh,2024,1,0.8
+Chhattisgarh,2024,5,0.8
+Chhattisgarh,2024,10,0.9
+Chhattisgarh,2024,15,1.1
+Chhattisgarh,2024,20,1.7
+Chhattisgarh,2024,25,1.8
+Chhattisgarh,2024,30,4.1
+Chhattisgarh,2024,35,3.7
+Chhattisgarh,2024,40,5.5
+Chhattisgarh,2024,45,7.0
+Chhattisgarh,2024,50,11.2
+Chhattisgarh,2024,55,17.5
+Chhattisgarh,2024,60,29.0
+Chhattisgarh,2024,65,36.1
+Chhattisgarh,2024,70,63.8
+Chhattisgarh,2024,75,90.6
+Chhattisgarh,2024,80,135.7
+Chhattisgarh,2024,85,225.3
+Delhi,2024,0,10.8
+Delhi,2024,1,0.6
+Delhi,2024,5,0.5
+Delhi,2024,10,0.6
+Delhi,2024,15,0.9
+Delhi,2024,20,1.1
+Delhi,2024,25,1.3
+Delhi,2024,30,1.0
+Delhi,2024,35,1.5
+Delhi,2024,40,2.2
+Delhi,2024,45,2.7
+Delhi,2024,50,5.3
+Delhi,2024,55,6.1
+Delhi,2024,60,15.8
+Delhi,2024,65,26.0
+Delhi,2024,70,45.0
+Delhi,2024,75,73.6
+Delhi,2024,80,94.1
+Delhi,2024,85,97.3
+Gujarat,2024,0,18.6
+Gujarat,2024,1,0.5
+Gujarat,2024,5,0.3
+Gujarat,2024,10,0.5
+Gujarat,2024,15,0.8
+Gujarat,2024,20,1.2
+Gujarat,2024,25,1.3
+Gujarat,2024,30,1.8
+Gujarat,2024,35,2.8
+Gujarat,2024,40,3.6
+Gujarat,2024,45,5.4
+Gujarat,2024,50,7.9
+Gujarat,2024,55,10.9
+Gujarat,2024,60,20.9
+Gujarat,2024,65,29.9
+Gujarat,2024,70,47.3
+Gujarat,2024,75,52.0
+Gujarat,2024,80,77.4
+Gujarat,2024,85,104.6
+Haryana,2024,0,24.5
+Haryana,2024,1,1.2
+Haryana,2024,5,0.6
+Haryana,2024,10,0.6
+Haryana,2024,15,0.9
+Haryana,2024,20,1.5
+Haryana,2024,25,1.7
+Haryana,2024,30,2.2
+Haryana,2024,35,2.8
+Haryana,2024,40,4.0
+Haryana,2024,45,5.2
+Haryana,2024,50,8.6
+Haryana,2024,55,13.1
+Haryana,2024,60,20.7
+Haryana,2024,65,33.0
+Haryana,2024,70,54.0
+Haryana,2024,75,69.9
+Haryana,2024,80,91.1
+Haryana,2024,85,114.3
+Himachal Pradesh,2024,0,11.2
+Himachal Pradesh,2024,1,0.8
+Himachal Pradesh,2024,5,0.2
+Himachal Pradesh,2024,10,0.3
+Himachal Pradesh,2024,15,0.8
+Himachal Pradesh,2024,20,1.0
+Himachal Pradesh,2024,25,1.2
+Himachal Pradesh,2024,30,1.5
+Himachal Pradesh,2024,35,1.8
+Himachal Pradesh,2024,40,3.1
+Himachal Pradesh,2024,45,3.7
+Himachal Pradesh,2024,50,4.7
+Himachal Pradesh,2024,55,6.0
+Himachal Pradesh,2024,60,14.4
+Himachal Pradesh,2024,65,24.5
+Himachal Pradesh,2024,70,39.1
+Himachal Pradesh,2024,75,52.1
+Himachal Pradesh,2024,80,73.8
+Himachal Pradesh,2024,85,118.1
+Jammu & Kashmir,2024,0,10.2
+Jammu & Kashmir,2024,1,0.3
+Jammu & Kashmir,2024,5,0.5
+Jammu & Kashmir,2024,10,0.8
+Jammu & Kashmir,2024,15,0.9
+Jammu & Kashmir,2024,20,1.0
+Jammu & Kashmir,2024,25,1.0
+Jammu & Kashmir,2024,30,1.5
+Jammu & Kashmir,2024,35,1.7
+Jammu & Kashmir,2024,40,2.5
+Jammu & Kashmir,2024,45,4.1
+Jammu & Kashmir,2024,50,5.7
+Jammu & Kashmir,2024,55,10.9
+Jammu & Kashmir,2024,60,17.6
+Jammu & Kashmir,2024,65,19.7
+Jammu & Kashmir,2024,70,35.3
+Jammu & Kashmir,2024,75,40.6
+Jammu & Kashmir,2024,80,71.2
+Jammu & Kashmir,2024,85,75.0
+Jharkhand,2024,0,28.3
+Jharkhand,2024,1,1.3
+Jharkhand,2024,5,0.7
+Jharkhand,2024,10,0.7
+Jharkhand,2024,15,1.2
+Jharkhand,2024,20,1.2
+Jharkhand,2024,25,1.5
+Jharkhand,2024,30,2.3
+Jharkhand,2024,35,2.9
+Jharkhand,2024,40,3.9
+Jharkhand,2024,45,6.2
+Jharkhand,2024,50,9.0
+Jharkhand,2024,55,12.5
+Jharkhand,2024,60,22.0
+Jharkhand,2024,65,28.6
+Jharkhand,2024,70,56.7
+Jharkhand,2024,75,78.2
+Jharkhand,2024,80,93.4
+Jharkhand,2024,85,127.2
+Karnataka,2024,0,14.8
+Karnataka,2024,1,0.7
+Karnataka,2024,5,0.4
+Karnataka,2024,10,0.3
+Karnataka,2024,15,0.5
+Karnataka,2024,20,1.3
+Karnataka,2024,25,1.6
+Karnataka,2024,30,2.1
+Karnataka,2024,35,3.2
+Karnataka,2024,40,4.6
+Karnataka,2024,45,6.0
+Karnataka,2024,50,8.6
+Karnataka,2024,55,11.6
+Karnataka,2024,60,21.5
+Karnataka,2024,65,30.3
+Karnataka,2024,70,49.4
+Karnataka,2024,75,66.4
+Karnataka,2024,80,92.8
+Karnataka,2024,85,116.3
+Kerala,2024,0,7.1
+Kerala,2024,1,0.2
+Kerala,2024,5,0.3
+Kerala,2024,10,0.4
+Kerala,2024,15,0.5
+Kerala,2024,20,0.7
+Kerala,2024,25,0.5
+Kerala,2024,30,0.7
+Kerala,2024,35,1.7
+Kerala,2024,40,1.5
+Kerala,2024,45,2.5
+Kerala,2024,50,4.1
+Kerala,2024,55,8.7
+Kerala,2024,60,14.6
+Kerala,2024,65,21.8
+Kerala,2024,70,39.7
+Kerala,2024,75,59.9
+Kerala,2024,80,70.5
+Kerala,2024,85,127.0
+Madhya Pradesh,2024,0,35.9
+Madhya Pradesh,2024,1,1.5
+Madhya Pradesh,2024,5,0.7
+Madhya Pradesh,2024,10,0.7
+Madhya Pradesh,2024,15,1.3
+Madhya Pradesh,2024,20,1.4
+Madhya Pradesh,2024,25,2.2
+Madhya Pradesh,2024,30,1.7
+Madhya Pradesh,2024,35,2.6
+Madhya Pradesh,2024,40,4.1
+Madhya Pradesh,2024,45,5.8
+Madhya Pradesh,2024,50,7.8
+Madhya Pradesh,2024,55,10.9
+Madhya Pradesh,2024,60,23.1
+Madhya Pradesh,2024,65,31.6
+Madhya Pradesh,2024,70,47.7
+Madhya Pradesh,2024,75,58.7
+Madhya Pradesh,2024,80,92.9
+Madhya Pradesh,2024,85,125.5
+Maharashtra,2024,0,13.1
+Maharashtra,2024,1,0.5
+Maharashtra,2024,5,0.2
+Maharashtra,2024,10,0.4
+Maharashtra,2024,15,0.5
+Maharashtra,2024,20,0.8
+Maharashtra,2024,25,1.2
+Maharashtra,2024,30,1.6
+Maharashtra,2024,35,2.1
+Maharashtra,2024,40,3.3
+Maharashtra,2024,45,4.4
+Maharashtra,2024,50,6.5
+Maharashtra,2024,55,9.7
+Maharashtra,2024,60,18.6
+Maharashtra,2024,65,28.5
+Maharashtra,2024,70,40.9
+Maharashtra,2024,75,59.7
+Maharashtra,2024,80,71.8
+Maharashtra,2024,85,109.3
+Odisha,2024,0,28.7
+Odisha,2024,1,1.3
+Odisha,2024,5,0.7
+Odisha,2024,10,0.8
+Odisha,2024,15,1.0
+Odisha,2024,20,1.2
+Odisha,2024,25,1.6
+Odisha,2024,30,2.2
+Odisha,2024,35,2.9
+Odisha,2024,40,4.6
+Odisha,2024,45,6.1
+Odisha,2024,50,8.3
+Odisha,2024,55,10.8
+Odisha,2024,60,20.1
+Odisha,2024,65,33.1
+Odisha,2024,70,49.0
+Odisha,2024,75,65.5
+Odisha,2024,80,77.2
+Odisha,2024,85,113.5
+Punjab,2024,0,15.9
+Punjab,2024,1,0.7
+Punjab,2024,5,0.5
+Punjab,2024,10,0.9
+Punjab,2024,15,0.8
+Punjab,2024,20,1.5
+Punjab,2024,25,1.5
+Punjab,2024,30,2.0
+Punjab,2024,35,2.9
+Punjab,2024,40,3.6
+Punjab,2024,45,5.3
+Punjab,2024,50,8.6
+Punjab,2024,55,11.2
+Punjab,2024,60,22.0
+Punjab,2024,65,29.3
+Punjab,2024,70,37.4
+Punjab,2024,75,51.7
+Punjab,2024,80,64.8
+Punjab,2024,85,116.7
+Rajasthan,2024,0,28.6
+Rajasthan,2024,1,1.4
+Rajasthan,2024,5,0.7
+Rajasthan,2024,10,0.5
+Rajasthan,2024,15,0.9
+Rajasthan,2024,20,0.8
+Rajasthan,2024,25,1.6
+Rajasthan,2024,30,1.7
+Rajasthan,2024,35,2.5
+Rajasthan,2024,40,3.9
+Rajasthan,2024,45,4.7
+Rajasthan,2024,50,6.7
+Rajasthan,2024,55,9.6
+Rajasthan,2024,60,19.3
+Rajasthan,2024,65,27.3
+Rajasthan,2024,70,37.5
+Rajasthan,2024,75,49.0
+Rajasthan,2024,80,79.1
+Rajasthan,2024,85,92.4
+Tamil Nadu,2024,0,10.9
+Tamil Nadu,2024,1,0.8
+Tamil Nadu,2024,5,0.5
+Tamil Nadu,2024,10,0.3
+Tamil Nadu,2024,15,1.0
+Tamil Nadu,2024,20,0.9
+Tamil Nadu,2024,25,1.4
+Tamil Nadu,2024,30,1.6
+Tamil Nadu,2024,35,2.4
+Tamil Nadu,2024,40,3.7
+Tamil Nadu,2024,45,4.6
+Tamil Nadu,2024,50,7.9
+Tamil Nadu,2024,55,9.4
+Tamil Nadu,2024,60,15.3
+Tamil Nadu,2024,65,21.3
+Tamil Nadu,2024,70,36.6
+Tamil Nadu,2024,75,45.4
+Tamil Nadu,2024,80,69.8
+Tamil Nadu,2024,85,88.7
+Telangana,2024,0,17.3
+Telangana,2024,1,0.6
+Telangana,2024,5,0.5
+Telangana,2024,10,0.5
+Telangana,2024,15,0.7
+Telangana,2024,20,1.2
+Telangana,2024,25,1.4
+Telangana,2024,30,2.0
+Telangana,2024,35,3.2
+Telangana,2024,40,3.9
+Telangana,2024,45,6.6
+Telangana,2024,50,8.5
+Telangana,2024,55,15.0
+Telangana,2024,60,21.6
+Telangana,2024,65,26.4
+Telangana,2024,70,44.2
+Telangana,2024,75,72.2
+Telangana,2024,80,84.0
+Telangana,2024,85,115.5
+Uttar Pradesh,2024,0,35.9
+Uttar Pradesh,2024,1,1.5
+Uttar Pradesh,2024,5,0.7
+Uttar Pradesh,2024,10,0.5
+Uttar Pradesh,2024,15,1.1
+Uttar Pradesh,2024,20,1.2
+Uttar Pradesh,2024,25,1.6
+Uttar Pradesh,2024,30,2.1
+Uttar Pradesh,2024,35,2.9
+Uttar Pradesh,2024,40,3.6
+Uttar Pradesh,2024,45,4.6
+Uttar Pradesh,2024,50,7.7
+Uttar Pradesh,2024,55,11.1
+Uttar Pradesh,2024,60,21.1
+Uttar Pradesh,2024,65,28.3
+Uttar Pradesh,2024,70,47.5
+Uttar Pradesh,2024,75,63.1
+Uttar Pradesh,2024,80,89.1
+Uttar Pradesh,2024,85,109.5
+Uttarakhand,2024,0,19.2
+Uttarakhand,2024,1,0.6
+Uttarakhand,2024,5,0.4
+Uttarakhand,2024,10,0.3
+Uttarakhand,2024,15,0.7
+Uttarakhand,2024,20,0.8
+Uttarakhand,2024,25,1.4
+Uttarakhand,2024,30,2.1
+Uttarakhand,2024,35,2.9
+Uttarakhand,2024,40,4.0
+Uttarakhand,2024,45,5.5
+Uttarakhand,2024,50,8.4
+Uttarakhand,2024,55,8.8
+Uttarakhand,2024,60,18.0
+Uttarakhand,2024,65,28.6
+Uttarakhand,2024,70,45.7
+Uttarakhand,2024,75,60.8
+Uttarakhand,2024,80,70.7
+Uttarakhand,2024,85,104.3
+West Bengal,2024,0,16.3
+West Bengal,2024,1,0.6
+West Bengal,2024,5,0.4
+West Bengal,2024,10,0.5
+West Bengal,2024,15,0.5
+West Bengal,2024,20,0.8
+West Bengal,2024,25,1.0
+West Bengal,2024,30,1.6
+West Bengal,2024,35,1.9
+West Bengal,2024,40,2.4
+West Bengal,2024,45,3.8
+West Bengal,2024,50,7.2
+West Bengal,2024,55,10.0
+West Bengal,2024,60,19.6
+West Bengal,2024,65,29.1
+West Bengal,2024,70,43.9
+West Bengal,2024,75,62.8
+West Bengal,2024,80,72.9
+West Bengal,2024,85,99.7
