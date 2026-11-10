@@ -1,0 +1,64 @@
+# Intervention file template. Copy it, rename it, and change the values.
+# Read by airhealth.intervention.load(); a mistake is reported in one line naming the field.
+#
+# Units: PM2.5 in µg/m³, annual mean. A change is signed: negative = cleaner air.
+#
+# Any value marked (Dist) is a plain number or a distribution given by its 5th and 95th
+# percentiles:
+#   { dist = "normal",     p5 = -30, p95 = -10 }
+#   { dist = "lognormal",  p5 = 5e7, p95 = 5e8 }      # skewed; must not cross zero
+#   { dist = "uniform",    p5 = 2,   p95 = 11 }       # its ends lie a little outside p5 and p95
+#   { dist = "triangular", p5 = 10,  p95 = 40, mode = 15 }
+# A negative lognormal (p5 = -60, p95 = -20) is a cut whose size is lognormal.
+
+name = "Template: a 10% cut in Delhi"     # required; shown on every result
+
+# Required. Where the change applies: India, states and UTs, districts or cities, by any
+# common spelling ("Orissa", "NCT of Delhi"). "Delhi" is the state (NCT of Delhi); a
+# district that shares its name with another needs its state: "Aurangabad, Bihar".
+# An unknown name is rejected with suggestions.
+places = ["Delhi"]
+
+start_year = 2027        # required; first year the air is cleaner
+ramp_years = 0           # optional (default 0); years to reach the full change, at most duration_years
+duration_years = 10      # required; years the change lasts, from start_year
+p_success = 0.5          # required; probability the intervention works at all, 0 to 1.
+                         # Not sampled: results are shown if it works, and times p_success.
+
+# Optional. How fast deaths fall after the air does (a cessation lag):
+#   "epa20"      US EPA 20-year lag: 30% of the fall in risk in year 1, 50% over years 2-5,
+#                20% over years 6-20 (the default; source in airhealth/lag.py)
+#   "immediate"  the whole fall in year 1
+lag = "epa20"
+
+# Optional, a what-if device: start every exposure unit of the places at this level
+# (µg/m³) instead of the exposure map's value, e.g. "Delhi from 100 to 80" whatever the
+# map says. The map still supplies the population. Leave it out to start from the map.
+# from_level = 100
+
+notes = """
+Free text: where the numbers came from, and which are guesses. Say plainly when a value is
+a placeholder rather than an estimate.
+"""
+
+[change]
+# Required: exactly ONE of the following.
+#   delta = -20            (Dist) µg/m³ added to every unit's annual mean
+#   pct = -10              (Dist) percent change of every unit's annual mean (at least -100)
+#   to = 40                (Dist) target annual mean; units already below it are left alone
+#   monthly_delta = [ ... ]  twelve values, January to December, µg/m³ (each may be a Dist)
+#   monthly_pct = [ ... ]    twelve values, January to December, percent (each may be a Dist)
+# A monthly profile becomes an annual change, weighted by days in the month: -40 in November
+# alone is -40 × 30/365 = -3.3 on the annual mean. Exposure maps are annual means, so
+# monthly_pct treats every month as equally polluted (in north India November is dirtier
+# than average, so a winter-only percent cut is understated). Monthly distributions are
+# drawn together: a draw that is good for one month is equally good for the others.
+pct = { dist = "normal", p5 = -15, p95 = -5 }
+
+[cost]
+once = 0                 # (Dist) optional, default 0; one-off cost at the start
+annual = { dist = "lognormal", p5 = 1e8, p95 = 1e9 }   # (Dist) optional, default 0; per year of duration
+currency = "INR"         # required; "INR" or "USD"
+year = 2026              # required; the price year the costs are in
+share_only_on_success = 0.0   # optional, 0 to 1; share of the cost spent only if it works
+                              # (default 0: the full cost is spent either way)
