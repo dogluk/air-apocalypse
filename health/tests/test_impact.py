@@ -18,7 +18,8 @@ def synthetic_baseline(state: str, fallback: bool = False) -> baseline.Baseline:
     mx[:2] = (0.03, 0.002)
     return baseline.Baseline(state=state, year=2022, population=1000 * np.exp(-0.03 * STARTS),
                              mx=mx, share_ncd_lri=np.where(STARTS < 5, 0.3, 0.8),
-                             fallback=fallback)
+                             fallback=fallback, death_factor=np.ones(len(STARTS)),
+                             reconciliation=None)
 
 
 @pytest.fixture
@@ -35,12 +36,13 @@ def world(monkeypatch):
             else:
                 out = table[(table.state == place.state) & (table.unit == place.name)]
             out = out.reset_index(drop=True)
-            out.attrs.update(map=map_name, year=2022)
+            out.attrs.update(map=map_name, year=2022, population_year=2022)
             return out
 
         monkeypatch.setattr(exposure, "cells", cells)
         monkeypatch.setattr(baseline, "load",
-                            lambda state, year=None: synthetic_baseline(state, state in fallback))
+                            lambda state, year=None, deaths="srs": synthetic_baseline(
+                                state, state in fallback))
     return install
 
 
@@ -269,3 +271,77 @@ def test_india_lists_its_fallback_states():
     expected = sorted(s for s in baseline.states() if s != "India" and baseline.load(s, 2019).fallback)
     assert r.fallback_states == expected
     assert r.deaths_averted > 0 and r.e0_after > r.e0_before
+
+
+# --- life-years and death counts against an independent computation ---------------------------
+
+def _independent_delhi(year: int = 2023):
+    """Delhi's deaths by band and remaining life expectancy at the mean age of death, from the
+    CSVs alone: no airhealth.lifetable, no airhealth.baseline. Life expectancy is integrated
+    numerically over a survivorship curve that is a straight line between the printed l(x)
+    within each band and falls at the constant rate l85 / L85+ above 85."""
+    from airhealth import paths
+    t = pd.read_csv(paths.DATA / "lifetables_srs.csv")
+    t = t[t.state == "Delhi"].sort_values("age_start")
+    lx, Lx = t.lx.to_numpy(float), t.Lx.to_numpy(float)
+    mx = np.append((lx[:-1] - lx[1:]) / Lx[:-1], lx[-1] / Lx[-1])
+    ages = np.linspace(0, 400, 400_001)                     # steps of 0.001 years
+    surv = np.interp(ages, STARTS, lx)
+    old = ages >= 85
+    surv[old] = lx[-1] * np.exp(-mx[-1] * (ages[old] - 85))
+    lived = np.concatenate([[0.0], np.cumsum((surv[1:] + surv[:-1]) / 2 * np.diff(ages))])
+    remaining = (lived[-1] - lived) / surv                  # e(t) at every grid age
+    width = np.diff(STARTS)
+    mean_age_in_band = width / 2
+    mean_age_in_band[0] = (Lx[0] - lx[1]) / (lx[0] - lx[1])  # infants: the table's own a0
+    e_at_death = np.append(np.interp(STARTS[:-1] + mean_age_in_band, ages, remaining), 1 / mx[-1])
+
+    p = pd.read_csv(paths.DATA / "population_age_state.csv")
+    p = p[(p.state == "NCT OF DELHI") & (p.year == year)].sort_values("age_start")
+    persons = p.population.to_numpy(float)
+    assert len(persons) == 18
+    population = np.append(persons[:-1], persons[-1] * Lx[-2:] / Lx[-2:].sum())
+    rec = pd.read_csv(paths.DATA / "death_reconciliation.csv").set_index("state").loc["Delhi"]
+    deaths = population * mx * np.where(STARTS >= rec.from_age, rec.factor, 1.0)
+    return population, deaths, e_at_death
+
+
+def test_delhi_life_years_match_an_independent_computation():
+    population, deaths, e_at_death = _independent_delhi()
+    state = resolve("Delhi")
+    r = steady_state(state, get("loglinear_jaganathan"), "aqli", Change(to=80), pm25_override=100)
+    assert r.year == 2023
+    assert r.population == pytest.approx(population.sum())
+    assert r.deaths_baseline == pytest.approx(deaths.sum(), rel=1e-9)
+    averted = deaths * (1 - 1.086 ** -2)                    # every age: Jaganathan is all-age
+    assert r.deaths_averted == pytest.approx(averted.sum(), rel=1e-9)
+    # 0.05%: the independent curve runs through the printed (rounded) l(x); the tool rebuilds
+    # l(x) from the rates
+    assert r.yll_averted == pytest.approx((averted * e_at_death).sum(), rel=5e-4)
+    # the band-start figure this replaces was about 7% higher
+    b = baseline.load("Delhi", 2023)
+    at_start = (averted * lifetable.life_table(b.mx).ex).sum()
+    assert at_start / r.yll_averted == pytest.approx(1.07, abs=0.02)
+
+
+def test_deaths_basis_scales_counts_not_life_expectancy():
+    state = resolve("Delhi")
+    curve = get("gemm_ncd_lri")
+    srs = steady_state(state, curve, "aqli", Change(to=80), pm25_override=100)
+    model = steady_state(state, curve, "aqli", Change(to=80), pm25_override=100, deaths="model")
+    assert (srs.e0_before, srs.e0_after) == (model.e0_before, model.e0_after)
+    assert srs.deaths_model == pytest.approx(model.deaths_baseline)
+    assert model.deaths_model == model.deaths_baseline and model.reconciliations == ()
+    rec, = srs.reconciliations
+    assert (rec.state, rec.from_age) == ("Delhi", 45)
+    assert rec.factor < srs.deaths_baseline / model.deaths_baseline < 1
+    assert rec.factor < srs.deaths_averted / model.deaths_averted < 1
+    with pytest.raises(ValueError, match="deaths"):
+        steady_state(state, curve, "aqli", Change(to=80), deaths="registered")
+
+
+def test_city_population_year_is_recorded():
+    city = steady_state(DELHI, get("loglinear_jaganathan"), "aqli", Change(delta=-10))
+    state = steady_state(resolve("Delhi"), get("loglinear_jaganathan"), "aqli", Change(delta=-10))
+    assert (city.population_year, city.year) == (2011, 2023)
+    assert (state.population_year, state.year) == (2023, 2023)

@@ -2,14 +2,16 @@
 
 For each exposure unit (a district, a state on the gbd2019 map, or a city) and age band:
 the unit's population is split by age in its state's proportions; deaths = population ×
-the state's all-cause rate mx; deaths in scope = deaths × share_ncd_lri for an NCD+LRI
+the state's all-cause rate mx × the state's death_factor (the reconciliation to the SRS
+crude death rate, baseline.py; all ones with deaths="model"); deaths in scope = deaths × share_ncd_lri for an NCD+LRI
 curve, all deaths otherwise; averted = in-scope deaths × (1 − ratio), ratio = the curve's
 rr(after) / rr(before) for that band (1 below the curve's min_age). Units add up to the place.
 
 Life expectancy: the state's life table is rebuilt with each band's rate multiplied by the
-population-weighted mean over the state's units of 1 − scope × (1 − ratio). Life-years
-averted are deaths averted in a band × remaining life expectancy at the mean age of death in
-that band (lifetable.ex_at_death), from the state's baseline table. A place spanning several states (the country) is computed
+population-weighted mean over the state's units of 1 − scope × (1 − ratio); the life table
+is never scaled by death_factor. Life-years averted are deaths averted in a band × remaining
+life expectancy at the mean age of death in that band (lifetable.ex_at_death), from the
+state's baseline table. A place spanning several states (the country) is computed
 state by state: deaths and life-years add, life expectancy is population-weighted.
 
 AQLI gives life expectancy, not relative risk: each unit's e0 moves by the curve's
@@ -76,22 +78,26 @@ class Impact:
     place: Place
     curve: Curve
     map_name: str
-    year: int                 # the exposure map's year (also the population year)
+    year: int                 # the exposure map's year (also the population year, but see below)
     pm25_before: float        # population-weighted, µg/m³
     pm25_after: float
     population: float
-    deaths_baseline: float    # all-cause deaths per year
+    deaths_baseline: float    # all-cause deaths per year, on the deaths basis asked for
     deaths_averted: float     # per year at steady state; negative if the air gets worse
     e0_before: float
     e0_after: float
     yll_averted: float        # deaths averted by age × remaining life expectancy at death
     derived: bool             # True when the deaths are derived from a life-expectancy curve
     fallback_states: list[str]
+    deaths_model: float = 0.0   # all-cause deaths per year before reconciliation (population × mx)
+    reconciliations: tuple[baseline.Reconciliation, ...] = ()   # one per state; empty for deaths="model"
+    population_year: int = 0    # the year the population is for (2011 for a city: Census)
 
 
 @dataclass(frozen=True)
 class _StateResult:
     population: float
+    deaths_model: float
     deaths_baseline: float
     deaths_averted: float
     yll_averted: float
@@ -102,7 +108,8 @@ class _StateResult:
 def _state(b: baseline.Baseline, curve: Curve, before: np.ndarray, after: np.ndarray,
            pop: np.ndarray) -> _StateResult:
     """One state's units (before, after, pop are per unit) against its baseline."""
-    deaths = np.outer(pop, b.population / b.population.sum()) * b.mx    # unit × band
+    model = np.outer(pop, b.population / b.population.sum()) * b.mx     # unit × band
+    deaths = model * b.death_factor
     table = lifetable.life_table(b.mx)
     if curve.kind == "life_expectancy":
         gains = np.array([curve.delta_e0(c0, c1) for c0, c1 in zip(before, after)])
@@ -119,16 +126,18 @@ def _state(b: baseline.Baseline, curve: Curve, before: np.ndarray, after: np.nda
         e0_after = lifetable.e0(b.mx * np.average(factor, axis=0, weights=pop))
     averted = (deaths * (1 - factor)).sum(axis=0)                       # by band
     return _StateResult(
-        population=pop.sum(), deaths_baseline=deaths.sum(), deaths_averted=averted.sum(),
-        yll_averted=(averted * lifetable.ex_at_death(b.mx)).sum(), e0_before=table.ex[0],
-        e0_after=e0_after)
+        population=pop.sum(), deaths_model=model.sum(), deaths_baseline=deaths.sum(),
+        deaths_averted=averted.sum(), yll_averted=(averted * lifetable.ex_at_death(b.mx)).sum(),
+        e0_before=table.ex[0], e0_after=e0_after)
 
 
 def steady_state(place: Place, curve: Curve, map_name: str, change: Change,
-                 year: int | None = None, pm25_override: float | None = None) -> Impact:
+                 year: int | None = None, pm25_override: float | None = None,
+                 deaths: str = "srs") -> Impact:
     """Deaths averted per year and change in life expectancy when `change` is applied to
     every exposure unit of `place` on `map_name`. pm25_override, if given, sets every unit's
-    starting concentration (population weights unchanged), e.g. Delhi from 100 to 80."""
+    starting concentration (population weights unchanged), e.g. Delhi from 100 to 80.
+    deaths: "srs" (death counts reconciled to the SRS crude death rate) or "model" (not)."""
     cells: pd.DataFrame = exposure.cells(place, map_name, year)
     year = int(cells.attrs["year"])
     before = cells.pm25.to_numpy(float)
@@ -137,11 +146,13 @@ def steady_state(place: Place, curve: Curve, map_name: str, change: Change,
     after = change.apply(before)
     pop = cells.population.to_numpy(float)
 
-    results, fallback = [], []
+    results, fallback, recs = [], [], []
     for state, rows in cells.groupby("state", sort=True).indices.items():
-        b = baseline.load(state, year)
+        b = baseline.load(state, year, deaths)
         if b.fallback:
             fallback.append(state)
+        if b.reconciliation:
+            recs.append(b.reconciliation)
         results.append(_state(b, curve, before[rows], after[rows], pop[rows]))
 
     weights = [r.population for r in results]
@@ -156,15 +167,18 @@ def steady_state(place: Place, curve: Curve, map_name: str, change: Change,
         e0_after=float(np.average([r.e0_after for r in results], weights=weights)),
         yll_averted=float(sum(r.yll_averted for r in results)),
         derived=curve.kind == "life_expectancy",
-        fallback_states=fallback)
+        fallback_states=fallback,
+        deaths_model=float(sum(r.deaths_model for r in results)),
+        reconciliations=tuple(recs),
+        population_year=int(cells.attrs["population_year"]))
 
 
 def burden(place: Place, curve: Curve, map_name: str, counterfactual: float | None = None,
-           year: int | None = None) -> Impact:
+           year: int | None = None, deaths: str = "srs") -> Impact:
     """The impact of bringing every unit down to the counterfactual (default: the curve's
     floor), i.e. the deaths attributable to the air above it."""
     to = curve.floor if counterfactual is None else counterfactual
-    return steady_state(place, curve, map_name, Change(to=to), year=year)
+    return steady_state(place, curve, map_name, Change(to=to), year=year, deaths=deaths)
 
 
 # --- many draws at once ---------------------------------------------------------------------
@@ -202,6 +216,9 @@ class ImpactDraws:
     yll_averted: np.ndarray
     derived: bool
     fallback_states: list[str]
+    deaths_model: float = 0.0
+    reconciliations: tuple[baseline.Reconciliation, ...] = ()
+    population_year: int = 0
 
 
 def _aqli_factors(mx: np.ndarray, gains: np.ndarray, from_age: int) -> np.ndarray:
@@ -218,7 +235,8 @@ def _aqli_factors(mx: np.ndarray, gains: np.ndarray, from_age: int) -> np.ndarra
 def _state_many(b: baseline.Baseline, curve: Curve, before: np.ndarray, after: np.ndarray,
                 pop: np.ndarray) -> dict:
     """_state for n draws: before (units,), after (n, units)."""
-    deaths = np.outer(pop, b.population / b.population.sum()) * b.mx    # unit × band
+    model = np.outer(pop, b.population / b.population.sum()) * b.mx     # unit × band
+    deaths = model * b.death_factor
     table = lifetable.life_table(b.mx)
     if curve.kind == "life_expectancy":
         gains = np.broadcast_to(curve.delta_e0(before[None, :], after), after.shape)
@@ -244,7 +262,7 @@ def _state_many(b: baseline.Baseline, curve: Curve, before: np.ndarray, after: n
             averted[:, bands] = (g @ deaths[:, bands]) * scope[bands]
             mean_g[:, bands] = (g @ pop / pop.sum())[:, None]
         e0_after = lifetable.e0_many(b.mx * (1 - scope * mean_g))
-    return dict(population=pop.sum(), deaths_baseline=deaths.sum(),
+    return dict(population=pop.sum(), deaths_model=model.sum(), deaths_baseline=deaths.sum(),
                 deaths_averted=averted.sum(axis=1),
                 yll_averted=averted @ lifetable.ex_at_death(b.mx),
                 e0_before=table.ex[0], e0_after=e0_after)
@@ -252,7 +270,7 @@ def _state_many(b: baseline.Baseline, curve: Curve, before: np.ndarray, after: n
 
 def steady_state_many(place: Place, curve: Curve, map_name: str, kind: str,
                       values: np.ndarray, year: int | None = None,
-                      pm25_override: float | None = None) -> ImpactDraws:
+                      pm25_override: float | None = None, deaths: str = "srs") -> ImpactDraws:
     """steady_state() for n draws: values[i] is the change (of `kind`: delta, pct or to) in
     draw i, and draw i uses row i of the curve's parameters if the curve came from
     sample_many(), else the curve as it is."""
@@ -264,11 +282,13 @@ def steady_state_many(place: Place, curve: Curve, map_name: str, kind: str,
     after = apply_many(kind, values, before)
     pop = cells.population.to_numpy(float)
 
-    results, fallback = [], []
+    results, fallback, recs = [], [], []
     for state, rows in cells.groupby("state", sort=True).indices.items():
-        b = baseline.load(state, year)
+        b = baseline.load(state, year, deaths)
         if b.fallback:
             fallback.append(state)
+        if b.reconciliation:
+            recs.append(b.reconciliation)
         results.append(_state_many(b, curve, before[rows], after[:, rows], pop[rows]))
 
     weights = [r["population"] for r in results]
@@ -283,4 +303,7 @@ def steady_state_many(place: Place, curve: Curve, map_name: str, kind: str,
         e0_after=np.average([r["e0_after"] for r in results], axis=0, weights=weights),
         yll_averted=sum(r["yll_averted"] for r in results),
         derived=curve.kind == "life_expectancy",
-        fallback_states=fallback)
+        fallback_states=fallback,
+        deaths_model=float(sum(r["deaths_model"] for r in results)),
+        reconciliations=tuple(recs),
+        population_year=int(cells.attrs["population_year"]))

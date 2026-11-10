@@ -49,7 +49,7 @@ def evaluate(case: dict) -> dict:
 
 
 def band(r: dict) -> str:
-    return f"{r['expected_ratio']:.3g} ±{r['tolerance']:.0%}"
+    return f"{r['expected_ratio']:.4g} ±{r['tolerance']:.0%}"
 
 
 def configuration(r: dict) -> str:
@@ -95,7 +95,7 @@ def readme(results: list[dict]) -> str:
                 f"**Ours:** {FORMATS[r['measures']](r['ours'])}, from {configuration(r)}.", "",
                 r["in_short"], ""]
         if r.get("expected_why"):
-            out += [f"**Expected ratio {r['expected_ratio']:.3g}:** "
+            out += [f"**Expected ratio {r['expected_ratio']:.4g}:** "
                     + " ".join(r["expected_why"].split()), ""]
         out += [f"**Band ±{r['tolerance']:.0%}:** " + " ".join(r["band_why"].split()), ""]
     return "\n".join(out)

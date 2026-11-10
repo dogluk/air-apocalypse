@@ -1,0 +1,39 @@
+state,period,srs_unit,srs_cdr_per_1000,reference_year,modelled_cdr_per_1000,from_age,factor
+India,2020-24,India,6.62,2022,7.529,45,0.8486
+Jammu & Kashmir,2020-24,Jammu & Kashmir,5.46,2022,5.748,45,0.9401
+Himachal Pradesh,2020-24,Himachal Pradesh,7.14,2022,7.491,45,0.9464
+Punjab,2020-24,Punjab,7.72,2022,9.036,45,0.8267
+Haryana,2020-24,Haryana,7.02,2022,8.423,45,0.7913
+Delhi,2020-24,Delhi,4.52,2022,5.948,45,0.7175
+Rajasthan,2020-24,Rajasthan,6.04,2022,6.473,45,0.9094
+Uttar Pradesh,2020-24,Uttar Pradesh,6.58,2022,7.142,45,0.8902
+Bihar,2020-24,Bihar,6.08,2022,6.672,45,0.8832
+Assam,2020-24,Assam,6.32,2022,7.191,45,0.8407
+West Bengal,2020-24,West Bengal,6.02,2022,7.353,45,0.7885
+Jharkhand,2020-24,Jharkhand,6.0,2022,6.995,45,0.812
+Odisha,2020-24,Odisha,7.86,2022,8.422,45,0.9162
+Chhattisgarh,2020-24,Chhattisgarh,8.74,2022,10.077,45,0.8269
+Madhya Pradesh,2020-24,Madhya Pradesh,7.04,2022,7.646,45,0.8891
+Gujarat,2020-24,Gujarat,6.72,2022,7.698,45,0.8434
+Maharashtra,2020-24,Maharashtra,6.32,2022,7.629,45,0.8002
+Andhra Pradesh,2020-24,Andhra Pradesh,7.06,2022,8.963,45,0.7524
+Karnataka,2020-24,Karnataka,7.18,2022,8.951,45,0.7641
+Kerala,2020-24,Kerala,7.62,2022,8.576,45,0.8791
+Tamil Nadu,2020-24,Tamil Nadu,7.08,2022,8.006,45,0.8668
+Chandigarh,2020-24,Chandigarh,4.28,2022,7.529,0,0.5685
+Uttarakhand,2020-24,Uttarakhand,6.32,2022,7.575,45,0.7957
+Sikkim,2020-24,Sikkim,4.84,2022,6.919,0,0.6996
+Arunachal Pradesh,2020-24,Arunachal Pradesh,5.64,2022,6.919,0,0.8152
+Nagaland,2020-24,Nagaland,5.18,2022,6.919,0,0.7487
+Manipur,2020-24,Manipur,4.72,2022,6.919,0,0.6822
+Mizoram,2020-24,Mizoram,5.6,2022,6.918,0,0.8094
+Tripura,2020-24,Tripura,6.26,2022,6.918,0,0.9048
+Meghalaya,2020-24,Meghalaya,5.7,2022,6.918,0,0.8239
+Daman & Diu,2020-24,Dadra and Nagar Haveli and Daman and Diu,5.0,2022,7.529,0,0.6641
+Dadra & Nagar Haveli,2020-24,Dadra and Nagar Haveli and Daman and Diu,5.0,2022,7.529,0,0.6641
+Goa,2020-24,Goa,7.1,2022,7.529,0,0.9431
+Lakshadweep,2020-24,Lakshadweep,6.04,2022,7.529,0,0.8023
+Puducherry,2020-24,Puducherry,6.38,2022,7.529,0,0.8474
+Andaman & Nicobar Islands,2020-24,A & N Islands,6.18,2022,7.529,0,0.8209
+Telangana,2020-24,Telangana,6.38,2022,8.233,45,0.7301
+Ladakh,2020-24,Ladakh,5.54,2022,7.529,0,0.7359

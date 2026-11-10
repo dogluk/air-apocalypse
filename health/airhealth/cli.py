@@ -1,11 +1,14 @@
 """airhealth: health effects of air pollution in India, from the terminal.
 
   airhealth list curves|maps|places
-  airhealth compare PLACE --to C2 [--from C1] [--map M] [--curves a,b]
-  airhealth burden PLACE [--map M] [--counterfactual C] [--curves a,b]
+  airhealth compare PLACE --to C2 [--from C1] [--map M] [--curves a,b] [--deaths srs|model]
+  airhealth burden PLACE [--map M] [--counterfactual C] [--curves a,b] [--deaths srs|model]
   airhealth chart PLACE [PLACE ...] [--map M] [--age A] [--out FILE]
-  airhealth run FILE [--map M] [--curves a,b] [--n N] [--seed S] [--charts DIR]
+  airhealth run FILE [--map M] [--curves a,b] [--n N] [--seed S] [--charts DIR] [--deaths ...]
 
+--deaths srs (the default) scales death counts to the SRS's own crude death rate for each
+state, 2020-24; --deaths model leaves them as projected population × life-table death rates.
+Life expectancy is the same either way. The last line of every result says which was used.
 --json (anywhere) prints the same content as JSON. A city's map defaults to cpcb when the city
 has ground-monitor data, everything else to aqli; the map used is named on the last line. An
 intervention file's map defaults to cpcb when every place in it is such a city, else aqli.
@@ -18,7 +21,7 @@ import numpy as np
 
 from pathlib import Path
 
-from . import curves, exposure, intervention, paths, places, provenance, report, simulate
+from . import baseline, curves, exposure, intervention, paths, places, provenance, report, simulate
 from .impact import Change, steady_state
 from .places import KINDS
 
@@ -69,8 +72,8 @@ def cmd_compare(args) -> None:
         level = start = args.from_
         notes.append(f"Starting level set to {start:g} µg/m³ by --from; the map supplies population only")
     change = Change(delta=args.to - level)
-    impacts = [steady_state(place, c, map_name, change, year=args.year, pm25_override=start)
-               for c in run]
+    impacts = [steady_state(place, c, map_name, change, year=args.year, pm25_override=start,
+                            deaths=args.deaths) for c in run]
     heading = f"{report.place_label(impacts[0])}: PM2.5 {level:.4g} → {args.to:g} µg/m³"
     _emit(args, impacts, unavailable, heading, notes)
 
@@ -81,7 +84,7 @@ def cmd_burden(args) -> None:
     run, unavailable = _curves(args.curves)
     impacts = [steady_state(place, c, map_name,
                             Change(to=c.floor if args.counterfactual is None else args.counterfactual),
-                            year=args.year) for c in run]
+                            year=args.year, deaths=args.deaths) for c in run]
     against = ("each curve's own floor" if args.counterfactual is None
                else f"{args.counterfactual:g} µg/m³")
     heading = f"{report.place_label(impacts[0])}: deaths attributable to PM2.5 above {against}"
@@ -125,7 +128,8 @@ def cmd_run(args) -> None:
         defaults = {_default_map(p) for p in iv.places}
         map_name = "cpcb" if defaults == {"cpcb"} else "aqli"
     names = [n.strip() for n in args.curves.split(",") if n.strip()] if args.curves else None
-    result = simulate.run(iv, map_name=map_name, curves=names, n=args.n, seed=args.seed)
+    result = simulate.run(iv, map_name=map_name, curves=names, n=args.n, seed=args.seed,
+                          deaths=args.deaths)
     written = []
     if args.charts:
         from . import charts  # matplotlib only when a chart is drawn
@@ -192,6 +196,11 @@ def _parser() -> argparse.ArgumentParser:
                                 description="Health effects of air pollution in India.")
     sub = p.add_subparsers(dest="command", required=True)
 
+    def deaths_flag(s):
+        s.add_argument("--deaths", choices=baseline.DEATHS_BASES, default="srs",
+                       help="death counts scaled to the SRS crude death rate of each state, "
+                       "2020-24 (srs, the default), or left as population × life-table rates (model)")
+
     def placed(name, help_):
         s = sub.add_parser(name, parents=[shared], help=help_)
         s.add_argument("place", help="India, a state, a district or a city (add ', State' if ambiguous)")
@@ -200,6 +209,7 @@ def _parser() -> argparse.ArgumentParser:
                        "that has it, otherwise aqli)")
         s.add_argument("--year", type=int, help="map year (default: the map's latest)")
         s.add_argument("--curves", help="comma-separated curve names (default: every curve)")
+        deaths_flag(s)
         return s
 
     c = placed("compare", "deaths and life expectancy for a move from one concentration to another")
@@ -231,6 +241,7 @@ def _parser() -> argparse.ArgumentParser:
     r.add_argument("--n", type=int, default=5000, help="Monte Carlo draws (default 5000)")
     r.add_argument("--seed", type=int, default=0, help="random seed (default 0)")
     r.add_argument("--charts", metavar="DIR", help="also draw the results and spread charts here")
+    deaths_flag(r)
     r.set_defaults(func=cmd_run)
 
     ls = sub.add_parser("list", parents=[shared], help="curves, maps or places, each with its source")

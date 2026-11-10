@@ -1,7 +1,8 @@
 """Tables and JSON for impact results, one row per curve.
 
-Every table ends with one line naming the exposure map and year, the states that fell back
-to all-India death rates, and the curves that were asked for but could not run, with why.
+Every table ends with one line naming the exposure map and year, how the death counts were
+scaled to the SRS crude death rate (or that they were not), the states that fell back to
+all-India death rates, and the curves that were asked for but could not run, with why.
 run_table() and run_json() do the same for an intervention run (simulate.Run).
 """
 from __future__ import annotations
@@ -12,7 +13,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from . import curves, exposure
+from . import baseline, curves, exposure
 from .curves import Curve, Unavailable
 from .impact import Impact
 
@@ -53,13 +54,40 @@ def _row(i: Impact) -> dict:
         deaths_derived=i.derived)
 
 
+def deaths_note(recs, deaths: float, deaths_model: float) -> str:
+    """How the death counts were scaled: `recs` are the states' Reconciliations (none when
+    the counts are unreconciled), deaths the count used and deaths_model the unscaled one."""
+    if not recs:
+        return ("Deaths are population × life-table death rates, not reconciled to the SRS "
+                "crude death rate (--deaths model)")
+    tail = "life expectancy is from the unscaled life table"
+    if len(recs) == 1:
+        text = recs[0].text
+        return f"{text[0].upper()}{text[1:]}; {tail}"
+    factors = [r.factor for r in recs]
+    return (f"Deaths scaled to each state's SRS crude death rate, {baseline.PERIOD_TEXT}: "
+            f"×{deaths / deaths_model:.2f} overall, ×{min(factors):.2f} to ×{max(factors):.2f} "
+            f"by state (data/death_reconciliation.csv); {tail}s")
+
+
+def _auto_notes(impacts: list[Impact]) -> list[str]:
+    if not impacts:
+        return []
+    i = impacts[0]
+    return [deaths_note(i.reconciliations, i.deaths_baseline, i.deaths_model)]
+
+
 def footer(impacts: list[Impact], unavailable: dict[str, str] | None = None,
            notes: tuple[str, ...] = ()) -> str:
     if unavailable is None:
         unavailable = select_curves()[1]
     maps = dict.fromkeys((i.map_name, i.year) for i in impacts)
     fallback = sorted({s for i in impacts for s in i.fallback_states})
-    return _footer(maps, fallback, unavailable, notes)
+    return _footer(maps, fallback, unavailable, [*notes, *_auto_notes(impacts)])
+
+
+def _deaths_text(deaths: float, population: float) -> str:
+    return f"all-cause deaths {deaths:,.0f} a year ({1000 * deaths / population:.1f} per 1,000)"
 
 
 def _footer(maps, fallback: list[str], unavailable: dict[str, str], notes=()) -> str:
@@ -82,8 +110,9 @@ def table(impacts: list[Impact], unavailable: dict[str, str] | None = None,
         return footer(impacts, unavailable, notes)
     first = impacts[0]
     lines = [heading or place_label(first),
-             f"Population {first.population / 1e6:,.1f} M; all-cause deaths "
-             f"{first.deaths_baseline:,.0f} a year. Steady state, per year.", ""]
+             f"Population {first.population / 1e6:,.1f} M; "
+             f"{_deaths_text(first.deaths_baseline, first.population)}. Steady state, per year.",
+             ""]
     head = ("curve", "PM2.5 µg/m³", "% of deaths", "deaths/yr", "life exp. yrs", "life-years/yr")
     rows = []
     for i in impacts:
@@ -113,10 +142,19 @@ def to_json(impacts: list[Impact], unavailable: dict[str, str] | None = None,
         place=dict(name=first.place.name, kind=first.place.kind, state=first.place.state) if first else None,
         population=first.population if first else None,
         deaths_baseline=first.deaths_baseline if first else None,
+        deaths_basis=("srs" if first.reconciliations else "model") if first else None,
+        deaths_unscaled=first.deaths_model if first else None,
+        death_scaling=_scaling_json(first.reconciliations) if first else [],
         rows=[_row(i) for i in impacts],
         fallback_states=sorted({s for i in impacts for s in i.fallback_states}),
         unavailable=unavailable, notes=list(notes),
         footer=footer(impacts, unavailable, notes))
+
+
+def _scaling_json(recs) -> list[dict]:
+    return [dict(state=r.state, factor=r.factor, from_age=r.from_age,
+                 srs_crude_death_rate_per_1000=r.srs_cdr, srs_unit=r.srs_unit,
+                 period=baseline.PERIOD_TEXT) for r in recs]
 
 
 # --- intervention runs ----------------------------------------------------------------------
@@ -218,14 +256,16 @@ def _run_heading(run: Run) -> list[str]:
         f"{where}. {_timing(iv, run.shares)}. Probability it works: {100 * iv.p_success:g}%.",
         f"Change: {change_text(iv)}; annual-mean change {after - run.pm25_before:+.2f} µg/m³ "
         f"(PM2.5 {run.pm25_before:.1f} → {after:.1f}, {start}; median draw).",
-        f"Population {run.population / 1e6:,.1f} M; all-cause deaths {run.deaths_baseline:,.0f} "
-        f"a year. {run.n:,} draws, seed {run.seed}.",
+        f"Population {run.population / 1e6:,.1f} M; "
+        f"{_deaths_text(run.deaths_baseline, run.population)}. {run.n:,} draws, seed {run.seed}.",
     ]
 
 
 def run_footer(run: Run) -> str:
-    notes = ["Life-years = deaths postponed by age × remaining life expectancy, at the map "
-             "year's population and age structure, summed over the intervention's years"]
+    notes = ["Life-years = deaths postponed by age × remaining life expectancy at the age of "
+             "death, at the map year's population and age structure, summed over the "
+             "intervention's years",
+             deaths_note(run.reconciliations, run.deaths_baseline, run.deaths_model)]
     return _footer({(run.map_name, run.year): None}, run.fallback_states, run.unavailable, notes)
 
 
@@ -283,6 +323,8 @@ def run_json(run: Run) -> dict:
         change=change_text(iv), pm25_before=run.pm25_before,
         annual_mean_change_median=float(np.median(first.pm25_after)) - run.pm25_before,
         population=run.population, deaths_baseline=run.deaths_baseline,
+        deaths_basis="srs" if run.reconciliations else "model",
+        deaths_unscaled=run.deaths_model, death_scaling=_scaling_json(run.reconciliations),
         start_year=iv.start_year, duration_years=iv.duration_years, ramp_years=iv.ramp_years,
         lag=iv.lag, realised_share_by_year=[float(x) for x in run.shares],
         cost_currency=iv.cost_currency, cost_year=iv.cost_year, usd_per_unit=run.usd_per_unit,

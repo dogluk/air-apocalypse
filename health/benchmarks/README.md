@@ -6,12 +6,12 @@ Each case runs this tool with the curve, counterfactual and year of a published 
 
 | Case | Measures | Published | Ours | Ratio | Expected |
 |---|---|---|---|---|---|
-| jaganathan2024_share | share | 24.9% of deaths | 25.7% of deaths | 1.032 | 1 ±10% |
-| jaganathan2024_deaths | deaths | 1.50 M deaths/yr | 2.10 M deaths/yr | 1.402 | 1.35 ±8% |
+| jaganathan2024_share | share | 24.9% of deaths | 25.9% of deaths | 1.038 | 1 ±10% |
+| jaganathan2024_deaths | deaths | 1.50 M deaths/yr | 1.86 M deaths/yr | 1.238 | 1.185 ±8% |
 | aqli2025_india_years | years | 3.50 years | 3.55 years | 1.014 | 1 ±3% |
 | aqli2025_delhi_years | years | 8.20 years | 8.17 years | 0.996 | 1 ±3% |
-| burnett2018_india_maps | deaths | 2.22 M deaths/yr | 1.42 M deaths/yr | 0.642 | 0.67 ±8% |
-| burnett2018_india_forced74 | deaths | 2.22 M deaths/yr | 1.98 M deaths/yr | 0.892 | 0.884 ±5% |
+| burnett2018_india_maps | deaths | 2.22 M deaths/yr | 1.22 M deaths/yr | 0.550 | 0.572 ±8% |
+| burnett2018_india_forced74 | deaths | 2.22 M deaths/yr | 1.69 M deaths/yr | 0.762 | 0.754 ±5% |
 
 ## Why they differ
 
@@ -21,21 +21,21 @@ One paragraph per case. The full notes, with quotations from each source, are in
 
 **Published:** 24.9% (95% CI 19.5-32.5) of total mortality attributable to PM2.5 above 5 µg/m³, 2009-19. Source: <https://pmc.ncbi.nlm.nih.gov/articles/PMC11790315/>, Summary (Findings); Table 2, 'PM2.5 concentrations higher than WHO guidelines (≤5 μg/m3)', attributable fraction, both the 11-year total and 'Mean deaths per year' rows.
 
-**Ours:** 25.7% of deaths, from `loglinear_jaganathan` on the `aqli` map, 2014, India (population-weighted 42.8 µg/m³), counterfactual 5 µg/m³.
+**Ours:** 25.9% of deaths, from `loglinear_jaganathan` on the `aqli` map, 2014, India (population-weighted 42.8 µg/m³), counterfactual 5 µg/m³.
 
 Same curve and same formula as the paper. Our exposure is the AQLI map for 2014, the middle of the paper's 2009-19, which strips out dust and sea salt; the paper built its own monitor-calibrated map of total PM2.5 for every year. The shares land within 4% of each other.
 
-**Band ±10%:** Same curve and formula; the exposure map and its year differ. Over 2011-19 our share runs from 25.0% to 28.2% on the AQLI map, 0% to 13% above the paper's 24.9%.
+**Band ±10%:** Same curve and formula; the exposure map and its year differ. Over 2011-19 our share runs from 25.2% to 28.4% on the AQLI map, 1% to 14% above the paper's 24.9%; 2014 is the middle year of the paper's period.
 
 ### jaganathan2024_deaths: Jaganathan et al. 2024
 
 **Published:** 1.5 million (95% CI 1.1-1.9) deaths a year attributable to PM2.5 above 5 µg/m³, mean over 2009-19. Source: <https://pmc.ncbi.nlm.nih.gov/articles/PMC11790315/>, Table 2, 'PM2.5 concentrations higher than WHO guidelines (≤5 μg/m3)', 'Mean deaths per year' row: 1·5 (1·1–1·9) million; Discussion: 'We estimated that 1·5 million (95% CI 1·1–1·9) deaths occurred annually'.
 
-**Ours:** 2.10 M deaths/yr, from `loglinear_jaganathan` on the `aqli` map, 2014, India (population-weighted 42.8 µg/m³), counterfactual 5 µg/m³.
+**Ours:** 1.86 M deaths/yr, from `loglinear_jaganathan` on the `aqli` map, 2014, India (population-weighted 42.8 µg/m³), counterfactual 5 µg/m³.
 
-The paper counts only deaths registered with the Civil Registration System, about 6.1 million a year, and many deaths in India are never registered (completeness ran from 30% to 100% by state). We count all deaths, from SRS death rates and the 2014 population: about 8.2 million. The shares nearly match, so the counts differ by about that ratio, 1.35 times, plus the 3% gap in the share. Compare the share, not the count.
+The paper counts only deaths registered with the Civil Registration System, about 6.1 million a year, and many deaths in India are never registered (completeness ran from 30% to 100% by state). We count all deaths: 7.2 million for 2014. The shares nearly match, so the counts differ by about that ratio, 1.19 times, plus the 4% gap in the share. Our own count is low for 2014 (the SRS's rate that year implies 8.5 million), because the tool applies 2020-24 death rates and a 2020-24 scaling to every year. Compare the share, not the count.
 
-**Expected ratio 1.35:** The paper's count is a share of the deaths registered in the Civil Registration System; ours is a share of all deaths. Its 16.6 million attributable deaths over 11 years at 24.9% imply 6.06 million registered deaths a year. Ours for 2014 is 8.19 million (SRS death rates, 2014 population). 8.19 / 6.06 = 1.35.
+**Expected ratio 1.185:** The paper's count is a share of the deaths registered in the Civil Registration System; ours is a share of all deaths. Its 16.6 million attributable deaths over 11 years at 24.9% imply 6.06 million registered deaths a year. Ours for 2014 is 7.18 million. 7.18 / 6.06 = 1.185. Our 7.18 million is itself too low for 2014: it is 5.7 deaths per 1,000 people, and the SRS recorded 6.7 that year (SRS Statistical Report 2015, Table 13). The tool has one set of death rates, for 2020-24, and one scaling factor per state, measured in 2022; both are applied to the 2014 population. At the SRS's own 2014 rate the count would be 8.5 million and this ratio about 1.4.
 
 **Band ±8%:** The band holds the gap between the two shares (previous case, within 10%); the denominators are known.
 
@@ -63,11 +63,11 @@ As for India: same table, coefficient and target, so only rounding separates the
 
 **Published:** India 2015, population-weighted PM2.5 74.0 µg/m³, 100% rollback: 2,219 thousand excess deaths (GEMM NCD+LRI). Source: <https://pmc.ncbi.nlm.nih.gov/articles/PMC6156628/>, Table 1, row 'India', rollback 100%: PM2.5 exposure 74.0 µg/m3, GEMM NCD+LRI 2,219 (thousands). The authors' deposited calculator gives 2,219,057 (see data/sources.toml, curves_gemm_ncd_lri.csv).
 
-**Ours:** 1.42 M deaths/yr, from `gemm_ncd_lri` on the `aqli` map, 2015, India (population-weighted 45.1 µg/m³), counterfactual 2.4 µg/m³.
+**Ours:** 1.22 M deaths/yr, from `gemm_ncd_lri` on the `aqli` map, 2015, India (population-weighted 45.1 µg/m³), counterfactual 2.4 µg/m³.
 
-Same curve, year and counterfactual, but our map puts India's 2015 air at 45.1 µg/m³ against the paper's 74.0 (AQLI removes dust and sea salt and uses a different model), which alone cuts the deaths to about three-quarters. Our baseline also has 12% fewer deaths from the causes the curve covers than the paper's (next case). Together: about two-thirds.
+Same curve, year and counterfactual, but our map puts India's 2015 air at 45.1 µg/m³ against the paper's 74.0 (AQLI removes dust and sea salt and uses a different model), which alone cuts the deaths to about three-quarters. Our baseline also has a quarter fewer deaths from the causes the curve covers than the paper's (next case). Together: a little over half.
 
-**Expected ratio 0.67:** Two known differences multiply. Baseline deaths: the paper's are GBD 2015's, 6.46 million deaths from non-communicable disease and lower respiratory infection at ages 25 and over; ours for 2015 are 5.71 million, 0.884 of that (next case). Exposure: our map puts India at 45.1 µg/m³ against the paper's 74.0; on the paper's own baseline the curve gives 1.68 million deaths at 45.1 against 2.22 million at 74.0, a factor of 0.758. 0.884 × 0.758 = 0.67.
+**Expected ratio 0.572:** Two known differences multiply. Baseline deaths: the paper's are GBD 2015's, 6.46 million deaths from non-communicable disease and lower respiratory infection at ages 25 and over; ours for 2015 are 4.87 million, 0.754 of that (next case). Exposure: our map puts India at 45.1 µg/m³ against the paper's 74.0; on the paper's own baseline the curve gives 1.68 million deaths at 45.1 against 2.22 million at 74.0, a factor of 0.758. 0.754 × 0.758 = 0.572.
 
 **Band ±8%:** The band holds what the two factors leave out: exposure varies within India and the curve bends, so applying it district by district gives about 4% fewer deaths than applying it once at the national mean.
 
@@ -75,10 +75,10 @@ Same curve, year and counterfactual, but our map puts India's 2015 air at 45.1 �
 
 **Published:** India 2015, population-weighted PM2.5 74.0 µg/m³, 100% rollback: 2,219 thousand excess deaths (GEMM NCD+LRI). Source: <https://pmc.ncbi.nlm.nih.gov/articles/PMC6156628/>, Table 1, row 'India', rollback 100%: PM2.5 exposure 74.0 µg/m3, GEMM NCD+LRI 2,219 (thousands).
 
-**Ours:** 1.98 M deaths/yr, from `gemm_ncd_lri` on the `aqli` map, 2015, India (every district forced to 74 µg/m³), counterfactual 2.4 µg/m³.
+**Ours:** 1.69 M deaths/yr, from `gemm_ncd_lri` on the `aqli` map, 2015, India (every district forced to 74 µg/m³), counterfactual 2.4 µg/m³.
 
-With every district set to the paper's 74.0 µg/m³ we land 11% below, and the reason is known: the paper's baseline (GBD 2015) has 6.46 million deaths at ages 25 and over from the causes the curve covers, ours has 5.71 million. Given the paper's own baseline, this tool's curve reproduces the paper's 2,219,057 deaths exactly. The gap is at the two ends of the age range: GBD counts far more deaths at 80 and over, and our cause shares are too low at 25-29.
+With every district set to the paper's 74.0 µg/m³ we land 24% below, and the reason is known: the paper's baseline (GBD 2015) has 6.46 million deaths at ages 25 and over from the causes the curve covers, ours has 4.87 million. Given the paper's own baseline, this tool's curve reproduces the paper's 2,219,057 deaths exactly. GBD counts more deaths in India than the SRS does, most of all at 80 and over; our counts are scaled to the SRS; and that scaling, measured for 2020-24, is too strong for 2015 (our 2015 run has 5.8 deaths per 1,000 where the SRS recorded 6.5).
 
-**Expected ratio 0.884:** At the paper's exposure the only difference left is baseline deaths. The paper's are in the authors' workbook (sheet 'NCD+ LRI baseline': GBD 2015, from the GHDx results tool, retrieved 31 July 2017): India, ages 25 and over, 6,457,516 deaths from non-communicable disease and lower respiratory infection. Ours for 2015: 5,711,340. 5.711 / 6.458 = 0.884.
+**Expected ratio 0.754:** At the paper's exposure the only difference left is baseline deaths. The paper's are in the authors' workbook (sheet 'NCD+ LRI baseline': GBD 2015, from the GHDx results tool, retrieved 31 July 2017): India, ages 25 and over, 6,457,516 deaths from non-communicable disease and lower respiratory infection. Ours for 2015: 4,869,398. 4.869 / 6.458 = 0.754. Two things make ours smaller. Before any scaling it is 5,711,340 (0.884): GBD counts far more deaths at 80 and over than the SRS, and our cause shares are too low at 25-29. Scaling deaths at 45 and over to the SRS crude death rate (the factor of 2020-24, applied here to 2015) takes it down by a further 15%.
 
 **Band ±5%:** The band holds the difference in the age pattern of the two baselines (the curve is steeper at younger ages); the totals are known.

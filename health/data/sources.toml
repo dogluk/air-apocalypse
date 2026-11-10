@@ -336,3 +336,26 @@ Checks in the script: 23 units a year; each sums to 100 within 0.6.
 Spot check by eye against the rendered PDF, 2026-11-11: Delhi 2022 (PDF p. 224), all 18 rows; India 2023 in the text layer.
 Not used in any result; it is the evidence for where modelled deaths exceed the SRS's (README, 'How many deaths a year').
 """
+
+["death_reconciliation.csv"]
+source = "Derived from srs_crude_death_rate.csv (SRS Statistical Reports 2020-2024, Statement 40), lifetables_srs.csv (SRS Abridged Life Tables 2020-24) and population_age_state.csv (Population Projections for India and States 2011-2036)."
+url = "https://censusindia.gov.in/nada/index.php/catalog/46172"
+locator = "Each input's own entry in this file gives its pages and tables."
+retrieved = "2026-11-11"
+licence = "Derived from Government of India publications; factual statistics reproduced with attribution."
+method = "derived"
+script = "scripts/build_death_reconciliation.py"
+notes = """
+Columns: state (canonical), period (2020-24), srs_unit (the SRS row the rate is from, as printed), srs_cdr_per_1000 (mean of the
+five annual SRS crude death rates 2020-2024), reference_year (2022), modelled_cdr_per_1000 (projected population of 1 July 2022 ×
+life-table death rates, per 1,000, before any scaling), from_age and factor (the factor on modelled deaths at ages from_age and
+over that makes the total equal srs_cdr_per_1000 × population at the reference year).
+from_age is 45 for India and the 22 states with their own SRS life table: the life-table rates are the SRS's age-specific rates
+(srs_age_specific_death_rates.csv), and modelled deaths exceed the SRS's because the projection has more people aged 45 and over
+than the SRS's own population distribution (srs_population_age_pct.csv); under 45 the two agree within 0.1 per 1,000 in every
+state. from_age is 0 for the 15 states and union territories that borrow all-India death rates: their factor brings the borrowed
+rates to the state's own SRS crude death rate at every age. Every state and union territory has its own SRS rate; Dadra & Nagar
+Haveli and Daman & Diu share the rate of their merged union territory.
+Checked by tests/test_baseline.py: the table is recomputed from its inputs, and deaths implied by it equal the SRS rate in every
+state at the reference year. The factor is used in every year; see the README for what that does to years before 2020.
+"""

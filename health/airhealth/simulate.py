@@ -9,7 +9,7 @@ figures.
 
 Accounting (a cohort run to 2050 replaces it in a later version). The steady-state change
 in deaths per year and in life-years per year (deaths by age × remaining life expectancy at
-that age, impact.steady_state_many) is computed once per draw, with the map year's
+the age of death, impact.steady_state_many) is computed once per draw, with the map year's
 population and age structure. Each year of the intervention realises a share of it: the
 ramp brings the change in over ramp_years in equal steps, and each step starts its own
 cessation lag (lag.profile), so the share in year k is the sum over steps of the step's
@@ -91,6 +91,8 @@ class Run:
     usd_per_unit: float             # dollars per unit of the cost currency
     fallback_states: list[str]
     unavailable: dict[str, str]     # curves asked for that could not run, with why
+    deaths_model: float = 0.0       # all-cause deaths a year before reconciliation to the SRS
+    reconciliations: tuple = ()     # baseline.Reconciliation per state; empty for deaths="model"
 
 
 def realised_shares(iv: Intervention) -> np.ndarray:
@@ -135,12 +137,16 @@ class _Steady:
     deaths_baseline: float
     year: int
     fallback: list[str]
+    deaths_model: float
+    reconciliations: tuple
 
 
-def _steady(iv: Intervention, curve: Curve, values: np.ndarray, map_name: str) -> _Steady:
+def _steady(iv: Intervention, curve: Curve, values: np.ndarray, map_name: str,
+            deaths: str = "srs") -> _Steady:
     """Steady-state results for every draw, added over the intervention's places."""
     parts = [impact.steady_state_many(p, curve, map_name, iv.change_kind, values,
-                                      pm25_override=iv.from_level) for p in iv.places]
+                                      pm25_override=iv.from_level, deaths=deaths)
+             for p in iv.places]
     pop = np.array([r.population for r in parts])
     return _Steady(
         deaths=sum(r.deaths_averted for r in parts), yll=sum(r.yll_averted for r in parts),
@@ -148,7 +154,9 @@ def _steady(iv: Intervention, curve: Curve, values: np.ndarray, map_name: str) -
         pm25_after=np.average([r.pm25_after for r in parts], axis=0, weights=pop),
         pm25_before=float(np.average([r.pm25_before for r in parts], weights=pop)),
         population=float(pop.sum()), deaths_baseline=float(sum(r.deaths_baseline for r in parts)),
-        year=parts[0].year, fallback=sorted({s for r in parts for s in r.fallback_states}))
+        year=parts[0].year, fallback=sorted({s for r in parts for s in r.fallback_states}),
+        deaths_model=float(sum(r.deaths_model for r in parts)),
+        reconciliations=tuple(dict.fromkeys(x for r in parts for x in r.reconciliations)))
 
 
 def _var(x: np.ndarray) -> float:
@@ -160,8 +168,9 @@ def _width(x: np.ndarray) -> float:
 
 
 def run(iv: Intervention, map_name: str = "aqli", curves: list[str] | None = None,
-        n: int = 5000, seed: int = 0) -> Run:
-    """Run the intervention on every curve asked for (default: every curve that can run)."""
+        n: int = 5000, seed: int = 0, deaths: str = "srs") -> Run:
+    """Run the intervention on every curve asked for (default: every curve that can run).
+    deaths: "srs" (death counts reconciled to the SRS crude death rate) or "model"."""
     if n < 2:
         raise ValueError(f"n: need at least 2 draws, got {n}")
     if map_name not in exposure.MAPS:
@@ -183,9 +192,9 @@ def run(iv: Intervention, map_name: str = "aqli", curves: list[str] | None = Non
     per_curve, first = {}, None
     for curve in chosen:
         batch = curve.sample_many(_rng(seed, 2, zlib.crc32(curve.name.encode())), n)
-        joint = _steady(iv, batch, values, map_name)
-        change_only = joint if batch is curve else _steady(iv, curve, values, map_name)
-        curve_only = _steady(iv, batch, median_values, map_name)
+        joint = _steady(iv, batch, values, map_name, deaths)
+        change_only = joint if batch is curve else _steady(iv, curve, values, map_name, deaths)
+        curve_only = _steady(iv, batch, median_values, map_name, deaths)
         if first is None:
             first = joint
         alone = {"pm25_change": change_only.yll * years, "curve_parameters": curve_only.yll * years}
@@ -202,7 +211,8 @@ def run(iv: Intervention, map_name: str = "aqli", curves: list[str] | None = Non
                year=first.year, population=first.population,
                deaths_baseline=first.deaths_baseline, pm25_before=first.pm25_before,
                shares=shares, usd_per_unit=usd, fallback_states=first.fallback,
-               unavailable=unavailable)
+               unavailable=unavailable, deaths_model=first.deaths_model,
+               reconciliations=first.reconciliations)
 
 
 def across_curve_spread(run: Run) -> float:

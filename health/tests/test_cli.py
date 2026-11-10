@@ -95,3 +95,41 @@ def test_curve_chart_is_written(tmp_path):
     path = charts.curves_chart(curves.available(), {"Delhi": 88.4, "India": 41.0},
                                tmp_path / "curves.png")
     assert path.exists() and path.stat().st_size > 30_000
+
+
+# --- death counts and the SRS crude death rate ------------------------------------------------
+
+def test_footer_says_how_deaths_were_scaled(capsys):
+    _, out, _ = run(capsys, "compare", "Delhi", "--from", "100", "--to", "80")
+    footer = out.strip().splitlines()[-1]
+    assert "scaled by ×0.72 to the SRS crude death rate for Delhi, 2020-24" in footer
+    assert "ages 45 and over" in footer and "unscaled life table" in footer
+    assert "per 1,000)" in out.splitlines()[1]             # the implied crude death rate
+    _, out, _ = run(capsys, "burden", "India", "--curves", "gemm_ncd_lri")
+    footer = out.strip().splitlines()[-1]
+    assert "each state's SRS crude death rate, 2020-24" in footer and "overall" in footer
+    _, out, _ = run(capsys, "burden", "Chandigarh", "--curves", "gemm_ncd_lri")
+    footer = out.strip().splitlines()[-1]
+    assert "Deaths scaled by ×0.57" in footer and "Chandigarh" in footer
+
+
+def test_deaths_model_switches_the_scaling_off(capsys):
+    args = ("--json", "compare", "Delhi", "--from", "100", "--to", "80")
+    srs = json.loads(run(capsys, *args)[1])
+    model = json.loads(run(capsys, *args, "--deaths", "model")[1])
+    assert (srs["deaths_basis"], model["deaths_basis"]) == ("srs", "model")
+    assert srs["deaths_unscaled"] == pytest.approx(model["deaths_baseline"])
+    assert srs["deaths_baseline"] < model["deaths_baseline"]
+    assert srs["death_scaling"][0]["state"] == "Delhi" and model["death_scaling"] == []
+    assert "not reconciled to the SRS crude death rate" in model["footer"]
+    for a, b in zip(srs["rows"], model["rows"]):
+        assert a["life_expectancy_gain"] == b["life_expectancy_gain"]
+        assert a["deaths_averted"] < b["deaths_averted"]
+
+
+def test_run_footer_says_how_deaths_were_scaled(capsys):
+    args = ("run", "interventions/delhi_100_to_80.toml", "--n", "50", "--curves", "gemm_ncd_lri")
+    _, out, _ = run(capsys, *args)
+    assert "SRS crude death rate for Delhi, 2020-24" in out.strip().splitlines()[-1]
+    result = json.loads(run(capsys, "--json", *args, "--deaths", "model")[1])
+    assert result["deaths_basis"] == "model" and "not reconciled" in result["footer"]
