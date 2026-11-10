@@ -66,8 +66,8 @@ def canonical_state(name: str) -> str:
 
 def _suggest(text: str) -> str:
     keys = difflib.get_close_matches(norm(text), _index(), n=5, cutoff=0.5)
-    names = list(dict.fromkeys(_label(p) for k in keys for p in _index()[k]))
-    return f"; did you mean {', '.join(names)}?" if names else ""
+    names = list(dict.fromkeys(f"{_label(p)} ({p.kind})" for k in keys for p in _index()[k]))
+    return f"; did you mean {' | '.join(names)}?" if names else ""
 
 
 def _label(p: Place) -> str:

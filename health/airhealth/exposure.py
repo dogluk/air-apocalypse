@@ -24,6 +24,12 @@ from . import baseline, paths
 from .places import Place
 
 MAPS: tuple[str, ...] = ("aqli", "acag_total", "gbd2019", "cpcb")
+LABELS = {
+    "aqli": "AQLI 2025 release, districts, satellite PM2.5 with dust and sea salt removed",
+    "acag_total": "ACAG V6.GL.02.04 total PM2.5, districts, WorldPop-weighted",
+    "gbd2019": "GBD 2019 state population-weighted means (Pandey et al. 2021)",
+    "cpcb": "CPCB ground monitors, city annual means",
+}
 COLUMNS = ["state", "unit", "pm25", "population"]
 DISTRICT_MAPS = {"aqli": "aqli_units", "acag_total": "acag_units"}
 
