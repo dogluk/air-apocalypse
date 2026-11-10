@@ -10,6 +10,16 @@ that MORTPAK 4 was used); it is recovered from the tables themselves. For all 23
 SRS 2020-24 tables, a0 = (L0 − l1) / d0 computed from the printed columns fits
 0.0425 + 2.875·q0 within 0.0005, which is the printed rounding (fit over
 q0 = 0.007 to 0.041; least squares gives 0.0425 + 2.874·q0).
+
+Remaining life expectancy at the age of death (ex_at_death), for life-years: people who die
+in a band die on average a years into it, not at its start, so each death is credited with
+the life expectancy of a person alive at age x + a, from the table's own columns. With
+survivors falling in a straight line across the band (what L = n·l(next) + a·d with a = n/2
+assumes): l(x+a) = l(x) − d·a/n, the person-years lived between x + a and x + n are
+(n − a)·(l(x+a) + l(x+n))/2, and e(x+a) = (those person-years + T(x+n)) / l(x+a). The open
+band keeps e(85) = 1/m: with one death rate for the whole band, remaining life expectancy
+is the same at every age in it. Using e(x) at the start of the band instead would overstate
+life-years by about 7%.
 """
 from dataclasses import dataclass
 
@@ -60,6 +70,19 @@ def _columns(mx: np.ndarray) -> tuple[np.ndarray, ...]:
     with np.errstate(divide="ignore", invalid="ignore"):
         ex = np.where(lx > 0, Tx / lx, 0.0)
     return qx, lx, Lx, ex
+
+
+def ex_at_death(mx: np.ndarray) -> np.ndarray:
+    """Remaining life expectancy at the mean age of death in each band (module docstring)."""
+    t = life_table(mx)
+    n = WIDTHS[:-1]
+    l0, l1 = t.lx[:-1], t.lx[1:]
+    d = l0 - l1
+    a = (t.Lx[:-1] - n * l1) / d            # the table's own a: n/2, or a0 in infancy
+    la = l0 - d * a / n
+    T_next = (t.ex * t.lx)[1:]              # person-years lived above the end of the band
+    closed = ((n - a) * (la + l1) / 2 + T_next) / la
+    return np.append(closed, t.ex[-1])
 
 
 def life_table(mx: np.ndarray) -> LifeTable:

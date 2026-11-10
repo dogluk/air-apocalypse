@@ -8,8 +8,8 @@ rr(after) / rr(before) for that band (1 below the curve's min_age). Units add up
 
 Life expectancy: the state's life table is rebuilt with each band's rate multiplied by the
 population-weighted mean over the state's units of 1 − scope × (1 − ratio). Life-years
-averted are deaths averted in a band × remaining life expectancy at the start of that band,
-from the state's baseline table. A place spanning several states (the country) is computed
+averted are deaths averted in a band × remaining life expectancy at the mean age of death in
+that band (lifetable.ex_at_death), from the state's baseline table. A place spanning several states (the country) is computed
 state by state: deaths and life-years add, life expectancy is population-weighted.
 
 AQLI gives life expectancy, not relative risk: each unit's e0 moves by the curve's
@@ -84,7 +84,7 @@ class Impact:
     deaths_averted: float     # per year at steady state; negative if the air gets worse
     e0_before: float
     e0_after: float
-    yll_averted: float        # deaths averted by age × remaining life expectancy at that age
+    yll_averted: float        # deaths averted by age × remaining life expectancy at death
     derived: bool             # True when the deaths are derived from a life-expectancy curve
     fallback_states: list[str]
 
@@ -120,7 +120,8 @@ def _state(b: baseline.Baseline, curve: Curve, before: np.ndarray, after: np.nda
     averted = (deaths * (1 - factor)).sum(axis=0)                       # by band
     return _StateResult(
         population=pop.sum(), deaths_baseline=deaths.sum(), deaths_averted=averted.sum(),
-        yll_averted=(averted * table.ex).sum(), e0_before=table.ex[0], e0_after=e0_after)
+        yll_averted=(averted * lifetable.ex_at_death(b.mx)).sum(), e0_before=table.ex[0],
+        e0_after=e0_after)
 
 
 def steady_state(place: Place, curve: Curve, map_name: str, change: Change,
@@ -244,7 +245,8 @@ def _state_many(b: baseline.Baseline, curve: Curve, before: np.ndarray, after: n
             mean_g[:, bands] = (g @ pop / pop.sum())[:, None]
         e0_after = lifetable.e0_many(b.mx * (1 - scope * mean_g))
     return dict(population=pop.sum(), deaths_baseline=deaths.sum(),
-                deaths_averted=averted.sum(axis=1), yll_averted=averted @ table.ex,
+                deaths_averted=averted.sum(axis=1),
+                yll_averted=averted @ lifetable.ex_at_death(b.mx),
                 e0_before=table.ex[0], e0_after=e0_after)
 
 

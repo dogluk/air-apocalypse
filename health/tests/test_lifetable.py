@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from airhealth.lifetable import e0, life_table, scale_adult, solve_adult_factor
+from airhealth.lifetable import STARTS, e0, ex_at_death, life_table, scale_adult, solve_adult_factor
 
 
 def test_constant_hazard_gives_reciprocal_life_expectancy():
@@ -35,3 +35,25 @@ def test_table_is_internally_consistent():
     assert t.qx[-1] == 1.0
     assert t.Lx[-1] == pytest.approx(t.lx[-1] / mx[-1])
     assert t.ex[0] == pytest.approx(t.Lx.sum())
+
+
+def test_life_expectancy_at_death_matches_numerical_integration():
+    """e at the mean age of death in each band, against a numerical integral of a survivorship
+    curve drawn as straight lines between the table's l(x) (constant rate above 85)."""
+    mx = 0.0004 * np.exp(0.085 * STARTS)
+    mx[:2] = (0.03, 0.002)
+    t = life_table(mx)
+    ages = np.linspace(0, 300, 600_001)
+    surv = np.interp(ages, STARTS, t.lx)
+    old = ages >= 85
+    surv[old] = t.lx[-1] * np.exp(-mx[-1] * (ages[old] - 85))
+    lived = np.concatenate([[0.0], np.cumsum((surv[1:] + surv[:-1]) / 2 * np.diff(ages))])
+    remaining = (lived[-1] - lived) / surv
+    a = np.diff(STARTS) / 2
+    a[0] = (t.Lx[0] - t.lx[1]) / (t.lx[0] - t.lx[1])
+    expected = np.append(np.interp(STARTS[:-1] + a, ages, remaining), 1 / mx[-1])
+    got = ex_at_death(mx)
+    assert got == pytest.approx(expected, rel=1e-5)
+    # less than at the start of the band, more than at the start of the next one
+    assert (got[:-1] < t.ex[:-1])[2:].all() and (got[:-1] > t.ex[1:])[2:-1].all()
+    assert got[-1] == pytest.approx(t.ex[-1])

@@ -164,6 +164,17 @@ def test_yll_uses_remaining_life_expectancy(world):
     assert r.yll_averted == pytest.approx(r.deaths_averted * ex85)
 
 
+def test_yll_is_below_the_band_start_figure(world):
+    # Deaths happen inside the band, where less life remains than at its start.
+    world([("A", "a1", 80.0, 1000)])
+    r = steady_state(STATE_A, SLOPE, "test", Change(delta=-20))
+    b = synthetic_baseline("A")
+    averted = b.population / b.population.sum() * 1000 * b.mx * (1 - 1.08 ** -2) * (STARTS >= 25)
+    at_start = (averted * lifetable.life_table(b.mx).ex).sum()
+    assert r.yll_averted == pytest.approx((averted * lifetable.ex_at_death(b.mx)).sum())
+    assert 0.85 * at_start < r.yll_averted < 0.97 * at_start
+
+
 def test_aqli_impact_is_marked_derived_and_consistent(world):
     world([("A", "a1", 50.0, 1000)])
     aqli = get("aqli")
