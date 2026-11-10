@@ -1,3 +1,66 @@
 # One table per data file, keyed by filename relative to health/data/.
 # Fields: source, url, locator, retrieved, licence, method (downloaded|transcribed|derived),
 # and script for derived tables.
+
+["lifetables_srs.csv"]
+source = "Office of the Registrar General & Census Commissioner, India. SRS Based Abridged Life Tables 2020-24 (May 2026)."
+url = "https://censusindia.gov.in/nada/index.php/catalog/47148/download/51393/SRS-Abridged_Life_Tables_2020-2024.pdf"
+catalog = "https://censusindia.gov.in/nada/index.php/catalog/47148"
+sha256 = "148629ce39c9956fa6a2444ad606394b9104d40f9ac6efcebb1da7336461f19f"
+locator = "Abridged life tables, report pp. 20-42 (PDF pp. 25-47): India and 22 states/UTs, 'Total' block, persons columns nqx, lx, nLx, ex. Cross-checked against Statement 3 (report p. 6, PDF p. 11)."
+retrieved = "2026-11-10"
+licence = "Government of India publication; no licence stated in the report or on the catalog page. Factual statistics reproduced with attribution."
+method = "transcribed"
+script = "scripts/build_baseline.py"
+notes = """
+Extracted with pdftotext -layout by the script. Checks in the script: l(x+n) = l(x)(1 - q(x)) within 3 for every row;
+e0 in every table equals Statement 3. Spot check by eye against the rendered PDF, 2026-11-10: Kerala rows 0-1, 25-30,
+45-50, 70-75, 85+ and Delhi rows 1-5, 30-35, 60-65, 80-85 (36 cells), all match. State names as printed in the table
+headings ('Telengana' is mapped to 'Telangana', the spelling of Statement 3, in airhealth.baseline.state_name).
+Andhra Pradesh's nLx column is printed with five decimals; kept as printed.
+"""
+
+["population_age_state.csv"]
+source = "Report of the Technical Group on Population Projections: Population Projections for India and States 2011-2036. National Commission on Population, MoHFW. Cover dated November 2019 (released July 2020)."
+url = "https://nhm.gov.in/New_Updates_2018/Report_Population_Projection_2019.pdf"
+sha256 = "9a9031c9c75d609e03ab94ce0ac6115cb9d8a9ab82d1b18a47b78e90ae01331b"
+locator = "Table 11 (persons as on 1st July, every year 2011-2036, India and every state/UT; PDF pp. 86-98) and Table 18 (persons by age as on 1st March 2011/16/21/26/31/36, India, 21 states and the combined North-East states excluding Assam; PDF pp. 164-260)."
+retrieved = "2026-11-10"
+licence = "Government of India publication; no licence stated in the report. Factual statistics reproduced with attribution."
+method = "derived"
+script = "scripts/build_baseline.py"
+notes = """
+Columns: state (as printed, upper case), year, age_start (0, 1, 5, ..., 75, 80; 80 means 80+), population (persons, 1st July).
+Derivation: band 0 is Table 18's '0-1' row (age under one); band 1 is '0-4' minus '0-1'. Each unit's age shares come from its
+own Table 18, or the combined North-East table for Arunachal, Manipur, Meghalaya, Mizoram, Nagaland, Sikkim and Tripura, or India
+for the other small states and UTs (Goa, Chandigarh, Puducherry, Ladakh, Lakshadweep, Andaman & Nicobar, Daman & Diu, Dadra &
+Nagar Haveli). Shares are interpolated linearly in time between the 1st March tables, held after March 2036, and applied to the
+unit's Table 11 total. The 80+ band is split into 80-84 and 85+ at load time (airhealth.baseline), not here.
+Checks in the script: Table 11 persons = male + female within 2; Table 18 age groups sum to its total; Table 18 totals equal
+Table 17's for the same unit; states and UTs sum to India in Table 11 (to 0.01% in every year).
+Misprint found: the Table 18 for Uttarakhand (report p. 178, PDF p. 182) is headed 'PUNJAB'; the script names units from Table 17 and
+checks totals, so it is read as Uttarakhand.
+Spot check by eye against the rendered PDF, 2026-11-10: Table 18 NCT of Delhi rows 0-1, 0-4, 25-29, 60-64, 80+, Total for all
+six years (36 cells); Table 11 Gujarat, Maharashtra, Andhra Pradesh for 2011, 2022, 2036 (9 cells). All match.
+"""
+
+["cause_share_ncd_lri.csv"]
+source = "Office of the Registrar General & Census Commissioner, India. Sample Registration System: Causes of Death Statistics 2021-2023 (September 2025)."
+url = "https://censusindia.gov.in/nada/index.php/catalog/46176/download/50424/SRS_COD-STATISTICS_2021-2023.pdf"
+catalog = "https://censusindia.gov.in/nada/index.php/catalog/46176"
+sha256 = "1622b1b105ddf5ba4b237c7658a372c2466b340af25316cd1cc593685b42f268"
+locator = "Table 1.3A 'Distribution of Deaths in India: 2021-2023, Person', report p. 9 (PDF p. 16). Rows: the four major cause groups and 'Respiratory infections'; columns 0-4, 05-14, 15-29, 30-44, 45-54, 55-69, 70+ (percent of deaths in the age group)."
+retrieved = "2026-11-10"
+licence = "Government of India publication; no licence stated in the report or on the catalog page. Factual statistics reproduced with attribution."
+method = "transcribed"
+script = "scripts/build_baseline.py"
+notes = """
+All-India, persons; the report gives no state breakdown by age and cause (only EAG/other, rural/urban and six regions).
+'Respiratory infections' (a subgroup of communicable conditions) stands in for lower respiratory infection; the report does not
+split upper from lower. Chronic 'Respiratory diseases' sit inside Non-Communicable diseases.
+Mapping onto the 19 bands (airhealth.baseline): 0-4 -> bands 0, 1; 05-14 -> 5, 10; 15-29 -> 15, 20, 25; 30-44 -> 30, 35, 40;
+45-54 -> 45, 50; 55-69 -> 55, 60, 65; 70+ -> 70, 75, 80, 85. Ill-defined deaths are shared out in proportion to defined causes:
+share = (ncd + respiratory infections) / (100 - ill-defined).
+Check in the script: the four major groups sum to 100 within 0.25 in every age group.
+Spot check by eye against the rendered PDF, 2026-11-10: all 35 cells in the file match.
+"""
