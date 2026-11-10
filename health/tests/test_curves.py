@@ -20,7 +20,20 @@ def test_no_benefit_below_floor():
 
 def test_children_unaffected():
     assert get("gemm_ncd_lri").ratio(100, 50, 5) == 1.0
-    assert get("loglinear_jaganathan").ratio(100, 50, 20) == 1.0
+    assert get("loglinear_vodonos").ratio(100, 50, 20) == 1.0
+    assert get("loglinear_brown").ratio(100, 50, 10) == 1.0
+
+
+def test_each_curve_starts_at_its_own_age():
+    # Jaganathan is estimated on all-age deaths, Brown at ages 15-69; GEMM's parameters
+    # start at 25; AQLI's estimate is all-age life expectancy.
+    ages = {c.name: c.min_age for c in curves.available()}
+    assert ages == {"loglinear_jaganathan": 0, "loglinear_brown": 15, "loglinear_vodonos": 25,
+                    "gemm_ncd_lri": 25, "aqli": 0}
+    assert get("loglinear_jaganathan").ratio(100, 50, 5) < 1.0
+    assert get("loglinear_jaganathan").ratio(100, 50, 0) < 1.0
+    assert get("loglinear_brown").ratio(100, 50, 15) < 1.0
+    assert get("loglinear_vodonos").ratio(100, 50, 25) < 1.0
 
 
 def test_worse_air_raises_risk():
@@ -109,6 +122,7 @@ def test_sampling_is_reproducible_and_varies(name):
     assert draws.std() > 0
     assert np.median(draws) == pytest.approx(c.ratio(100, 80, 60), abs=0.01)
     assert c.ratio(100, 80, 60) == get(name).ratio(100, 80, 60)   # sampling leaves the original
+    assert c.sample(rng).min_age == c.min_age
 
 
 def test_loglinear_slopes_as_published():

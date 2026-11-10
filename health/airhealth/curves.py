@@ -10,9 +10,13 @@ Local tier (IHME files in data_local/, see IHME_DOWNLOADS.md): gbd2019, gbd2023,
 gemm_5cod. They are registered here with their file check only; get() raises Unavailable
 while the files are missing and NotImplementedError once they are present.
 
-Relative-risk curves apply from ages.ADULT_FROM; younger bands get 1.0. A curve's floor is
-the concentration below which no further benefit is assumed: rr(c) compares max(c, floor)
-with the floor itself.
+Each curve applies from its own min_age; younger bands get a relative risk of 1.0. The
+log-linear curves carry min_age in data/curves_loglinear.csv (Jaganathan 0: all-age deaths;
+Brown 15: studied at 15-69; Vodonos 25). GEMM starts at its first parameter row (25). AQLI has
+no relative risk; its min_age (0) is where the derived-deaths step applies its multiplier on
+death rates, because AQLI's estimate is all-age life expectancy. A curve's floor is the
+concentration below which no further benefit is assumed: rr(c) compares max(c, floor) with
+the floor itself.
 
 Uncertainty (sample): a log-linear slope is drawn as Normal(pct_per_10, se_pct_per_10).
 Where a paper prints a 95% interval rather than a standard error, se = (upper - lower) /
@@ -90,6 +94,7 @@ class Curve:
     floor: float
     death_scope: Literal["all", "ncd_lri"]
     source: str
+    min_age: int  # youngest age band the curve applies to; younger bands get rr = 1
 
     def _log_h(self, c: np.ndarray, age: int) -> np.ndarray:
         """Log hazard ratio at absolute concentration c (vs. the curve's own zero)."""
@@ -101,7 +106,7 @@ class Curve:
     def rr(self, c: float | np.ndarray, age: int) -> float | np.ndarray:
         """Relative risk at c against the floor, for the age band starting at `age`."""
         c = self._clamp(c)
-        if age < ADULT_FROM:
+        if age < self.min_age:
             return _scalar_or_array(np.ones_like(c))
         floor = np.asarray(max(self.floor, 0.0))
         return _scalar_or_array(np.exp(self._log_h(c, age) - self._log_h(floor, age)))
@@ -125,10 +130,11 @@ class LogLinear(Curve):
     se_pct_per_10: float = 0.0
 
     def __init__(self, name: str, pct_per_10: float, se_pct_per_10: float, floor: float,
-                 label: str = "", source: str = "", death_scope: str = "all"):
+                 label: str = "", source: str = "", death_scope: str = "all",
+                 min_age: int = ADULT_FROM):
         _set(self, name=name, label=label or name, kind="relative_risk", floor=float(floor),
-             death_scope=death_scope, source=source, pct_per_10=float(pct_per_10),
-             se_pct_per_10=float(se_pct_per_10))
+             death_scope=death_scope, source=source, min_age=int(min_age),
+             pct_per_10=float(pct_per_10), se_pct_per_10=float(se_pct_per_10))
 
     @property
     def beta(self) -> float:
@@ -153,7 +159,7 @@ class GEMM(Curve):
                  source: str = GEMM_SOURCE, floor: float = GEMM_CF):
         p = params.sort_values("age_start").reset_index(drop=True)
         _set(self, name=name, label=label, kind="relative_risk", floor=float(floor),
-             death_scope="ncd_lri", source=source, params=p)
+             death_scope="ncd_lri", source=source, min_age=int(p.age_start.iloc[0]), params=p)
 
     def _row(self, age: int) -> pd.Series:
         rows = self.params[self.params.age_start <= age]
@@ -181,8 +187,10 @@ class AQLILinear(Curve):
                  name: str = "aqli",
                  label: str = "AQLI linear, 0.98 years of life expectancy per 10 µg/m³",
                  source: str = AQLI_SOURCE):
+        # min_age 0: AQLI's estimate is all-age life expectancy, so the derived-deaths step
+        # (impact) applies its multiplier on death rates from birth.
         _set(self, name=name, label=label, kind="life_expectancy", floor=float(floor),
-             death_scope="all", source=source, years_per_10=float(years_per_10))
+             death_scope="all", source=source, min_age=0, years_per_10=float(years_per_10))
 
     def delta_e0(self, c_from: float, c_to: float) -> float:
         """Change in life expectancy (years) moving from c_from to c_to; positive = gained."""
@@ -229,7 +237,7 @@ def _loglinear() -> dict[str, LogLinear]:
     for r in t.itertuples():
         pct, lo, hi = (_pct_per_10(v, r.scale, r.per_ugm3) for v in (r.estimate, r.lower, r.upper))
         out[r.name] = LogLinear(r.name, pct, (hi - lo) / (2 * Z95), r.floor, label=r.label,
-                                source=f"{r.source}. {r.url}")
+                                source=f"{r.source}. {r.url}", min_age=r.min_age)
     return out
 
 

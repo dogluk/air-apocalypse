@@ -205,7 +205,8 @@ licence = "Published estimates re-typed with citation. Jaganathan: NIH author ma
 method = "transcribed"
 notes = """
 Columns: name, label, scale ('percent' = % change in mortality, 'rr' = relative risk), per_ugm3 (the increment the estimate is
-per), estimate, lower, upper (95% interval as printed), floor (µg/m³), source, url, locator.
+per), estimate, lower, upper (95% interval as printed), floor (µg/m³), min_age (the youngest age band the curve applies
+to; younger bands get a relative risk of 1), source, url, locator.
 airhealth.curves converts each row to % per 10 µg/m³ by compounding on the log scale, pct10 = ((1 + pct/100)^(10/per) - 1) x 100
 (an RR is first written as pct = (RR - 1) x 100), and takes se = (pct10(upper) - pct10(lower)) / (2 x 1.959964).
 Read at source, 2026-11-10: Jaganathan and Brown from the PMC full text (Europe PMC fullTextXML of PMC11790315 and PMC9472672);
@@ -216,9 +217,10 @@ the other intervals in that sentence nearly are.
 Vodonos: the paper's slope falls with the study's mean concentration (inverse transform: beta per µg/m³ = 0.006 + 0.071 / mean,
 Table 2), 1.29% at 10, 1.03% at 15.7, 0.82% at 30. One slope is a simplification, said so in the row's label. The paper's
 studies have means up to 43.7 µg/m³ (Asia), so nothing in it speaks to Indian concentrations above that.
-Brown: the paper reports the estimate at ages 15-69 and does not compute attributable deaths; the curve is applied from age 25
-upward like every adult curve, which extends it past 69. Its floor of 2 is the paper's modelling assumption (no effect at 0-2).
-Jaganathan: estimated on all-age district deaths; the package applies adult curves from 25 only.
+Brown: the paper reports the estimate at ages 15-69 and does not compute attributable deaths; min_age 15, so the curve is applied
+from 15 upward, which extrapolates it past 69 (said so in the label). Its floor of 2 is the paper's modelling assumption (no effect at 0-2).
+Jaganathan: estimated on all-age, all-cause district deaths; min_age 0, so it applies at every age.
+Vodonos: min_age 25, the adult start used for GEMM (a project choice, not a figure from the paper).
 """
 
 ["curves_gemm_ncd_lri.csv"]
