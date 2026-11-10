@@ -133,3 +133,47 @@ def test_run_footer_says_how_deaths_were_scaled(capsys):
     assert "SRS crude death rate for Delhi, 2020-24" in out.strip().splitlines()[-1]
     result = json.loads(run(capsys, "--json", *args, "--deaths", "model")[1])
     assert result["deaths_basis"] == "model" and "not reconciled" in result["footer"]
+
+
+# --- city population, floors, bad levels, debug (final review I4, M2, M3, M4, M12) -----------
+
+def test_city_result_names_its_population_year(capsys):
+    _, out, _ = run(capsys, "compare", "Bengaluru", "--to", "20", "--curves", "gemm_ncd_lri")
+    footer = out.strip().splitlines()[-1]
+    assert "Population of Bengaluru: Census 2011" in footer and "not updated to 2025" in footer
+    result = json.loads(run(capsys, "--json", "compare", "Bengaluru", "--to", "20")[1])
+    assert result["population_year"] == 2011 and "Census 2011" in result["footer"]
+    _, out, _ = run(capsys, "compare", "Karnataka", "--to", "20", "--curves", "gemm_ncd_lri")
+    assert "Census" not in out
+
+
+def test_negative_level_is_refused(capsys):
+    for flags, named in ((["--from", "100", "--to", "-5"], "--to"),
+                         (["--from", "-1", "--to", "5"], "--from")):
+        code, out, err = run(capsys, "compare", "Delhi", *flags)
+        assert code == 1 and out == ""
+        assert "cannot be below 0" in err and err.startswith(f"airhealth: {named}:")
+
+
+def test_move_below_the_floor_is_marked(capsys):
+    _, out, _ = run(capsys, "compare", "Delhi", "--from", "10", "--to", "1",
+                    "--curves", "loglinear_jaganathan,loglinear_brown")
+    assert "loglinear_jaganathan †" in out and "loglinear_brown †" in out
+    assert "below the curve's floor" in out and "loglinear_jaganathan 5" in out
+    rows = json.loads(run(capsys, "--json", "compare", "Delhi", "--from", "10", "--to", "1")[1])["rows"]
+    assert all(r["below_floor"] for r in rows)
+    _, out, _ = run(capsys, "compare", "Delhi", "--from", "100", "--to", "80")
+    assert "†" not in out
+
+
+def test_list_maps_says_which_years_give_results(capsys):
+    _, out, _ = run(capsys, "list", "maps")
+    aqli = out.split("aqli  [")[1].split("]")[0]
+    assert aqli.startswith("1998-2023") and "results 2011-2023" in aqli
+
+
+def test_debug_shows_the_traceback(capsys):
+    with pytest.raises(KeyError):
+        cli.main(["--debug", "compare", "Dehli", "--to", "80"])
+    capsys.readouterr()
+    assert cli.main(["compare", "Dehli", "--to", "80"]) == 1

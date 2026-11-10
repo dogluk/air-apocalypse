@@ -287,7 +287,10 @@ def test_run_json_and_charts(capsys, tmp_path):
     assert result["map"] == "aqli" and result["n"] == 200
     assert {r["curve"] for r in result["rows"]} == {c.name for c in curves.available()}
     for row in result["rows"]:
-        assert row["life_years"]["p5"] <= row["life_years"]["median"] <= row["life_years"]["p95"]
+        if row["interval"] == "none":
+            assert row["curve"] == "aqli" and row["life_years"]["p5"] is None
+        else:
+            assert row["life_years"]["p5"] < row["life_years"]["median"] < row["life_years"]["p95"]
     assert len(result["charts"]) == 2
     for path in result["charts"]:
         assert (tmp_path / path.rsplit("/", 1)[-1]).stat().st_size > 30_000
@@ -297,3 +300,74 @@ def test_charts_are_written(tmp_path):
     run = simulate.run(load("delhi_100_to_80"), n=200)
     assert charts.results_chart(run, tmp_path / "r.png").stat().st_size > 30_000
     assert charts.spread_chart(run, tmp_path / "s.png").stat().st_size > 30_000
+
+
+# --- no fake ranges (final review, I2) --------------------------------------------------------
+
+def _row(result: dict, curve: str) -> dict:
+    return next(r for r in result["rows"] if r["curve"] == curve)
+
+
+def test_curve_without_interval_prints_no_range(capsys):
+    """AQLI publishes no interval. With a fixed change it has one value, not '438,000 to 438,000'."""
+    args = [str(IV / "november_only_delhi.toml"), "--n", "300", "--curves", "aqli,gemm_ncd_lri"]
+    assert cli.main(["run", *args]) == 0
+    out = capsys.readouterr().out
+    line = next(ln for ln in out.splitlines() if ln.startswith("aqli *"))
+    assert line.count("(no published interval)") == 3 and " to " not in line
+    assert " to " in next(ln for ln in out.splitlines() if ln.startswith("gemm_ncd_lri"))
+    import json
+    assert cli.main(["--json", "run", *args]) == 0
+    result = json.loads(capsys.readouterr().out)
+    aqli, gemm = _row(result, "aqli"), _row(result, "gemm_ncd_lri")
+    assert (aqli["interval"], gemm["interval"]) == ("none", "published")
+    for key in ("life_years", "deaths_postponed", "e0_change_years"):
+        assert aqli[key]["p5"] is None and aqli[key]["p95"] is None and aqli[key]["median"] > 0
+        assert gemm[key]["p5"] < gemm[key]["median"] < gemm[key]["p95"]
+
+
+def test_sampled_change_gives_a_range_labelled_partial():
+    iv = nov(change_kind="delta", monthly=None,
+             change=Dist.parse({"dist": "uniform", "p5": -10, "p95": -2}, "change.delta"))
+    result = simulate.run(iv, n=N, curves=["aqli", "gemm_ncd_lri"])
+    rows = {r["curve"]: r for r in report.run_rows(result)}
+    assert rows["aqli"]["interval"] == "pm25_change_only"
+    assert rows["aqli"]["life_years"]["p5"] < rows["aqli"]["life_years"]["p95"]
+    text = report.run_table(result)
+    line = next(ln for ln in text.splitlines() if ln.startswith("aqli *"))
+    assert line.count("PM2.5 change only") == 3
+    assert "PM2.5 change only" not in next(ln for ln in text.splitlines()
+                                           if ln.startswith("gemm_ncd_lri"))
+
+
+def test_fixed_cost_prints_one_value():
+    iv = fixed(-5, cost_once=Dist.fixed(1e9), cost_annual=Dist.fixed(0.0))
+    text = report.run_table(simulate.run(iv, n=N, curves=["gemm_ncd_lri"]))
+    cost = next(ln for ln in text.splitlines() if "Cost if it works" in ln)
+    assert " to " not in cost.split("Cost if it works")[1].split("prices")[0]
+
+
+# --- city population year, monthly_pct note (I4, M10) ----------------------------------------
+
+def test_city_run_names_its_population_year(tmp_path):
+    f = tmp_path / "city.toml"
+    f.write_text((IV / "delhi_100_to_80.toml").read_text().replace(
+        'places = ["Delhi"]', 'places = ["Bengaluru"]'))
+    result = simulate.run(intervention.load(f), map_name="cpcb", n=50, curves=["gemm_ncd_lri"])
+    assert result.population_year == 2011 and result.census_places == ("Bengaluru",)
+    assert "Census 2011" in report.run_footer(result)
+    assert report.run_json(result)["population_year"] == 2011
+    state = simulate.run(load("delhi_100_to_80"), n=50, curves=["gemm_ncd_lri"])
+    assert state.population_year == state.year and "Census" not in report.run_footer(state)
+
+
+def test_monthly_pct_prints_its_assumption(tmp_path):
+    f = tmp_path / "pct.toml"
+    text = (IV / "november_only_delhi.toml").read_text()
+    assert "monthly_delta" in text
+    import re
+    f.write_text(re.sub(r"monthly_delta\s*=\s*\[[^\]]*\]",
+                        "monthly_pct = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -30, 0]", text))
+    result = simulate.run(intervention.load(f), n=50, curves=["gemm_ncd_lri"])
+    assert "monthly_pct takes every month to be as polluted" in report.run_footer(result)
+    assert "monthly_pct" not in report.run_footer(simulate.run(nov(), n=50, curves=["gemm_ncd_lri"]))

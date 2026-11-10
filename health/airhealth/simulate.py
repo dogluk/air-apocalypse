@@ -35,7 +35,8 @@ from itertools import combinations
 
 import numpy as np
 
-from . import exposure, impact, intervention, report
+from . import curves as curves_
+from . import exposure, impact, intervention
 from . import lag as lags
 from .curves import Curve
 from .intervention import Intervention, Invalid
@@ -93,6 +94,8 @@ class Run:
     unavailable: dict[str, str]     # curves asked for that could not run, with why
     deaths_model: float = 0.0       # all-cause deaths a year before reconciliation to the SRS
     reconciliations: tuple = ()     # baseline.Reconciliation per state; empty for deaths="model"
+    population_year: int = 0        # the year the population is for (2011 if any place is a city)
+    census_places: tuple = ()       # the places whose population is the Census's, not the map year's
 
 
 def realised_shares(iv: Intervention) -> np.ndarray:
@@ -139,6 +142,8 @@ class _Steady:
     fallback: list[str]
     deaths_model: float
     reconciliations: tuple
+    population_year: int
+    census_places: tuple
 
 
 def _steady(iv: Intervention, curve: Curve, values: np.ndarray, map_name: str,
@@ -156,7 +161,9 @@ def _steady(iv: Intervention, curve: Curve, values: np.ndarray, map_name: str,
         population=float(pop.sum()), deaths_baseline=float(sum(r.deaths_baseline for r in parts)),
         year=parts[0].year, fallback=sorted({s for r in parts for s in r.fallback_states}),
         deaths_model=float(sum(r.deaths_model for r in parts)),
-        reconciliations=tuple(dict.fromkeys(x for r in parts for x in r.reconciliations)))
+        reconciliations=tuple(dict.fromkeys(x for r in parts for x in r.reconciliations)),
+        population_year=min(r.population_year for r in parts),
+        census_places=tuple(r.place.name for r in parts if r.population_year != r.year))
 
 
 def _var(x: np.ndarray) -> float:
@@ -176,7 +183,7 @@ def run(iv: Intervention, map_name: str = "aqli", curves: list[str] | None = Non
     if map_name not in exposure.MAPS:
         raise ValueError(f"unknown exposure map {map_name!r}; choose from {', '.join(exposure.MAPS)}")
     _check_places(iv.places, map_name)
-    chosen, unavailable = report.select_curves(curves)
+    chosen, unavailable = curves_.select(curves)
     if not chosen:
         raise ValueError("no curve can run: " + "; ".join(f"{k}: {v}" for k, v in unavailable.items()))
 
@@ -212,7 +219,8 @@ def run(iv: Intervention, map_name: str = "aqli", curves: list[str] | None = Non
                deaths_baseline=first.deaths_baseline, pm25_before=first.pm25_before,
                shares=shares, usd_per_unit=usd, fallback_states=first.fallback,
                unavailable=unavailable, deaths_model=first.deaths_model,
-               reconciliations=first.reconciliations)
+               reconciliations=first.reconciliations, population_year=first.population_year,
+               census_places=first.census_places)
 
 
 def across_curve_spread(run: Run) -> float:

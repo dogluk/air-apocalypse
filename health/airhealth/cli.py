@@ -9,7 +9,7 @@
 --deaths srs (the default) scales death counts to the SRS's own crude death rate for each
 state, 2020-24; --deaths model leaves them as projected population × life-table death rates.
 Life expectancy is the same either way. The last line of every result says which was used.
---json (anywhere) prints the same content as JSON. A city's map defaults to cpcb when the city
+--json (anywhere) prints the same content as JSON; --debug shows the traceback of an error. A city's map defaults to cpcb when the city
 has ground-monitor data, everything else to aqli; the map used is named on the last line. An
 intervention file's map defaults to cpcb when every place in it is such a city, else aqli.
 """
@@ -44,7 +44,7 @@ def _default_map(place: places.Place) -> str:
 
 def _curves(spec: str | None):
     names = [n.strip() for n in spec.split(",") if n.strip()] if spec else None
-    run, unavailable = report.select_curves(names)
+    run, unavailable = curves.select(names)
     if not run:
         raise ValueError("no curve can run: " + "; ".join(f"{n}: {why}" for n, why in unavailable.items()))
     return run, unavailable
@@ -62,6 +62,9 @@ def cmd_compare(args) -> None:
     place = _place(args)
     map_name = args.map or _default_map(place)
     run, unavailable = _curves(args.curves)
+    for flag, value in (("--to", args.to), ("--from", args.from_)):
+        if value is not None and value < 0:
+            raise ValueError(f"{flag}: a concentration cannot be below 0 µg/m³, got {value:g}")
     notes = []
     if args.from_ is None:
         level = exposure.mean(place, map_name, args.year)
@@ -149,7 +152,7 @@ def cmd_run(args) -> None:
 def _list_rows(what: str) -> list[dict]:
     sources = provenance.load_sources()
     if what == "curves":
-        run, unavailable = report.select_curves()
+        run, unavailable = curves.select()
         rows = [dict(name=c.name, available="yes", label=c.label, source=c.source) for c in run]
         cat = curves.catalogue().set_index("name")
         rows += [dict(name=n, available=f"no: {why}", label=cat.label[n], source=cat.source[n])
@@ -161,6 +164,10 @@ def _list_rows(what: str) -> list[dict]:
             s = sources[f"exposure_{m}.csv"]
             years = sorted(exposure._table(m).year.unique())
             span = f"{years[0]}-{years[-1]}" if len(years) > 1 else str(years[0])
+            usable = [y for y in years if y in baseline.projection_years()]
+            if usable != years:     # results need a population, and the projections start in 2011
+                span += (f"; results {usable[0]}-{usable[-1]} (the population projections "
+                         f"start in {usable[0]}); earlier years for charts only")
             rows.append(dict(name=m, years=span, label=exposure.LABELS[m],
                              source=f"{s['source']} {s['url']}"))
         return rows
@@ -192,6 +199,8 @@ def _parser() -> argparse.ArgumentParser:
     shared = argparse.ArgumentParser(add_help=False)
     shared.add_argument("--json", action="store_true", default=argparse.SUPPRESS,
                         help="print the same content as JSON")
+    shared.add_argument("--debug", action="store_true", default=argparse.SUPPRESS,
+                        help="on an error, show the full traceback instead of one line")
     p = argparse.ArgumentParser(prog="airhealth", parents=[shared],
                                 description="Health effects of air pollution in India.")
     sub = p.add_subparsers(dest="command", required=True)
@@ -257,6 +266,8 @@ def main(argv: list[str] | None = None) -> int:
     try:
         args.func(args)
     except (KeyError, ValueError, curves.Unavailable, NotImplementedError) as e:
+        if getattr(args, "debug", False):
+            raise
         msg = e.args[0] if e.args else str(e)
         print(f"airhealth: {msg}", file=sys.stderr)
         return 1

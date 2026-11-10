@@ -299,6 +299,25 @@ def get(name: str) -> Curve:
     raise KeyError(f"unknown curve {name!r}; choose from {', '.join([*curves, *IHME])}")
 
 
+IHME_REASON = "need IHME files in health/data_local/ (see health/IHME_DOWNLOADS.md)"
+NOT_BUILT = "IHME files present, but the curve is not built yet"
+
+
+def select(names: list[str] | None = None) -> tuple[list[Curve], dict[str, str]]:
+    """The curves that can run, and the reason each of the rest cannot. names=None means
+    every registered curve. An unknown name raises KeyError."""
+    names = names or [*(c.name for c in available()), *IHME]
+    run, unavailable = [], {}
+    for name in dict.fromkeys(names):
+        try:
+            run.append(get(name))
+        except Unavailable:
+            unavailable[name] = IHME_REASON
+        except NotImplementedError:
+            unavailable[name] = NOT_BUILT
+    return run, unavailable
+
+
 def available() -> list[Curve]:
     """Curves that run now: the open tier (the IHME tier is not implemented yet)."""
     return list(_open().values())

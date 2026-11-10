@@ -14,29 +14,13 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from . import baseline, curves, exposure
-from .curves import Curve, Unavailable
+from .curves import IHME_REASON, NOT_BUILT  # noqa: F401  (re-exported for callers)
 from .impact import Impact
 
 if TYPE_CHECKING:
     from .simulate import Run
 
-IHME_REASON = "need IHME files in health/data_local/ (see health/IHME_DOWNLOADS.md)"
-NOT_BUILT = "IHME files present, but the curve is not built yet"
-
-
-def select_curves(names: list[str] | None = None) -> tuple[list[Curve], dict[str, str]]:
-    """The curves that can run, and the reason each of the rest cannot. names=None means
-    every registered curve. An unknown name raises KeyError."""
-    names = names or [*(c.name for c in curves.available()), *curves.IHME]
-    run, unavailable = [], {}
-    for name in dict.fromkeys(names):
-        try:
-            run.append(curves.get(name))
-        except Unavailable:
-            unavailable[name] = IHME_REASON
-        except NotImplementedError:
-            unavailable[name] = NOT_BUILT
-    return run, unavailable
+select_curves = curves.select     # the selection lives with the curves; kept here by name
 
 
 def place_label(impact: Impact) -> str:
@@ -51,7 +35,21 @@ def _row(i: Impact) -> dict:
         share_of_deaths_averted=i.deaths_averted / i.deaths_baseline,
         deaths_averted=i.deaths_averted, life_expectancy_gain=i.e0_after - i.e0_before,
         e0_before=i.e0_before, e0_after=i.e0_after, life_years_averted=i.yll_averted,
-        deaths_derived=i.derived)
+        deaths_derived=i.derived, floor=i.curve.floor, below_floor=_below_floor(i))
+
+
+def _below_floor(i: Impact) -> bool:
+    """Part of the move lies below the curve's floor, where it counts no further benefit."""
+    return min(i.pm25_before, i.pm25_after) < i.curve.floor - 1e-9
+
+
+def population_note(population_year: int, year: int, places: list[str]) -> str | None:
+    """Cities carry their Census population in every year; say so when that is in use."""
+    if population_year == year:
+        return None
+    return (f"Population of {', '.join(places)}: Census {population_year} urban agglomeration, "
+            f"not updated to {year}; deaths and life-years are low by however much the city "
+            f"has grown since")
 
 
 def deaths_note(recs, deaths: float, deaths_model: float) -> str:
@@ -74,7 +72,9 @@ def _auto_notes(impacts: list[Impact]) -> list[str]:
     if not impacts:
         return []
     i = impacts[0]
-    return [deaths_note(i.reconciliations, i.deaths_baseline, i.deaths_model)]
+    notes = [population_note(i.population_year, i.year, [i.place.name]),
+             deaths_note(i.reconciliations, i.deaths_baseline, i.deaths_model)]
+    return [n for n in notes if n]
 
 
 def footer(impacts: list[Impact], unavailable: dict[str, str] | None = None,
@@ -116,7 +116,7 @@ def table(impacts: list[Impact], unavailable: dict[str, str] | None = None,
     head = ("curve", "PM2.5 µg/m³", "% of deaths", "deaths/yr", "life exp. yrs", "life-years/yr")
     rows = []
     for i in impacts:
-        name = i.curve.name + (" *" if i.derived else "")
+        name = i.curve.name + (" *" if i.derived else "") + (" †" if _below_floor(i) else "")
         rows.append((name, f"{i.pm25_before:.1f} → {i.pm25_after:.1f}",
                      f"{100 * i.deaths_averted / i.deaths_baseline:.1f}%",
                      f"{i.deaths_averted:,.0f}", f"{i.e0_after - i.e0_before:+.2f}",
@@ -128,6 +128,11 @@ def table(impacts: list[Impact], unavailable: dict[str, str] | None = None,
     lines += [f"  {i.curve.name}: {i.curve.label}" for i in impacts]
     if any(i.derived for i in impacts):
         lines.append("  * deaths derived from the life-expectancy change, not a relative risk")
+    low = [i for i in impacts if _below_floor(i)]
+    if low:
+        lines.append("  † part of this move is below the curve's floor, where the curve counts no "
+                     "further benefit (floor, µg/m³: "
+                     + ", ".join(f"{i.curve.name} {i.curve.floor:g}" for i in low) + ")")
     lines += ["", footer(impacts, unavailable, notes)]
     return "\n".join(lines)
 
@@ -141,6 +146,7 @@ def to_json(impacts: list[Impact], unavailable: dict[str, str] | None = None,
         heading=heading or (place_label(first) if first else ""),
         place=dict(name=first.place.name, kind=first.place.kind, state=first.place.state) if first else None,
         population=first.population if first else None,
+        population_year=first.population_year if first else None,
         deaths_baseline=first.deaths_baseline if first else None,
         deaths_basis=("srs" if first.reconciliations else "model") if first else None,
         deaths_unscaled=first.deaths_model if first else None,
@@ -179,8 +185,30 @@ def _usd(x: float) -> str:
     return f"{sign}${_sig(a)}"
 
 
-def _range(d: dict, fmt=_sig) -> str:
-    return f"{fmt(d['median'])} ({fmt(d['p5'])} to {fmt(d['p95'])})"
+PM25_ONLY = "PM2.5 change only"
+
+
+def _range(d: dict, fmt=_sig, interval: str = "published") -> str:
+    """median (5-95% range). A curve with no published interval has no range of its own:
+    with a fixed PM2.5 change the value stands alone, and with a sampled one the range is
+    labelled as covering the PM2.5 change only. A zero-width range is never printed."""
+    if interval == "none" or d["p5"] == d["p95"]:
+        return fmt(d["median"]) + (f" ({NO_INTERVAL})" if interval == "none" else "")
+    tail = f"; {PM25_ONLY}" if interval == "pm25_change_only" else ""
+    return f"{fmt(d['median'])} ({fmt(d['p5'])} to {fmt(d['p95'])}{tail})"
+
+
+def _interval(r) -> str:
+    """published: the curve's own uncertainty is in the range. pm25_change_only: the curve
+    publishes no interval, so the range reflects the sampled PM2.5 change alone. none: no
+    published interval and a fixed change, so there is no range at all."""
+    if r.widths["curve_parameters"] > 0 or r.spread["curve_parameters"] > 0:
+        return "published"
+    return "pm25_change_only" if r.widths["pm25_change"] > 0 else "none"
+
+
+def _without_range(d: dict) -> dict:
+    return dict(d, p5=None, p95=None)
 
 
 def _dist_text(d, unit: str) -> str:
@@ -224,9 +252,13 @@ def run_rows(run: Run) -> list[dict]:
     rows = []
     for name, r in run.per_curve.items():
         s = r.summary()
+        interval = _interval(r)
+        if interval == "none":      # no range to report: p5 and p95 are null, not the median
+            for key in ("life_years", "deaths_postponed", "e0_change_years"):
+                s[key] = _without_range(s[key])
         rows.append(dict(
             curve=name, label=r.curve.label, deaths_derived=r.curve.kind == "life_expectancy",
-            published_interval=r.widths["curve_parameters"] > 0 or r.spread["curve_parameters"] > 0,
+            published_interval=interval == "published", interval=interval,
             life_years=s["life_years"], deaths_postponed=s["deaths_postponed"],
             e0_change_years=s["e0_change_years"], cost_usd=s["cost_usd"],
             expected_life_years=s["expected_life_years"], expected_cost_usd=s["expected_cost_usd"],
@@ -265,7 +297,14 @@ def run_footer(run: Run) -> str:
     notes = ["Life-years = deaths postponed by age × remaining life expectancy at the age of "
              "death, at the map year's population and age structure, summed over the "
              "intervention's years",
+             population_note(run.population_year, run.year, run.census_places),
              deaths_note(run.reconciliations, run.deaths_baseline, run.deaths_model)]
+    iv = run.intervention
+    if iv.monthly is not None and iv.change_kind == "pct":
+        notes.insert(0, "monthly_pct takes every month to be as polluted as the annual mean; "
+                     "where the months cut are dirtier than average (a north Indian winter) "
+                     "the annual change, and so every result here, is understated")
+    notes = [n for n in notes if n]
     return _footer({(run.map_name, run.year): None}, run.fallback_states, run.unavailable, notes)
 
 
@@ -278,8 +317,10 @@ def run_table(run: Run) -> str:
     lines = [*_run_heading(run), "",
              "If it works, totals over the run (median, 5-95% range):"]
     lines += _columns(("curve", "life-years", "deaths postponed", "life exp. at full effect, yrs"),
-                      [(star(r), _range(r["life_years"]), _range(r["deaths_postponed"]),
-                        _range(r["e0_change_years"], lambda v: f"{v:+.2f}")) for r in rows])
+                      [(star(r), _range(r["life_years"], interval=r["interval"]),
+                        _range(r["deaths_postponed"], interval=r["interval"]),
+                        _range(r["e0_change_years"], lambda v: f"{v:+.2f}", r["interval"]))
+                       for r in rows])
 
     cost = rows[0]["cost_usd"]
     lines += ["", f"Expected = mean if it works × probability it works "
@@ -325,6 +366,7 @@ def run_json(run: Run) -> dict:
         population=run.population, deaths_baseline=run.deaths_baseline,
         deaths_basis="srs" if run.reconciliations else "model",
         deaths_unscaled=run.deaths_model, death_scaling=_scaling_json(run.reconciliations),
+        population_year=run.population_year,
         start_year=iv.start_year, duration_years=iv.duration_years, ramp_years=iv.ramp_years,
         lag=iv.lag, realised_share_by_year=[float(x) for x in run.shares],
         cost_currency=iv.cost_currency, cost_year=iv.cost_year, usd_per_unit=run.usd_per_unit,

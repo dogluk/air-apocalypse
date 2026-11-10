@@ -197,7 +197,7 @@ def _run_text(run) -> tuple[str, str]:
 def results_chart(run, path: Path) -> Path:
     """Life-years over the run if the intervention works: a bar per curve at the median,
     a line over its 5-95% range."""
-    from .report import _sig
+    from .report import NO_INTERVAL, PM25_ONLY, _interval, _sig
     rows = list(run.per_curve.values())[::-1]            # first curve on top
     med = np.array([np.median(r.life_years) for r in rows])
     lo = np.array([np.percentile(r.life_years, 5) for r in rows])
@@ -208,16 +208,18 @@ def results_chart(run, path: Path) -> Path:
     with plt.rc_context(STYLE):
         fig, ax = _frame(len(rows), foot)
         ax.barh(y, med, height=0.5, color=SERIES[0], lw=0, zorder=2)
-        ax.hlines(y, lo, hi, color=INK, lw=1.5, zorder=3)
+        ranged = hi > lo                                 # no whisker where there is no range
+        ax.hlines(y[ranged], lo[ranged], hi[ranged], color=INK, lw=1.5, zorder=3)
         for k in (lo, hi):
-            ax.plot(k, y, "|", color=INK, ms=10, mew=1.5, zorder=3)
+            ax.plot(k[ranged], y[ranged], "|", color=INK, ms=10, mew=1.5, zorder=3)
         span = max(hi.max(), 0) - min(lo.min(), 0) or 1.0
         for yy, m, h, l, r in zip(y, med, hi, lo, rows):
             x, ha = (h + span * 0.015, "left") if m >= 0 else (l - span * 0.015, "right")
-            fixed = h == l and r.curve.kind == "life_expectancy"
-            ax.text(x, yy, _sig(m) + ("  (no published interval)" if fixed else ""), va="center", ha=ha, fontsize=10.5, color=INK,
+            tail = {"none": f"  ({NO_INTERVAL})", "pm25_change_only": f"  ({PM25_ONLY})",
+                    "published": ""}[_interval(r)]
+            ax.text(x, yy, _sig(m) + tail, va="center", ha=ha, fontsize=10.5, color=INK,
                     fontproperties=SANS_B)
-        ax.set_xlim(min(lo.min(), 0) - span * 0.04, max(hi.max(), 0) + span * 0.14)
+        ax.set_xlim(min(lo.min(), 0) - span * 0.04, max(hi.max(), 0) + span * 0.3)
         ax.axvline(0, color=MUTED, lw=1, zorder=1)
         ax.set_yticks(y, [_label(r.curve) for r in rows], fontproperties=SANS, fontsize=11,
                       color=INK)
