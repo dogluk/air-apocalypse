@@ -12,7 +12,7 @@ from airhealth.impact import Change, Impact, steady_state
 HERE = Path(__file__).resolve().parent
 CASES = HERE / "cases.toml"
 README = HERE / "README.md"
-DEFAULT_TOLERANCE = 0.15
+DEFAULT_EXPECTED = 1.0
 
 MEASURES = {
     "share": lambda i: i.deaths_averted / i.deaths_baseline,
@@ -43,8 +43,13 @@ def evaluate(case: dict) -> dict:
                 case.get("pm25_override"))
     ours = MEASURES[case["measures"]](i)
     ratio = ours / case["published"]
-    return dict(case, ours=ours, ratio=ratio, within=abs(ratio - 1) <= case["tolerance"],
-                pm25=i.pm25_before)
+    expected = case.get("expected_ratio", DEFAULT_EXPECTED)
+    return dict(case, ours=ours, ratio=ratio, expected_ratio=expected,
+                within=abs(ratio / expected - 1) <= case["tolerance"], pm25=i.pm25_before)
+
+
+def band(r: dict) -> str:
+    return f"{r['expected_ratio']:.3g} ±{r['tolerance']:.0%}"
 
 
 def configuration(r: dict) -> str:
@@ -55,9 +60,9 @@ def configuration(r: dict) -> str:
 
 
 def table(results: list[dict]) -> str:
-    head = ("case", "published", "ours", "ratio", "tolerance", "")
+    head = ("case", "published", "ours", "ratio", "expected", "")
     rows = [(r["id"], FORMATS[r["measures"]](r["published"]), FORMATS[r["measures"]](r["ours"]),
-             f"{r['ratio']:.3f}", f"±{r['tolerance']:.0%}", "ok" if r["within"] else "OUTSIDE")
+             f"{r['ratio']:.3f}", band(r), "ok" if r["within"] else "OUTSIDE")
             for r in results]
     w = [max(len(x[k]) for x in [head, *rows]) for k in range(len(head))]
     return "\n".join("  ".join(x[k].ljust(w[k]) if k == 0 else x[k].rjust(w[k]) for k in range(len(x)))
@@ -71,14 +76,16 @@ def readme(results: list[dict]) -> str:
            "Each case runs this tool with the curve, counterfactual and year of a published "
            "estimate, on the exposure map closest to the paper's, and compares the result with "
            "the published figure. Where they differ, the reason is written down; nothing is "
-           "tuned to close a gap. Ratio is ours divided by published; a case passes when the "
-           "ratio is within its tolerance of 1.", "",
-           "| Case | Measures | Published | Ours | Ratio | Tolerance |",
+           "tuned to close a gap. Ratio is ours divided by published. Each case states the "
+           "ratio it expects, worked out from the known differences in inputs and not from the "
+           "result, and passes when the ratio is within a narrow band of that expectation: a "
+           "case expected at 0.67 fails at 1.0.", "",
+           "| Case | Measures | Published | Ours | Ratio | Expected |",
            "|---|---|---|---|---|---|"]
     for r in results:
         out.append(f"| {r['id']} | {r['measures']} | {FORMATS[r['measures']](r['published'])} | "
                    f"{FORMATS[r['measures']](r['ours'])} | {r['ratio']:.3f} | "
-                   f"±{r['tolerance']:.0%}{'' if r['within'] else ' (outside)'} |")
+                   f"{band(r)}{'' if r['within'] else ' (outside)'} |")
     out += ["", "## Why they differ", "",
             "One paragraph per case. The full notes, with quotations from each source, are in "
             "`cases.toml` (`why_different`).", ""]
@@ -87,8 +94,10 @@ def readme(results: list[dict]) -> str:
                 f"**Published:** {r['published_text']}. Source: <{r['source_url']}>, {r['locator']}", "",
                 f"**Ours:** {FORMATS[r['measures']](r['ours'])}, from {configuration(r)}.", "",
                 r["in_short"], ""]
-        if r.get("tolerance_why"):
-            out += [f"**Tolerance ±{r['tolerance']:.0%}:** " + " ".join(r["tolerance_why"].split()), ""]
+        if r.get("expected_why"):
+            out += [f"**Expected ratio {r['expected_ratio']:.3g}:** "
+                    + " ".join(r["expected_why"].split()), ""]
+        out += [f"**Band ±{r['tolerance']:.0%}:** " + " ".join(r["band_why"].split()), ""]
     return "\n".join(out)
 
 
@@ -99,7 +108,7 @@ def main() -> int:
     print(f"\nwrote {README}")
     for r in results:
         if not r["within"]:
-            print(f"{r['id']} is outside its tolerance.")
+            print(f"{r['id']} is outside its band.")
     return 0 if all(r["within"] for r in results) else 1
 
 
