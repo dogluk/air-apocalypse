@@ -45,6 +45,13 @@ MID_YEAR = sum(LIFE_TABLE_PERIOD) // 2
 PERIOD_TEXT = f"{LIFE_TABLE_PERIOD[0]}-{LIFE_TABLE_PERIOD[1] % 100}"
 DEATHS_BASES = ("srs", "model")   # reconciled to the SRS crude death rate, or not
 RECONCILE_FROM_AGE = 45           # where the diagnosis puts the excess (see module docstring)
+RECONCILE_SOURCE = (
+    "This project's comparison of modelled deaths by age with the SRS's own age-specific death "
+    "rates and population age distribution, 2020-2024 (data/srs_age_specific_death_rates.csv, "
+    "data/srs_population_age_pct.csv; tests/test_baseline.py): in India and all 22 states with "
+    "a life table the excess over the SRS crude death rate is at ages 45 and over. SRS "
+    "Statistical Reports, https://censusindia.gov.in/nada/index.php/catalog/46172"
+)
 
 
 @dataclass(frozen=True)

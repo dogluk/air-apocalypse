@@ -177,3 +177,11 @@ def test_debug_shows_the_traceback(capsys):
         cli.main(["--debug", "compare", "Dehli", "--to", "80"])
     capsys.readouterr()
     assert cli.main(["compare", "Dehli", "--to", "80"]) == 1
+
+
+def test_curve_chart_labels_say_what_each_line_is_the_risk_of():
+    by_name = {c.name: c for c in curves.available()}
+    assert charts.line_label(by_name["gemm_ncd_lri"]) == "GEMM NCD+LRI: NCD+LRI deaths only"
+    assert charts.line_label(by_name["loglinear_jaganathan"]) == "Jaganathan 2024: all deaths"
+    assert charts.age_band(60) == "ages 60-64" and charts.age_band(62) == "ages 60-64"
+    assert charts.age_band(85) == "ages 85 and over" and charts.age_band(0) == "ages 0-0"

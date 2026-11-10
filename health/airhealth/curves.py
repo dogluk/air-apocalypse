@@ -18,9 +18,14 @@ death rates, because AQLI's estimate is all-age life expectancy. A curve's floor
 concentration below which no further benefit is assumed: rr(c) compares max(c, floor) with
 the floor itself.
 
-Uncertainty (sample): a log-linear slope is drawn as Normal(pct_per_10, se_pct_per_10).
-Where a paper prints a 95% interval rather than a standard error, se = (upper - lower) /
-(2 × 1.959964), with both bounds first put on the per-10 µg/m³ percent scale. GEMM draws
+Uncertainty (sample): a log-linear slope is drawn on the scale the interval was estimated
+on, the log of the relative risk: ln RR per 10 µg/m³ ~ Normal(ln(1 + pct_per_10/100),
+se_log_per_10), with se_log_per_10 = (ln upper − ln lower) / (2 × 1.959964) from the printed
+95% interval, both bounds first put on the per-10 µg/m³ scale. The draw is not truncated at
+zero: where an interval reaches a relative risk of 1.00 (Brown 2022: 1.01, 1.00 to 1.03),
+about one draw in eleven has a negative slope, cleaner air raising deaths, and is kept as
+drawn, because cutting those draws off would move the mean above the published estimate.
+se_pct_per_10 is the same interval on the percent scale, kept for reference. GEMM draws
 theta_age + se_age × Z with one Z shared by all ages (the authors' calculator moves every
 age together, theta ± 2 se). AQLI publishes no interval, so its sample() is the curve
 unchanged.
@@ -138,16 +143,22 @@ class Curve:
 
 @dataclass(frozen=True, init=False)
 class LogLinear(Curve):
-    """rr = exp(beta · (c − floor)), beta = ln(1 + pct/100) / 10."""
+    """rr = exp(beta · (c − floor)), beta = ln(1 + pct/100) / 10. se_log_per_10 is the
+    standard error of ln RR per 10 µg/m³, the scale sample() draws on; if not given it is
+    taken from se_pct_per_10 (se_pct / (100 + pct))."""
     pct_per_10: float = 0.0
     se_pct_per_10: float = 0.0
+    se_log_per_10: float = 0.0
 
     def __init__(self, name: str, pct_per_10: float, se_pct_per_10: float, floor: float,
                  label: str = "", source: str = "", death_scope: str = "all",
-                 min_age: int = ADULT_FROM):
+                 min_age: int = ADULT_FROM, se_log_per_10: float | None = None):
+        if se_log_per_10 is None:
+            se_log_per_10 = float(se_pct_per_10) / (100 + float(pct_per_10))
         _set(self, name=name, label=label or name, kind="relative_risk", floor=float(floor),
              death_scope=death_scope, source=source, min_age=int(min_age),
-             pct_per_10=float(pct_per_10), se_pct_per_10=float(se_pct_per_10))
+             pct_per_10=float(pct_per_10), se_pct_per_10=float(se_pct_per_10),
+             se_log_per_10=float(se_log_per_10))
 
     @property
     def beta(self) -> float:
@@ -156,11 +167,16 @@ class LogLinear(Curve):
     def _log_h(self, c, age):
         return self.beta * c
 
+    def _draw_pct(self, rng, size=None):
+        """pct_per_10 for draws of ln RR per 10 ~ Normal; not truncated (module docstring)."""
+        log_rr = rng.normal(np.log1p(self.pct_per_10 / 100), self.se_log_per_10, size)
+        return np.expm1(log_rr) * 100
+
     def sample(self, rng):
-        return _evolve(self, pct_per_10=float(rng.normal(self.pct_per_10, self.se_pct_per_10)))
+        return _evolve(self, pct_per_10=float(self._draw_pct(rng)))
 
     def sample_many(self, rng, n):
-        return _evolve(self, pct_per_10=rng.normal(self.pct_per_10, self.se_pct_per_10, (n, 1)))
+        return _evolve(self, pct_per_10=self._draw_pct(rng, (n, 1)))
 
 
 @dataclass(frozen=True, init=False)
@@ -267,8 +283,10 @@ def _loglinear() -> dict[str, LogLinear]:
     out = {}
     for r in t.itertuples():
         pct, lo, hi = (_pct_per_10(v, r.scale, r.per_ugm3) for v in (r.estimate, r.lower, r.upper))
+        se_log = (np.log1p(hi / 100) - np.log1p(lo / 100)) / (2 * Z95)
         out[r.name] = LogLinear(r.name, pct, (hi - lo) / (2 * Z95), r.floor, label=r.label,
-                                source=f"{r.source}. {r.url}", min_age=r.min_age)
+                                source=f"{r.source}. {r.url}", min_age=r.min_age,
+                                se_log_per_10=se_log)
     return out
 
 

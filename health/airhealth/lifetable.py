@@ -28,6 +28,14 @@ from scipy.optimize import brentq
 
 from .ages import ADULT_FROM, AGE_STARTS
 
+# The SRS's infant convention a0 = A0_INTERCEPT + A0_SLOPE · q0 (module docstring).
+A0_INTERCEPT, A0_SLOPE = 0.0425, 2.875
+A0_SOURCE = (
+    "Fitted by this project to the printed columns of all 23 SRS Abridged Life Tables 2020-24 "
+    "(a0 = (L0 − l1) / d0 against q0, within 0.0005; data/lifetables_srs.csv). The report says "
+    "only that MORTPAK 4 was used. https://censusindia.gov.in/nada/index.php/catalog/47148"
+)
+
 STARTS = np.array(AGE_STARTS, dtype=float)
 WIDTHS = np.append(np.diff(STARTS), np.inf)
 
@@ -42,11 +50,11 @@ class LifeTable:
 
 
 def _infant_a0(m0: float | np.ndarray) -> float | np.ndarray:
-    """Solve a0 = 0.0425 + 2.875·q0 with q0 = m0 / (1 + (1 − a0)·m0)."""
+    """Solve a0 = A0_INTERCEPT + A0_SLOPE·q0 with q0 = m0 / (1 + (1 − a0)·m0)."""
     a0 = 0.1
     for _ in range(20):
         q0 = m0 / (1 + (1 - a0) * m0)
-        a0 = 0.0425 + 2.875 * q0
+        a0 = A0_INTERCEPT + A0_SLOPE * q0
     return a0
 
 

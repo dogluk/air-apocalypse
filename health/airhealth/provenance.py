@@ -1,4 +1,5 @@
-"""Every data file must have a sources.toml entry with full provenance."""
+"""Every data file must have a sources.toml entry with full provenance, and every number
+written into the code instead of a data file must be listed in constants() with its source."""
 import tomllib
 from pathlib import Path
 
@@ -32,4 +33,34 @@ def check(data_dir: Path | None = None, sources_path: Path | None = None) -> lis
             problems.append(f"{name}: method must be one of {METHODS}, got {method!r}")
         if method == "derived" and not entry.get("script"):
             problems.append(f"{name}: derived table needs script")
+    if data_dir == paths.DATA:
+        problems += check_constants()
     return problems
+
+
+def constants() -> list[dict]:
+    """The sourced numbers that live in code, not in data/: name, value, source."""
+    from . import baseline, curves, lag, lifetable
+    aqli = curves.AQLILinear()
+    return [
+        dict(name="AQLI: years of life expectancy per 10 µg/m³", value=aqli.years_per_10,
+             source=curves.AQLI_SOURCE),
+        dict(name="AQLI: floor (WHO guideline), µg/m³", value=aqli.floor, source=curves.AQLI_SOURCE),
+        dict(name="GEMM: counterfactual, µg/m³", value=curves.GEMM_CF, source=curves.GEMM_SOURCE),
+        dict(name="Highest long-term exposure in a cohort behind GEMM, µg/m³",
+             value=curves.MAX_COHORT_PM25, source=curves.MAX_COHORT_PM25_SOURCE),
+        dict(name="EPA 20-year cessation lag: shares in year 1, years 2-5, years 6-20",
+             value=(float(lag._EPA20[0]), float(lag._EPA20[1:5].sum()), float(lag._EPA20[5:].sum())),
+             source=lag.EPA_SOURCE),
+        dict(name="Infant a0 = intercept + slope × q0",
+             value=(lifetable.A0_INTERCEPT, lifetable.A0_SLOPE), source=lifetable.A0_SOURCE),
+        dict(name="Age from which deaths are scaled to the SRS crude death rate",
+             value=baseline.RECONCILE_FROM_AGE, source=baseline.RECONCILE_SOURCE),
+    ]
+
+
+def check_constants() -> list[str]:
+    """Problems with the constants' sources; an empty list means every one names a source
+    with a link."""
+    return [f"{c['name']}: source missing or without a link" for c in constants()
+            if "http" not in (c.get("source") or "")]

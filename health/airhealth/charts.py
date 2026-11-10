@@ -14,7 +14,8 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 from matplotlib import font_manager as fm  # noqa: E402
 
-from . import paths  # noqa: E402
+from . import baseline, paths  # noqa: E402
+from .ages import AGE_STARTS  # noqa: E402
 from .curves import MAX_COHORT_PM25, Curve  # noqa: E402
 
 INK, INK2, MUTED, GRID, BG = "#0b0b0b", "#52514e", "#8a8984", "#e6e5e1", "#fcfcfb"
@@ -28,6 +29,21 @@ CITE = {"loglinear_jaganathan": "Jaganathan et al. 2024, Lancet Planet Health",
         "loglinear_brown": "Brown et al. 2022, Environ Health Perspect",
         "loglinear_vodonos": "Vodonos et al. 2018, Environ Res",
         "gemm_ncd_lri": "Burnett et al. 2018, PNAS (GEMM)"}
+
+# What each line is the risk of: a relative risk applies to the deaths its curve covers.
+COVERS = {"all": "all deaths", "ncd_lri": "NCD+LRI deaths only"}
+
+
+def age_band(age: int) -> str:
+    """The band an age falls in, as text: 60 -> 'ages 60-64', 85 -> 'ages 85 and over'."""
+    start = max(a for a in AGE_STARTS if a <= age)
+    later = [a for a in AGE_STARTS if a > start]
+    return f"ages {start}-{later[0] - 1}" if later else f"ages {start} and over"
+
+
+def line_label(c: Curve) -> str:
+    return f"{SHORT.get(c.name, c.name)}: {COVERS[c.death_scope]}"
+
 
 logging.getLogger("matplotlib.font_manager").setLevel(logging.ERROR)  # DejaVu has no semibold
 for _f in paths.FONTS.glob("*.ttf"):
@@ -53,9 +69,12 @@ def _spread(ys: list[float], gap: float) -> list[float]:
 
 def curves_chart(curves: list[Curve], marks: dict[str, float], path: Path, age: int = 60,
                  note: str = "") -> Path:
-    """Relative risk of death against annual-mean PM2.5 (0-150 µg/m³), one line per curve, at the
-    age band starting at `age`, each against its own floor. Places in `marks` are drawn at their
-    concentration. Curves without a relative risk (AQLI) are named in the subtitle, not drawn."""
+    """Relative risk against annual-mean PM2.5 (0-150 µg/m³), one line per curve, for the age
+    band holding `age`, each against its own floor. A line is the risk of the deaths its curve
+    covers, and its label says which: all deaths, or NCD+LRI deaths only (GEMM), so the lines
+    are not on one scale of "the death rate"; the subtitle gives GEMM's level in all-death
+    terms at the highest marked place. Places in `marks` are drawn at their concentration.
+    Curves without a relative risk (AQLI) are named in the subtitle, not drawn."""
     drawn = [c for c in curves if c.kind == "relative_risk"]
     skipped = [c for c in curves if c.kind != "relative_risk"]
     x = np.linspace(0, 150, 601)
@@ -69,7 +88,7 @@ def curves_chart(curves: list[Curve], marks: dict[str, float], path: Path, age: 
             colour = SERIES[k % len(SERIES)]
             y = np.asarray(c.rr(x, age), dtype=float)
             ax.plot(x, y, color=colour, lw=2, solid_capstyle="round", zorder=3,
-                    label=SHORT.get(c.name, c.name))
+                    label=line_label(c))
             ends.append((y[-1], SHORT.get(c.name, c.name), colour))
         top = max(e[0] for e in ends) if ends else 2.0
         ax.set_ylim(0.9, top * 1.08)
@@ -101,26 +120,37 @@ def curves_chart(curves: list[Curve], marks: dict[str, float], path: Path, age: 
         ax.tick_params(length=0)
         ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda v, _: f"{v:.1f}×"))
         ax.set_xlabel("Annual-mean PM2.5, µg/m³")
-        ax.set_ylabel(f"Death rate at age {age}+, × the rate at the floor")
+        ax.set_ylabel(f"Relative risk, {age_band(age)}: × the risk at the curve's floor")
         fig.legend(loc="upper left", bbox_to_anchor=(0.064, 0.845), ncol=len(drawn) or 1,
                    frameon=False, labelcolor=INK2, handlelength=1.6,
                    prop=fm.FontProperties(family=SANS_FAMILY, size=10))
 
+        band_index = max(k for k, a in enumerate(AGE_STARTS) if a <= age)
+        share = float(baseline._share_ncd_lri()[band_index])     # NCD+LRI share of deaths, this band
+        partial = [d for d in drawn if d.death_scope == "ncd_lri"]
         if marks and drawn:
             place, c = max(marks.items(), key=lambda kv: kv[1])
-            rrs = [float(d.rr(c, age)) for d in drawn]
+            # every curve on the same footing for the title: the factor on ALL deaths
+            on_all = [1 + (share if d.death_scope == "ncd_lri" else 1.0) * (float(d.rr(c, age)) - 1)
+                      for d in drawn]
             title = (f"At {place}'s {c:.0f} µg/m³, the curves put the death rate at "
-                     f"{min(rrs):.2f}× to {max(rrs):.2f}× clean air")
+                     f"{min(on_all):.2f}× to {max(on_all):.2f}× clean air")
         else:
+            place = c = None
             title = "How each curve turns PM2.5 into risk of death"
         fig.text(0.07, 0.935, title, fontsize=17, color=INK, fontproperties=SERIF)
-        sub = (f"Relative risk of death at age {age}+ against each curve's own floor (2-5 µg/m³), "
-               "where it counts as clean air.\nPast the shaded edge every line is an extrapolation.")
-        if skipped:
-            sub += (f" Not drawn: {', '.join(c.name for c in skipped)}, which gives life expectancy, "
-                    "not a relative risk.")
+        sub = (f"Relative risk at {age_band(age)}, of the deaths each curve covers (see the key), "
+               "against the curve's own floor (2-5 µg/m³). Shaded: extrapolation.")
+        for d in partial:
+            sub += (f"\n{SHORT.get(d.name, d.name)} covers {100 * share:.0f}% of deaths at these ages"
+                    + (f": its {float(d.rr(c, age)):.2f}× at {place} is "
+                       f"{1 + share * (float(d.rr(c, age)) - 1):.2f}× on all deaths."
+                       if place else "."))
         fig.text(0.07, 0.915, sub, fontsize=10.5, color=INK2, va="top", linespacing=1.4,
                  fontproperties=SANS)
+        if skipped:
+            note = (f"Not drawn: {', '.join(c.name for c in skipped)}, which gives life "
+                    f"expectancy, not a relative risk. {note}").strip()
         src = ("Curves: " + "; ".join(CITE.get(c.name, c.name) for c in drawn) +
                f". Shaded edge at {MAX_COHORT_PM25:.0f} µg/m³: Burnett et al. 2018, PNAS.")
         foot = "\n".join(textwrap.fill(t, 165) for t in (src, note) if t)

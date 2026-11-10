@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from airhealth import curves, paths
-from airhealth.curves import Unavailable, get
+from airhealth.curves import LogLinear, Unavailable, get
 
 IHME_TIER = ("gbd2019", "gbd2023", "gemm_5cod")
 
@@ -132,3 +132,21 @@ def test_loglinear_slopes_as_published():
     assert j.se_pct_per_10 == pytest.approx((10.8 - 6.4) / (2 * 1.959964))
     assert b.pct_per_10 == pytest.approx(1.0)
     assert b.ratio(10, 20, 40) == pytest.approx(1.01)
+
+
+def test_slope_is_drawn_on_the_log_scale_and_not_truncated():
+    """ln RR per 10 ~ Normal from the printed 95% interval; draws below zero are kept."""
+    j, b = get("loglinear_jaganathan"), get("loglinear_brown")
+    assert j.se_log_per_10 == pytest.approx((np.log(1.108) - np.log(1.064)) / (2 * 1.959964))
+    assert b.se_log_per_10 == pytest.approx((np.log(1.03) - np.log(1.00)) / (2 * 1.959964))
+    draws = np.log1p(j.sample_many(np.random.default_rng(1), 200_000).pct_per_10 / 100)
+    assert draws.mean() == pytest.approx(np.log(1.086), abs=2e-4)
+    assert np.percentile(draws, [2.5, 97.5]) == pytest.approx(np.log([1.064, 1.108]), abs=5e-4)
+    brown = b.sample_many(np.random.default_rng(1), 200_000).pct_per_10
+    assert np.median(brown) == pytest.approx(1.0, abs=0.01)
+    assert 0.08 < (brown < 0).mean() < 0.11            # about one draw in eleven: harm, kept
+    assert LogLinear("x", 8.0, 0.0, floor=5).se_log_per_10 == 0
+
+
+def test_vodonos_label_says_where_it_applies():
+    assert "applied from age 25" in get("loglinear_vodonos").label
