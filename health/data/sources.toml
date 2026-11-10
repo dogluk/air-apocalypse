@@ -194,3 +194,51 @@ printed), aqli_units and acag_units (';'-separated districts holding the city co
 and checked by the script to exist in the map's table). These are final 2011 figures, not the provisional ones.
 Spot check against the workbook, 2026-11-10: all eleven 2011 'Persons' cells match.
 """
+
+["curves_loglinear.csv"]
+source = "Three published studies, one row each, with each row's citation, url and locator in the file: Jaganathan et al. 2024 (Lancet Planet Health 8: e987-96), Brown et al. 2022 (Environ Health Perspect 130: 097004), Vodonos et al. 2018 (Environ Res 166: 677-89)."
+url = "https://pmc.ncbi.nlm.nih.gov/articles/PMC11790315/"
+urls = ["https://pmc.ncbi.nlm.nih.gov/articles/PMC11790315/", "https://pmc.ncbi.nlm.nih.gov/articles/PMC9472672/", "https://doi.org/10.1016/j.envres.2018.06.021"]
+locator = "Per row, in the locator column. Jaganathan: Summary and Results (final difference-in-differences model). Brown: Results and Figure 2 (spatially adjusted, nonaccidental, ages 15-69). Vodonos: Section 3 Results and Table 2 (all-cause, all ages, slope at a study mean of 30 µg/m³)."
+retrieved = "2026-11-10"
+licence = "Published estimates re-typed with citation. Jaganathan: NIH author manuscript in PMC; Brown: open access in EHP; Vodonos: Elsevier article. Facts reproduced with attribution."
+method = "transcribed"
+notes = """
+Columns: name, label, scale ('percent' = % change in mortality, 'rr' = relative risk), per_ugm3 (the increment the estimate is
+per), estimate, lower, upper (95% interval as printed), floor (µg/m³), source, url, locator.
+airhealth.curves converts each row to % per 10 µg/m³ by compounding on the log scale, pct10 = ((1 + pct/100)^(10/per) - 1) x 100
+(an RR is first written as pct = (RR - 1) x 100), and takes se = (pct10(upper) - pct10(lower)) / (2 x 1.959964).
+Read at source, 2026-11-10: Jaganathan and Brown from the PMC full text (Europe PMC fullTextXML of PMC11790315 and PMC9472672);
+volume and pages from the same XML. Vodonos from a copy of the published PDF (Environmental Research 166 (2018) 677-689, publisher
+header and pagination intact) at http://www.scientificintegrityinstitute.org/ERMAPM25JS080118.pdf; the publisher's copy is
+paywalled. That text prints the 30 µg/m³ interval as '(95%CI-0.52-1.12)'; read as 0.52-1.12, which is symmetric about 0.82 as
+the other intervals in that sentence nearly are.
+Vodonos: the paper's slope falls with the study's mean concentration (inverse transform: beta per µg/m³ = 0.006 + 0.071 / mean,
+Table 2), 1.29% at 10, 1.03% at 15.7, 0.82% at 30. One slope is a simplification, said so in the row's label. The paper's
+studies have means up to 43.7 µg/m³ (Asia), so nothing in it speaks to Indian concentrations above that.
+Brown: the paper reports the estimate at ages 15-69 and does not compute attributable deaths; the curve is applied from age 25
+upward like every adult curve, which extends it past 69. Its floor of 2 is the paper's modelling assumption (no effect at 0-2).
+Jaganathan: estimated on all-age district deaths; the package applies adult curves from 25 only.
+"""
+
+["curves_gemm_ncd_lri.csv"]
+source = "Burnett R, Chen H, Szyszkowicz M, et al. Global estimates of mortality associated with long-term exposure to outdoor fine particulate matter. PNAS 2018; 115(38): 9592-97. doi:10.1073/pnas.1803222115. Parameters as deposited by the authors in the paper's data repository (DataGEMM)."
+url = "https://github.com/mszyszkowicz/DataGEMM/blob/c0640d86a852e2e3565392ba014964bd43edb8ff/GEMM%20Calculator%20(PNAS)_ab.zip"
+catalog = "https://pmc.ncbi.nlm.nih.gov/articles/PMC6156628/"
+sha256 = "fb8073c703b3ce77a17ab7134f7120999d1ecff466e6d890c980e086c5c03e7e"
+locator = "GEMM Calculator (PNAS)_ab.zip -> 'GEMM Calculator (PNAS)_ab.xlsx' (sha256 d33564165209dd0dc9208f40c37993fb3c45d98c181a71682bd1f0c1ce60961f), sheet 'GEMM fit parameters', block 'All-regions, INcluding China', 'Non-accidental function (Non-Communicable + LRI deaths)', rows 12-23 (age groups 25-29 to 80+), columns C-G. sha256 above is of the zip."
+retrieved = "2026-11-10"
+licence = "The repository has no licence. Published parameters re-typed with citation; no code copied. The PNAS article is CC BY-NC-ND 4.0."
+method = "transcribed"
+notes = """
+Columns: age_start, age_group (as printed; '30-35' is the sheet's label for 30-34), theta, se_theta, alpha, mu, nu.
+Column meaning read from the workbook's own formulas (sheet 'Burden_YesCN_NCD+LRI', e.g. cell C91):
+HR = EXP(LN(1 + z/E) / (1 + EXP((F - z)/G)) * C), z = MAX(0, PM2.5 - 2.4), so C = theta, E = alpha, F = mu, G = nu; D is 'se'.
+The workbook's 95% bounds use theta -/+ 2 se for every age at once.
+The PNAS supplementary appendix (pnas.1803222115.sapp.pdf) could not be read: PMC and Europe PMC serve a browser check
+(reCAPTCHA / Cloudflare) and pnas.org returns 403. The parameters are therefore from the authors' deposit that the paper names
+under Data deposition, not from the SI table itself. Tie to the paper: the workbook's India total (sheet 'Burden_YesCN_NCD+LRI',
+AN91, 2,219,057 deaths, age-specific functions, PM2.5 74.0) equals PNAS Table 1, India, GEMM NCD+LRI, 100% rollback, 2,219
+thousand. The all-age '25+' row (0.143, 0.01807) and the 'EXcluding China' block are not used.
+Check against the workbook, 2026-11-10: all 60 parameter cells and 12 age labels compared by script (openpyxl, values only), no mismatch.
+"""
