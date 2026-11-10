@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "airhealth"
+version = "0.1.0"
+description = "Health effects of air pollution in India: risk curves, exposure maps, deaths."
+requires-python = ">=3.10"
+dependencies = ["numpy", "pandas", "scipy", "matplotlib", "pyarrow"]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[project.scripts]
+airhealth = "airhealth.cli:main"
+
+[tool.setuptools]
+packages = ["airhealth"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

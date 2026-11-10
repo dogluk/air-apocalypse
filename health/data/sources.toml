@@ -1,0 +1,3 @@
+# One table per data file, keyed by filename relative to health/data/.
+# Fields: source, url, locator, retrieved, licence, method (downloaded|transcribed|derived),
+# and script for derived tables.
