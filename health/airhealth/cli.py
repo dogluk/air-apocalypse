@@ -4,9 +4,11 @@
   airhealth compare PLACE --to C2 [--from C1] [--map M] [--curves a,b]
   airhealth burden PLACE [--map M] [--counterfactual C] [--curves a,b]
   airhealth chart PLACE [PLACE ...] [--map M] [--age A] [--out FILE]
+  airhealth run FILE [--map M] [--curves a,b] [--n N] [--seed S] [--charts DIR]
 
 --json (anywhere) prints the same content as JSON. A city's map defaults to cpcb when the city
-has ground-monitor data, everything else to aqli; the map used is named on the last line.
+has ground-monitor data, everything else to aqli; the map used is named on the last line. An
+intervention file's map defaults to cpcb when every place in it is such a city, else aqli.
 """
 import argparse
 import json
@@ -14,7 +16,9 @@ import sys
 
 import numpy as np
 
-from . import curves, exposure, paths, places, provenance, report
+from pathlib import Path
+
+from . import curves, exposure, intervention, paths, places, provenance, report, simulate
 from .impact import Change, steady_state
 from .places import KINDS
 
@@ -103,6 +107,41 @@ def cmd_chart(args) -> None:
         print(path)
 
 
+def _intervention_file(text: str) -> Path:
+    path = Path(text)
+    if not path.exists() and (paths.HEALTH / path).exists():
+        path = paths.HEALTH / path          # interventions/x.toml from anywhere
+    if not path.exists():
+        raise ValueError(f"no intervention file {text!r}")
+    return path
+
+
+def cmd_run(args) -> None:
+    path = _intervention_file(args.file)
+    iv = intervention.load(path)
+    if args.map:
+        map_name = args.map
+    else:
+        defaults = {_default_map(p) for p in iv.places}
+        map_name = "cpcb" if defaults == {"cpcb"} else "aqli"
+    names = [n.strip() for n in args.curves.split(",") if n.strip()] if args.curves else None
+    result = simulate.run(iv, map_name=map_name, curves=names, n=args.n, seed=args.seed)
+    written = []
+    if args.charts:
+        from . import charts  # matplotlib only when a chart is drawn
+        folder = Path(args.charts)
+        written = [charts.results_chart(result, folder / f"run_{path.stem}.png"),
+                   charts.spread_chart(result, folder / f"spread_{path.stem}.png")]
+    if args.json:
+        out = report.run_json(result)
+        out["charts"] = [str(w) for w in written]
+        print(json.dumps(out, indent=2, default=float, ensure_ascii=False))
+    else:
+        if written:
+            print("Charts: " + ", ".join(str(w) for w in written) + "\n")
+        print(report.run_table(result))
+
+
 def _list_rows(what: str) -> list[dict]:
     sources = provenance.load_sources()
     if what == "curves":
@@ -183,6 +222,16 @@ def _parser() -> argparse.ArgumentParser:
     ch.add_argument("--age", type=int, default=60)
     ch.add_argument("--out", help="PNG path (default: health/charts/curves_<place>.png)")
     ch.set_defaults(func=cmd_chart)
+
+    r = sub.add_parser("run", parents=[shared], help="run an intervention file, with uncertainty")
+    r.add_argument("file", help="intervention TOML file (see interventions/_template.toml)")
+    r.add_argument("--map", choices=exposure.MAPS, help="exposure map (default: cpcb if every "
+                   "place is a city that has it, otherwise aqli)")
+    r.add_argument("--curves", help="comma-separated curve names (default: every curve)")
+    r.add_argument("--n", type=int, default=5000, help="Monte Carlo draws (default 5000)")
+    r.add_argument("--seed", type=int, default=0, help="random seed (default 0)")
+    r.add_argument("--charts", metavar="DIR", help="also draw the results and spread charts here")
+    r.set_defaults(func=cmd_run)
 
     ls = sub.add_parser("list", parents=[shared], help="curves, maps or places, each with its source")
     ls.add_argument("what", choices=("curves", "maps", "places"))

@@ -24,6 +24,11 @@ Where a paper prints a 95% interval rather than a standard error, se = (upper - 
 theta_age + se_age × Z with one Z shared by all ages (the authors' calculator moves every
 age together, theta ± 2 se). AQLI publishes no interval, so its sample() is the curve
 unchanged.
+
+sample_many(rng, n) draws n curves at once: the result is one curve whose sampled parameter
+is an array of shape (n, 1), so rr() and ratio() broadcast over draws along the first axis
+(a concentration of shape (units,) or (n, units) gives (n, units)). It draws from the same
+distribution as sample(), one draw per row.
 """
 from __future__ import annotations
 
@@ -111,12 +116,20 @@ class Curve:
         floor = np.asarray(max(self.floor, 0.0))
         return _scalar_or_array(np.exp(self._log_h(c, age) - self._log_h(floor, age)))
 
+    def age_group(self, age: int):
+        """A key shared by ages whose risk is the same function of concentration (None for
+        ages below min_age, where rr is 1). Lets callers compute a ratio once per group."""
+        return None if age < self.min_age else 0
+
     def ratio(self, c_from, c_to, age: int) -> float | np.ndarray:
         """rr(c_to) / rr(c_from): the factor on death rates when air moves from c_from to c_to."""
         out = np.asarray(self.rr(c_to, age)) / np.asarray(self.rr(c_from, age))
         return _scalar_or_array(out)
 
     def sample(self, rng: np.random.Generator) -> Curve:
+        raise NotImplementedError
+
+    def sample_many(self, rng: np.random.Generator, n: int) -> Curve:
         raise NotImplementedError
 
     def with_floor(self, floor: float) -> Curve:
@@ -146,20 +159,30 @@ class LogLinear(Curve):
     def sample(self, rng):
         return _evolve(self, pct_per_10=float(rng.normal(self.pct_per_10, self.se_pct_per_10)))
 
+    def sample_many(self, rng, n):
+        return _evolve(self, pct_per_10=rng.normal(self.pct_per_10, self.se_pct_per_10, (n, 1)))
+
 
 @dataclass(frozen=True, init=False)
 class GEMM(Curve):
     """Burnett et al. 2018: rr = exp(theta · ln(1 + z/alpha) / (1 + exp(−(z − mu)/nu))),
     z = max(0, c − 2.4), with theta by age band (params: age_start, theta, se_theta, alpha,
-    mu, nu). An age takes the row with the largest age_start not above it (80+ covers 85+)."""
+    mu, nu). An age takes the row with the largest age_start not above it (80+ covers 85+).
+    z shifts every theta by z standard errors (0 for the published curve; sample_many sets
+    it to an (n, 1) array)."""
     params: pd.DataFrame = field(default=None, compare=False, repr=False)
+    z: float = field(default=0.0, compare=False, repr=False)
 
     def __init__(self, params: pd.DataFrame, name: str = "gemm_ncd_lri",
                  label: str = "GEMM NCD+LRI (Burnett 2018), age-specific",
                  source: str = GEMM_SOURCE, floor: float = GEMM_CF):
         p = params.sort_values("age_start").reset_index(drop=True)
         _set(self, name=name, label=label, kind="relative_risk", floor=float(floor),
-             death_scope="ncd_lri", source=source, min_age=int(p.age_start.iloc[0]), params=p)
+             death_scope="ncd_lri", source=source, min_age=int(p.age_start.iloc[0]), params=p,
+             z=0.0)
+
+    def age_group(self, age: int):
+        return None if age < self.min_age else int(self._row(age).age_start)
 
     def _row(self, age: int) -> pd.Series:
         rows = self.params[self.params.age_start <= age]
@@ -170,12 +193,16 @@ class GEMM(Curve):
     def _log_h(self, c, age):
         p = self._row(age)
         z = np.maximum(0.0, c - GEMM_CF)
-        return p.theta * np.log1p(z / p.alpha) / (1 + np.exp(-(z - p.mu) / p.nu))
+        theta = p.theta + p.se_theta * self.z
+        return theta * np.log1p(z / p.alpha) / (1 + np.exp(-(z - p.mu) / p.nu))
 
     def sample(self, rng):
         z = rng.standard_normal()
         drawn = self.params.assign(theta=self.params.theta + self.params.se_theta * z)
         return _evolve(self, params=drawn)
+
+    def sample_many(self, rng, n):
+        return _evolve(self, z=rng.standard_normal((n, 1)))
 
 
 @dataclass(frozen=True, init=False)
@@ -192,16 +219,20 @@ class AQLILinear(Curve):
         _set(self, name=name, label=label, kind="life_expectancy", floor=float(floor),
              death_scope="all", source=source, min_age=0, years_per_10=float(years_per_10))
 
-    def delta_e0(self, c_from: float, c_to: float) -> float:
-        """Change in life expectancy (years) moving from c_from to c_to; positive = gained."""
+    def delta_e0(self, c_from, c_to) -> float | np.ndarray:
+        """Change in life expectancy (years) moving from c_from to c_to; positive = gained.
+        Arrays broadcast."""
         fall = self._clamp(c_from) - self._clamp(c_to)
-        return float(self.years_per_10 / 10 * fall)
+        return _scalar_or_array(self.years_per_10 / 10 * fall)
 
     def rr(self, c, age):
         raise TypeError("aqli gives life expectancy, not a relative risk; use delta_e0()")
 
     def sample(self, rng):
         return self  # AQLI publishes no interval for its coefficient
+
+    def sample_many(self, rng, n):
+        return self
 
 
 # --- registry -----------------------------------------------------------------------------

@@ -31,7 +31,7 @@ class LifeTable:
     ex: np.ndarray
 
 
-def _infant_a0(m0: float) -> float:
+def _infant_a0(m0: float | np.ndarray) -> float | np.ndarray:
     """Solve a0 = 0.0425 + 2.875·q0 with q0 = m0 / (1 + (1 − a0)·m0)."""
     a0 = 0.1
     for _ in range(20):
@@ -40,29 +40,43 @@ def _infant_a0(m0: float) -> float:
     return a0
 
 
-def life_table(mx: np.ndarray) -> LifeTable:
-    mx = np.asarray(mx, dtype=float)
-    if mx.shape != STARTS.shape:
+def _columns(mx: np.ndarray) -> tuple[np.ndarray, ...]:
+    """qx, lx, Lx, ex for rates of shape (..., bands): one table per row of the last axis."""
+    if mx.shape[-1:] != STARTS.shape:
         raise ValueError(f"mx must have {len(STARTS)} bands, got shape {mx.shape}")
     if (mx <= 0).any():
         raise ValueError("death rates must be positive")
     n = WIDTHS[:-1]
-    a = n / 2
-    a[0] = _infant_a0(mx[0])
-    m = mx[:-1]
+    a = np.broadcast_to(n / 2, mx[..., :-1].shape).copy()
+    a[..., 0] = _infant_a0(mx[..., 0])
+    m = mx[..., :-1]
     q = np.minimum(n * m / (1 + (n - a) * m), 1.0)
-    qx = np.append(q, 1.0)
-    lx = np.concatenate([[1.0], np.cumprod(1 - q)])
-    d = lx[:-1] - lx[1:]
-    Lx = np.append(n * lx[1:] + a * d, lx[-1] / mx[-1])
-    Tx = np.cumsum(Lx[::-1])[::-1]
+    ones = np.ones(mx.shape[:-1] + (1,))
+    qx = np.concatenate([q, ones], axis=-1)
+    lx = np.concatenate([ones, np.cumprod(1 - q, axis=-1)], axis=-1)
+    d = lx[..., :-1] - lx[..., 1:]
+    Lx = np.concatenate([n * lx[..., 1:] + a * d, lx[..., -1:] / mx[..., -1:]], axis=-1)
+    Tx = np.flip(np.cumsum(np.flip(Lx, -1), axis=-1), -1)
     with np.errstate(divide="ignore", invalid="ignore"):
         ex = np.where(lx > 0, Tx / lx, 0.0)
+    return qx, lx, Lx, ex
+
+
+def life_table(mx: np.ndarray) -> LifeTable:
+    mx = np.asarray(mx, dtype=float)
+    if mx.shape != STARTS.shape:
+        raise ValueError(f"mx must have {len(STARTS)} bands, got shape {mx.shape}")
+    qx, lx, Lx, ex = _columns(mx)
     return LifeTable(mx=mx, qx=qx, lx=lx, Lx=Lx, ex=ex)
 
 
 def e0(mx: np.ndarray) -> float:
     return float(life_table(mx).ex[0])
+
+
+def e0_many(mx: np.ndarray) -> np.ndarray:
+    """Life expectancy at birth for each row of rates of shape (n, bands)."""
+    return _columns(np.asarray(mx, dtype=float))[3][..., 0]
 
 
 def scale_adult(mx: np.ndarray, factor: float | np.ndarray,

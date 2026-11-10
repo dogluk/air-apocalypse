@@ -1,4 +1,8 @@
-"""Charts in the repo's style (fonts from fonts/, the palette and spare axes of diwali/charts.py)."""
+"""Charts in the repo's style (fonts from fonts/, the palette and spare axes of diwali/charts.py).
+
+curves_chart: the risk curves with places marked. results_chart: an intervention run, one bar
+per curve with its 5-95% range. spread_chart: what drives the spread within each curve, beside
+the spread across curves."""
 import logging
 import textwrap
 from pathlib import Path
@@ -19,7 +23,7 @@ BAND = "#efeeea"
 # surface; aqua and yellow sit under 3:1 contrast, so every line is also labelled directly).
 SERIES = ("#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#6250d6", "#e34948")
 SHORT = {"loglinear_jaganathan": "Jaganathan 2024", "loglinear_brown": "Brown 2022",
-         "loglinear_vodonos": "Vodonos 2018", "gemm_ncd_lri": "GEMM NCD+LRI"}
+         "loglinear_vodonos": "Vodonos 2018", "gemm_ncd_lri": "GEMM NCD+LRI", "aqli": "AQLI"}
 CITE = {"loglinear_jaganathan": "Jaganathan et al. 2024, Lancet Planet Health",
         "loglinear_brown": "Brown et al. 2022, Environ Health Perspect",
         "loglinear_vodonos": "Vodonos et al. 2018, Environ Res",
@@ -123,6 +127,159 @@ def curves_chart(curves: list[Curve], marks: dict[str, float], path: Path, age: 
         fig.text(0.07, 0.02, foot, fontsize=8.5, color=MUTED,
                  linespacing=1.4, fontproperties=SANS)
 
+        path = Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(path, dpi=180)
+        plt.close(fig)
+    return path
+
+
+# --- intervention runs ----------------------------------------------------------------------
+
+def _label(c: Curve) -> str:
+    return SHORT.get(c.name, c.name) + (" *" if c.kind == "life_expectancy" else "")
+
+
+def _style(ax) -> None:
+    for side in ("top", "right", "left"):
+        ax.spines[side].set_visible(False)
+    ax.grid(axis="x", color=GRID, lw=1)
+    ax.set_axisbelow(True)
+    ax.tick_params(length=0)
+    ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda v, _: f"{v:,.0f}"))
+
+
+FOOT_WIDTH = 170
+
+
+def _foot_lines(foot: str) -> list[str]:
+    return [line for t in foot.split("\n") for line in textwrap.wrap(t, FOOT_WIDTH)]
+
+
+def _frame(n_rows: int, foot: str, legend: bool = False):
+    """A figure sized to its rows, with room above for title, subtitle (and a legend) and
+    below for the axis label and the footnote."""
+    above = 1.55 + (0.35 if legend else 0)
+    below = 0.75 + 0.2 * len(_foot_lines(foot))
+    fig = plt.figure(figsize=(11, above + below + 0.62 * n_rows + 0.3))
+    h = fig.get_figheight()
+    ax = fig.add_axes([0.25, below / h, 0.68, 1 - (above + below) / h])
+    return fig, ax
+
+
+def _texts(fig, title: str, sub: str, foot: str) -> None:
+    h = fig.get_figheight()
+    fig.text(0.04, 1 - 0.35 / h, title, fontsize=17, color=INK, fontproperties=SERIF, va="top")
+    fig.text(0.04, 1 - 0.8 / h, sub, fontsize=10.5, color=INK2, va="top", linespacing=1.4,
+             fontproperties=SANS)
+    fig.text(0.04, 0.12 / h, "\n".join(_foot_lines(foot)), fontsize=8.5, color=MUTED,
+             linespacing=1.4, fontproperties=SANS)
+
+
+def _run_text(run) -> tuple[str, str]:
+    from .report import change_text, run_footer
+    iv = run.intervention
+    first = next(iter(run.per_curve.values()))
+    after = float(np.median(first.pm25_after))
+    where = ", ".join(p.name for p in iv.places)
+    sub = (f"{where}, {iv.start_year}-{iv.start_year + iv.duration_years - 1}: {change_text(iv)}; "
+           f"annual mean {run.pm25_before:.1f} → {after:.1f} µg/m³. Lag {iv.lag}"
+           f"{f', ramp {iv.ramp_years} years' if iv.ramp_years else ''}. "
+           f"If it works; it works with probability {iv.p_success:g}.")
+    cites = [CITE.get(n, n) for n in run.per_curve if n in CITE]
+    if "aqli" in run.per_curve:
+        cites.append("AQLI (EPIC, Univ. of Chicago)")
+    foot = (f"Curves: {'; '.join(cites)}. {run.n:,} draws, seed {run.seed}. "
+            "* deaths derived from AQLI's life-expectancy change.\n" + run_footer(run))
+    return sub, foot
+
+
+def results_chart(run, path: Path) -> Path:
+    """Life-years over the run if the intervention works: a bar per curve at the median,
+    a line over its 5-95% range."""
+    from .report import _sig
+    rows = list(run.per_curve.values())[::-1]            # first curve on top
+    med = np.array([np.median(r.life_years) for r in rows])
+    lo = np.array([np.percentile(r.life_years, 5) for r in rows])
+    hi = np.array([np.percentile(r.life_years, 95) for r in rows])
+    y = np.arange(len(rows))
+    sub, foot = _run_text(run)
+
+    with plt.rc_context(STYLE):
+        fig, ax = _frame(len(rows), foot)
+        ax.barh(y, med, height=0.5, color=SERIES[0], lw=0, zorder=2)
+        ax.hlines(y, lo, hi, color=INK, lw=1.5, zorder=3)
+        for k in (lo, hi):
+            ax.plot(k, y, "|", color=INK, ms=10, mew=1.5, zorder=3)
+        span = max(hi.max(), 0) - min(lo.min(), 0) or 1.0
+        for yy, m, h, l, r in zip(y, med, hi, lo, rows):
+            x, ha = (h + span * 0.015, "left") if m >= 0 else (l - span * 0.015, "right")
+            fixed = h == l and r.curve.kind == "life_expectancy"
+            ax.text(x, yy, _sig(m) + ("  (no published interval)" if fixed else ""), va="center", ha=ha, fontsize=10.5, color=INK,
+                    fontproperties=SANS_B)
+        ax.set_xlim(min(lo.min(), 0) - span * 0.04, max(hi.max(), 0) + span * 0.14)
+        ax.axvline(0, color=MUTED, lw=1, zorder=1)
+        ax.set_yticks(y, [_label(r.curve) for r in rows], fontproperties=SANS, fontsize=11,
+                      color=INK)
+        _style(ax)
+        ax.set_xlabel(f"Life-years gained over the {run.intervention.duration_years} years, "
+                      "if it works (bar: median; line: 5-95% of draws)")
+        top, bottom = max(med, key=abs), min(med, key=abs)
+        title = (f"{run.intervention.name}: {_sig(bottom)} to {_sig(top)} life-years, "
+                 "depending on the curve")
+        _texts(fig, title, textwrap.fill(sub, 150), foot)
+        path = Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(path, dpi=180)
+        plt.close(fig)
+    return path
+
+
+def spread_chart(run, path: Path) -> Path:
+    """For each curve, the 5-95% width of life-years when only the PM2.5 change is sampled and
+    when only the curve's parameters are, with the range of medians across curves for scale."""
+    from .report import _sig
+    rows = list(run.per_curve.values())[::-1]
+    y = np.arange(len(rows))
+    parts = (("pm25_change", "PM2.5 change sampled alone", SERIES[0]),
+             ("curve_parameters", "curve parameters sampled alone", SERIES[1]))
+    medians = [np.median(r.life_years) for r in rows]
+    across = max(medians) - min(medians)
+    sub, foot = _run_text(run)
+
+    with plt.rc_context(STYLE):
+        fig, ax = _frame(len(rows), foot, legend=True)
+        h = 0.3
+        for k, (key, label, colour) in enumerate(parts):
+            widths = [r.widths[key] for r in rows]
+            ax.barh(y + (0.5 - k) * (h + 0.04), widths, height=h, color=colour, lw=0,
+                    label=label, zorder=2)
+        top = max([across, *(r.widths[k] for r in rows for k, _, _ in parts)]) or 1.0
+        for yy, r in zip(y, rows):
+            if r.widths["curve_parameters"] == 0 and r.spread["curve_parameters"] == 0:
+                ax.text(top * 0.01, yy - 0.5 * (h + 0.04), "no published interval",
+                        va="center", fontsize=9.5, color=INK2, fontproperties=SANS)
+        if len(rows) > 1:
+            ax.axvline(across, color=INK, lw=1.5, ls=(0, (3, 2)), zorder=3)
+            ax.text(across, 1.01, f"range of medians across curves, {_sig(across)}",
+                    transform=ax.get_xaxis_transform(), ha="right", va="bottom", fontsize=10,
+                    color=INK, fontproperties=SANS_B)
+        ax.set_xlim(0, top * 1.08)
+        ax.set_yticks(y, [_label(r.curve) for r in rows], fontproperties=SANS, fontsize=11,
+                      color=INK)
+        _style(ax)
+        ax.set_xlabel("Width of the 5-95% range of life-years over the run, if it works")
+        fh = fig.get_figheight()
+        fig.legend(loc="upper left", bbox_to_anchor=(0.04, 1 - 1.45 / fh), ncol=2,
+                   frameon=False, labelcolor=INK2, handlelength=1.6,
+                   prop=fm.FontProperties(family=SANS_FAMILY, size=10))
+        if all(r.widths["pm25_change"] == 0 for r in rows):
+            sub += " The PM2.5 change is a fixed number in this file, so it adds no spread."
+        within = max(r.widths[k] for r in rows for k, _, _ in parts)
+        title = ("Which curve you pick moves the answer more than the uncertainty within any one"
+                 if across > within else
+                 "The uncertainty within a curve is as large as the choice of curve")
+        _texts(fig, title, textwrap.fill(sub, 150), foot)
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(path, dpi=180)

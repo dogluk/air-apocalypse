@@ -59,6 +59,8 @@ pct = { dist = "normal", p5 = -15, p95 = -5 }
 once = 0                 # (Dist) optional, default 0; one-off cost at the start
 annual = { dist = "lognormal", p5 = 1e8, p95 = 1e9 }   # (Dist) optional, default 0; per year of duration
 currency = "INR"         # required; "INR" or "USD"
-year = 2026              # required; the price year the costs are in
+year = 2025              # required; the price year the costs are in. Rupees become
+                         # dollars at that year's World Bank average rate
+                         # (data/fx_inr_usd.csv, 2000-2025); no inflation adjustment
 share_only_on_success = 0.0   # optional, 0 to 1; share of the cost spent only if it works
                               # (default 0: the full cost is spent either way)

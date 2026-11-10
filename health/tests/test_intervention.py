@@ -19,7 +19,7 @@ p_success = 0.5
 [cost]
 annual = 1e8
 currency = "INR"
-year = 2026
+year = 2025
 """
 
 

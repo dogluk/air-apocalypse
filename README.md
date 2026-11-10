@@ -13,8 +13,9 @@ Open notebooks, not a finished argument. Everything here is reproducible from fr
 | | What | State |
 |---|---|---|
 | [`diwali/`](diwali/) | Ten years of hourly PM2.5 across India's ten biggest cities: how much Diwali actually changes the air, and how much of the famous "post-Diwali smog" is Diwali at all | Complete — see its [README](diwali/README.md) |
-| [`lit/`](lit/) | What's been published on Indian air quality, and the gap analysis: which questions the data can answer that nobody has asked | In progress |
+| [`lit/`](lit/) | What's been published on Indian air quality, and the gap analysis: which questions the data can answer that nobody has asked. Also [who is measuring India's air](lit/landscape.md) | In progress |
 | [`bets/`](bets/) | Interventions, costed and sorted by whether the physics allows them | In progress |
+| [`health/`](health/) | `airhealth`: what a change in PM2.5 would do to deaths and life expectancy in any Indian state, district or city, across the risk curves and exposure maps that published estimates disagree on, with odds, cost and uncertainty for an intervention | First version — see its [README](health/README.md) |
 
 ## What the Diwali track found
 
@@ -32,7 +33,10 @@ at least as search reveals them, do not.
 
 ## The question behind all of it
 
-Concentration ≈ emissions ÷ (mixing height × ventilation).
+Concentration ≈ emissions ÷ (mixing height × wind speed).
+
+It leaves out where people actually breathe (exposure), particles that form in the air from
+gases, pollution blown in from elsewhere, and removal by rain and deposition.
 
 Every intervention attacks one of those three terms, or else gives up on the air and
 protects the lungs directly. Sorting proposals by which term they touch, and whether the

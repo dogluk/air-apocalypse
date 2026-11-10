@@ -5,8 +5,11 @@ Which interventions survive contact with arithmetic. Working notes, not conclusi
 ## The sorting principle
 
 ```
-concentration  ≈  emissions / (mixing height × ventilation)
+concentration  ≈  emissions / (mixing height × wind speed)
 ```
+
+It leaves out where people actually breathe (exposure), particles that form in the air from
+gases, pollution blown in from elsewhere, and removal by rain and deposition.
 
 Every proposal attacks one of those three terms — or else gives up on the air and protects
 the lungs directly. Sorting by which term a bet touches, and whether the physics permits

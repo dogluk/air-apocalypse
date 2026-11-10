@@ -16,4 +16,4 @@ monthly_delta = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -40, 0]
 [cost]
 annual = { dist = "lognormal", p5 = 5e7, p95 = 5e8 }
 currency = "INR"
-year = 2026
+year = 2025

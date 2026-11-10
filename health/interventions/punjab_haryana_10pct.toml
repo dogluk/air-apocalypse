@@ -18,5 +18,5 @@ pct = -10
 once = { dist = "lognormal", p5 = 5e9, p95 = 5e10 }
 annual = { dist = "lognormal", p5 = 1e9, p95 = 1e10 }
 currency = "INR"
-year = 2026
+year = 2025
 share_only_on_success = 0.0

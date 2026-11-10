@@ -17,19 +17,27 @@ Exposure maps are annual means, so monthly_pct treats every month as equally pol
 months are given as distributions they are drawn together (one percentile for all twelve in
 each draw): an intervention that does better than expected in November is taken to do
 better in December too.
+
+Costs are in the currency and price year of the file. Rupees become dollars at the World
+Bank's annual average rate for cost.year (data/fx_inr_usd.csv); a rupee cost whose year is
+not in that table is Invalid. There is no inflation adjustment: costs stay in the prices of
+their year.
 """
 from __future__ import annotations
 
 import tomllib
 from collections.abc import Sequence
 from dataclasses import dataclass
+from functools import cache
 from pathlib import Path
 from typing import Literal
 
 import numpy as np
+import pandas as pd
 from scipy import optimize, stats
 
 from . import lag as lags
+from . import paths
 from . import places as places_
 from .impact import Change
 from .places import Place
@@ -43,10 +51,28 @@ TOP_KEYS = ("name", "places", "start_year", "ramp_years", "duration_years", "p_s
             "from_level", "lag", "notes", "change", "cost")
 COST_KEYS = ("once", "annual", "currency", "year", "share_only_on_success")
 CURRENCIES = ("INR", "USD")
+FX_FILE = "fx_inr_usd.csv"
 
 
 class Invalid(ValueError):
     """An intervention file that cannot be used; the message is one line naming the field."""
+
+
+@cache
+def _inr_per_usd() -> dict[int, float]:
+    t = pd.read_csv(paths.DATA / FX_FILE)
+    return dict(zip(t.year.astype(int), t.inr_per_usd.astype(float)))
+
+
+def usd_per(currency: str, year: int) -> float:
+    """Dollars per unit of `currency` at the annual average rate of `year`."""
+    if currency == "USD":
+        return 1.0
+    rates = _inr_per_usd()
+    if year not in rates:
+        raise Invalid(f"cost.year: no rupee-dollar rate for {year}; data/{FX_FILE} covers "
+                      f"{min(rates)}-{max(rates)} (World Bank annual averages)")
+    return 1 / rates[year]
 
 
 def annual_from_monthly(monthly: Sequence[float]) -> float:
@@ -275,8 +301,9 @@ def _cost(table) -> dict:
     share = _number(table.get("share_only_on_success", 0.0), "cost.share_only_on_success")
     if not 0 <= share <= 1:
         raise Invalid(f"cost.share_only_on_success: must be between 0 and 1, got {share:g}")
-    return dict(cost_once=once, cost_annual=annual, cost_currency=currency,
-                cost_year=_integer(table["year"], "cost.year"),
+    year = _integer(table["year"], "cost.year")
+    usd_per(currency, year)                     # Invalid if there is no rate for the year
+    return dict(cost_once=once, cost_annual=annual, cost_currency=currency, cost_year=year,
                 cost_share_only_on_success=share)
 
 

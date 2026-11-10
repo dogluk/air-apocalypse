@@ -248,3 +248,21 @@ AN91, 2,219,057 deaths, age-specific functions, PM2.5 74.0) equals PNAS Table 1,
 thousand. The all-age '25+' row (0.143, 0.01807) and the 'EXcluding China' block are not used.
 Check against the workbook, 2026-11-10: all 60 parameter cells and 12 age labels compared by script (openpyxl, values only), no mismatch.
 """
+
+["fx_inr_usd.csv"]
+source = "World Bank, World Development Indicators: PA.NUS.FCRF 'Official exchange rate (LCU per US$, period average)', India (World Bank API, source id 2, last updated 2026-10-08)."
+url = "https://api.worldbank.org/v2/country/IND/indicator/PA.NUS.FCRF?format=json&per_page=100&date=2000:2026"
+page = "https://data.worldbank.org/indicator/PA.NUS.FCRF?locations=IN"
+sha256 = "5ca38878420f23c601ae39a25781e47fe21b02fafa224dda527522bdc5af1468"
+locator = "API JSON, second element: one record per year, fields date and value; India, 2000-2025 (2026 has no value yet)."
+retrieved = "2026-11-10"
+licence = "CC BY 4.0 (World Bank Open Data terms of use)"
+method = "downloaded"
+script = "scripts/build_fx.py"
+notes = """
+Columns: year, inr_per_usd (rupees per US dollar, annual average of the official rate), written as the API gives them. The
+World Bank takes this series from the IMF's International Financial Statistics. Used by airhealth.simulate to turn an
+intervention's rupee costs into dollars at the rate of its cost.year; a cost.year outside 2000-2025 is rejected. No
+inflation (price-level) adjustment is made: costs stay in the prices of their cost.year. Not cross-checked against the
+RBI reference rate.
+"""

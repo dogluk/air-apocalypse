@@ -19,6 +19,15 @@ and the result is marked derived.
 
 Results are steady state: the change in deaths per year and in period life expectancy once
 the new air has been breathed long enough for the full effect, with today's age structure.
+
+steady_state() is the reference implementation, one change and one curve at a time.
+steady_state_many() gives the same numbers for n draws at once (n changes, and a curve from
+Curve.sample_many() or a fixed one), for the Monte Carlo in simulate.py. Once the factors on
+death rates are known the arithmetic is linear in deaths by unit and age, so it runs as array
+operations over draws. For AQLI, the multiplier on death rates that gives each life-expectancy
+gain is solved exactly when there are at most AQLI_EXACT distinct gains, and otherwise on a
+grid of AQLI_GRID gains spanning the draws, interpolating the log of the multiplier, which is
+nearly linear in the gain (tests hold the two within 0.1% of steady_state()).
 """
 from dataclasses import dataclass
 
@@ -31,6 +40,8 @@ from .curves import Curve
 from .places import Place
 
 STARTS = np.array(AGE_STARTS)
+AQLI_EXACT = 64
+AQLI_GRID = 33
 
 
 @dataclass(frozen=True)
@@ -153,3 +164,121 @@ def burden(place: Place, curve: Curve, map_name: str, counterfactual: float | No
     floor), i.e. the deaths attributable to the air above it."""
     to = curve.floor if counterfactual is None else counterfactual
     return steady_state(place, curve, map_name, Change(to=to), year=year)
+
+
+# --- many draws at once ---------------------------------------------------------------------
+
+def apply_many(kind: str, values: np.ndarray, before: np.ndarray) -> np.ndarray:
+    """Change.apply for n values of one kind at once: shape (n, units), never below 0. A drawn
+    target below 0 counts as 0."""
+    v = np.asarray(values, dtype=float)[:, None]
+    pm = np.asarray(before, dtype=float)[None, :]
+    if kind == "delta":
+        out = pm + v
+    elif kind == "pct":
+        out = pm * (1 + v / 100)
+    elif kind == "to":
+        out = np.minimum(pm, np.maximum(v, 0.0))
+    else:
+        raise ValueError(f"unknown change kind {kind!r}; use delta, pct or to")
+    return np.maximum(out, 0.0)
+
+
+@dataclass(frozen=True)
+class ImpactDraws:
+    """Impact for n draws: the fields that vary are arrays of length n."""
+    place: Place
+    curve: Curve
+    map_name: str
+    year: int
+    pm25_before: float
+    pm25_after: np.ndarray
+    population: float
+    deaths_baseline: float
+    deaths_averted: np.ndarray
+    e0_before: float
+    e0_after: np.ndarray
+    yll_averted: np.ndarray
+    derived: bool
+    fallback_states: list[str]
+
+
+def _aqli_factors(mx: np.ndarray, gains: np.ndarray, from_age: int) -> np.ndarray:
+    """The multiplier on death rates that gives each gain in e0 (same shape as gains)."""
+    unique = np.unique(gains)
+    if len(unique) <= AQLI_EXACT:
+        solved = np.array([lifetable.solve_adult_factor(mx, g, from_age=from_age) for g in unique])
+        return solved[np.searchsorted(unique, gains)]
+    grid = np.linspace(unique[0], unique[-1], AQLI_GRID)
+    solved = np.array([lifetable.solve_adult_factor(mx, g, from_age=from_age) for g in grid])
+    return np.exp(np.interp(gains, grid, np.log(solved)))   # log f is nearly linear in g
+
+
+def _state_many(b: baseline.Baseline, curve: Curve, before: np.ndarray, after: np.ndarray,
+                pop: np.ndarray) -> dict:
+    """_state for n draws: before (units,), after (n, units)."""
+    deaths = np.outer(pop, b.population / b.population.sum()) * b.mx    # unit × band
+    table = lifetable.life_table(b.mx)
+    if curve.kind == "life_expectancy":
+        gains = np.broadcast_to(curve.delta_e0(before[None, :], after), after.shape)
+        f = _aqli_factors(b.mx, gains, curve.min_age)                    # draw × unit
+        factor = np.where(STARTS >= curve.min_age, f[..., None], 1.0)    # draw × unit × band
+        e0_after = table.ex[0] + np.average(gains, axis=1, weights=pop)
+        averted = np.einsum("ub,nub->nb", deaths, 1 - factor)            # draw × band
+    else:
+        # Bands whose risk is the same function of concentration share one ratio; with
+        # g = 1 − ratio (draw × unit), deaths averted in band b are scope_b × g @ deaths[:, b]
+        # and the population-weighted factor on band b's rate is 1 − scope_b × g @ pop / Σpop.
+        scope = b.share_ncd_lri if curve.death_scope == "ncd_lri" else np.ones(len(STARTS))
+        groups: dict = {}
+        for k, age in enumerate(STARTS):
+            groups.setdefault(curve.age_group(int(age)), []).append(k)
+        averted = np.zeros((after.shape[0], len(STARTS)))
+        mean_g = np.zeros_like(averted)
+        for key, bands in groups.items():
+            if key is None:
+                continue                                                  # rr = 1: nothing moves
+            age = int(STARTS[bands[0]])
+            g = 1 - np.broadcast_to(curve.ratio(before[None, :], after, age), after.shape)
+            averted[:, bands] = (g @ deaths[:, bands]) * scope[bands]
+            mean_g[:, bands] = (g @ pop / pop.sum())[:, None]
+        e0_after = lifetable.e0_many(b.mx * (1 - scope * mean_g))
+    return dict(population=pop.sum(), deaths_baseline=deaths.sum(),
+                deaths_averted=averted.sum(axis=1), yll_averted=averted @ table.ex,
+                e0_before=table.ex[0], e0_after=e0_after)
+
+
+def steady_state_many(place: Place, curve: Curve, map_name: str, kind: str,
+                      values: np.ndarray, year: int | None = None,
+                      pm25_override: float | None = None) -> ImpactDraws:
+    """steady_state() for n draws: values[i] is the change (of `kind`: delta, pct or to) in
+    draw i, and draw i uses row i of the curve's parameters if the curve came from
+    sample_many(), else the curve as it is."""
+    cells: pd.DataFrame = exposure.cells(place, map_name, year)
+    year = int(cells.attrs["year"])
+    before = cells.pm25.to_numpy(float)
+    if pm25_override is not None:
+        before = np.full_like(before, float(pm25_override))
+    after = apply_many(kind, values, before)
+    pop = cells.population.to_numpy(float)
+
+    results, fallback = [], []
+    for state, rows in cells.groupby("state", sort=True).indices.items():
+        b = baseline.load(state, year)
+        if b.fallback:
+            fallback.append(state)
+        results.append(_state_many(b, curve, before[rows], after[:, rows], pop[rows]))
+
+    weights = [r["population"] for r in results]
+    return ImpactDraws(
+        place=place, curve=curve, map_name=map_name, year=year,
+        pm25_before=float(np.average(before, weights=pop)),
+        pm25_after=np.average(after, axis=1, weights=pop),
+        population=float(pop.sum()),
+        deaths_baseline=float(sum(r["deaths_baseline"] for r in results)),
+        deaths_averted=sum(r["deaths_averted"] for r in results),
+        e0_before=float(np.average([r["e0_before"] for r in results], weights=weights)),
+        e0_after=np.average([r["e0_after"] for r in results], axis=0, weights=weights),
+        yll_averted=sum(r["yll_averted"] for r in results),
+        derived=curve.kind == "life_expectancy",
+        fallback_states=fallback)
