@@ -24,27 +24,10 @@ import pandas as pd
 
 from . import paths
 from .ages import AGE_STARTS
+from .places import canonical_state
 
 LIFE_TABLE_PERIOD = (2020, 2024)
 MID_YEAR = sum(LIFE_TABLE_PERIOD) // 2
-
-# Printed names that differ from the SRS life-table spelling. Next task replaces
-# state_name with places.canonical_state.
-_RENAMES = {
-    "Telengana": "Telangana",                  # SRS table heading; Statement 3 has Telangana
-    "INDIA": "India",
-    "NCT OF DELHI": "Delhi",
-    "JAMMU & KASHMIR (UT)": "Jammu & Kashmir",
-}
-
-
-def state_name(printed: str) -> str:
-    """Display name for a state as printed by any of the three sources."""
-    if printed in _RENAMES:
-        return _RENAMES[printed]
-    if printed.isupper():
-        return " ".join(w if w == "&" else w.capitalize() for w in printed.split())
-    return printed
 
 
 @dataclass(frozen=True)
@@ -64,14 +47,14 @@ def _life_tables() -> dict[str, pd.DataFrame]:
     for printed, g in t.groupby("state", sort=False):
         g = g.sort_values("age_start")
         assert tuple(g.age_start) == AGE_STARTS, printed
-        out[state_name(printed)] = g
+        out[canonical_state(printed)] = g
     return out
 
 
 @cache
 def _population() -> pd.DataFrame:
     p = pd.read_csv(paths.DATA / "population_age_state.csv")
-    p["state"] = p["state"].map(state_name)
+    p["state"] = p["state"].map(canonical_state)
     return p
 
 

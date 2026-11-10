@@ -16,7 +16,7 @@ notes = """
 Extracted with pdftotext -layout by the script. Checks in the script: l(x+n) = l(x)(1 - q(x)) within 3 for every row;
 e0 in every table equals Statement 3. Spot check by eye against the rendered PDF, 2026-11-10: Kerala rows 0-1, 25-30,
 45-50, 70-75, 85+ and Delhi rows 1-5, 30-35, 60-65, 80-85 (36 cells), all match. State names as printed in the table
-headings ('Telengana' is mapped to 'Telangana', the spelling of Statement 3, in airhealth.baseline.state_name).
+headings ('Telengana' is mapped to 'Telangana', the spelling of Statement 3, in places.csv, read by airhealth.places.canonical_state).
 Andhra Pradesh's nLx column is printed with five decimals; kept as printed.
 """
 
@@ -63,4 +63,134 @@ Mapping onto the 19 bands (airhealth.baseline): 0-4 -> bands 0, 1; 05-14 -> 5, 1
 share = (ncd + respiratory infections) / (100 - ill-defined).
 Check in the script: the four major groups sum to 100 within 0.25 in every age group.
 Spot check by eye against the rendered PDF, 2026-11-10: all 35 cells in the file match.
+"""
+
+["places.csv"]
+source = "Names as printed in the sources of this package: SRS life tables 2020-24, population projections 2011-2036, AQLI Annual Update 2025 (gadm1, gadm2), geoBoundaries gbOpen IND ADM1/ADM2, Pandey et al. 2021 appendix table 3, CPCB station files, Census 2011 table A-04 (I)."
+url = "https://github.com/aqli-epic/aqli-update"
+locator = "States and aliases: the STATES table in scripts/build_places.py. Districts: the (state, unit) pairs of exposure_aqli.csv and exposure_acag_total.csv. Cities: cities.csv."
+retrieved = "2026-11-10"
+licence = "Names are facts; the district lists inherit CC BY 4.0 (AQLI) and ODbL 1.0 (geoBoundaries ADM2, Pathways Data / LGD)."
+method = "derived"
+script = "scripts/build_places.py"
+notes = """
+Columns: name, kind (country, state, district, city), state (parent state; the state itself for a state; empty for India),
+aliases (';'-separated). Canonical state names are those of baseline.states(). Matching in airhealth.places ignores case,
+accents, punctuation and '&' versus 'and', so only spellings that differ beyond that are listed as aliases.
+District names differ between the two satellite maps (GADM in AQLI, LGD 2021 in geoBoundaries: 'Bangalore' in both, but
+'Ahmednagar'/'Ahmadnagar', 'Mumbai City'/'Mumbai'); both spellings are kept as separate districts, each found only in its own map.
+"""
+
+["exposure_aqli.csv"]
+source = "Air Quality Life Index (AQLI), Energy Policy Institute at the University of Chicago. AQLI Annual Update 2025 data (data years 1998-2023), gadm0/gadm1/gadm2 wide CSVs."
+url = "https://github.com/aqli-epic/aqli-update/tree/441f4e2241d9ec92567f080faa99dd3a29f7a90a/AQLI%20Annual%20Update%202025%20data"
+sha256 = "4e330b30c99a66fac3019a5ee15a15407ff4bcb352f16eedb5e6353ec96d97b0"
+locator = "gadm2.zip -> gadm2/gadm2_2023_wide.csv, rows name0 == 'India' (690 districts); columns name1, name, population, pm1998-pm2023, who1998-who2023. sha256 is of gadm2.zip; gadm1.zip d7af89aa509c66f8756442c8730215f76bd7d11bd7bfe439f748bc4ee6edbb22, gadm0.zip 9820a91a82fb0f442c15b760ea32f8e05504cd6ca289ec69b177751de9b706f9."
+retrieved = "2026-11-10"
+licence = "CC BY 4.0 (repository licence)"
+method = "derived"
+script = "scripts/build_exposure_aqli.py"
+population_total = 1398021054
+notes = """
+Columns: state, unit (AQLI district), year, pm25 (µg/m³; satellite PM2.5 with mineral dust and sea salt removed, per the
+release Readme), population (AQLI's, LandScan; one figure, the same in every year), aqli_years_who (AQLI's life-expectancy
+gain if the WHO guideline of 5 µg/m³ were met). population_total is India's population in gadm0_2023_wide.csv.
+Release choice: the repository Readme (2026-11-10) calls the 2025 release the 'latest completed release' and the 2026 folder
+(data to 2024) 'work in progress ... should not be treated as a finalized AQLI release'. The 2026 files recompute the whole
+series: NCT of Delhi pm2023 is 88.35 in the 2025 release and 89.81 in the 2026 files.
+GADM codes Jammu and Kashmir and Ladakh as 'Z01', so India is selected by name0, not iso_alpha3.
+Checks in the script: districts sum to the gadm0 India population exactly; population-weighted district means reproduce
+every gadm1 state value in every year to 0.01 (largest gap 0.005, rounding). Spot check against the raw file, 2026-11-10:
+Lucknow 2010 and 2023, Ernakulam 2023, Jaisalmer 2023 all match; India pm2023 41.0 (gadm0) equals the table's weighted mean.
+One Telangana district is named 'NA' in gadm2 (population 1,547,413); written as 'Unnamed area'.
+"""
+
+["exposure_acag_total.csv"]
+source = "Atmospheric Composition Analysis Group (Washington University in St. Louis), surface PM2.5 V6.GL.02.04 (Shen et al. 2024, ACS ES&T Air, doi:10.1021/acsestair.3c00054), annual mean 2023 at 0.1°; weighted with WorldPop Global2 R2025A India 2023 1 km constrained UN-adjusted population; districts from geoBoundaries gbOpen IND ADM2 and states from ADM1."
+url = "https://satpmdata.s3.us-east-1.amazonaws.com/archive/V6GL0204/CNNPM25c0p10/Annual/AS/V6GL02.04.CNNPM25.0p10.AS.202301-202312.nc"
+worldpop_url = "https://data.worldpop.org/GIS/Population/Global_2015_2030/R2025A/2023/IND/v1/1km_ua/constrained/ind_pop_2023_CN_1km_R2025A_UA_v1.tif"
+boundaries_url = "https://github.com/wmgeolab/geoBoundaries/tree/9469f09/releaseData/gbOpen/IND"
+catalog = "https://sites.wustl.edu/acag/datasets/surface-pm2-5/"
+sha256 = "543de3d4b0a0e97c2b458fc3b737a90b2c7053fc543bcc8646f34bf3c2d574cd"
+locator = "Variable PM25 of the 2023 Asia-crop file. sha256 above is of the .nc; WorldPop tif c2859c04866c24759b66c3e327672832c78ad06772e436b8a1aceaf600b953bc; geoBoundaries-IND-ADM2.geojson 8bef6929fd65432e7dc775e7c44473e84efff064ebddbfd6b834e6291546db40; geoBoundaries-IND-ADM1.geojson 47aa0acb6f69868daee49143276f3ce323f18905ba7d38d0a86816b405028736."
+retrieved = "2026-11-10"
+licence = "ACAG: CC BY 4.0. WorldPop: CC BY 4.0. geoBoundaries IND ADM2: ODbL 1.0 (Pathways Data Pvt. Ltd., lgdirectory.gov.in); ADM1: CC BY 2.5 IN (DataMeet). The derived table is shared under ODbL 1.0."
+method = "derived"
+script = "scripts/build_exposure_acag.py"
+population_total = 1431702948
+notes = """
+Columns: state, unit (geoBoundaries district), year (2023), pm25 (µg/m³, total PM2.5 including dust and sea salt), population
+(WorldPop 2023 persons, summed over the district's pixels). population_total is the sum of the WorldPop India raster.
+Year: 2023 is the last year of V6.GL.02.04 and the last year of the AQLI 2025 release, so the two maps share a year.
+ACAG has since published V6.GL.03 (1998-2024) in the same bucket; not used here, the build pins V6.GL.02.04.
+Method (script docstring): each WorldPop pixel takes the 0.1° cell and the district containing its centre; 4,752 populated
+pixels (1,056,060 people, 0.074%) fall outside every district polygon and go to the nearest district (at most 16 pixels away).
+No populated pixel falls in an empty ACAG cell. Corrections to geoBoundaries: Yanam put in Puducherry (the ADM1 outline
+leaves it in Andhra Pradesh; by area overlap it is the only misplaced district); 'Hydrabad' spelled Hyderabad; a Ladakh unit
+named 'DATA NOT AVAILABLE' (4,507 people) written as 'Unnamed area'; trailing spaces stripped ('North ').
+Cross-check: India population-weighted mean 49.8 here against 47.1 in ACAG's own region summary
+(archive/V6GL0204/RegionSummaries/GlobalPM25-V6GL0203-Annual-1998-2023-wThresFrac.csv, labelled V6GL0203 and weighted by
+ACAG's population); states differ from ACAG's state summary by -7 to +9 µg/m³, most within ±5 (largest: Assam +9.0,
+Lakshadweep -6.8). Running the same
+script on the 0.01° file gives 50.2, so resolution is not the gap; the label suggests the summary is the earlier
+V6.GL.02.03 data, which V6.GL.02.04 revised for 'abnormally low values'.
+WorldPop R2025A puts fewer people in the densest cores than the census does (Mumbai island ~0.9 million) and more in some
+surrounding districts; this moves district weights within a state, not the cities' populations (cities.csv).
+"""
+
+["exposure_gbd2019.csv"]
+source = "India State-Level Disease Burden Initiative Air Pollution Collaborators (Pandey A, Brauer M, Cropper ML, et al.). Health and economic impact of air pollution in the states of India: the Global Burden of Disease Study 2019. Lancet Planet Health 2021; 5: e25-38. Appendix (mmc1.pdf)."
+url = "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7805008/supplementaryFiles"
+catalog = "https://pmc.ncbi.nlm.nih.gov/articles/PMC7805008/"
+sha256 = "1382e04dae7490e41835dda93461c4eaef35c3f1761151140a155269d619da72"
+locator = "Appendix table 3 'PM2.5 concentration, use of solid fuels, and ozone concentration in the states of India, 2019', report p. 18 (PDF p. 19), column 'Population-weighted mean ambient PM2.5 µg/m³ (95% UI)'. sha256 is of mmc1.pdf."
+retrieved = "2026-11-10"
+licence = "CC BY 4.0 (article and appendix, as stated on the article)"
+method = "transcribed"
+script = "scripts/build_exposure_gbd2019.py"
+notes = """
+Columns: state, gbd_region (the row as printed), year (2019), pm25, pm25_lower, pm25_upper (95% UI).
+Extracted with pdftotext -layout by the script. The paper groups 'Jammu & Kashmir and Ladakh' and 'Other small union
+territories' (Andaman and Nicobar Islands, Chandigarh, Dadra and Nagar Haveli, Daman and Diu, Lakshadweep, Puducherry,
+as listed in the main text, Methods); each member state carries its group's value. The India row is kept (state 'India').
+Population for weighting is not in the table: airhealth.exposure takes each state's 2019 total from the official
+projections (baseline), so the weighted India mean (90.9) differs from the printed 91.7.
+Checks in the script: India 91.7 (69.6-113.9), Kerala 15.8 (13.0-18.7), Delhi 217.6 (117.9-297.3) equal the main text.
+Spot check by eye against the rendered page, 2026-11-10: Bihar, Uttar Pradesh, Manipur, Rajasthan, Haryana, Sikkim, Goa,
+Other small union territories (24 cells), all match.
+"""
+
+["exposure_cpcb.csv"]
+source = "Central Pollution Control Board continuous ambient air quality monitoring stations (CAAQMS), 15-minute data compiled by Vonter/india-cpcb-aqi (parquet releases 2016-2025), as downloaded by diwali/download.sh."
+url = "https://github.com/Vonter/india-cpcb-aqi/releases"
+locator = "diwali/data/raw/cpcb-air-quality-YYYY.parquet (git-ignored), columns City, State, Station ID, Timestamp, 'PM2.5 (µg/m³)', 'PM10 (µg/m³)'; cities and CPCB city names from diwali/config.py CITIES."
+retrieved = "2026-11-09"
+licence = "ODbL 1.0 (the compilation); the derived table is shared under ODbL 1.0."
+method = "derived"
+script = "scripts/build_exposure_cpcb.py"
+notes = """
+Columns: city, state, year, pm25 (mean over the year's hours of the median across the city's stations of station-hour
+means, µg/m³), stations (stations with any valid hour that year), hours_share (share of the year's hours with a city value).
+The raw files hold whole calendar years (1 Jan 00:00 to 31 Dec 23:45, IST wall-clock, every year 2016-2025; checked in the
+script). QC is the Diwali track's (diwali/extract.py), applied to the whole year.
+City-years with under 75% of hours are dropped: Ahmedabad 2016 (45%), Kolkata 2016 (0%), Ahmedabad 2017 (40%), Jaipur 2017
+(37%), Mumbai 2018 (59%), Pune 2018 (50%), Kolkata 2018 (56%), Surat 2022 (14%), Pune 2022 (64%), Surat 2023 (74%).
+Not in the files at all: Jaipur 2016, Kolkata 2017, Surat 2016-2021. Surat has a single station in every year kept.
+"""
+
+["cities.csv"]
+source = "Office of the Registrar General & Census Commissioner, India. Census of India 2011, table A-04 (I): Towns and urban agglomerations classified by population size class in 2011 with variation between 1901 and 2011 - Class I."
+url = "https://censusindia.gov.in/nada/index.php/catalog/42876/download/46544"
+catalog = "https://censusindia.gov.in/nada/index.php/catalog/42876"
+sha256 = "8ab1bafd6e49aec4a6b2709398dbdeaab2b53bc369a53e62eacac601647a58dd"
+locator = "Sheet 'CLASS I', the numbered entries Greater Mumbai U.A. (1), Delhi U.A. (2), Kolkata U.A. (3), Chennai U.A. (4), Bruhat Bangalore U.A. (5), Hyderabad U.A. (6), Ahmadabad U.A. (7), Pune U.A. (8), Surat U.A. (9), Jaipur (10, a city; no UA), Lucknow U.A. (12); row 'Census year 2011', column 'Persons'."
+retrieved = "2026-11-10"
+licence = "Government of India publication; no licence stated on the catalog page. Factual statistics reproduced with attribution."
+method = "derived"
+script = "scripts/build_exposure_cpcb.py"
+notes = """
+Columns: city (as in diwali/config.py), state (from the CPCB files), population (Census 2011 persons), census_name (entry as
+printed), aqli_units and acag_units (';'-separated districts holding the city core in each satellite map; chosen by hand,
+and checked by the script to exist in the map's table). These are final 2011 figures, not the provisional ones.
+Spot check against the workbook, 2026-11-10: all eleven 2011 'Persons' cells match.
 """

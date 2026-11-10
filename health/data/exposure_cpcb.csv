@@ -1,0 +1,93 @@
+city,state,year,pm25,stations,hours_share
+Ahmedabad,Gujarat,2018,74.8,1,0.929
+Ahmedabad,Gujarat,2019,61.9,1,0.93
+Ahmedabad,Gujarat,2020,46.5,1,0.937
+Ahmedabad,Gujarat,2021,49.3,9,0.98
+Ahmedabad,Gujarat,2022,50.0,9,0.981
+Ahmedabad,Gujarat,2023,48.6,9,1.0
+Ahmedabad,Gujarat,2024,50.8,9,1.0
+Ahmedabad,Gujarat,2025,44.4,9,1.0
+Bengaluru,Karnataka,2016,43.2,3,0.899
+Bengaluru,Karnataka,2017,31.9,3,0.947
+Bengaluru,Karnataka,2018,32.1,8,0.931
+Bengaluru,Karnataka,2019,32.6,8,1.0
+Bengaluru,Karnataka,2020,27.7,8,1.0
+Bengaluru,Karnataka,2021,29.2,8,1.0
+Bengaluru,Karnataka,2022,31.9,9,1.0
+Bengaluru,Karnataka,2023,29.1,11,1.0
+Bengaluru,Karnataka,2024,30.7,11,1.0
+Bengaluru,Karnataka,2025,27.9,12,1.0
+Chennai,Tamil Nadu,2016,51.9,3,0.916
+Chennai,Tamil Nadu,2017,44.6,3,0.991
+Chennai,Tamil Nadu,2018,48.5,3,0.999
+Chennai,Tamil Nadu,2019,36.4,4,1.0
+Chennai,Tamil Nadu,2020,28.0,8,1.0
+Chennai,Tamil Nadu,2021,25.6,8,1.0
+Chennai,Tamil Nadu,2022,27.1,9,1.0
+Chennai,Tamil Nadu,2023,28.2,8,1.0
+Chennai,Tamil Nadu,2024,24.1,9,1.0
+Chennai,Tamil Nadu,2025,30.7,9,1.0
+Delhi,Delhi,2016,129.8,10,0.997
+Delhi,Delhi,2017,108.1,17,1.0
+Delhi,Delhi,2018,109.7,37,1.0
+Delhi,Delhi,2019,104.7,37,1.0
+Delhi,Delhi,2020,91.3,38,1.0
+Delhi,Delhi,2021,101.1,39,1.0
+Delhi,Delhi,2022,94.9,39,1.0
+Delhi,Delhi,2023,97.5,39,1.0
+Delhi,Delhi,2024,100.7,39,1.0
+Delhi,Delhi,2025,94.3,40,1.0
+Hyderabad,Telangana,2016,50.4,3,0.9
+Hyderabad,Telangana,2017,46.7,6,0.992
+Hyderabad,Telangana,2018,42.2,6,1.0
+Hyderabad,Telangana,2019,40.3,6,1.0
+Hyderabad,Telangana,2020,34.9,6,1.0
+Hyderabad,Telangana,2021,38.7,6,1.0
+Hyderabad,Telangana,2022,37.8,14,1.0
+Hyderabad,Telangana,2023,36.1,14,1.0
+Hyderabad,Telangana,2024,29.4,14,1.0
+Hyderabad,Telangana,2025,32.5,14,1.0
+Jaipur,Rajasthan,2018,55.9,3,0.999
+Jaipur,Rajasthan,2019,46.9,3,1.0
+Jaipur,Rajasthan,2020,43.8,3,1.0
+Jaipur,Rajasthan,2021,55.5,3,0.999
+Jaipur,Rajasthan,2022,54.5,3,0.998
+Jaipur,Rajasthan,2023,52.2,6,1.0
+Jaipur,Rajasthan,2024,53.9,6,1.0
+Jaipur,Rajasthan,2025,51.0,6,1.0
+Kolkata,West Bengal,2019,68.2,7,1.0
+Kolkata,West Bengal,2020,46.6,7,1.0
+Kolkata,West Bengal,2021,53.3,7,1.0
+Kolkata,West Bengal,2022,48.8,7,1.0
+Kolkata,West Bengal,2023,47.6,7,1.0
+Kolkata,West Bengal,2024,44.4,7,1.0
+Kolkata,West Bengal,2025,43.3,7,1.0
+Lucknow,Uttar Pradesh,2016,125.6,3,0.919
+Lucknow,Uttar Pradesh,2017,119.2,4,0.959
+Lucknow,Uttar Pradesh,2018,115.9,4,0.996
+Lucknow,Uttar Pradesh,2019,100.6,4,1.0
+Lucknow,Uttar Pradesh,2020,97.8,3,1.0
+Lucknow,Uttar Pradesh,2021,76.9,5,1.0
+Lucknow,Uttar Pradesh,2022,59.4,6,1.0
+Lucknow,Uttar Pradesh,2023,54.4,6,1.0
+Lucknow,Uttar Pradesh,2024,55.7,6,1.0
+Lucknow,Uttar Pradesh,2025,54.2,6,1.0
+Mumbai,Maharashtra,2016,38.1,1,0.946
+Mumbai,Maharashtra,2017,42.7,1,0.872
+Mumbai,Maharashtra,2019,34.7,10,0.989
+Mumbai,Maharashtra,2020,36.4,20,1.0
+Mumbai,Maharashtra,2021,44.1,21,1.0
+Mumbai,Maharashtra,2022,43.7,20,1.0
+Mumbai,Maharashtra,2023,42.0,29,1.0
+Mumbai,Maharashtra,2024,32.5,28,1.0
+Mumbai,Maharashtra,2025,33.0,29,1.0
+Pune,Maharashtra,2016,58.8,1,0.928
+Pune,Maharashtra,2017,39.7,1,0.86
+Pune,Maharashtra,2019,48.3,1,0.96
+Pune,Maharashtra,2020,40.0,6,0.859
+Pune,Maharashtra,2021,41.6,8,1.0
+Pune,Maharashtra,2023,48.6,9,0.949
+Pune,Maharashtra,2024,34.8,11,1.0
+Pune,Maharashtra,2025,37.4,12,1.0
+Surat,Gujarat,2024,31.2,1,0.784
+Surat,Gujarat,2025,29.2,1,0.806

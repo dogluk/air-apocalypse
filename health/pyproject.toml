@@ -11,6 +11,8 @@ dependencies = ["numpy", "pandas", "scipy", "matplotlib", "pyarrow"]
 
 [project.optional-dependencies]
 dev = ["pytest"]
+# Only for rebuilding data/ with scripts/build_exposure_*.py; the package never imports these.
+build = ["duckdb", "rasterio", "geopandas", "openpyxl"]
 
 [project.scripts]
 airhealth = "airhealth.cli:main"

@@ -21,7 +21,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from airhealth.baseline import state_name
+from airhealth.places import canonical_state
 
 DATA = Path(__file__).resolve().parents[1] / "data"
 NUM = r"[\d,]+(?:\.\d+)?"
@@ -76,7 +76,7 @@ def check_lifetables(t: pd.DataFrame, statement3: str) -> None:
         implied = lx[:-1] * (1 - qx[:-1])
         assert np.allclose(implied, lx[1:], atol=3), state
         # e0 printed in the table equals the one in Statement 3
-        name = state_name(state)  # Statement 3 spells Telangana; the table heading does not
+        name = canonical_state(state)  # Statement 3 spells Telangana; the table heading does not
         label = "India*" if name == "India" else name
         m = re.search(rf"^\s*{re.escape(label)}\s+({NUM})\s", statement3, re.M)
         assert m and num(m.group(1)) == g.ex.iloc[0], (state, m and m.group(1))

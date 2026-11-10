@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from airhealth import baseline, paths
+from airhealth import baseline, paths, places
 from airhealth.lifetable import e0
 
 # India, persons, as on 1st July 2022 ('000): Technical Group on Population
@@ -13,7 +13,7 @@ INDIA_2022_THOUSANDS = 1_377_901
 def published_e0() -> dict[str, float]:
     t = pd.read_csv(paths.DATA / "lifetables_srs.csv")
     at_birth = t[t.age_start == 0]
-    return {baseline.state_name(s): e for s, e in zip(at_birth.state, at_birth.ex)}
+    return {places.canonical_state(s): e for s, e in zip(at_birth.state, at_birth.ex)}
 
 
 def test_computed_e0_matches_srs_published():
