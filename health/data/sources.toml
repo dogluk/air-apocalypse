@@ -103,6 +103,8 @@ Checks in the script: districts sum to the gadm0 India population exactly; popul
 every gadm1 state value in every year to 0.01 (largest gap 0.005, rounding). Spot check against the raw file, 2026-11-10:
 Lucknow 2010 and 2023, Ernakulam 2023, Jaisalmer 2023 all match; India pm2023 41.0 (gadm0) equals the table's weighted mean.
 One Telangana district is named 'NA' in gadm2 (population 1,547,413); written as 'Unnamed area'.
+Use: airhealth.exposure keeps this file's split of each state among its districts and scales the state to the official
+projection (population_age_state.csv) for the year asked, 2011-2036; other years keep this population.
 """
 
 ["exposure_acag_total.csv"]
@@ -136,6 +138,8 @@ script on the 0.01° file gives 50.2, so resolution is not the gap; the label su
 V6.GL.02.03 data, which V6.GL.02.04 revised for 'abnormally low values'.
 WorldPop R2025A puts fewer people in the densest cores than the census does (Mumbai island ~0.9 million) and more in some
 surrounding districts; this moves district weights within a state, not the cities' populations (cities.csv).
+Use: airhealth.exposure keeps this file's split of each state among its districts and scales the state to the official
+projection (population_age_state.csv) for the year asked.
 """
 
 ["exposure_gbd2019.csv"]

@@ -6,12 +6,12 @@ Each case runs this tool with the curve, counterfactual and year of a published 
 
 | Case | Measures | Published | Ours | Ratio | Tolerance |
 |---|---|---|---|---|---|
-| jaganathan2024_share | share | 24.9% of deaths | 25.8% of deaths | 1.034 | ±15% |
-| jaganathan2024_deaths | deaths | 1.50 M deaths/yr | 2.33 M deaths/yr | 1.554 | ±65% |
-| aqli2025_india_years | years | 3.50 years | 3.52 years | 1.007 | ±5% |
+| jaganathan2024_share | share | 24.9% of deaths | 25.7% of deaths | 1.032 | ±15% |
+| jaganathan2024_deaths | deaths | 1.50 M deaths/yr | 2.10 M deaths/yr | 1.402 | ±50% |
+| aqli2025_india_years | years | 3.50 years | 3.55 years | 1.014 | ±5% |
 | aqli2025_delhi_years | years | 8.20 years | 8.17 years | 0.996 | ±5% |
-| burnett2018_india_maps | deaths | 2.22 M deaths/yr | 1.56 M deaths/yr | 0.701 | ±35% |
-| burnett2018_india_forced74 | deaths | 2.22 M deaths/yr | 2.16 M deaths/yr | 0.974 | ±15% |
+| burnett2018_india_maps | deaths | 2.22 M deaths/yr | 1.42 M deaths/yr | 0.642 | ±40% |
+| burnett2018_india_forced74 | deaths | 2.22 M deaths/yr | 1.98 M deaths/yr | 0.892 | ±15% |
 
 ## Why they differ
 
@@ -21,7 +21,7 @@ One paragraph per case. The full notes, with quotations from each source, are in
 
 **Published:** 24.9% (95% CI 19.5-32.5) of total mortality attributable to PM2.5 above 5 µg/m³, 2009-19. Source: <https://pmc.ncbi.nlm.nih.gov/articles/PMC11790315/>, Summary (Findings); Table 2, 'PM2.5 concentrations higher than WHO guidelines (≤5 μg/m3)', attributable fraction, both the 11-year total and 'Mean deaths per year' rows.
 
-**Ours:** 25.8% of deaths, from `loglinear_jaganathan` on the `aqli` map, 2014, India (population-weighted 42.9 µg/m³), counterfactual 5 µg/m³.
+**Ours:** 25.7% of deaths, from `loglinear_jaganathan` on the `aqli` map, 2014, India (population-weighted 42.8 µg/m³), counterfactual 5 µg/m³.
 
 Same curve and same formula as the paper. Our exposure is the AQLI map for 2014, the middle of the paper's 2009-19, which strips out dust and sea salt; the paper built its own monitor-calibrated map of total PM2.5 for every year. The shares land within 4% of each other.
 
@@ -29,19 +29,19 @@ Same curve and same formula as the paper. Our exposure is the AQLI map for 2014,
 
 **Published:** 1.5 million (95% CI 1.1-1.9) deaths a year attributable to PM2.5 above 5 µg/m³, mean over 2009-19. Source: <https://pmc.ncbi.nlm.nih.gov/articles/PMC11790315/>, Table 2, 'PM2.5 concentrations higher than WHO guidelines (≤5 μg/m3)', 'Mean deaths per year' row: 1·5 (1·1–1·9) million; Discussion: 'We estimated that 1·5 million (95% CI 1·1–1·9) deaths occurred annually'.
 
-**Ours:** 2.33 M deaths/yr, from `loglinear_jaganathan` on the `aqli` map, 2014, India (population-weighted 42.9 µg/m³), counterfactual 5 µg/m³.
+**Ours:** 2.10 M deaths/yr, from `loglinear_jaganathan` on the `aqli` map, 2014, India (population-weighted 42.8 µg/m³), counterfactual 5 µg/m³.
 
-The paper counts only deaths registered with the Civil Registration System, about 6.1 million a year, and many deaths in India are never registered (completeness ran from 30% to 100% by state). We count all deaths, from SRS death rates: about 9.05 million. The shares nearly match, so the counts differ by about that ratio, 1.5 times. Compare the share, not the count.
+The paper counts only deaths registered with the Civil Registration System, about 6.1 million a year, and many deaths in India are never registered (completeness ran from 30% to 100% by state). We count all deaths, from SRS death rates and the 2014 population: about 8.2 million. The shares nearly match, so the counts differ by about that ratio, 1.35 times, plus the 3% gap in the share. Compare the share, not the count.
 
-**Tolerance ±65%:** The paper's count is a share of the deaths registered in the Civil Registration System, which misses many deaths; ours is a share of all deaths as modelled from SRS death rates. The two denominators differ by about 1.5×, and the shares agree within 4% (previous case), so the counts are expected to differ by about 1.5× for that reason alone. The band is set to hold that understood gap, not to close it.
+**Tolerance ±50%:** The paper's count is a share of the deaths registered in the Civil Registration System, which misses many deaths; ours is a share of all deaths as modelled from SRS death rates. The two denominators differ by about 1.35×, and the shares agree within 4% (previous case), so the counts are expected to differ by about 1.4× for that reason alone. The band is set to hold that understood gap, not to close it. (It was ±65% while the map carried AQLI's 2023 population into 2014, which made the gap 1.55×; the map now carries the 2014 projection.)
 
 ### aqli2025_india_years: AQLI India fact sheet 2025
 
 **Published:** India, 41 µg/m³ in 2023: meeting the WHO guideline of 5 µg/m³ 'could add 3.5 years onto the life expectancy of an average Indian'. Source: <https://aqli.epic.uchicago.edu/files/India%20FactSheet_2025_GlobalWV.pdf>, Page 1, opening paragraph and first key take-away; data year 2023 (footnote 1: 'AQLI 2023 dataset', population-weighted).
 
-**Ours:** 3.52 years, from `aqli` on the `aqli` map, 2023, India (population-weighted 41.0 µg/m³), counterfactual 5 µg/m³.
+**Ours:** 3.55 years, from `aqli` on the `aqli` map, 2023, India (population-weighted 41.2 µg/m³), counterfactual 5 µg/m³.
 
-Same exposure table, same coefficient (0.98 years per 10 µg/m³) and same 5 µg/m³ target as AQLI, so only AQLI's rounding to one decimal separates the two.
+Same exposure table, same coefficient (0.98 years per 10 µg/m³) and same 5 µg/m³ target as AQLI. Our districts are weighted by the 2023 population projection of their state (AQLI's split within each state), which puts India at 41.2 µg/m³ against AQLI's 41.0; that and AQLI's rounding to one decimal are all that separate the two.
 
 ### aqli2025_delhi_years: AQLI India fact sheet 2025
 
@@ -55,16 +55,16 @@ As for India: same table, coefficient and target, so only rounding separates the
 
 **Published:** India 2015, population-weighted PM2.5 74.0 µg/m³, 100% rollback: 2,219 thousand excess deaths (GEMM NCD+LRI). Source: <https://pmc.ncbi.nlm.nih.gov/articles/PMC6156628/>, Table 1, row 'India', rollback 100%: PM2.5 exposure 74.0 µg/m3, GEMM NCD+LRI 2,219 (thousands). The authors' deposited calculator gives 2,219,057 (see data/sources.toml, curves_gemm_ncd_lri.csv).
 
-**Ours:** 1.56 M deaths/yr, from `gemm_ncd_lri` on the `aqli` map, 2015, India (population-weighted 45.2 µg/m³), counterfactual 2.4 µg/m³.
+**Ours:** 1.42 M deaths/yr, from `gemm_ncd_lri` on the `aqli` map, 2015, India (population-weighted 45.1 µg/m³), counterfactual 2.4 µg/m³.
 
-Same curve, year and counterfactual, but our map puts India's 2015 air at 45.2 µg/m³ against the paper's 74.0. AQLI removes dust and sea salt and uses a different model, so our air is cleaner and the deaths fewer.
+Same curve, year and counterfactual, but our map puts India's 2015 air at 45.1 µg/m³ against the paper's 74.0. AQLI removes dust and sea salt and uses a different model, so our air is cleaner and the deaths fewer. Our baseline also has about 11% fewer deaths per person from the causes GEMM covers (next case).
 
-**Tolerance ±35%:** Our map puts India's 2015 air far cleaner than the paper's exposure surface does (45.2 against 74.0 µg/m³), for a known reason (AQLI removes dust and sea salt; different model). The next case forces the paper's level and lands within 3%, which shows the gap here is exposure, not the curve or the arithmetic.
+**Tolerance ±40%:** Two known gaps multiply. Our map puts India's 2015 air far cleaner than the paper's exposure surface does (45.1 against 74.0 µg/m³), for a known reason (AQLI removes dust and sea salt; different model); at the same population and death rates that alone gives about 0.72 of the paper's deaths (this case over the next). And our baseline has about 11% fewer NCD+LRI deaths per person than the paper's, which the next case, at the paper's level, isolates (0.89). Together about 0.64. (The band was ±35% while the map carried AQLI's 2023 population, 9% above the 2015 projection, which hid the second gap.)
 
 ### burnett2018_india_forced74: Burnett et al. 2018 (GEMM NCD+LRI), India 2015, at the paper's 74.0 µg/m³
 
 **Published:** India 2015, population-weighted PM2.5 74.0 µg/m³, 100% rollback: 2,219 thousand excess deaths (GEMM NCD+LRI). Source: <https://pmc.ncbi.nlm.nih.gov/articles/PMC6156628/>, Table 1, row 'India', rollback 100%: PM2.5 exposure 74.0 µg/m3, GEMM NCD+LRI 2,219 (thousands).
 
-**Ours:** 2.16 M deaths/yr, from `gemm_ncd_lri` on the `aqli` map, 2015, India (every district forced to 74 µg/m³), counterfactual 2.4 µg/m³.
+**Ours:** 1.98 M deaths/yr, from `gemm_ncd_lri` on the `aqli` map, 2015, India (every district forced to 74 µg/m³), counterfactual 2.4 µg/m³.
 
-With every district set to the paper's 74.0 µg/m³, we land 2.6% below. Our population is 9% larger and our deaths per person from the causes GEMM covers are about 11% lower; the two nearly cancel. One national level also ignores how exposure is spread within India.
+With every district set to the paper's 74.0 µg/m³, we land 11% below. Our population is the 2015 projection, so the gap is in deaths per person: our baseline has about 11% fewer deaths from the causes GEMM covers, at ages 25 and over, than the paper's. One national level also ignores how exposure is spread within India.

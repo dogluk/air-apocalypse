@@ -11,11 +11,37 @@ AQLI_DELHI_2023 = 88.35
 
 @pytest.mark.parametrize("map_name", ["aqli", "acag_total"])
 def test_no_population_lost_in_join(map_name):
+    # The table as built, before cells() scales it to the projections.
     source_total = provenance.load_sources()[f"exposure_{map_name}.csv"]["population_total"]
-    c = exposure.cells(INDIA, map_name)
-    assert c.population.sum() == pytest.approx(source_total, rel=0.005)
-    missing = set(baseline.states()) - {"India"} - set(c.state)
+    t = exposure._table(map_name)
+    assert t[t.year == t.year.max()].population.sum() == pytest.approx(source_total, rel=0.005)
+    missing = set(baseline.states()) - {"India"} - set(t.state)
     assert not missing
+
+
+@pytest.mark.parametrize("map_name, year", [("aqli", 2014), ("aqli", 2023), ("aqli", None),
+                                            ("acag_total", None)])
+def test_map_population_is_the_projection_for_the_year(map_name, year):
+    t = exposure._table(map_name)
+    raw_year = t.year.max() if year is None else year
+    raw = t[t.year == raw_year]
+    c = exposure.cells(INDIA, map_name, year)
+    assert c.attrs["population_year"] == raw_year
+    for state in ("Bihar", "Delhi", "Kerala", "Ladakh"):
+        ours = c[c.state == state].set_index("unit").population
+        projected = baseline.load(state, raw_year).population.sum()
+        assert ours.sum() == pytest.approx(projected, rel=1e-9)
+        theirs = raw[raw.state == state].set_index("unit").population
+        assert (ours / ours.sum()).to_dict() == pytest.approx((theirs / theirs.sum()).to_dict())
+        one = exposure.cells(resolve(state), map_name, year).population.sum()
+        assert one == pytest.approx(projected, rel=1e-9)
+
+
+def test_map_population_outside_the_projections_is_the_maps_own():
+    c = exposure.cells(INDIA, "aqli", 2005)
+    raw = exposure._table("aqli")
+    assert c.population.sum() == raw[raw.year == 2005].population.sum()
+    assert c.attrs["population_year"] == 2023
 
 
 def test_delhi_aqli_matches_published():

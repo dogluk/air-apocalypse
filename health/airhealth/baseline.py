@@ -81,6 +81,12 @@ def states() -> list[str]:
     return list(dict.fromkeys(_population().state))
 
 
+def projection_years() -> range:
+    """The years the population projections cover (2011-2036)."""
+    y = _population().year
+    return range(int(y.min()), int(y.max()) + 1)
+
+
 def load(state: str, year: int | None = None) -> Baseline:
     pop = _population()
     rows = pop[pop.state == state]

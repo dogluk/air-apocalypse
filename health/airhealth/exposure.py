@@ -2,18 +2,28 @@
 
 Maps (sources and methods in data/sources.toml):
   aqli        AQLI Annual Update 2025, districts (GADM), 1998-2023; satellite PM2.5 with
-              dust and sea salt removed; AQLI's population.
+              dust and sea salt removed; district shares from AQLI's (LandScan) population.
   acag_total  ACAG V6.GL.02.04 total PM2.5, 2023, averaged to districts (geoBoundaries)
-              with WorldPop 2023 weights.
+              with WorldPop 2023 weights; district shares from WorldPop 2023.
   gbd2019     GBD 2019 state population-weighted means (Pandey et al. 2021), 2019; one
               value per state, population from the official projections (baseline).
   cpcb        Ground monitors, mean of hourly cross-station medians, for the cities in
-              diwali/config.py only; population is the Census 2011 urban agglomeration.
+              diwali/config.py only; population is the Census 2011 urban agglomeration,
+              the same in every year.
+
+Population on the district maps: each map carries one population (AQLI's and WorldPop's are
+both 2023 figures). cells() scales each state's districts so the state's total is the
+official projection (baseline.load) for the year asked for, keeping the map's split between
+districts; a state then has the same population here as in baseline.load, and a 2014 run
+uses 2014's people. With no year given, the year is the map's latest (2023 for both), scaled
+the same way. A year the projections do not cover (AQLI 1998-2010) keeps the map's own
+population. attrs["population_year"] names the year the population is for.
 
 cells() gives one row per district for the country or a state, one row for a district or
 city. A city on a satellite map is the population-weighted mean of the district(s) holding
-its core (data/cities.csv), carried with the city's own population. The year defaults to
-the map's latest; the frame's attrs record map and year.
+its core (data/cities.csv), carried with the city's own population (Census 2011, as on cpcb).
+The year defaults to the map's latest; the frame's attrs record map, year and
+population_year.
 """
 from functools import cache
 
@@ -32,11 +42,24 @@ LABELS = {
 }
 COLUMNS = ["state", "unit", "pm25", "population"]
 DISTRICT_MAPS = {"aqli": "aqli_units", "acag_total": "acag_units"}
+MAP_POPULATION_YEAR = {"aqli": 2023, "acag_total": 2023}  # see data/sources.toml
 
 
 @cache
 def _table(map_name: str) -> pd.DataFrame:
     return pd.read_csv(paths.DATA / f"exposure_{map_name}.csv")
+
+
+@cache
+def _districts(map_name: str, year: int) -> tuple[pd.DataFrame, int]:
+    """A district map's rows for one year, each state scaled to its projected population."""
+    t = _table(map_name)
+    t = t[t.year == year]
+    if year not in baseline.projection_years():
+        return t, MAP_POPULATION_YEAR[map_name]
+    projected = {s: baseline.load(s, year).population.sum() for s in t.state.unique()}
+    return t.assign(population=t.population * t.state.map(projected)
+                    / t.groupby("state").population.transform("sum")), year
 
 
 @cache
@@ -67,8 +90,10 @@ def cells(place: Place, map_name: str, year: int | None = None) -> pd.DataFrame:
     t = _table(map_name)
     y = _year(t, map_name, year)
     t = t[t.year == y]
+    population_year = y
 
     if map_name == "cpcb":
+        population_year = 2011
         if place.kind != "city":
             raise ValueError(f"cpcb covers only the cities in diwali/config.py "
                              f"({', '.join(_cities().index)}), not a {place.kind}")
@@ -88,6 +113,7 @@ def cells(place: Place, map_name: str, year: int | None = None) -> pd.DataFrame:
                        population=[baseline.load(s, y).population.sum() for s in t.state])
 
     else:
+        t, population_year = _districts(map_name, y)
         if place.kind == "country":
             out = t
         elif place.kind == "state":
@@ -103,11 +129,12 @@ def cells(place: Place, map_name: str, year: int | None = None) -> pd.DataFrame:
             out = pd.DataFrame({"state": [place.state], "unit": [place.name],
                                 "pm25": [np.average(d.pm25, weights=d.population)],
                                 "population": [c.population]})
+            population_year = 2011
 
     out = out[COLUMNS].reset_index(drop=True)
     if out.empty:
         raise KeyError(f"{map_name} has no rows for {place.name!r}")
-    out.attrs.update(map=map_name, year=y)
+    out.attrs.update(map=map_name, year=y, population_year=population_year)
     return out
 
 
