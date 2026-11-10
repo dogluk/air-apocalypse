@@ -10,10 +10,9 @@ import statsmodels.formula.api as smf
 from matplotlib import font_manager as fm
 from scipy import stats
 
-from config import CHARTS, DATA, DIWALI, ROOT
+from config import CHARTS, DATA, DIWALI, FONTS
 
 warnings.filterwarnings("ignore")
-FONTS = ROOT / "fonts"
 SERIF = fm.FontProperties(fname=FONTS / "youngserif.ttf")
 SANS = fm.FontProperties(fname=FONTS / "instrumentsans-regular.ttf")
 SANS_B = fm.FontProperties(fname=FONTS / "instrumentsans-semibold.ttf")

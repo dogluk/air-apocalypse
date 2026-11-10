@@ -13,9 +13,8 @@ import numpy as np
 import pandas as pd
 from matplotlib import font_manager as fm
 
-from config import CHARTS, DATA, ROOT
+from config import CHARTS, DATA, FONTS
 
-FONTS = ROOT / "fonts"
 SERIF = fm.FontProperties(fname=FONTS / "youngserif.ttf")
 SANS = fm.FontProperties(fname=FONTS / "instrumentsans-regular.ttf")
 SANS_B = fm.FontProperties(fname=FONTS / "instrumentsans-semibold.ttf")

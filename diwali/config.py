@@ -7,6 +7,7 @@ RAW = ROOT / "data" / "raw"
 FIRES = ROOT / "data" / "fires"
 DATA = ROOT / "data"
 CHARTS = ROOT / "charts"
+FONTS = ROOT.parent / "fonts"   # shared across the repo's analysis tracks
 
 # Lakshmi Puja night (the main firework night in North India), per Drik Panchang, New Delhi.
 # In Karnataka the festival runs Naraka Chaturdashi (D-1) -> Lakshmi Puja (D) -> Bali Padyami (D+1 or D+2),
