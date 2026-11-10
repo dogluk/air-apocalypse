@@ -5,3 +5,6 @@ __pycache__/
 data/raw/
 data/fires/
 data/hourly.parquet
+
+# pull logs
+data/trends_pull.log
