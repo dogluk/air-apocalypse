@@ -5,6 +5,7 @@
   airhealth burden PLACE [--map M] [--counterfactual C] [--curves a,b] [--deaths srs|model]
   airhealth chart PLACE [PLACE ...] [--map M] [--age A] [--out FILE]
   airhealth run FILE [--map M] [--curves a,b] [--n N] [--seed S] [--charts DIR] [--deaths ...]
+  airhealth dashboard [--port 8765] [--no-open]     a local page over the same functions
 
 --deaths srs (the default) scales death counts to the SRS's own crude death rate for each
 state, 2020-24; --deaths model leaves them as projected population × life-table death rates.
@@ -195,6 +196,11 @@ def cmd_list(args) -> None:
         print(f"{r['name']}  [{extra}]\n  {r['label']}\n  Source: {r['source']}\n")
 
 
+def cmd_dashboard(args) -> None:
+    from . import dashboard  # http.server only when asked for
+    dashboard.serve(port=args.port, open_browser=not args.no_open)
+
+
 def _parser() -> argparse.ArgumentParser:
     shared = argparse.ArgumentParser(add_help=False)
     shared.add_argument("--json", action="store_true", default=argparse.SUPPRESS,
@@ -252,6 +258,11 @@ def _parser() -> argparse.ArgumentParser:
     r.add_argument("--charts", metavar="DIR", help="also draw the results and spread charts here")
     deaths_flag(r)
     r.set_defaults(func=cmd_run)
+
+    d = sub.add_parser("dashboard", parents=[shared], help="open a local page to explore results")
+    d.add_argument("--port", type=int, default=8765)
+    d.add_argument("--no-open", action="store_true", help="do not open a browser tab")
+    d.set_defaults(func=cmd_dashboard)
 
     ls = sub.add_parser("list", parents=[shared], help="curves, maps or places, each with its source")
     ls.add_argument("what", choices=("curves", "maps", "places"))

@@ -20,5 +20,8 @@ airhealth = "airhealth.cli:main"
 [tool.setuptools]
 packages = ["airhealth"]
 
+[tool.setuptools.package-data]
+airhealth = ["*.html"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]

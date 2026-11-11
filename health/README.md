@@ -146,6 +146,19 @@ $ airhealth chart Delhi India
 The shaded band starts at 84 µg/m³, the highest long-term exposure in any group of people
 behind the GEMM curve. Everything to its right is extrapolation.
 
+### `dashboard`: a local page over the same numbers
+
+```
+airhealth dashboard            # opens http://127.0.0.1:8765/ ; Ctrl-C to stop
+```
+
+One page, served only to this machine, with a place picker, the exposure map, the death-count
+basis and From/To sliders. It shows what the change buys on every curve, the burden at the
+map's level, the curve shapes, how the three state-level maps disagree, and a table of every
+input the result depends on with which of them can be switched today. It calls the same
+functions as `compare` and `burden`, so the numbers match the terminal (`tests/test_dashboard.py`
+checks this). It always uses each map's latest year.
+
 ### `run`: an intervention, with odds, cost and uncertainty
 
 An intervention is a short text file (next section). `run` draws 5,000 versions of it: each
@@ -479,7 +492,11 @@ gap is this tool's own: its 2014 and 2015 counts are too low (see the limitation
 
 - **IHME-tier curves** (GBD 2019 and 2023, GEMM five causes). They need files IHME will not
   let us redistribute; [`IHME_DOWNLOADS.md`](IHME_DOWNLOADS.md) says what to download and
-  where to put it. Today the tool names them as unavailable.
+  where to put it. The risk-curve files are downloaded (2026-11-11); the deaths-by-cause
+  queries are not, and no loader exists yet, so the tool still names them as unavailable.
+- **A switch for every input.** Only the curve, the map, the death-count basis and the
+  counterfactual can be switched today. The life table, population, cause shares and the
+  rest are fixed in code. Design note: [`../docs/specs/2026-11-11-source-switches.md`](../docs/specs/2026-11-11-source-switches.md).
 - **The run to 2050**: a year-by-year cohort simulation with an ageing population, which
   separates the ageing effect from the intervention's.
 - **Valuation presets**: putting money values on deaths and life-years (value of a
@@ -487,13 +504,14 @@ gap is this tool's own: its 2014 and 2015 counts are too low (see the limitation
   reported now.
 - **The Surat case**: reproducing Greenstone et al.'s "benefits at least 25× costs" for
   Surat's emissions trading scheme.
-- **A web page.** The JSON output (`--json`) is the intended interface for one.
+- **A public web page.** `airhealth dashboard` is a local page only. The JSON output
+  (`--json`) is the intended interface for a public one.
 
 ## Layout
 
 ```
 airhealth/        the package: places, exposure, baseline, lifetable, curves, impact,
-                  intervention, lag, simulate, report, charts, cli
+                  intervention, lag, simulate, report, charts, cli, dashboard (+ .html)
 data/             committed tables, each with an entry in data/sources.toml; MISSING.md
 data_local/       IHME files, never committed (git-ignored)
 interventions/    the template and three examples

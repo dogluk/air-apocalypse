@@ -172,6 +172,14 @@ question someone should have answered in print.
 **What would kill it:** GBD's newer rounds having already converged on the satellite values,
 or a paper that already reconciles the two. Check GBD 2021 and 2023 state means first.
 
+**First check, 2026-11-11: it has largely converged.** IHME's GBD 2023 exposure file gives
+India **53.6 µg/m³ for 2019 and 54.1 for 2023**, against 90.9 for 2019 in the GBD 2019 round.
+That is within a few points of ACAG's total (49.8). So the question shrinks from "why do the
+maps disagree" to "what did IHME change between rounds, and how many of the burden figures
+still quoted rest on the old map". State values were not checked (the file identifies places
+by number and the key is not among the downloaded files). The file is IHME's and is not in
+this repo; see `health/IHME_DOWNLOADS.md`.
+
 **Why it matters:** the choice of map moves where every place sits on the risk curve. On a
 bending curve, a city at 90 and the same city at 220 are in different regimes, and an
 intervention's benefit changes with it.

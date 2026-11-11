@@ -8,6 +8,41 @@ non-commercial user agreement.
 Status key: **[confirmed]** = read on a public page on 2026-11-10. **[unconfirmed]** = could not be
 checked without logging in; look at what the tool offers and tell us if it differs.
 
+## Status, 2026-11-11
+
+**Part A is done; Part B (the queries) is not.** The Part A files are in
+`health/data_local/ihme_raw/` under IHME's own filenames, with the zips unpacked beside
+them. They were **not** renamed to the names Part A asks for: the loader is not written yet,
+and it should read the files as IHME delivers them. Treat the filenames in Part A below as
+superseded by this table.
+
+| What | Where under `data_local/ihme_raw/` | Read on 2026-11-11 |
+|---|---|---|
+| GBD 2019 risk curves, means | `IHME_GBD_2019_PM_RISK_SUMM/` (38 CSVs) | Columns `label, exposure_spline, mean, lower, upper`; ratio scale (1 at zero exposure). One file each for COPD, LRI, lung cancer, type 2 diabetes, birth outcomes; IHD and stroke have one file per five-year age from 25 to 95. |
+| GBD 2019 TMREL draws | `IHME_GBD_2019_PM_RISK_TMREL_DRAWS_Y2021M01D06.csv` | 1,000 draws, one column `x`. |
+| GBD 2019 information sheet | `IHME_GBD_2019_PM_RISK_INFO_SHEET_Y2021M03D18_0.pdf` | Not read yet. Read it before writing the loader. |
+| GBD 2023 risk curves | `IHME_GBD_2023_AIR_POLLUTION_1990_2021_RR_CURVES/` | PM2.5 mean files for **seven causes of death**: COPD, type 2 diabetes, lung cancer, dementia, IHD, LRI, stroke (plus birth weight and gestational age; NO2 and ozone files are not ours). One file per cause, **no age split** for IHD or stroke. Exposure runs 0 to 2,500 in steps of 0.1. |
+| GBD 2023 exposure | `IHME_GBD_2023_AIR_POLLUTION_1990_2023_PM/` | One CSV of population-weighted means by `location_id` and year (925 locations, 1990-2023), plus yearly rasters (`.TIF`). |
+| Codebook | `IHME_GBD_2021_AIR_POLLUTION_1990_2023_CODEBOOK_Y2024M06D06.csv` | Describes the exposure CSV. Lists India as location 163; **does not list Indian states**. |
+
+Two traps for whoever writes the loader:
+
+1. **The GBD 2023 files are on two scales.** The four dated 2022 (COPD, diabetes, lung
+   cancer, birth outcomes) have columns `cause, exposure, mean, lower, upper` and start at 1:
+   a risk ratio. The four dated 2025 (IHD, stroke, LRI, dementia) have columns
+   `risk, mean, lower, upper` and start at 0: almost certainly the log of the ratio. Confirm
+   against IHME's documentation before using either.
+2. **State location ids are not in the codebook.** The exposure CSV does contain rows that
+   look like Indian states, but the ids must come from IHME's location hierarchy, which is
+   not among these files. The Part B query results carry `location_name`, which settles it.
+
+A first look at the exposure CSV: India (location 163) is **53.6 µg/m³ in 2019 and 54.1 in
+2023**. GBD 2019, as printed in Pandey et al. 2021, had 90.9. So IHME's own newer round has
+moved most of the way to the satellite maps (AQLI 41.2, ACAG 49.8). This bears on gap G7 in
+`lit/gaps.md`. Not yet wired into the tool.
+
+Still to download: everything in Part B, by web query with a free IHME login.
+
 ## Part A. Relative-risk curves (public, no login)
 
 1. Open https://ghdx.healthdata.org/record/ihme-data/global-burden-disease-study-2019-gbd-2019-particulate-matter-risk-curves
