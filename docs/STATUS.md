@@ -2,6 +2,32 @@
 
 Last updated 2026-11-11. Read this first when picking the project up.
 
+## In plain words (rewritten at the end of every session)
+
+**What we are building.** A calculator: "if PM2.5 in place X goes from A to B, how many deaths
+a year are avoided and how many years of life are gained?" It answers on five published risk
+curves side by side, never one, because they disagree by several times. Later it prices
+interventions (cost per life-year) and becomes a public page on dogl.uk.
+
+**Where it is.** The calculator works for India, every state and ten cities, from the command
+line and from a local dashboard (`airhealth dashboard`). It checks itself against three
+published studies and lands where it should, with the gaps explained.
+
+**Last session (2026-11-11).** Fixed death counts for years before 2020: they used 2020-24
+death rates and came out up to a sixth wrong. Now each year uses the government survey's (SRS)
+own figures for that year. Committed locally (`4b67ed2`), not pushed.
+
+**Next session.** "A switch for every input" (next builds, item 1). Today some inputs have
+one source hard-wired: death rates by age, population, cause-of-death shares. Where credible
+sources disagree, the tool should let you pick, say which one it used, and show how much the
+answer moves between them. Concretely: add the UN's population and death estimates (World
+Population Prospects) as a second source, put a dropdown for each input on the dashboard,
+and print the spread. Three questions in the design note; defaults are proposed there.
+
+**Waiting on Akash.** (1) The IHME downloads, Part B of `health/IHME_DOWNLOADS.md`: about an
+hour of form-filling on IHME's site with a free login; unblocks the GBD risk curves.
+(2) When to push.
+
 ## What exists
 
 - `diwali/`: finished 10-city, 10-year PM2.5 analysis.
