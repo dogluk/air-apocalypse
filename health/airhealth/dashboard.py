@@ -8,16 +8,18 @@ to disk and nothing leaves the machine. Standard library only.
 """
 import json
 import webbrowser
+from functools import cache
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 import numpy as np
 
-from . import baseline, curves, exposure, places, report
+from . import baseline, curves, exposure, paths, places, report
 from .impact import Change, steady_state
 
 PAGE = Path(__file__).with_name("dashboard.html")
+SHAPES = paths.DATA / "districts.geojson"     # scripts/build_district_shapes.py
 SHAPE_AGE = 60
 STATE_MAPS = ("aqli", "acag_total", "gbd2019")
 
@@ -69,6 +71,55 @@ def _default_map(place: places.Place) -> str:
     return "aqli"
 
 
+@cache
+def _districts() -> list[dict]:
+    """Properties of every drawn district: state, unit (ACAG's name), aqli_unit."""
+    return [f["properties"] for f in json.loads(SHAPES.read_text())["features"]
+            if f["properties"]["layer"] == "district"]
+
+
+def _key(state: str, unit: str) -> str:
+    return f"{state}|{unit}"
+
+
+def district_values(map_name: str, year: int) -> dict[str, float]:
+    """PM2.5 for each drawn district on the map: its own value (ACAG), its AQLI district's
+    (AQLI, older boundaries; absent when none matches), its state's (GBD 2019), or its
+    city's (CPCB, the city's districts only)."""
+    t = exposure._table(map_name)
+    t = t[t.year == year]
+    if map_name == "gbd2019":
+        by_state = dict(zip(t.state, t.pm25))
+        return {_key(d["state"], d["unit"]): float(by_state[d["state"]])
+                for d in _districts() if d["state"] in by_state}
+    if map_name == "cpcb":
+        out = {}
+        for city, pm25 in zip(t.city, t.pm25):
+            c = exposure._cities().loc[city]
+            out.update({_key(c.state, u): float(pm25) for u in c.acag_units.split(";")})
+        return out
+    by_unit = {(s, u): float(v) for s, u, v in zip(t.state, t.unit, t.pm25)}
+    col = "aqli_unit" if map_name == "aqli" else "unit"
+    return {_key(d["state"], d["unit"]): by_unit[d["state"], d[col]]
+            for d in _districts() if (d["state"], d[col]) in by_unit}
+
+
+def selected_districts(place: places.Place) -> list[str]:
+    """The drawn districts that make up the place; empty for India (nothing singled out)."""
+    if place.kind == "state":
+        return [_key(d["state"], d["unit"]) for d in _districts() if d["state"] == place.name]
+    if place.kind == "city":
+        c = exposure._cities().loc[place.name]
+        return [_key(c.state, u) for u in c.acag_units.split(";")]
+    return []
+
+
+def _years(map_name: str) -> list[int]:
+    """The map's years that results can run for (the population projections start in 2011)."""
+    usable = baseline.projection_years()
+    return [int(y) for y in sorted(exposure._table(map_name).year.unique()) if y in usable]
+
+
 def meta() -> dict:
     run, unavailable = curves.select()
     conc = np.arange(0, 251, 2.5)
@@ -94,7 +145,8 @@ def meta() -> dict:
     cat = curves.catalogue().set_index("name")
     return dict(
         places=plist,
-        maps=[dict(name=m, short=MAP_SHORT[m], label=exposure.LABELS[m]) for m in exposure.MAPS],
+        maps=[dict(name=m, short=MAP_SHORT[m], label=exposure.LABELS[m], years=_years(m))
+              for m in exposure.MAPS],
         curves=[dict(name=c.name, short=SHORT.get(c.name, c.name), label=c.label, floor=c.floor,
                      min_age=c.min_age, kind=c.kind, source=c.source) for c in run],
         unavailable=[dict(name=n, short=SHORT.get(n, n), label=cat.label[n], why=why)
@@ -110,8 +162,9 @@ def result(q: dict) -> dict:
     place = places.resolve(q["place"], kind=q.get("kind") or None)
     map_name = q.get("map") or _default_map(place)
     deaths = q.get("deaths") or "srs"
+    year = int(q["year"]) if q.get("year") not in (None, "") else None
     run, unavailable = curves.select()
-    level = float(exposure.mean(place, map_name))
+    level = float(exposure.mean(place, map_name, year))
     start = float(q["from"]) if q.get("from") not in (None, "") else None
     to = float(q["to"])
     if to < 0 or (start is not None and start < 0):
@@ -120,12 +173,14 @@ def result(q: dict) -> dict:
     notes = ([f"Starting level is the map's, {level:.1f} µg/m³"] if start is None else
              [f"Starting level set to {start:g} µg/m³; the map supplies population only"])
     change = Change(delta=to - origin)
-    cmp_ = [steady_state(place, c, map_name, change, pm25_override=start, deaths=deaths)
-            for c in run]
-    bur = [steady_state(place, c, map_name, Change(to=c.floor), deaths=deaths) for c in run]
+    cmp_ = [steady_state(place, c, map_name, change, year=year, pm25_override=start,
+                         deaths=deaths) for c in run]
+    bur = [steady_state(place, c, map_name, Change(to=c.floor), year=year, deaths=deaths)
+           for c in run]
     label = report.place_label(cmp_[0])
     return dict(
-        map=map_name, map_level=level, origin=origin, to=to,
+        map=map_name, year=cmp_[0].year, map_level=level, origin=origin, to=to,
+        districts=district_values(map_name, cmp_[0].year), selected=selected_districts(place),
         compare=report.to_json(cmp_, unavailable, f"{label}: PM2.5 {origin:.4g} → {to:g} µg/m³", notes),
         burden=report.to_json(bur, unavailable,
                               f"{label}: deaths attributable to PM2.5 above each curve's own floor", []),
@@ -153,6 +208,8 @@ class Handler(BaseHTTPRequestHandler):
         try:
             if url.path in ("/", "/index.html"):
                 self._send(200, PAGE.read_bytes(), "text/html; charset=utf-8")
+            elif url.path == "/api/shapes":
+                self._send(200, SHAPES.read_bytes(), "application/geo+json")
             elif url.path == "/api/meta":
                 self._json(200, meta())
             elif url.path == "/api/result":

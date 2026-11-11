@@ -12,6 +12,7 @@
   --ink: #0b0b0b; --ink2: #52514e; --ink3: #85837c;
   --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
   --band: rgba(208, 59, 59, .07); --mark: #0b0b0b;
+  --q1: #cde2fb; --q2: #9ec5f4; --q3: #6da7ec; --q4: #3987e5; --q5: #256abf; --q6: #184f95; --q7: #0d366b;
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -20,6 +21,7 @@
     --ink: #f0efec; --ink2: #c3c2b7; --ink3: #8e8d85;
     --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
     --band: rgba(230, 103, 103, .10); --mark: #f0efec;
+    --q1: #0d366b; --q2: #184f95; --q3: #256abf; --q4: #3987e5; --q5: #6da7ec; --q6: #9ec5f4; --q7: #cde2fb;
   }
 }
 * { box-sizing: border-box; }
@@ -64,6 +66,12 @@ td.l, th.l { text-align: left; }
   padding: 6px 9px; border-radius: 6px; font-size: 12px; line-height: 1.4; display: none; z-index: 20; max-width: 300px; }
 .scroll { overflow-x: auto; }
 .err { color: var(--s2); }
+.mapwrap svg { width: 100%; max-width: 760px; height: auto; display: block; margin: 0 auto; }
+.mapwrap path.d { stroke: var(--surface); stroke-width: .35; }
+.mapwrap path.d:hover { stroke: var(--ink); stroke-width: 1; }
+.mapwrap path.s { fill: none; stroke: var(--ink3); stroke-width: .6; pointer-events: none; }
+.mapwrap path.sel { fill: none; stroke: var(--ink); stroke-width: 2; pointer-events: none; }
+.sw { display: inline-block; width: 14px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
 </style>
 </head>
 <body>
@@ -75,6 +83,7 @@ td.l, th.l { text-align: left; }
   <div class="card controls" id="controls">
     <label>Place <select id="place"></select></label>
     <label>Exposure map <select id="map"></select></label>
+    <label>Year <select id="year"></select></label>
     <label>Death count
       <span class="seg" id="deaths">
         <button data-v="srs" aria-pressed="true" title="Scaled to the government survey's death rate">Survey-scaled</button>
@@ -109,6 +118,15 @@ td.l, th.l { text-align: left; }
       <p class="sub">The place's level on the chosen map against each curve's own safe floor. This is the "burden" figure
       that papers quote; it does not move with the From and To settings.</p>
       <div id="burChart"></div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2 id="mapTitle">PM2.5 by district</h2>
+      <p class="sub" id="mapSub"></p>
+      <div class="legend" id="mapLegend"></div>
+      <div id="mapChart" class="mapwrap"></div>
     </div>
   </div>
 
@@ -322,13 +340,71 @@ function draw() {
   bars($("cmpChart"), RES.compare.rows, metric, METRICS[metric].f, rowTip);
   $("cmpTitle").textContent = `${METRICS[metric].name}: ${fmt.pm(RES.origin)} → ${fmt.pm(RES.to)} µg/m³`;
   bars($("burChart"), RES.burden.rows, "deaths_averted", fmt.int, rowTip);
-  shapes(); exposureChart(); table();
+  shapes(); exposureChart(); table(); drawMap();
+}
+
+// ---- district map -----------------------------------------------------------------------
+const BINS = [15, 25, 35, 50, 70, 100];          // µg/m³; fixed so the maps compare by eye
+const binOf = v => BINS.findIndex(b => v < b) === -1 ? BINS.length : BINS.findIndex(b => v < b);
+const MAP_WHAT = {
+  aqli: "Each district takes the value of the AQLI district with the same name. AQLI uses older boundaries, so districts created since (and a few renamed beyond recognition) have no value.",
+  acag_total: "Each district's own population-weighted mean.",
+  gbd2019: "GBD 2019 is a state-level map: every district takes its state's value.",
+  cpcb: "Ground monitors in ten cities only: each city's districts take its annual mean; everything else has no value.",
+};
+let GEO = null, PATHS = null;
+function project(geo) {
+  const k = Math.cos(22 * Math.PI / 180), xs = [], ys = [];
+  const walk = (c, f) => typeof c[0] === "number" ? f(c) : c.forEach(x => walk(x, f));
+  geo.features.forEach(f => walk(f.geometry.coordinates, ([x, y]) => { xs.push(x * k); ys.push(-y); }));
+  const x0 = Math.min(...xs), y0 = Math.min(...ys), w = Math.max(...xs) - x0, h = Math.max(...ys) - y0;
+  const W = 760, s = W / w, H = h * s;
+  const pt = ([x, y]) => `${((x * k - x0) * s).toFixed(1)},${((-y - y0) * s).toFixed(1)}`;
+  const ring = r => "M" + r.map(pt).join("L") + "Z";
+  const d = g => (g.type === "Polygon" ? [g.coordinates] : g.coordinates).map(p => p.map(ring).join("")).join("");
+  return { W, H, d: geo.features.map(f => ({ p: f.properties, d: d(f.geometry) })) };
+}
+async function drawMap() {
+  if (!GEO) { GEO = await (await fetch("/api/shapes")).json(); PATHS = project(GEO); }
+  const host = $("mapChart"); host.innerHTML = "";
+  const vals = RES.districts, sel = new Set(RES.selected);
+  const svg = el("svg", { viewBox: `0 0 ${PATHS.W} ${PATHS.H.toFixed(0)}`, role: "img",
+    "aria-label": `PM2.5 by district, ${mapShort(RES.map)} ${RES.year}` });
+  const defs = el("defs"), pat = el("pattern", { id: "nodata", width: 4, height: 4, patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" });
+  pat.append(el("rect", { width: 4, height: 4, fill: "var(--grid)" }), el("line", { x1: 0, y1: 0, x2: 0, y2: 4, stroke: "var(--line)", "stroke-width": 1.5 }));
+  defs.append(pat); svg.append(defs);
+  const districts = PATHS.d.filter(x => x.p.layer === "district"), states = PATHS.d.filter(x => x.p.layer === "state");
+  districts.forEach(x => {
+    const key = x.p.state + "|" + x.p.unit, v = vals[key];
+    const path = el("path", { d: x.d, class: "d", fill: v == null ? "url(#nodata)" : `var(--q${binOf(v) + 1})` });
+    path.addEventListener("mousemove", ev => tip(`<b>${x.p.unit}</b>, ${x.p.state}<br>` + (v == null ? "no value on this map"
+      : `${fmt.pm(v)} µg/m³` + (RES.map === "aqli" && x.p.aqli_unit !== x.p.unit ? ` (AQLI district: ${x.p.aqli_unit})` : "")), ev));
+    path.addEventListener("mouseleave", () => tip(null));
+    svg.append(path);
+  });
+  states.forEach(x => svg.append(el("path", { d: x.d, class: "s" })));
+  const [kind, name] = $("place").value.split("|");
+  if (kind === "state") states.filter(x => x.p.state === name).forEach(x => svg.append(el("path", { d: x.d, class: "sel" })));
+  else districts.filter(x => sel.has(x.p.state + "|" + x.p.unit)).forEach(x => svg.append(el("path", { d: x.d, class: "sel" })));
+  host.append(svg);
+  const outlined = [...svg.querySelectorAll("path.sel")].map(p => p.getBBox());
+  if (outlined.length) {            // a small place (a city, Delhi) also gets a ring to find it by
+    const x0 = Math.min(...outlined.map(b => b.x)), x1 = Math.max(...outlined.map(b => b.x + b.width));
+    const y0 = Math.min(...outlined.map(b => b.y)), y1 = Math.max(...outlined.map(b => b.y + b.height));
+    if (Math.max(x1 - x0, y1 - y0) < 24)
+      svg.append(el("circle", { cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, r: 16, fill: "none", stroke: "var(--ink)", "stroke-width": 1.5, "pointer-events": "none" }));
+  }
+  const labels = ["under " + BINS[0], ...BINS.slice(1).map((b, i) => `${BINS[i]}-${b}`), BINS[BINS.length - 1] + "+"];
+  $("mapLegend").innerHTML = labels.map((l, i) => `<span><i class="sw" style="background:var(--q${i + 1})"></i>${l}</span>`).join("") +
+    `<span><i class="sw" style="background:var(--grid);outline:1px solid var(--line)"></i>no value</span><span>µg/m³ · WHO guideline 5</span>`;
+  $("mapTitle").textContent = `PM2.5 by district: ${mapShort(RES.map)}, ${RES.year}`;
+  $("mapSub").textContent = MAP_WHAT[RES.map] + (sel.size ? " The selected place is outlined." : "");
 }
 
 // ---- controls ---------------------------------------------------------------------------
 async function load() {
   const [kind, name] = $("place").value.split("|");
-  const q = new URLSearchParams({ place: name, kind, map: $("map").value, deaths, to: $("toN").value });
+  const q = new URLSearchParams({ place: name, kind, map: $("map").value, year: $("year").value, deaths, to: $("toN").value });
   if (fromSet !== null) q.set("from", fromSet);
   const r = await fetch("/api/result?" + q), j = await r.json();
   if (!r.ok) { $("error").textContent = j.error; return; }
@@ -342,6 +418,12 @@ function mapsFor(kind) {
   const ok = META.maps.filter(m => kind === "city" ? m.name === "cpcb" || m.name === "aqli" || m.name === "acag_total" : m.name !== "cpcb");
   $("map").innerHTML = ok.map(m => `<option value="${m.name}" title="${m.label}">${m.short}</option>`).join("");
   $("map").value = ok.some(m => m.name === prev) ? prev : (kind === "city" ? "cpcb" : "aqli");
+  yearsFor();
+}
+function yearsFor() {
+  const prev = +$("year").value, ys = META.maps.find(m => m.name === $("map").value).years;
+  $("year").innerHTML = ys.slice().reverse().map(y => `<option value="${y}">${y}</option>`).join("");
+  $("year").value = ys.includes(prev) ? prev : ys[ys.length - 1];
 }
 function seg(id, set) {
   $(id).addEventListener("click", ev => {
@@ -361,7 +443,8 @@ async function init() {
     META.inputs.map(r => `<tr><td>${r.input}</td><td class="l">${r.now}</td><td class="l">${r.switch}</td><td class="l">${r.pending}</td></tr>`).join("");
   fromSet = 100; $("fromN").value = 100; $("fromR").value = 100; $("toN").value = 80; $("toR").value = 80;
   $("place").addEventListener("change", () => { mapsFor($("place").value.split("|")[0]); fromSet = null; load(); });
-  $("map").addEventListener("change", () => { fromSet = null; load(); });
+  $("map").addEventListener("change", () => { yearsFor(); fromSet = null; load(); });
+  $("year").addEventListener("change", () => { fromSet = null; load(); });
   $("useMap").addEventListener("click", () => { fromSet = null; load(); });
   [["fromN", "fromR"], ["fromR", "fromN"]].forEach(([a, b]) => $(a).addEventListener("input", () => { $(b).value = $(a).value; fromSet = $(a).value; later(); }));
   [["toN", "toR"], ["toR", "toN"]].forEach(([a, b]) => $(a).addEventListener("input", () => { $(b).value = $(a).value; later(); }));
