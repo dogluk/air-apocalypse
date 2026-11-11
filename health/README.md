@@ -381,9 +381,23 @@ used. **Life expectancy is never scaled:** it comes from the life table as publi
 this tool reproduces to within 0.09 years. `--deaths model` (or `deaths="model"` in Python)
 switches the scaling off and gives projected population × life-table rates.
 
-The factor is measured at the 2022 population and used in every year. In a later year the
-count drifts above the SRS rate as the projected population ages (Delhi 2023: 4.6 per
-1,000). In an earlier year it is too strong; see the limitations.
+The factor is measured at the 2022 population and used in every year from 2020 on. In a
+later year the count drifts above the SRS rate as the projected population ages (Delhi 2023:
+4.6 per 1,000); after 2024 nothing checks it, and every result says so.
+
+**Years before 2020** use that year's own SRS reports (2011-19, transcribed). Mortality then
+was higher mostly among young children (India 2011: death rates under 5 were 1.75 to 2.8
+times 2020-24's, ages 30-70 about the same) and at 80 and over, so a single factor would put
+the extra deaths at the wrong ages. Instead each age band's rate is the 2020-24 rate times
+the SRS's rate for that band in the year and a year either side, over its 2020-24 mean (the
+state's own, or India's where the state has none: the smaller states, and Telangana and
+Uttarakhand before 2014). Life expectancy moves with these rates. The counts are then scaled
+at 45 and over to the SRS's crude death rate for that year
+(`data/death_reconciliation_by_year.csv`). India's factor is 1.02 in 2011 and falls to 0.78
+by 2019: with the year's own rates by age, the only gap left is the projection's age
+structure drifting away from the SRS's as it moves on from the 2011 Census. States the SRS
+printed no rate for before 2020 (the smaller states and UTs) keep the 2020-24 factor, and
+the footer says which. Andhra Pradesh before 2014 is the undivided state in the SRS.
 
 **Which count is right is not settled.** The evidence both ways:
 
@@ -421,20 +435,19 @@ narrow band of that expectation.
 
 | Case | Measures | Published | Ours | Ratio | Expected |
 |---|---|---|---|---|---|
-| jaganathan2024_share | share | 24.9% of deaths | 25.9% of deaths | 1.038 | 1 ±10% |
-| jaganathan2024_deaths | deaths | 1.50 M deaths/yr | 1.86 M deaths/yr | 1.238 | 1.185 ±8% |
+| jaganathan2024_share | share | 24.9% of deaths | 26.0% of deaths | 1.044 | 1 ±10% |
+| jaganathan2024_deaths | deaths | 1.50 M deaths/yr | 2.19 M deaths/yr | 1.462 | 1.392 ±8% |
 | aqli2025_india_years | years | 3.50 years | 3.55 years | 1.014 | 1 ±3% |
 | aqli2025_delhi_years | years | 8.20 years | 8.17 years | 0.996 | 1 ±3% |
-| burnett2018_india_maps | deaths | 2.22 M deaths/yr | 1.22 M deaths/yr | 0.550 | 0.572 ±8% |
-| burnett2018_india_forced74 | deaths | 2.22 M deaths/yr | 1.69 M deaths/yr | 0.762 | 0.754 ±5% |
+| burnett2018_india_maps | deaths | 2.22 M deaths/yr | 1.31 M deaths/yr | 0.591 | 0.619 ±8% |
+| burnett2018_india_forced74 | deaths | 2.22 M deaths/yr | 1.82 M deaths/yr | 0.818 | 0.816 ±5% |
 
 In short: the shares and life-expectancy gains match. The counts differ because the papers
 counted different sets of deaths. Jaganathan used registered deaths only, which miss many.
 Burnett's GEMM paper used the Global Burden of Disease's deaths for 2015, 6.46 million at
 ages 25 and over from the causes the curve covers, where this tool, tied to the SRS, has
-4.87 million; fed the paper's own deaths, this tool's curve reproduces the paper's 2,219,057
-exactly. The paper also put India at 74 µg/m³ against AQLI's 45 for 2015. One part of the
-gap is this tool's own: its 2014 and 2015 counts are too low (see the limitations).
+5.27 million; fed the paper's own deaths, this tool's curve reproduces the paper's 2,219,057
+exactly. The paper also put India at 74 µg/m³ against AQLI's 45 for 2015.
 
 ## Known limitations
 
@@ -444,14 +457,13 @@ gap is this tool's own: its 2014 and 2015 counts are too low (see the limitation
   Arunachal Pradesh, Chandigarh, Dadra & Nagar Haveli, Daman & Diu, Goa, Ladakh,
   Lakshadweep, Manipur, Meghalaya, Mizoram, Nagaland, Puducherry, Sikkim and Tripura have
   no life table of their own in the Sample Registration System (SRS). Tables say so.
-- **Death rates are the SRS 2020-24 tables, and the scaling to the SRS crude death rate is
-  the 2020-24 factor, in every year.** Death rates were higher before 2020 and the
-  projection's age structure was closer to the SRS's, so counts for earlier years come out
-  too low: a 2014 run has 5.7 deaths per 1,000 where the SRS recorded 6.7 that year, and a
-  2015 run 5.8 against 6.5. Shares and life expectancy are not affected. Do not quote death
-  or life-year counts for years before 2020. Scaling each year to the SRS's rate for that
-  year would fix this; the earlier SRS reports have not been transcribed
-  (`data/MISSING.md`).
+- **Years before 2020 take their death rates by age from the SRS's annual reports, which
+  print rates for India and the bigger states only.** Small states and UTs borrow India's
+  change by age and keep the 2020-24 scaling. Single-year SRS rates are noisy for small
+  states and young ages (printed to 0.1 per 1,000), which is why three years are averaged.
+  The life table's shape within each band, and the cause shares (2021-23), stay 2020-24's.
+- **After 2024 the death rates and scaling are 2020-24's**, applied to the projected
+  population and checked against nothing; every such result says so.
 - **How many deaths India has is itself uncertain by about a tenth**, because the SRS and
   the population projections disagree about how old the population is. See "How many deaths
   a year".

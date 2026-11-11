@@ -17,9 +17,9 @@ anywhere a credible source disagrees with another.
 |---|---|---|---|
 | Risk curve | Jaganathan, Brown, Vodonos, GEMM, AQLI | yes, `--curves` | GBD 2019, GBD 2023, GEMM five causes |
 | Exposure map | AQLI, ACAG total, GBD 2019 (states), CPCB (cities) | yes, `--map` | GBD 2023 (file is downloaded) |
-| Death count | SRS-scaled; population × life-table rates | yes, `--deaths` | UN WPP 2024; GBD; per-year SRS rates |
+| Death count | SRS-scaled; population × life-table rates | yes, `--deaths` | UN WPP 2024; GBD |
 | Counterfactual | each curve's floor; one number | yes, `--counterfactual` | |
-| Death rates by age | SRS abridged life tables 2020-24 | no | UN WPP, GBD |
+| Death rates by age | SRS abridged life tables 2020-24 (2011-19 moved by each year's SRS rates by age) | no | UN WPP, GBD |
 | Population by age | Government projections 2011-2036 | no | UN WPP, GBD, Census 2011 (cities) |
 | Share of deaths that are NCD + LRI | SRS cause of death 2021-23, all-India | no | GBD by state |
 | Timing of benefit | immediate; EPA 20-year lag | yes, in the intervention file | |

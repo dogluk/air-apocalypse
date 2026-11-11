@@ -268,41 +268,60 @@ RBI reference rate.
 """
 
 ["srs_crude_death_rate.csv"]
-source = "Office of the Registrar General & Census Commissioner, India. Sample Registration System Statistical Report, 2020, 2021, 2022, 2023 and 2024 (five annual reports)."
+source = "Office of the Registrar General & Census Commissioner, India. Sample Registration System Statistical Report, 2011 to 2024 (fourteen annual reports)."
 url = "https://censusindia.gov.in/nada/index.php/catalog/46172/download/50420/SRS_STAT_2023.pdf"
 catalog = "https://censusindia.gov.in/nada/index.php/catalog/46172"
 urls = """
+2011: https://censusindia.gov.in/nada/index.php/catalog/34790/download/38478/SRS_STAT_2011.pdf  sha256 2e4d78579db6609a2f81149918983878fefb58f0062a314f9f5fead6225d9b28
+2012: https://censusindia.gov.in/nada/index.php/catalog/34791/download/38479/SRS_STAT_2012.pdf  sha256 36321777bb932b5172538fa6a94a27852bd12b10dca792ffd96c7095f4af4e02
+2013: https://censusindia.gov.in/nada/index.php/catalog/34788/download/38476/SRS_STAT_2013.pdf  sha256 6c85083e4ad8dfcf7ec804b9d15bb788da145983cf05db6fb95141b4dc6538ab
+2014: https://censusindia.gov.in/nada/index.php/catalog/34787/download/38475/SRS_STAT_2014.pdf  sha256 5b8aa01e28cf8f3a0579ff0e3803a29677b3d57effb375aac7428e49837d6892
+2015: https://censusindia.gov.in/nada/index.php/catalog/44371/download/48038/SRS_STAT_2015.pdf  sha256 fe54178bf00788a07ab5520df5b13d24388e5353428b35c343215f3367851bfa
+2016: https://censusindia.gov.in/nada/index.php/catalog/44372/download/48040/SRS_STAT_2016.pdf  sha256 7da0cdf41ec5c32e84664e110b0b146c1c3551425f9f7515d77ba3e8c5fefbf3
+2017: https://censusindia.gov.in/nada/index.php/catalog/44373/download/48042/SRS_STAT_2017.pdf  sha256 a82bf4df15f910ca769441349972303e5213a8160c5fc00d511a2f308330e5f4
+2018: https://censusindia.gov.in/nada/index.php/catalog/44374/download/48044/SRS_STAT_2018.pdf  sha256 672ccb7eb04b6547438fb1ffda91638d590a1d5cb9978817eba60b40e3333eef
+2019: https://censusindia.gov.in/nada/index.php/catalog/44375/download/48046/SRS_STAT_2019.pdf  sha256 50efe7a9f00db7df697f4f71ee8db0c4991a4a80f35f6a02d204689809f79ac9
 2020: https://censusindia.gov.in/nada/index.php/catalog/44376/download/48048/SRS_STAT_2020.pdf  sha256 aae760b4f2b4d16bfa275a6f0690c19bc203bdd7ef7f82bfd66fe3304373e56a
 2021: https://censusindia.gov.in/nada/index.php/catalog/45556/download/49753/SRS_STAT_2021.pdf  sha256 1587399e3a1bbe49e3c5f1ded842b204dc771652583dbffeff366294ef800d55
 2022: https://censusindia.gov.in/nada/index.php/catalog/45570/download/49767/SRS_STAT_2022.pdf  sha256 8c1789a0a7089f6ae716909c7d403fb1c16940eca943c4fa9a6471523d0a66c9
 2023: https://censusindia.gov.in/nada/index.php/catalog/46172/download/50420/SRS_STAT_2023.pdf  sha256 11a396d4def5361eb541d0aa5173ff9e850f05b5794a5c9415de83e22699865d
 2024: https://censusindia.gov.in/nada/index.php/catalog/47152/download/51396/SRS_STAT_2024.pdf  sha256 f922a4a817e612c78a7827e4f526f69dc433d68c4af287b76d418337637c946a
 """
-locator = "Statement 40, 'CDR (Crude Death Rate) by Residence, India and States/UTs', column 'Total': report p. 118 (PDF p. 145) in 2020; p. 128 (PDF p. 155) in 2021, 2022 and 2023; p. 128 (PDF p. 156) in 2024. India, 22 bigger states/UTs, 8 smaller states and 6 union territories: 37 rows a year."
+locator = "Statement 40, 'CDR (Crude Death Rate) by Residence, India and States/UTs', column 'Total': report p. 118 (PDF p. 145) in 2020; p. 128 (PDF p. 155) in 2021, 2022 and 2023; p. 128 (PDF p. 156) in 2024. India, 22 bigger states/UTs, 8 smaller states and 6 union territories: 37 rows a year. Before 2020 the statement is 'CDR (Crude Death Rates) by residence, India and bigger States[/UTs]' and has India and the bigger states only: Statement 41, report p. 68, in 2011 (PDF p. 91), 2012 (PDF p. 91) and 2013 (PDF p. 89), 21 rows; Statement 40, report p. 68 (PDF p. 91) in 2014, 23 rows; Statement 40, report p. 122, in 2015 (PDF p. 146), 2016 (PDF p. 146), 2017 (PDF p. 154), 2018 (PDF p. 152) and 2019 (PDF p. 148), 23 rows."
 retrieved = "2026-11-11"
 licence = "Government of India publication; no licence stated in the reports or on the catalog pages. Factual statistics reproduced with attribution."
 method = "transcribed"
 script = "scripts/build_srs_death_rates.py"
 notes = """
 Columns: state (as printed), year, cdr_per_1000 (deaths per 1,000 population, persons, rural and urban combined).
-Extracted with pdftotext -layout by the script. Check in the script: for India and the 22 bigger states/UTs the figure equals
-the 'All ages (Crude death rate)' row of the same report's Detailed Table 8, in every year.
+Extracted with pdftotext -layout by the script. Check in the script: for India and the bigger states/UTs the figure equals
+the 'All ages (Crude death rate)' row of the same report's Detailed Table 8, in every year; before 2020 the statement, Table 8
+and Table 1 cover the same units.
+Which units, by year. 2020-2024: all 37. 2014-2019: India and 22 bigger states/UTs (Telangana first printed in the 2014
+report). 2011-2013: India and 20 bigger states; no Uttarakhand, and 'Andhra Pradesh' is the undivided state (Telangana
+included), so its 2011-2013 rows are not comparable with Andhra Pradesh from 2014. The reports before 2020 print no crude death
+rate for the smaller states or union territories anywhere (only their sample sizes), so those have no row before 2020; the SRS
+Bulletins (same catalog) do print them and were not read. Jammu & Kashmir includes Ladakh before 2020, and the 2020-2024 rows
+for Jammu & Kashmir exclude it.
 'Dadra and Nagar Haveli and Daman and Diu' is one union territory in these reports and has one rate; airhealth uses it for both
 of its former parts. In the 2020 report the text layer runs that name into the next row ('Ladakh and Diu', then 'Daman 5.0');
 read against the rendered page (PDF p. 145): the merged union territory 3.7, Ladakh 5.0, Puducherry 5.4, Lakshadweep 6.5.
 Spot check by eye against the rendered PDF, 2026-11-11: the whole of Statement 40 for 2020 (37 rows); for 2021-2024 the text
-layer was read row by row against the script's output for India, Delhi, Kerala and the six union territories.
+layer was read row by row against the script's output for India, Delhi, Kerala and the six union territories. For 2011-2019
+the rendered statement page of each report was read for India (7.1, 7.0, 7.0, 6.7, 6.5, 6.4, 6.3, 6.2, 6.0) and the whole
+statement agreed with the text layer the script reads. India 6.7 in 2014 is the 2014 report's own figure; the 2015 report's
+Table 13 gives the same. Cross-check, 2026-11-11, not in the script: every 'Total' figure in Table 13 ('Annual estimates of
+Death rate by sex', the six years to the report's own) of the 2011-2020 reports equals this table's row for that unit and year
+where both exist (978 pairs, no difference).
 The two corrigenda on the catalog pages (2015-2020 reports: Tables 13 and 17; 2023: the title of Table 2) do not touch
-Statement 40, Table 1 or Table 8.
-Also read, for the benchmark notes only and not in this table: SRS Statistical Report 2015 (catalog 44371, sha256
-fe54178bf00788a07ab5520df5b13d24388e5353428b35c343215f3367851bfa), Table 13 and Statement 40: India 6.7 in 2014 and 6.5 in 2015.
+Statement 40, Table 1 or Table 8. The 2011-2014 catalog pages carry no corrigendum.
 """
 
 ["srs_age_specific_death_rates.csv"]
-source = "Office of the Registrar General & Census Commissioner, India. Sample Registration System Statistical Report, 2020, 2021, 2022, 2023 and 2024 (five annual reports)."
+source = "Office of the Registrar General & Census Commissioner, India. Sample Registration System Statistical Report, 2011 to 2024 (fourteen annual reports)."
 url = "https://censusindia.gov.in/nada/index.php/catalog/46172/download/50420/SRS_STAT_2023.pdf"
 catalog = "https://censusindia.gov.in/nada/index.php/catalog/46172"
-locator = "Detailed Table 8, 'Age-Specific Death Rate by Sex and Residence', first column ('Total', persons): report pp. 261-283 (PDF pp. 288-310) in 2020; pp. 272-294 (PDF pp. 300-322) in 2021, 2022 and 2023; pp. 272-294 (PDF pp. 301-323) in 2024. One page each for India and 22 bigger states/UTs. The five URLs and checksums are under srs_crude_death_rate.csv."
+locator = "Detailed Table 8, 'Age-Specific Death Rate by Sex and Residence', first column ('Total', persons): PDF pp. 191-212 in 2011, 182-202 in 2012 and 185-205 in 2013 (report pp. 166-186 in each year's contents; these pages print no page number); report pp. 174-196 (PDF pp. 195-217) in 2014; pp. 268-290 in 2015 (PDF pp. 290-312), 2016 (PDF pp. 290-312), 2017 (PDF pp. 299-321), 2018 (PDF pp. 297-319) and 2019 (PDF pp. 293-315); pp. 261-283 (PDF pp. 288-310) in 2020; pp. 272-294 (PDF pp. 300-322) in 2021, 2022 and 2023; pp. 272-294 (PDF pp. 301-323) in 2024. One page each for India and the bigger states/UTs (22 from 2014, 20 in 2011-2013). The fourteen URLs and checksums are under srs_crude_death_rate.csv."
 retrieved = "2026-11-11"
 licence = "Government of India publication; no licence stated in the reports or on the catalog pages. Factual statistics reproduced with attribution."
 method = "transcribed"
@@ -310,21 +329,28 @@ script = "scripts/build_srs_death_rates.py"
 notes = """
 Columns: state (as printed; 'Telengana' in some years), year, age_start (0 = 'Below 1', 1 = '1-4', 5 = '5-9', ..., 85 = '85+'),
 rate_per_1000 (deaths per 1,000 population of that age, persons, rural and urban combined). The printed '0-4' row is not kept.
-Checks in the script: 23 units a year; 'All ages' equals Statement 40; the crude rate rebuilt from these rates and Table 1's age
-shares is within 0.35 per 1,000 of the printed one.
-The 2020 Telangana page is headed 'Table 9' by misprint; its title and layout are Table 8's.
+Units: India and 22 bigger states/UTs from 2014, India and 20 bigger states in 2011-2013 (Andhra Pradesh undivided, no
+Uttarakhand); see srs_crude_death_rate.csv. Every report 2011-2024 prints the same bands, 'Below 1', '1-4', '0-4', '5-9', ...,
+'80-84', '85+', so no year is reshaped.
+Checks in the script: the unit count a year; 'All ages' equals the CDR statement; the crude rate rebuilt from the printed '0-4'
+rate, these rates from 5-9 up and Table 1's age shares is within 0.25 per 1,000 of the printed one (largest gap 0.21,
+Chhattisgarh 2024; an earlier version of the check split 0-4 between 'Below 1' and '1-4' at 1:4 and allowed 0.35, which Assam
+2015 failed at 0.43).
+The 2020 Telangana page is headed 'Table 9' by misprint; its title and layout are Table 8's. In 2011 the West Bengal page ends
+at the 85+ row and its 'All ages' row opens the next page (PDF p. 212).
 Spot check by eye against the rendered PDF, 2026-11-11: Delhi 2023 (PDF p. 305), all 19 rates and the all-ages rate; India 2020,
-2022 and 2023 and Delhi 2020 read in the text layer against the output.
-These are the rates the SRS life tables are built from: the mean of the five years equals the life table's m = d/L within 2%
+2022 and 2023 and Delhi 2020 read in the text layer against the output. Uttar Pradesh 2011 (PDF p. 210) and Kerala 2017
+(PDF p. 311, report p. 280), all 19 rates and the all-ages rate each.
+These are the rates the SRS life tables are built from: the mean of the five years 2020-2024 equals the life table's m = d/L within 2%
 at ages 30 to 79 and within 4% at 80-84, for India and every state (checked 2026-11-11). Below 30 the rates are small numbers
 printed to one decimal, so the match is to that rounding (within 8%). The open band differs, as the life table closes it by model.
 """
 
 ["srs_population_age_pct.csv"]
-source = "Office of the Registrar General & Census Commissioner, India. Sample Registration System Statistical Report, 2020, 2021, 2022, 2023 and 2024 (five annual reports)."
+source = "Office of the Registrar General & Census Commissioner, India. Sample Registration System Statistical Report, 2011 to 2024 (fourteen annual reports)."
 url = "https://censusindia.gov.in/nada/index.php/catalog/46172/download/50420/SRS_STAT_2023.pdf"
 catalog = "https://censusindia.gov.in/nada/index.php/catalog/46172"
-locator = "Detailed Table 1, 'Percent Distribution of Estimated population by Age-group, Sex and Residence', first column ('Total', persons): report pp. 180-191 (PDF pp. 207-218) in 2020; pp. 193-204 (PDF pp. 221-232) in 2021, 2022 and 2023; pp. 193-204 (PDF pp. 222-233) in 2024. India and 22 bigger states/UTs. The five URLs and checksums are under srs_crude_death_rate.csv."
+locator = "Detailed Table 1, 'Percent Distribution of Estimated population by Age-group, Sex and Residence', first column ('Total', persons): PDF pp. 114-122 in 2011 and 2012 and 112-122 in 2013 (report pp. 93-103 in each year's contents; these pages print no page number); report pp. 93-104 (PDF pp. 114-125) in 2014; pp. 187-198 in 2015 (PDF pp. 209-220), 2016 (PDF pp. 209-220), 2017 (PDF pp. 218-229), 2018 (PDF pp. 216-227) and 2019 (PDF pp. 212-223); pp. 180-191 (PDF pp. 207-218) in 2020; pp. 193-204 (PDF pp. 221-232) in 2021, 2022 and 2023; pp. 193-204 (PDF pp. 222-233) in 2024. India and the bigger states/UTs (22 from 2014, 20 in 2011-2013). The fourteen URLs and checksums are under srs_crude_death_rate.csv."
 retrieved = "2026-11-11"
 licence = "Government of India publication; no licence stated in the reports or on the catalog pages. Factual statistics reproduced with attribution."
 method = "transcribed"
@@ -332,8 +358,11 @@ script = "scripts/build_srs_death_rates.py"
 notes = """
 Columns: state (as printed), year, age_start (0 = '0-4', 5, ..., 85 = '85+'), pct (percent of the SRS's estimated population,
 persons, rural and urban combined; printed to one decimal, so the oldest bands are coarse).
-Checks in the script: 23 units a year; each sums to 100 within 0.6.
-Spot check by eye against the rendered PDF, 2026-11-11: Delhi 2022 (PDF p. 224), all 18 rows; India 2023 in the text layer.
+Checks in the script: the unit count a year (23 from 2014, 21 in 2011-2013); each sums to 100 within 0.6. Same bands in every
+report 2011-2024. In 2011-2013 only the first page of the table carries its title and a unit's rows can run over a page break;
+the script reads on until Table 2.
+Spot check by eye against the rendered PDF, 2026-11-11: Delhi 2022 (PDF p. 224), all 18 rows; India 2023 in the text layer;
+Kerala 2017 (PDF p. 224, report p. 193), all 18 rows.
 Not used in any result; it is the evidence for where modelled deaths exceed the SRS's (README, 'How many deaths a year').
 """
 
@@ -357,5 +386,25 @@ state. from_age is 0 for the 15 states and union territories that borrow all-Ind
 rates to the state's own SRS crude death rate at every age. Every state and union territory has its own SRS rate; Dadra & Nagar
 Haveli and Daman & Diu share the rate of their merged union territory.
 Checked by tests/test_baseline.py: the table is recomputed from its inputs, and deaths implied by it equal the SRS rate in every
-state at the reference year. The factor is used in every year; see the README for what that does to years before 2020.
+state at the reference year. The factor is used in the period and in every year after it (a projection); for 2011-19 see
+death_reconciliation_by_year.csv.
+"""
+
+["death_reconciliation_by_year.csv"]
+source = "Derived from srs_crude_death_rate.csv and srs_age_specific_death_rates.csv (SRS Statistical Reports 2011-2024), lifetables_srs.csv (SRS Abridged Life Tables 2020-24) and population_age_state.csv (Population Projections for India and States 2011-2036)."
+url = "https://censusindia.gov.in/nada/index.php/catalog/44371"
+locator = "Each input's own entry in this file gives its pages and tables."
+retrieved = "2026-11-11"
+licence = "Derived from Government of India publications; factual statistics reproduced with attribution."
+method = "derived"
+script = "scripts/build_death_reconciliation.py"
+notes = """
+The same columns as death_reconciliation.csv, one row per early year (2011-19) and every unit the SRS printed a crude death rate
+for that year: India and the bigger states (20 in 2011-13, 22 from 2014; Telangana and Uttarakhand appear in 2014). period and
+reference_year are the year; srs_cdr_per_1000 is that year's rate, not a mean; modelled_cdr_per_1000 uses that year's projected
+population and that year's death rates by age (airhealth.baseline: the 2020-24 life table moved band by band by the SRS's rates by
+age for the year and a year either side over their 2020-24 mean). from_age is 45 throughout. India's factor runs from 1.02 in 2011
+to 0.78 in 2019: once the rates by age are the year's own, what remains is the projection's age structure drifting from the SRS's
+as it moves away from the 2011 Census. States without a row keep the period factor (death_reconciliation.csv) in that year.
+Checked by tests/test_baseline.py: deaths implied equal the year's SRS rate in every unit and year.
 """

@@ -20,7 +20,7 @@ cd health
 ../.venv/bin/airhealth compare Delhi --from 100 --to 80
 ../.venv/bin/airhealth burden India
 ../.venv/bin/airhealth run interventions/november_only_delhi.toml
-../.venv/bin/python -m pytest -q                       # 185 tests
+../.venv/bin/python -m pytest -q                       # 193 tests
 ```
 
 ## Git
@@ -40,19 +40,14 @@ are never committed.
 
 ## Next builds, in order
 
-1. **Pre-2020 warning (known defect).** Runs for years before 2020 print death counts about
-   15% low with nothing on screen saying so (`health/airhealth/report.py`, `deaths_note`).
-   The scaling factor is measured on 2020-24 and applied to every year. Fix: per-year SRS
-   rates (listed in `health/data/MISSING.md`), or at least a printed warning. Until then use
-   the default year for death counts.
-2. **A switch for every input.** Design note, not yet agreed:
+1. **A switch for every input.** Design note, not yet agreed:
    [`specs/2026-11-11-source-switches.md`](specs/2026-11-11-source-switches.md).
-3. **IHME curves** (design stage 3): loaders for GBD 2019 and GBD 2023 curves and GEMM five
+2. **IHME curves** (design stage 3): loaders for GBD 2019 and GBD 2023 curves and GEMM five
    causes. Needs the Part B queries. Read the status section of `IHME_DOWNLOADS.md` first:
    the 2023 files are on two different scales.
-4. **GBD 2023 exposure as a fifth map.** The file is downloaded. Needs IHME's state ids.
-5. Cohort run to 2050 (stage 4), valuation presets (stage 5), the Surat 25× case (stage 6).
-6. Air-response layer (emissions to concentration), the dome effect, a public web page.
+3. **GBD 2023 exposure as a fifth map.** The file is downloaded. Needs IHME's state ids.
+4. Cohort run to 2050 (stage 4), valuation presets (stage 5), the Surat 25× case (stage 6).
+5. Air-response layer (emissions to concentration), the dome effect, a public web page.
 
 ## Other open work
 
@@ -61,6 +56,16 @@ are never committed.
   Not written.
 - **G1** in `lit/gaps.md`: did firecracker bans work? The data is already in `diwali/`.
 - **G7** has a first answer: GBD 2023's India exposure is 54, not 91. See the note there.
+
+## Done 2026-11-11
+
+Years before 2020 now use that year's own SRS figures: the nine Statistical Reports 2011-19
+are transcribed (crude death rates, rates by age, age shares; `health/data/sources.toml`),
+death rates by age are moved band by band to each year's, and counts are scaled to each
+year's crude death rate (`health/data/death_reconciliation_by_year.csv`). Before, a 2014 run
+had 5.7 deaths per 1,000 against the SRS's 6.7; now it matches. Two benchmarks' expected
+ratios moved with it (Jaganathan deaths 1.185 → 1.392, Burnett at 74 µg/m³ 0.754 → 0.816);
+both write-ups had predicted the direction. Years after 2024 still carry a footer warning.
 
 ## Small known issues in `health/`
 
@@ -75,4 +80,6 @@ Positive AQLI numbers mean years gained. Each curve applies from its own startin
 (Jaganathan all ages, Brown 15, GEMM and Vodonos 25; Vodonos's source says all-age). Map
 populations are scaled to the year asked for. Death counts are reconciled to each state's
 SRS crude death rate. The dashboard's table of inputs is hand-written in
-`health/airhealth/dashboard.py`.
+`health/airhealth/dashboard.py`. For 2011-19: each year's rates by age average it and a
+year either side; states with no SRS rates by age that year borrow India's change; the
+early-year scaling is at 45 and over, like 2020-24's.

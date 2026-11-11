@@ -94,6 +94,7 @@ class Run:
     unavailable: dict[str, str]     # curves asked for that could not run, with why
     deaths_model: float = 0.0       # all-cause deaths a year before reconciliation to the SRS
     reconciliations: tuple = ()     # baseline.Reconciliation per state; empty for deaths="model"
+    rate_adjustments: tuple = ()    # baseline.RateAdjustment per state, early years only
     population_year: int = 0        # the year the population is for (2011 if any place is a city)
     census_places: tuple = ()       # the places whose population is the Census's, not the map year's
 
@@ -142,6 +143,7 @@ class _Steady:
     fallback: list[str]
     deaths_model: float
     reconciliations: tuple
+    rate_adjustments: tuple
     population_year: int
     census_places: tuple
 
@@ -162,6 +164,7 @@ def _steady(iv: Intervention, curve: Curve, values: np.ndarray, map_name: str,
         year=parts[0].year, fallback=sorted({s for r in parts for s in r.fallback_states}),
         deaths_model=float(sum(r.deaths_model for r in parts)),
         reconciliations=tuple(dict.fromkeys(x for r in parts for x in r.reconciliations)),
+        rate_adjustments=tuple(dict.fromkeys(x for r in parts for x in r.rate_adjustments)),
         population_year=min(r.population_year for r in parts),
         census_places=tuple(r.place.name for r in parts if r.population_year != r.year))
 
@@ -219,7 +222,8 @@ def run(iv: Intervention, map_name: str = "aqli", curves: list[str] | None = Non
                deaths_baseline=first.deaths_baseline, pm25_before=first.pm25_before,
                shares=shares, usd_per_unit=usd, fallback_states=first.fallback,
                unavailable=unavailable, deaths_model=first.deaths_model,
-               reconciliations=first.reconciliations, population_year=first.population_year,
+               reconciliations=first.reconciliations, rate_adjustments=first.rate_adjustments,
+               population_year=first.population_year,
                census_places=first.census_places)
 
 

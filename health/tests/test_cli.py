@@ -107,7 +107,7 @@ def test_footer_says_how_deaths_were_scaled(capsys):
     assert "per 1,000)" in out.splitlines()[1]             # the implied crude death rate
     _, out, _ = run(capsys, "burden", "India", "--curves", "gemm_ncd_lri")
     footer = out.strip().splitlines()[-1]
-    assert "each state's SRS crude death rate, 2020-24" in footer and "overall" in footer
+    assert "each state's SRS crude death rate for 2020-24" in footer and "overall" in footer
     _, out, _ = run(capsys, "burden", "Chandigarh", "--curves", "gemm_ncd_lri")
     footer = out.strip().splitlines()[-1]
     assert "Deaths scaled by ×0.57" in footer and "Chandigarh" in footer
@@ -133,6 +133,47 @@ def test_run_footer_says_how_deaths_were_scaled(capsys):
     assert "SRS crude death rate for Delhi, 2020-24" in out.strip().splitlines()[-1]
     result = json.loads(run(capsys, "--json", *args, "--deaths", "model")[1])
     assert result["deaths_basis"] == "model" and "not reconciled" in result["footer"]
+
+
+def test_year_outside_the_srs_years_is_flagged(capsys):
+    """2011-19 are scaled to their own year's SRS rate; after 2024 there is none to check."""
+    args = ("compare", "Delhi", "--from", "100", "--to", "80", "--curves", "gemm_ncd_lri")
+    footer = run(capsys, *args, "--year", "2015")[1].strip().splitlines()[-1]
+    assert "SRS crude death rate for Delhi, 2015" in footer and "not checked" not in footer
+    assert "Delhi's own SRS rates by age for 2014-16" in footer
+    footer = run(capsys, *args, "--year", "2022")[1].strip().splitlines()[-1]
+    assert "not checked" not in footer and "rates by age for" not in footer
+    footer = run(capsys, "burden", "Delhi", "--map", "gbd2019",
+                 "--curves", "gemm_ncd_lri")[1].strip().splitlines()[-1]
+    assert "SRS crude death rate for Delhi, 2019" in footer
+    footer = run(capsys, "compare", "Bengaluru", "--to", "20",       # cpcb's latest is 2025
+                 "--curves", "gemm_ncd_lri")[1].strip().splitlines()[-1]
+    assert "Death counts for 2025 are not checked" in footer and "projected" in footer
+    result = json.loads(run(capsys, "--json", *args, "--year", "2015", "--deaths", "model")[1])
+    assert "Delhi's own SRS rates by age for 2014-16" in result["footer"]
+    assert result["death_scaling"] == []
+    srs = json.loads(run(capsys, "--json", *args, "--year", "2015")[1])
+    assert srs["death_scaling"][0]["period"] == "2015"
+
+
+def test_early_year_names_states_on_the_period_scaling(capsys):
+    footer = run(capsys, "burden", "India", "--year", "2015",
+                 "--curves", "gemm_ncd_lri")[1].strip().splitlines()[-1]
+    assert "each state's SRS crude death rate for 2015" in footer
+    assert "2020-24 for the 15 without an SRS life table" in footer   # no SRS rate before 2020
+    assert "death_reconciliation_by_year.csv" in footer
+    assert footer.count("Chandigarh") == 1        # named once, in the life-table line
+    footer = run(capsys, "burden", "India", "--year", "2012",
+                 "--curves", "gemm_ncd_lri")[1].strip().splitlines()[-1]
+    assert "2020-24 for Telangana, Uttarakhand, the 15" in footer   # in the SRS from 2014
+    assert "India's used for Telangana, Uttarakhand" in footer
+
+
+def test_run_in_an_early_year_is_scaled_to_it(capsys):
+    args = ("run", "interventions/delhi_100_to_80.toml", "--n", "50", "--curves", "gemm_ncd_lri")
+    footer = run(capsys, *args, "--map", "gbd2019")[1].strip().splitlines()[-1]
+    assert "SRS crude death rate for Delhi, 2019" in footer and "not checked" not in footer
+    assert "not checked" not in run(capsys, *args)[1]                  # aqli 2023
 
 
 # --- city population, floors, bad levels, debug (final review I4, M2, M3, M4, M12) -----------

@@ -58,14 +58,70 @@ def deaths_note(recs, deaths: float, deaths_model: float) -> str:
     if not recs:
         return ("Deaths are population × life-table death rates, not reconciled to the SRS "
                 "crude death rate (--deaths model)")
-    tail = "life expectancy is from the unscaled life table"
+    early = any(r.period != baseline.PERIOD_TEXT for r in recs)
+    tail = "the scaling does not touch life expectancy" if early else \
+        "life expectancy is from the unscaled life table"
     if len(recs) == 1:
         text = recs[0].text
         return f"{text[0].upper()}{text[1:]}; {tail}"
     factors = [r.factor for r in recs]
-    return (f"Deaths scaled to each state's SRS crude death rate, {baseline.PERIOD_TEXT}: "
+    return (f"Deaths scaled to each state's SRS crude death rate for {_years(recs)}: "
             f"×{deaths / deaths_model:.2f} overall, ×{min(factors):.2f} to ×{max(factors):.2f} "
-            f"by state (data/death_reconciliation.csv); {tail}s")
+            f"by state (data/{_recon_file(recs)}); {tail}{'' if early else 's'}")
+
+
+def _recon_file(recs) -> str:
+    early = any(r.period != baseline.PERIOD_TEXT for r in recs)
+    return "death_reconciliation_by_year.csv" if early else "death_reconciliation.csv"
+
+
+def _years(recs) -> str:
+    """The years the scaling's SRS rates are for: one label, or the year and its exceptions.
+    States with no SRS life table (from_age 0) are listed elsewhere in the footer, so they
+    are counted here, not named."""
+    periods = dict.fromkeys(r.period for r in recs)
+    if len(periods) == 1:
+        return next(iter(periods))
+    main = max(periods, key=lambda p: sum(r.period == p for r in recs))
+    rest = []
+    for p in periods:
+        if p == main:
+            continue
+        named = [r.state for r in recs if r.period == p and r.from_age]
+        unnamed = sum(1 for r in recs if r.period == p and not r.from_age)
+        who = named + ([f"the {unnamed} without an SRS life table"] if unnamed else [])
+        rest.append(f"{p} for {', '.join(who)}")
+    return f"{main} ({'; '.join(rest)}: no SRS rate for {main})"
+
+
+def rates_note(adjs, fallback=()) -> str | None:
+    """An early year's death rates by age: whose SRS rates moved them, and over which years."""
+    if not adjs:
+        return None
+    a = adjs[0]
+    if len(adjs) == 1:
+        return (f"Death rates by age for {a.state} are the {baseline.PERIOD_TEXT} life table "
+                f"moved band by band by {a.text} against {baseline.PERIOD_TEXT}; life expectancy "
+                f"moves with them")
+    borrowed = [x.state for x in adjs
+                if x.unit == "India" and x.state != "India" and x.state not in fallback]
+    tail = (f"; India's used for {', '.join(borrowed)}" if borrowed else "")
+    return (f"Death rates by age are the {baseline.PERIOD_TEXT} life tables moved band by band "
+            f"by each state's own SRS rates by age for {a.years[0]}-{a.years[1] % 100} against "
+            f"{baseline.PERIOD_TEXT}{tail}; life expectancy moves with them")
+
+
+def period_note(year: int, reconciled: bool) -> str | None:
+    """After the life-table period there is no SRS rate to check the counts against; say so.
+    (Early years carry their own rates and scaling, named by rates_note and deaths_note.)"""
+    if year <= baseline.LIFE_TABLE_PERIOD[1]:
+        return None
+    if not reconciled:
+        return (f"Death rates are the SRS life tables for {baseline.PERIOD_TEXT}, used unchanged "
+                f"for {year}")
+    return (f"Death counts for {year} are not checked against that year's SRS crude death "
+            f"rate: they are projected, {baseline.PERIOD_TEXT} death rates and scaling on "
+            f"{year}'s population")
 
 
 def _auto_notes(impacts: list[Impact]) -> list[str]:
@@ -73,7 +129,9 @@ def _auto_notes(impacts: list[Impact]) -> list[str]:
         return []
     i = impacts[0]
     notes = [population_note(i.population_year, i.year, [i.place.name]),
-             deaths_note(i.reconciliations, i.deaths_baseline, i.deaths_model)]
+             deaths_note(i.reconciliations, i.deaths_baseline, i.deaths_model),
+             rates_note(i.rate_adjustments, i.fallback_states),
+             period_note(i.year, bool(i.reconciliations))]
     return [n for n in notes if n]
 
 
@@ -160,7 +218,7 @@ def to_json(impacts: list[Impact], unavailable: dict[str, str] | None = None,
 def _scaling_json(recs) -> list[dict]:
     return [dict(state=r.state, factor=r.factor, from_age=r.from_age,
                  srs_crude_death_rate_per_1000=r.srs_cdr, srs_unit=r.srs_unit,
-                 period=baseline.PERIOD_TEXT) for r in recs]
+                 period=r.period) for r in recs]
 
 
 # --- intervention runs ----------------------------------------------------------------------
@@ -298,7 +356,9 @@ def run_footer(run: Run) -> str:
              "death, at the map year's population and age structure, summed over the "
              "intervention's years",
              population_note(run.population_year, run.year, run.census_places),
-             deaths_note(run.reconciliations, run.deaths_baseline, run.deaths_model)]
+             deaths_note(run.reconciliations, run.deaths_baseline, run.deaths_model),
+             rates_note(run.rate_adjustments, run.fallback_states),
+             period_note(run.year, bool(run.reconciliations))]
     iv = run.intervention
     if iv.monthly is not None and iv.change_kind == "pct":
         notes.insert(0, "monthly_pct takes every month to be as polluted as the annual mean; "

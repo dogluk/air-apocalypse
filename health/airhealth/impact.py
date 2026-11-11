@@ -90,7 +90,8 @@ class Impact:
     derived: bool             # True when the deaths are derived from a life-expectancy curve
     fallback_states: list[str]
     deaths_model: float = 0.0   # all-cause deaths per year before reconciliation (population × mx)
-    reconciliations: tuple[baseline.Reconciliation, ...] = ()   # one per state; empty for deaths="model"
+    reconciliations: tuple[baseline.Reconciliation, ...] = ()
+    rate_adjustments: tuple[baseline.RateAdjustment, ...] = ()   # one per state, early years only   # one per state; empty for deaths="model"
     population_year: int = 0    # the year the population is for (2011 for a city: Census)
 
 
@@ -146,13 +147,15 @@ def steady_state(place: Place, curve: Curve, map_name: str, change: Change,
     after = change.apply(before)
     pop = cells.population.to_numpy(float)
 
-    results, fallback, recs = [], [], []
+    results, fallback, recs, adjs = [], [], [], []
     for state, rows in cells.groupby("state", sort=True).indices.items():
         b = baseline.load(state, year, deaths)
         if b.fallback:
             fallback.append(state)
         if b.reconciliation:
             recs.append(b.reconciliation)
+        if b.rates:
+            adjs.append(b.rates)
         results.append(_state(b, curve, before[rows], after[rows], pop[rows]))
 
     weights = [r.population for r in results]
@@ -169,7 +172,7 @@ def steady_state(place: Place, curve: Curve, map_name: str, change: Change,
         derived=curve.kind == "life_expectancy",
         fallback_states=fallback,
         deaths_model=float(sum(r.deaths_model for r in results)),
-        reconciliations=tuple(recs),
+        reconciliations=tuple(recs), rate_adjustments=tuple(adjs),
         population_year=int(cells.attrs["population_year"]))
 
 
@@ -218,6 +221,7 @@ class ImpactDraws:
     fallback_states: list[str]
     deaths_model: float = 0.0
     reconciliations: tuple[baseline.Reconciliation, ...] = ()
+    rate_adjustments: tuple[baseline.RateAdjustment, ...] = ()   # one per state, early years only
     population_year: int = 0
 
 
@@ -282,13 +286,15 @@ def steady_state_many(place: Place, curve: Curve, map_name: str, kind: str,
     after = apply_many(kind, values, before)
     pop = cells.population.to_numpy(float)
 
-    results, fallback, recs = [], [], []
+    results, fallback, recs, adjs = [], [], [], []
     for state, rows in cells.groupby("state", sort=True).indices.items():
         b = baseline.load(state, year, deaths)
         if b.fallback:
             fallback.append(state)
         if b.reconciliation:
             recs.append(b.reconciliation)
+        if b.rates:
+            adjs.append(b.rates)
         results.append(_state_many(b, curve, before[rows], after[:, rows], pop[rows]))
 
     weights = [r["population"] for r in results]
@@ -305,5 +311,5 @@ def steady_state_many(place: Place, curve: Curve, map_name: str, kind: str,
         derived=curve.kind == "life_expectancy",
         fallback_states=fallback,
         deaths_model=float(sum(r["deaths_model"] for r in results)),
-        reconciliations=tuple(recs),
+        reconciliations=tuple(recs), rate_adjustments=tuple(adjs),
         population_year=int(cells.attrs["population_year"]))

@@ -25,10 +25,21 @@ factor per state, built by scripts/build_death_reconciliation.py: for a state wi
 SRS tables, the factor on deaths at ages 45 and over that makes total deaths equal the
 state's mean SRS crude death rate for 2020-24 × its population, at the 2022 population; for
 a state that borrows all-India rates, one factor on deaths at every age, to the state's own
-SRS crude death rate. The same factor is used in every year. Baseline.death_factor is that
-factor by band, and Baseline.deaths = population × mx × death_factor. The life table (mx,
-and so life expectancy) is never scaled. deaths="model" switches the reconciliation off
-(death_factor all ones).
+SRS crude death rate. Baseline.death_factor is that factor by band, and Baseline.deaths =
+population × mx × death_factor. The reconciliation never changes mx, and so never life
+expectancy. deaths="model" switches it off (death_factor all ones).
+
+Years. In the life-table period, and after it (a projection, checked against nothing), the
+rates are the period's and so is the factor. In an early year (EARLY_YEARS, 2011-19) the
+SRS's own reports for that year are used instead: each band's rate is the period's times
+the ratio of the SRS's rate by age for the year and a year either side
+(data/srs_age_specific_death_rates.csv) to its 2020-24 mean, for the state, or for India
+where the state has no rates by age for all those years (the smaller states, and Telangana
+and Uttarakhand before 2014; Andhra Pradesh before 2014 is the undivided state). Mortality
+then fell mostly at young ages, so this moves the age pattern, and life expectancy, as well
+as the total. The deaths are then reconciled to that year's own SRS crude death rate, ages 45
+and over, as above (data/death_reconciliation_by_year.csv); where the SRS printed no rate for
+the state that year (smaller states and UTs before 2020), the period factor is kept.
 """
 from dataclasses import dataclass
 from functools import cache
@@ -45,6 +56,8 @@ MID_YEAR = sum(LIFE_TABLE_PERIOD) // 2
 PERIOD_TEXT = f"{LIFE_TABLE_PERIOD[0]}-{LIFE_TABLE_PERIOD[1] % 100}"
 DEATHS_BASES = ("srs", "model")   # reconciled to the SRS crude death rate, or not
 RECONCILE_FROM_AGE = 45           # where the diagnosis puts the excess (see module docstring)
+EARLY_YEARS = (2011, 2019)        # years before the period with the SRS's own rates transcribed
+RATE_WINDOW = 1                   # an early year's rates by age: it and a year either side
 RECONCILE_SOURCE = (
     "This project's comparison of modelled deaths by age with the SRS's own age-specific death "
     "rates and population age distribution, 2020-2024 (data/srs_age_specific_death_rates.csv, "
@@ -62,12 +75,26 @@ class Reconciliation:
     from_age: int          # 45 for a state with its own SRS tables, 0 (every age) otherwise
     srs_cdr: float         # mean SRS crude death rate over the life-table period, per 1,000
     srs_unit: str          # the SRS row the rate is from, as printed (the state, or its merged UT)
+    period: str = PERIOD_TEXT   # the years of that rate: the life-table period, or one early year
 
     @property
     def text(self) -> str:
         ages = f" at ages {self.from_age} and over" if self.from_age else ""
         return (f"deaths{ages} scaled by ×{self.factor:.2f} to the SRS crude death rate for "
-                f"{self.srs_unit}, {PERIOD_TEXT} ({self.srs_cdr:.1f} per 1,000)")
+                f"{self.srs_unit}, {self.period} ({self.srs_cdr:.1f} per 1,000)")
+
+
+@dataclass(frozen=True)
+class RateAdjustment:
+    """An early year's death rates: the period's, times the SRS's rates by age over `years`
+    divided by its rates for the life-table period, band by band, for `unit`."""
+    state: str             # the state whose death rates were adjusted
+    unit: str              # the state whose SRS rates by age were used, or India
+    years: tuple[int, int] # first and last year averaged
+
+    @property
+    def text(self) -> str:
+        return f"{self.unit}'s own SRS rates by age for {self.years[0]}-{self.years[1] % 100}"
 
 
 @dataclass(frozen=True)
@@ -80,6 +107,7 @@ class Baseline:
     fallback: bool             # True when mx is all-India, not the state's own
     death_factor: np.ndarray   # factor on death counts by band (all ones for deaths="model")
     reconciliation: Reconciliation | None   # None for deaths="model"
+    rates: RateAdjustment | None = None     # set in an early year (EARLY_YEARS), else None
 
     @property
     def deaths(self) -> np.ndarray:
@@ -126,8 +154,42 @@ def _reconciliations() -> dict[str, Reconciliation]:
             for r in t.itertuples()}
 
 
-def reconciliation(state: str) -> Reconciliation:
-    return _reconciliations()[state]
+@cache
+def _year_reconciliations() -> dict[tuple[str, int], Reconciliation]:
+    t = pd.read_csv(paths.DATA / "death_reconciliation_by_year.csv")
+    return {(r.state, int(r.period)): Reconciliation(r.state, float(r.factor), int(r.from_age),
+                                                     float(r.srs_cdr_per_1000), r.srs_unit,
+                                                     str(r.period))
+            for r in t.itertuples()}
+
+
+def reconciliation(state: str, year: int | None = None) -> Reconciliation:
+    """The scaling to the SRS crude death rate: that year's, for an early year the SRS printed
+    a rate for the state; otherwise the life-table period's."""
+    return _year_reconciliations().get((state, year)) or _reconciliations()[state]
+
+
+@cache
+def _srs_asdr() -> pd.DataFrame:
+    """SRS rates by age, one row per (canonical state, year), one column per band."""
+    t = pd.read_csv(paths.DATA / "srs_age_specific_death_rates.csv")
+    t["state"] = t.state.map(canonical_state)
+    wide = t.pivot_table(index=["state", "year"], columns="age_start", values="rate_per_1000")
+    assert tuple(wide.columns) == AGE_STARTS
+    return wide
+
+
+def rate_adjustment(state: str, year: int) -> tuple[np.ndarray, RateAdjustment]:
+    """Factor by band on the period's death rates for an early year, from the state's own SRS
+    rates by age (India's when the state has none for every year needed)."""
+    t = _srs_asdr()
+    lo, hi = LIFE_TABLE_PERIOD
+    window = [y for y in range(year - RATE_WINDOW, year + RATE_WINDOW + 1)
+              if EARLY_YEARS[0] <= y <= hi]
+    needed = [*window, *range(lo, hi + 1)]
+    unit = state if all((state, y) in t.index for y in needed) else "India"
+    rows = lambda years: t.loc[[(unit, y) for y in years]].mean().to_numpy()  # noqa: E731
+    return rows(window) / rows(range(lo, hi + 1)), RateAdjustment(state, unit, (window[0], window[-1]))
 
 
 def _rates(table: pd.DataFrame) -> np.ndarray:
@@ -167,10 +229,14 @@ def load(state: str, year: int | None = None, deaths: str = "srs") -> Baseline:
     L80, L85 = table.Lx.to_numpy(float)[-2:]
     population = np.append(persons[:-1], persons[-1] * np.array([L80, L85]) / (L80 + L85))
 
-    rec = reconciliation(state) if deaths == "srs" else None
+    mx, adjustment = _rates(table), None
+    if EARLY_YEARS[0] <= year <= EARLY_YEARS[1]:
+        ratio, adjustment = rate_adjustment(state, year)
+        mx = mx * ratio
+    rec = reconciliation(state, year) if deaths == "srs" else None
     factor = np.ones(len(AGE_STARTS))
     if rec:
         factor[np.array(AGE_STARTS) >= rec.from_age] = rec.factor
-    return Baseline(state=state, year=year, population=population, mx=_rates(table),
+    return Baseline(state=state, year=year, population=population, mx=mx,
                     share_ncd_lri=_share_ncd_lri().copy(), fallback=fallback,
-                    death_factor=factor, reconciliation=rec)
+                    death_factor=factor, reconciliation=rec, rates=adjustment)

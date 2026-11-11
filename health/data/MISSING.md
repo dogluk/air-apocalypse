@@ -27,15 +27,6 @@ AQLI states 0.98 years per 10 µg/m³ PM2.5 with no interval (methodology page, 
 `aqli.sample()` therefore returns the curve unchanged. The interval would have to come from Ebenstein et al. 2017 (PNAS 114:
 10384-89, a PM10 estimate) through AQLI's PM10-to-PM2.5 conversion; neither was looked up for this task.
 
-## SRS crude death rates before 2020: not transcribed (death counts for early years)
-
-Death counts are scaled to each state's SRS crude death rate for 2020-24 (death_reconciliation.csv), and the same factor is
-used in every year. For years before 2020 that is too strong: a 2014 run has 5.7 deaths per 1,000 and a 2015 run 5.8, where the
-SRS recorded 6.7 and 6.5 (SRS Statistical Report 2015, Table 13 and Statement 40, read 2026-11-11; India only, not in a data
-file). Follow-up: transcribe Statement 40 from the SRS Statistical Reports for 2011 to 2019 (same catalog, censusindia.gov.in;
-2015 is catalog 44371) and scale each year to its own rate. Care needed: Telangana appears from 2014, Ladakh from 2020, and
-Dadra & Nagar Haveli and Daman & Diu are separate rows before 2020.
-
 ## City populations after 2011: no official source found
 
 cities.csv holds the Census 2011 urban agglomerations and they are used in every year (every result that uses one says so).

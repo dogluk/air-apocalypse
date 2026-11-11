@@ -66,9 +66,15 @@ def test_year_outside_projections_raises():
 
 # --- death counts against the SRS's own crude death rate (final review, I1) ------------------
 
+def period(t: pd.DataFrame) -> pd.DataFrame:
+    """The rows for the life-table period; the SRS files also hold 2011-19."""
+    lo, hi = baseline.LIFE_TABLE_PERIOD
+    return t[t.year.between(lo, hi)]
+
+
 def srs_mean_cdr() -> dict[str, float]:
     """Mean SRS crude death rate 2020-24 by canonical state, straight from the transcription."""
-    t = pd.read_csv(paths.DATA / "srs_crude_death_rate.csv")
+    t = period(pd.read_csv(paths.DATA / "srs_crude_death_rate.csv"))
     assert sorted(t.year.unique()) == [2020, 2021, 2022, 2023, 2024]
     out = {}
     for printed, g in t.groupby("state"):
@@ -95,8 +101,8 @@ def test_unreconciled_deaths_exceed_the_srs_rate_because_of_age_structure():
     """The diagnosis: same death rates, older population. Modelled deaths are above the SRS's
     by 5% to 32% in every state with its own table, and all of the excess is at 45 and over."""
     cdr = srs_mean_cdr()
-    asdr = pd.read_csv(paths.DATA / "srs_age_specific_death_rates.csv")
-    age = pd.read_csv(paths.DATA / "srs_population_age_pct.csv")
+    asdr = period(pd.read_csv(paths.DATA / "srs_age_specific_death_rates.csv"))
+    age = period(pd.read_csv(paths.DATA / "srs_population_age_pct.csv"))
     for frame in (asdr, age):
         frame["state"] = frame.state.map(places.canonical_state)
     starts = np.array(baseline.AGE_STARTS)
@@ -157,3 +163,58 @@ def test_life_table_is_not_scaled():
         assert srs.deaths.sum() < model.deaths.sum()
     with pytest.raises(ValueError, match="deaths"):
         baseline.load("Delhi", deaths="registered")
+
+
+# --- years before the life-table period: the SRS's own rates for that year ------------------
+
+def srs_asdr(unit: str, years) -> np.ndarray:
+    t = pd.read_csv(paths.DATA / "srs_age_specific_death_rates.csv")
+    t = t[t.state.map(places.canonical_state) == unit]
+    return t[t.year.isin(list(years))].groupby("age_start").rate_per_1000.mean().to_numpy()
+
+
+def test_early_year_rates_follow_the_srs_band_by_band():
+    """2011-19: each band's rate is the period's times the SRS's own rate for the year and
+    its neighbours over the SRS's 2020-24 rate, so the age pattern is that year's."""
+    period = baseline.load("Delhi", 2022)
+    for year, window in ((2015, range(2014, 2017)), (2011, range(2011, 2013)),
+                         (2019, range(2018, 2021))):
+        b = baseline.load("Delhi", year)
+        ratio = srs_asdr("Delhi", window) / srs_asdr("Delhi", range(2020, 2025))
+        assert b.mx == pytest.approx(period.mx * ratio, rel=1e-9), year
+        assert b.rates.unit == "Delhi" and b.rates.years == (window[0], window[-1])
+    india = baseline.load("India", 2011)
+    assert india.mx[0] > 1.5 * baseline.load("India", 2022).mx[0]       # infant deaths
+    assert e0(india.mx) < e0(baseline.load("India", 2022).mx) - 1
+
+
+def test_states_without_their_own_early_rates_borrow_indias():
+    india = baseline.load("India", 2012).mx / baseline.load("India", 2022).mx
+    for state in ("Telangana", "Uttarakhand", "Chandigarh"):        # Telangana: from 2014
+        b = baseline.load(state, 2012)
+        assert b.rates.unit == "India", state
+        assert b.mx / baseline.load(state, 2022).mx == pytest.approx(india, rel=1e-9), state
+
+
+def test_rates_in_and_after_the_period_are_the_life_tables():
+    for year in (2020, 2022, 2024, 2030):
+        b = baseline.load("Delhi", year)
+        assert b.rates is None and b.mx == pytest.approx(baseline.load("Delhi", 2022).mx)
+
+
+def test_early_year_counts_equal_that_years_srs_crude_death_rate():
+    t = pd.read_csv(paths.DATA / "srs_crude_death_rate.csv")
+    t = t[t.year < baseline.LIFE_TABLE_PERIOD[0]]
+    assert sorted(t.year.unique()) == list(range(2011, 2020))
+    for r in t.itertuples():
+        state = places.canonical_state(r.state)
+        b = baseline.load(state, r.year)
+        assert 1000 * b.deaths.sum() / b.population.sum() == pytest.approx(r.cdr_per_1000,
+                                                                           abs=0.006), r
+        assert b.reconciliation.period == str(r.year) and 0.5 < b.reconciliation.factor < 1.5
+
+
+def test_early_year_without_an_srs_rate_keeps_the_period_scaling():
+    for state, year in (("Chandigarh", 2015), ("Telangana", 2012)):
+        rec = baseline.load(state, year).reconciliation
+        assert rec.period == baseline.PERIOD_TEXT and rec == baseline.reconciliation(state)
