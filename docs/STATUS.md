@@ -7,25 +7,30 @@ Last updated 2026-11-11. Read this first when picking the project up.
 **What we are building.** A calculator: "if PM2.5 in place X goes from A to B, how many deaths
 a year are avoided and how many years of life are gained?" It answers on five published risk
 curves side by side, never one, because they disagree by several times. Later it prices
-interventions (cost per life-year) and becomes a public page on dogl.uk.
+interventions (cost per life-year) and becomes a public page on dogl.uk. Akash's role:
+direction and taste, and bringing in researchers to check and push it; Claude makes the
+technical calls and writes them down so an expert can check them quickly.
 
-**Where it is.** The calculator works for India, every state and ten cities, from the command
-line and from a local dashboard (`airhealth dashboard`). It checks itself against three
-published studies and lands where it should, with the gaps explained.
+**Where it is.** Works for India, every state and ten cities, from the command line and a
+local dashboard (`airhealth dashboard`): place, map, year, a source for each input, a district
+map. Checks itself against three published studies and lands where it should.
 
-**Last session (2026-11-11).** Fixed death counts for years before 2020: they used 2020-24
-death rates and came out up to a sixth wrong. Now each year uses the government survey's (SRS)
-own figures for that year. Committed locally (`4b67ed2`), not pushed.
+**Done 2026-11-11 (all committed locally, nothing pushed).**
+1. Years before 2020 use that year's own SRS death figures (was up to a sixth off).
+2. Dashboard: a year selector and a district map of PM2.5.
+3. A switch for every input: population, death rates and the death count can each come from
+   the Indian government or the UN (World Population Prospects 2024); the result names its
+   sources and says when it mixes them; giving several sources prints the range. Finding:
+   across sources India's numbers move about 15%; across risk curves, about 8 times. The
+   curve is the choice that matters.
 
-**Next session.** "A switch for every input" (next builds, item 1). Today some inputs have
-one source hard-wired: death rates by age, population, cause-of-death shares. Where credible
-sources disagree, the tool should let you pick, say which one it used, and show how much the
-answer moves between them. Concretely: add the UN's population and death estimates (World
-Population Prospects) as a second source, put a dropdown for each input on the dashboard,
-and print the spread. Three questions in the design note; defaults are proposed there.
+**Next session.** The IHME (GBD) risk curves, once the Part B data is downloaded. Akash
+signs in to IHME in a browser window Claude drives (Playwright); Claude runs the queries
+in `health/IHME_DOWNLOADS.md` Part B and writes the loader. Without that, next is either
+the evidence review (`lit/evidence.md`, which interventions are observed to work) or a
+one-page "methods for reviewers" note to send to researchers.
 
-**Waiting on Akash.** (1) The IHME downloads, Part B of `health/IHME_DOWNLOADS.md`: about an
-hour of form-filling on IHME's site with a free login; unblocks the GBD risk curves.
+**Waiting on Akash.** (1) Fifteen minutes to sign in to IHME in the browser Claude opens.
 (2) When to push.
 
 ## What exists
@@ -46,7 +51,7 @@ cd health
 ../.venv/bin/airhealth compare Delhi --from 100 --to 80
 ../.venv/bin/airhealth burden India
 ../.venv/bin/airhealth run interventions/november_only_delhi.toml
-../.venv/bin/python -m pytest -q                       # 193 tests
+../.venv/bin/python -m pytest -q                       # 215 tests
 ```
 
 ## Git
@@ -66,12 +71,13 @@ are never committed.
 
 ## Next builds, in order
 
-1. **A switch for every input.** Design note, not yet agreed:
-   [`specs/2026-11-11-source-switches.md`](specs/2026-11-11-source-switches.md).
-2. **IHME curves** (design stage 3): loaders for GBD 2019 and GBD 2023 curves and GEMM five
-   causes. Needs the Part B queries. Read the status section of `IHME_DOWNLOADS.md` first:
-   the 2023 files are on two different scales.
-3. **GBD 2023 exposure as a fifth map.** The file is downloaded. Needs IHME's state ids.
+1. **IHME curves** (design stage 3): loaders for GBD 2019 and GBD 2023 curves and GEMM five
+   causes. Needs the Part B queries (Claude drives the browser; Akash signs in). Read the
+   status section of `IHME_DOWNLOADS.md` first: the 2023 files are on two different scales.
+   GBD deaths then become a third source for `deaths` (`airhealth/inputs.py`).
+2. **GBD 2023 exposure as a fifth map.** The file is downloaded. Needs IHME's state ids.
+3. **A methods note for reviewers**: one page per input and curve, what was chosen and why,
+   what would change the answer most. For Akash to send to researchers.
 4. Cohort run to 2050 (stage 4), valuation presets (stage 5), the Surat 25× case (stage 6).
 5. Air-response layer (emissions to concentration), the dome effect, a public web page.
 

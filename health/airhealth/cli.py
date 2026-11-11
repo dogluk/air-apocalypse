@@ -1,15 +1,16 @@
 """airhealth: health effects of air pollution in India, from the terminal.
 
-  airhealth list curves|maps|places
-  airhealth compare PLACE --to C2 [--from C1] [--map M] [--curves a,b] [--deaths srs|model]
-  airhealth burden PLACE [--map M] [--counterfactual C] [--curves a,b] [--deaths srs|model]
+  airhealth list curves|maps|places|inputs
+  airhealth compare PLACE --to C2 [--from C1] [--map M] [--curves a,b] [--use input=source]
+  airhealth burden PLACE [--map M] [--counterfactual C] [--curves a,b] [--use input=source]
   airhealth chart PLACE [PLACE ...] [--map M] [--age A] [--out FILE]
-  airhealth run FILE [--map M] [--curves a,b] [--n N] [--seed S] [--charts DIR] [--deaths ...]
+  airhealth run FILE [--map M] [--curves a,b] [--n N] [--seed S] [--charts DIR] [--use ...]
   airhealth dashboard [--port 8765] [--no-open]     a local page over the same functions
 
---deaths srs (the default) scales death counts to the SRS's own crude death rate for each
-state, 2020-24; --deaths model leaves them as projected population × life-table death rates.
-Life expectancy is the same either way. The last line of every result says which was used.
+--use input=source picks a source for population, death_rates or deaths (airhealth list
+inputs); repeat it for several inputs, or give several sources (--use deaths=srs,unwpp) to get
+a result for each and the range across them. --deaths X is shorthand for --use deaths=X. The
+last line of every result names the source of each input.
 --json (anywhere) prints the same content as JSON; --debug shows the traceback of an error. A city's map defaults to cpcb when the city
 has ground-monitor data, everything else to aqli; the map used is named on the last line. An
 intervention file's map defaults to cpcb when every place in it is such a city, else aqli.
@@ -24,6 +25,7 @@ from pathlib import Path
 
 from . import baseline, curves, exposure, intervention, paths, places, provenance, report, simulate
 from .impact import Change, steady_state
+from .inputs import DEMOGRAPHIC, REGISTRY, Choice
 from .places import KINDS
 
 PLACES_SOURCE = "places.csv"
@@ -51,6 +53,43 @@ def _curves(spec: str | None):
     return run, unavailable
 
 
+def _choice(args) -> Choice:
+    return Choice.parse(getattr(args, "use", None), getattr(args, "deaths", None))
+
+
+SPREAD = (("deaths_averted", "deaths/yr", "{:,.0f}"), ("life_years_averted", "life-years/yr", "{:,.0f}"))
+
+
+def _across(results) -> dict:
+    """Per curve, the lowest and highest of each count across the source combinations."""
+    out = {}
+    for name in [i.curve.name for i in results[0][0]]:
+        rows = [next(i for i in impacts if i.curve.name == name) for impacts, _ in results]
+        out[name] = {k: [min(getattr(r, a) for r in rows), max(getattr(r, a) for r in rows)]
+                     for k, a in (("deaths_averted", "deaths_averted"),
+                                  ("life_years_averted", "yll_averted"))}
+    return out
+
+
+def _emit_all(args, results, unavailable, notes):
+    """One result as before; several (one per source combination) each in turn, then the
+    range across them."""
+    if len(results) == 1:
+        impacts, heading = results[0]
+        return _emit(args, impacts, unavailable, heading, notes)
+    across = _across(results)
+    if args.json:
+        print(json.dumps(dict(results=[report.to_json(i, unavailable, h, notes) for i, h in results],
+                              across_sources=across), indent=2, default=float, ensure_ascii=False))
+        return
+    for impacts, heading in results:
+        print(report.table(impacts, unavailable, heading, notes) + "\n")
+    for name, spans in across.items():
+        print(f"Across sources, {name}: " + "; ".join(
+            f"{fmt.format(spans[k][0])} to {fmt.format(spans[k][1])} {unit}"
+            for k, unit, fmt in SPREAD))
+
+
 def _emit(args, impacts, unavailable, heading, notes):
     if args.json:
         print(json.dumps(report.to_json(impacts, unavailable, heading, notes), indent=2,
@@ -76,23 +115,30 @@ def cmd_compare(args) -> None:
         level = start = args.from_
         notes.append(f"Starting level set to {start:g} µg/m³ by --from; the map supplies population only")
     change = Change(delta=args.to - level)
-    impacts = [steady_state(place, c, map_name, change, year=args.year, pm25_override=start,
-                            deaths=args.deaths) for c in run]
-    heading = f"{report.place_label(impacts[0])}: PM2.5 {level:.4g} → {args.to:g} µg/m³"
-    _emit(args, impacts, unavailable, heading, notes)
+    results = []
+    for src in _choice(args).combinations():
+        impacts = [steady_state(place, c, map_name, change, year=args.year, pm25_override=start,
+                                deaths=src) for c in run]
+        heading = f"{report.place_label(impacts[0])}: PM2.5 {level:.4g} → {args.to:g} µg/m³"
+        results.append((impacts, heading))
+    _emit_all(args, results, unavailable, notes)
 
 
 def cmd_burden(args) -> None:
     place = _place(args)
     map_name = args.map or _default_map(place)
     run, unavailable = _curves(args.curves)
-    impacts = [steady_state(place, c, map_name,
-                            Change(to=c.floor if args.counterfactual is None else args.counterfactual),
-                            year=args.year, deaths=args.deaths) for c in run]
     against = ("each curve's own floor" if args.counterfactual is None
                else f"{args.counterfactual:g} µg/m³")
-    heading = f"{report.place_label(impacts[0])}: deaths attributable to PM2.5 above {against}"
-    _emit(args, impacts, unavailable, heading, [])
+    results = []
+    for src in _choice(args).combinations():
+        impacts = [steady_state(place, c, map_name,
+                                Change(to=c.floor if args.counterfactual is None
+                                       else args.counterfactual),
+                                year=args.year, deaths=src) for c in run]
+        heading = f"{report.place_label(impacts[0])}: deaths attributable to PM2.5 above {against}"
+        results.append((impacts, heading))
+    _emit_all(args, results, unavailable, [])
 
 
 def cmd_chart(args) -> None:
@@ -132,8 +178,12 @@ def cmd_run(args) -> None:
         defaults = {_default_map(p) for p in iv.places}
         map_name = "cpcb" if defaults == {"cpcb"} else "aqli"
     names = [n.strip() for n in args.curves.split(",") if n.strip()] if args.curves else None
-    result = simulate.run(iv, map_name=map_name, curves=names, n=args.n, seed=args.seed,
-                          deaths=args.deaths)
+    combos = _choice(args).combinations(base=iv.sources)
+    runs = [simulate.run(iv, map_name=map_name, curves=names, n=args.n, seed=args.seed,
+                         deaths=src) for src in combos]
+    if len(runs) > 1:
+        return _emit_runs(args, runs)
+    result = runs[0]
     written = []
     if args.charts:
         from . import charts  # matplotlib only when a chart is drawn
@@ -150,6 +200,24 @@ def cmd_run(args) -> None:
         print(report.run_table(result))
 
 
+def _emit_runs(args, runs) -> None:
+    """Several runs of one intervention, one per source combination, and the range of the
+    median life-years across them."""
+    across = {}
+    for name in runs[0].per_curve:
+        meds = [float(np.median(r.per_curve[name].life_years)) for r in runs]
+        across[name] = dict(life_years_median=[min(meds), max(meds)])
+    if args.json:
+        print(json.dumps(dict(results=[report.run_json(r) for r in runs], across_sources=across),
+                         indent=2, default=float, ensure_ascii=False))
+        return
+    for r in runs:
+        print(report.run_table(r) + "\n")
+    for name, spans in across.items():
+        lo, hi = spans["life_years_median"]
+        print(f"Across sources, {name}: median life-years {lo:,.0f} to {hi:,.0f}")
+
+
 def _list_rows(what: str) -> list[dict]:
     sources = provenance.load_sources()
     if what == "curves":
@@ -159,6 +227,10 @@ def _list_rows(what: str) -> list[dict]:
         rows += [dict(name=n, available=f"no: {why}", label=cat.label[n], source=cat.source[n])
                  for n, why in unavailable.items()]
         return rows
+    if what == "inputs":
+        return [dict(name=i.name, label=i.label, default=i.default, switch=i.switch,
+                     sources=[dict(name=s.name, label=s.label, body=s.body) for s in i.sources],
+                     pending=i.pending) for i in REGISTRY.values()]
     if what == "maps":
         rows = []
         for m in exposure.MAPS:
@@ -184,6 +256,19 @@ def cmd_list(args) -> None:
         rows = [r for r in rows if r["kind"] == args.kind]
     if args.json:
         print(json.dumps(rows, indent=2, ensure_ascii=False))
+        return
+    if args.what == "inputs":
+        for r in rows:
+            print(f"{r['name']}: {r['label']}  [switch: {r['switch']}]")
+            for s in r["sources"]:
+                mark = " (default)" if s["name"] == r["default"] else ""
+                print(f"  {s['name']}{mark}: {s['label']}" + (f"  [{s['body']}]" if s["body"] else ""))
+            if not r["sources"]:
+                print(f"  now: {r['default']}")
+            if r["pending"]:
+                print(f"  not yet wired: {r['pending']}")
+        print("\nMixing bodies (e.g. UN population with SRS death rates) is allowed; the result "
+              "says when it happens.")
         return
     if args.what == "places":
         src = rows[0]["source"] if rows else ""
@@ -212,9 +297,12 @@ def _parser() -> argparse.ArgumentParser:
     sub = p.add_subparsers(dest="command", required=True)
 
     def deaths_flag(s):
-        s.add_argument("--deaths", choices=baseline.DEATHS_BASES, default="srs",
-                       help="death counts scaled to the SRS crude death rate of each state, "
-                       "2020-24 (srs, the default), or left as population × life-table rates (model)")
+        s.add_argument("--use", action="append", metavar="INPUT=SOURCE[,SOURCE]",
+                       help="source for an input: " + "; ".join(
+                           f"{i.name}={'|'.join(x.name for x in i.sources)}" for i in DEMOGRAPHIC)
+                       + " (airhealth list inputs). Repeatable; several sources give a result each")
+        s.add_argument("--deaths", choices=baseline.DEATHS_BASES, default=None,
+                       help="shorthand for --use deaths=…")
 
     def placed(name, help_):
         s = sub.add_parser(name, parents=[shared], help=help_)
@@ -265,7 +353,7 @@ def _parser() -> argparse.ArgumentParser:
     d.set_defaults(func=cmd_dashboard)
 
     ls = sub.add_parser("list", parents=[shared], help="curves, maps or places, each with its source")
-    ls.add_argument("what", choices=("curves", "maps", "places"))
+    ls.add_argument("what", choices=("curves", "maps", "places", "inputs"))
     ls.add_argument("--kind", choices=KINDS, help="places only: one kind")
     ls.set_defaults(func=cmd_list)
     return p

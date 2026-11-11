@@ -41,7 +41,7 @@ as the total. The deaths are then reconciled to that year's own SRS crude death 
 and over, as above (data/death_reconciliation_by_year.csv); where the SRS printed no rate for
 the state that year (smaller states and UTs before 2020), the period factor is kept.
 """
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from functools import cache
 
 import numpy as np
@@ -49,12 +49,13 @@ import pandas as pd
 
 from . import paths
 from .ages import AGE_STARTS
+from .inputs import Sources
 from .places import canonical_state
 
 LIFE_TABLE_PERIOD = (2020, 2024)
 MID_YEAR = sum(LIFE_TABLE_PERIOD) // 2
 PERIOD_TEXT = f"{LIFE_TABLE_PERIOD[0]}-{LIFE_TABLE_PERIOD[1] % 100}"
-DEATHS_BASES = ("srs", "model")   # reconciled to the SRS crude death rate, or not
+DEATHS_BASES = ("srs", "model", "unwpp")   # see inputs.REGISTRY["deaths"]
 RECONCILE_FROM_AGE = 45           # where the diagnosis puts the excess (see module docstring)
 EARLY_YEARS = (2011, 2019)        # years before the period with the SRS's own rates transcribed
 RATE_WINDOW = 1                   # an early year's rates by age: it and a year either side
@@ -76,12 +77,26 @@ class Reconciliation:
     srs_cdr: float         # mean SRS crude death rate over the life-table period, per 1,000
     srs_unit: str          # the SRS row the rate is from, as printed (the state, or its merged UT)
     period: str = PERIOD_TEXT   # the years of that rate: the life-table period, or one early year
+    reference_year: int = MID_YEAR   # the population year the factor is solved at
 
     @property
     def text(self) -> str:
         ages = f" at ages {self.from_age} and over" if self.from_age else ""
         return (f"deaths{ages} scaled by ×{self.factor:.2f} to the SRS crude death rate for "
                 f"{self.srs_unit}, {self.period} ({self.srs_cdr:.1f} per 1,000)")
+
+
+@dataclass(frozen=True)
+class UNScaling:
+    """Deaths scaled band by band to the UN's deaths by age for India in `year`; the same
+    factors in every state."""
+    state: str
+    year: int
+    overall: float          # India's scaled deaths over its unscaled deaths
+
+    @property
+    def text(self) -> str:
+        return f"deaths scaled band by band to the UN's deaths by age for India, {self.year} (WPP 2024)"
 
 
 @dataclass(frozen=True)
@@ -108,6 +123,8 @@ class Baseline:
     death_factor: np.ndarray   # factor on death counts by band (all ones for deaths="model")
     reconciliation: Reconciliation | None   # None for deaths="model"
     rates: RateAdjustment | None = None     # set in an early year (EARLY_YEARS), else None
+    sources: Sources = Sources()
+    un_scaling: UNScaling | None = None     # set for deaths="unwpp"
 
     @property
     def deaths(self) -> np.ndarray:
@@ -159,7 +176,7 @@ def _year_reconciliations() -> dict[tuple[str, int], Reconciliation]:
     t = pd.read_csv(paths.DATA / "death_reconciliation_by_year.csv")
     return {(r.state, int(r.period)): Reconciliation(r.state, float(r.factor), int(r.from_age),
                                                      float(r.srs_cdr_per_1000), r.srs_unit,
-                                                     str(r.period))
+                                                     str(r.period), int(r.period))
             for r in t.itertuples()}
 
 
@@ -208,35 +225,98 @@ def projection_years() -> range:
     return range(int(y.min()), int(y.max()) + 1)
 
 
-def load(state: str, year: int | None = None, deaths: str = "srs") -> Baseline:
-    if deaths not in DEATHS_BASES:
-        raise ValueError(f"deaths must be one of {', '.join(DEATHS_BASES)}, got {deaths!r}")
+@cache
+def _unwpp(name: str, col: str) -> dict[int, np.ndarray]:
+    """UN WPP 2024 India by year: one value per band (data/unwpp_<name>.csv)."""
+    t = pd.read_csv(paths.DATA / f"unwpp_{name}.csv").sort_values(["year", "age_start"])
+    out = {int(y): g[col].to_numpy(float) for y, g in t.groupby("year")}
+    assert all(len(v) == len(AGE_STARTS) for v in out.values())
+    return out
+
+
+def _un(name: str, col: str, year: int) -> np.ndarray:
+    try:
+        return _unwpp(name, col)[year]
+    except KeyError:
+        raise KeyError(f"no UN WPP {name} for {year}; the file covers "
+                       f"{min(_unwpp(name, col))}-{max(_unwpp(name, col))}") from None
+
+
+def _projected(state: str, year: int) -> np.ndarray:
+    """The government projection by band, 1 July of year, 80+ split by the state's life table."""
     pop = _population()
     rows = pop[pop.state == state]
     if rows.empty:
         raise KeyError(f"unknown state {state!r}; see baseline.states()")
-    year = MID_YEAR if year is None else int(year)
     rows = rows[rows.year == year].sort_values("age_start")
     if rows.empty:
         raise KeyError(f"no population for {state!r} in {year}; "
                        f"projections cover {pop.year.min()}-{pop.year.max()}")
-
     tables = _life_tables()
-    fallback = state not in tables
-    table = tables["India" if fallback else state]
-
+    table = tables.get(state, tables["India"])
     persons = rows.population.to_numpy(float)       # bands 0, 1, 5, ..., 75, 80+
     L80, L85 = table.Lx.to_numpy(float)[-2:]
-    population = np.append(persons[:-1], persons[-1] * np.array([L80, L85]) / (L80 + L85))
+    return np.append(persons[:-1], persons[-1] * np.array([L80, L85]) / (L80 + L85))
 
-    mx, adjustment = _rates(table), None
+
+def _population_for(state: str, year: int, source: str) -> np.ndarray:
+    p = _projected(state, year)
+    if source == "unwpp":     # India's level by band from the UN; the state keeps its share
+        p = p * _un("population_age", "population", year) / _projected("India", year)
+    return p
+
+
+def _rates_for(state: str, year: int, source: str) -> tuple[np.ndarray, RateAdjustment | None]:
+    tables = _life_tables()
+    mx = _rates(tables.get(state, tables["India"]))
+    if source == "unwpp":     # India's level by band from the UN; the state keeps its pattern
+        return mx * _un("lifetable", "mx", year) / _rates(tables["India"]), None
     if EARLY_YEARS[0] <= year <= EARLY_YEARS[1]:
         ratio, adjustment = rate_adjustment(state, year)
-        mx = mx * ratio
-    rec = reconciliation(state, year) if deaths == "srs" else None
-    factor = np.ones(len(AGE_STARTS))
-    if rec:
+        return mx * ratio, adjustment
+    return mx, None
+
+
+@cache
+def _modelled(state: str, year: int, population: str, death_rates: str) -> np.ndarray:
+    """Unscaled deaths by band: population × death rates."""
+    return _population_for(state, year, population) * _rates_for(state, year, death_rates)[0]
+
+
+def _srs_factor(state: str, rec: Reconciliation, src: Sources) -> Reconciliation:
+    """The SRS scaling solved for the population and death rates in use, at the record's
+    reference year (scripts/build_death_reconciliation.py does the same for the defaults)."""
+    modelled = _modelled(state, rec.reference_year, src.population, src.death_rates)
+    pop = _population_for(state, rec.reference_year, src.population).sum()
+    old = np.array(AGE_STARTS) >= rec.from_age
+    target = rec.srs_cdr / 1000 * pop
+    factor = (target - modelled[~old].sum()) / modelled[old].sum()
+    return replace(rec, factor=float(factor))
+
+
+def load(state: str, year: int | None = None, deaths: str = "srs",
+         sources: Sources | None = None) -> Baseline:
+    """A state's baseline for a year. `sources` chooses each demographic input's source
+    (inputs.Sources); `deaths` alone is shorthand for Sources(deaths=deaths)."""
+    if sources is None:
+        if deaths not in DEATHS_BASES:
+            raise ValueError(f"deaths must be one of {', '.join(DEATHS_BASES)}, got {deaths!r}")
+        sources = Sources(deaths=deaths)
+    year = MID_YEAR if year is None else int(year)
+    population = _population_for(state, year, sources.population)
+    mx, adjustment = _rates_for(state, year, sources.death_rates)
+    fallback = state not in _life_tables()
+
+    factor, rec, un = np.ones(len(AGE_STARTS)), None, None
+    if sources.deaths == "srs":
+        rec = _srs_factor(state, reconciliation(state, year), sources)
         factor[np.array(AGE_STARTS) >= rec.from_age] = rec.factor
+    elif sources.deaths == "unwpp":
+        india = _modelled("India", year, sources.population, sources.death_rates)
+        target = _un("deaths_age", "deaths", year)
+        factor = target / india
+        un = UNScaling(state, year, float(target.sum() / india.sum()))
     return Baseline(state=state, year=year, population=population, mx=mx,
                     share_ncd_lri=_share_ncd_lri().copy(), fallback=fallback,
-                    death_factor=factor, reconciliation=rec, rates=adjustment)
+                    death_factor=factor, reconciliation=rec, rates=adjustment,
+                    sources=sources, un_scaling=un)

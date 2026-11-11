@@ -152,12 +152,30 @@ behind the GEMM curve. Everything to its right is extrapolation.
 airhealth dashboard            # opens http://127.0.0.1:8765/ ; Ctrl-C to stop
 ```
 
-One page, served only to this machine, with a place picker, the exposure map, the death-count
-basis and From/To sliders. It shows what the change buys on every curve, the burden at the
-map's level, the curve shapes, how the three state-level maps disagree, and a table of every
-input the result depends on with which of them can be switched today. It calls the same
-functions as `compare` and `burden`, so the numbers match the terminal (`tests/test_dashboard.py`
-checks this). It always uses each map's latest year.
+One page, served only to this machine, with a place picker, the exposure map and its year, a
+source for each demographic input (population, death rates, death count) and From/To
+sliders. It shows what the change buys on every curve, the burden at the map's level, a map
+of PM2.5 by district with the place outlined, the curve shapes, how the three state-level
+maps disagree, and a table of every input the result depends on with its sources. It calls
+the same functions as `compare` and `burden`, so the numbers match the terminal
+(`tests/test_dashboard.py` checks this).
+
+### Sources: a switch for every input
+
+```
+airhealth list inputs                                   # every input, its sources, the default
+airhealth compare Delhi --to 40 --use deaths=unwpp
+airhealth burden India --use deaths=srs,unwpp,model     # a result for each, then the range
+```
+
+Population by age, death rates by age and the death count can each come from the Indian
+government's figures (the default) or the UN's World Population Prospects 2024; the death
+count can also be left unscaled (`model`). The UN publishes India only, so a UN choice keeps
+each state's pattern from the Indian sources and takes India's level, age band by age band,
+from the UN. Mixing the two is allowed and the result says so. `--deaths X` is shorthand for
+`--use deaths=X`; an intervention file can carry a `[sources]` table with the same keys. Every
+result's last line names the source of each input. Across every combination for India
+(`--to 20`), deaths averted move by about 15%; across the curves they move by about 8 times.
 
 ### `run`: an intervention, with odds, cost and uncertainty
 
@@ -251,7 +269,7 @@ How to read it:
 
 Other flags: `--map M` (default: cpcb when every place is a city with ground monitors,
 otherwise aqli), `--curves a,b`, `--n N` draws, `--seed S` (the same seed gives the same
-answer), `--deaths srs|model` (next section but one).
+answer), `--use input=source` (see "Sources" above).
 
 **How time is counted in this version.** The steady-state effect is computed once per
 draw. Each year of the intervention then realises a share of it. The **ramp** brings the
@@ -422,8 +440,13 @@ Sources for the UN figures: United Nations, World Population Prospects 2024, med
 variant, files `WPP2024_Demographic_Indicators_Medium.csv.gz` (crude death rate, deaths)
 and `WPP2024_PopulationByAge5GroupSex_Medium.csv.gz` (age structure), both under
 <https://population.un.org/wpp/assets/Excel%20Files/1_Indicator%20(Standard)/CSV_FILES/>,
-read 2026-11-11 (sha256 286ac36b… and a04d7d14…; not committed, used for this comparison
-only).
+read 2026-11-11 (sha256 286ac36b… and a04d7d14…).
+
+Since 2026-11-11 the UN's figures are a switch (`--use deaths=unwpp`, and population and
+death rates; `data/unwpp_*.csv`, `scripts/build_unwpp.py`). Year by year, the UN's crude
+death rate for India against the SRS's: within 1% in 2011-14, 4-11% higher in 2015-19, 20%
+and 24% higher in 2020 and 2021 (the pandemic), within 3.5% in 2022-24. So "about a tenth"
+is a 2020-24 average carried by the pandemic years; in a normal year the two are closer.
 
 ## Benchmarks: does it reproduce published numbers?
 

@@ -28,7 +28,7 @@ def world(monkeypatch):
     def install(rows, fallback=()):
         table = pd.DataFrame(rows, columns=exposure.COLUMNS)
 
-        def cells(place, map_name, year=None):
+        def cells(place, map_name, year=None, population="projection"):
             if place.kind == "country":
                 out = table
             elif place.kind == "state":
@@ -41,7 +41,7 @@ def world(monkeypatch):
 
         monkeypatch.setattr(exposure, "cells", cells)
         monkeypatch.setattr(baseline, "load",
-                            lambda state, year=None, deaths="srs": synthetic_baseline(
+                            lambda state, year=None, deaths="srs", sources=None: synthetic_baseline(
                                 state, state in fallback))
     return install
 
@@ -312,9 +312,10 @@ def test_delhi_life_years_match_an_independent_computation():
     r = steady_state(state, get("loglinear_jaganathan"), "aqli", Change(to=80), pm25_override=100)
     assert r.year == 2023
     assert r.population == pytest.approx(population.sum())
-    assert r.deaths_baseline == pytest.approx(deaths.sum(), rel=1e-9)
+    # 1e-4: the CSV's factor is rounded to four places; the tool solves it unrounded
+    assert r.deaths_baseline == pytest.approx(deaths.sum(), rel=1e-4)
     averted = deaths * (1 - 1.086 ** -2)                    # every age: Jaganathan is all-age
-    assert r.deaths_averted == pytest.approx(averted.sum(), rel=1e-9)
+    assert r.deaths_averted == pytest.approx(averted.sum(), rel=1e-4)
     # 0.05%: the independent curve runs through the printed (rounded) l(x); the tool rebuilds
     # l(x) from the rates
     assert r.yll_averted == pytest.approx((averted * e_at_death).sum(), rel=5e-4)

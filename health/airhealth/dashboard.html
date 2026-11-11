@@ -66,6 +66,7 @@ td.l, th.l { text-align: left; }
   padding: 6px 9px; border-radius: 6px; font-size: 12px; line-height: 1.4; display: none; z-index: 20; max-width: 300px; }
 .scroll { overflow-x: auto; }
 .err { color: var(--s2); }
+.controls-inline { display: contents; }
 .mapwrap svg { width: 100%; max-width: 760px; height: auto; display: block; margin: 0 auto; }
 .mapwrap path.d { stroke: var(--surface); stroke-width: .35; }
 .mapwrap path.d:hover { stroke: var(--ink); stroke-width: 1; }
@@ -84,11 +85,7 @@ td.l, th.l { text-align: left; }
     <label>Place <select id="place"></select></label>
     <label>Exposure map <select id="map"></select></label>
     <label>Year <select id="year"></select></label>
-    <label>Death count
-      <span class="seg" id="deaths">
-        <button data-v="srs" aria-pressed="true" title="Scaled to the government survey's death rate">Survey-scaled</button>
-        <button data-v="model" aria-pressed="false" title="Projected population × life-table death rates">Unscaled</button>
-      </span></label>
+    <span id="sources" class="controls-inline"></span>
     <label>From, µg/m³
       <span class="pair"><input type="number" id="fromN" min="0" max="250" step="1">
       <input type="range" id="fromR" min="0" max="250" step="1">
@@ -166,7 +163,8 @@ td.l, th.l { text-align: left; }
 const $ = id => document.getElementById(id);
 const SERIES = ["var(--s1)", "var(--s2)", "var(--s3)", "var(--s4)"];
 const NS = "http://www.w3.org/2000/svg";
-let META, RES, metric = "deaths_averted", deaths = "srs", fromSet = null, timer;
+let META, RES, metric = "deaths_averted", fromSet = null, timer;
+const SOURCE_SHORT = { projection: "Government projection", srs: "Government survey (SRS)", model: "Unscaled", unwpp: "UN (WPP 2024)" };
 
 const fmt = {
   int: v => Math.round(v).toLocaleString("en-US"),
@@ -328,7 +326,7 @@ function tiles() {
   const rate = 1000 * c.deaths_baseline / c.population;
   const t = [
     ["Population", fmt.sig(c.population), `${c.place.name} (${c.place.kind}), ${c.population_year}`],
-    ["Deaths a year, all causes", fmt.sig(c.deaths_baseline), `${rate.toFixed(1)} per 1,000 · ${c.deaths_basis === "srs" ? "survey-scaled; unscaled " + fmt.sig(c.deaths_unscaled) : "unscaled"}`],
+    ["Deaths a year, all causes", fmt.sig(c.deaths_baseline), `${rate.toFixed(1)} per 1,000 · ${c.deaths_basis === "model" ? "unscaled" : (c.deaths_basis === "srs" ? "survey-scaled" : "scaled to the UN") + "; unscaled " + fmt.sig(c.deaths_unscaled)}`],
     ["Level on this map", fmt.pm(RES.map_level) + " µg/m³", mapShort(RES.map)],
     ["Deaths averted a year", `${fmt.sig(Math.min(...v))} to ${fmt.sig(Math.max(...v))}`, `${fmt.pm(RES.origin)} → ${fmt.pm(RES.to)} µg/m³, lowest to highest curve`],
     ["Life expectancy gained", `${Math.min(...le).toFixed(2)} to ${Math.max(...le).toFixed(2)} yr`, "lowest to highest curve"],
@@ -404,7 +402,8 @@ async function drawMap() {
 // ---- controls ---------------------------------------------------------------------------
 async function load() {
   const [kind, name] = $("place").value.split("|");
-  const q = new URLSearchParams({ place: name, kind, map: $("map").value, year: $("year").value, deaths, to: $("toN").value });
+  const q = new URLSearchParams({ place: name, kind, map: $("map").value, year: $("year").value, to: $("toN").value });
+  META.inputs.filter(i => i.demographic).forEach(i => q.set(i.name, $("src_" + i.name).value));
   if (fromSet !== null) q.set("from", fromSet);
   const r = await fetch("/api/result?" + q), j = await r.json();
   if (!r.ok) { $("error").textContent = j.error; return; }
@@ -440,7 +439,11 @@ async function init() {
   $("place").value = "state|Delhi";
   mapsFor("state");
   $("inputs").innerHTML = `<tr><th>Input</th><th class="l">Sources that work today</th><th class="l">Switch</th><th class="l">Not yet wired</th></tr>` +
-    META.inputs.map(r => `<tr><td>${r.input}</td><td class="l">${r.now}</td><td class="l">${r.switch}</td><td class="l">${r.pending}</td></tr>`).join("");
+    META.inputs.map(r => `<tr><td>${r.label}</td><td class="l">${r.sources.length ? r.sources.map(s => `<b>${s.name}</b>${s.name === r.default ? " (default)" : ""}: ${s.label}`).join("<br>") : r.default}</td><td class="l">${r.switch}</td><td class="l">${r.pending}</td></tr>`).join("");
+  $("sources").innerHTML = META.inputs.filter(i => i.demographic).map(i =>
+    `<label>${i.label} <select id="src_${i.name}">` + i.sources.map(s =>
+      `<option value="${s.name}" title="${s.label}"${s.name === i.default ? " selected" : ""}>${SOURCE_SHORT[s.name] || s.name}</option>`).join("") + `</select></label>`).join("");
+  META.inputs.filter(i => i.demographic).forEach(i => $("src_" + i.name).addEventListener("change", load));
   fromSet = 100; $("fromN").value = 100; $("fromR").value = 100; $("toN").value = 80; $("toR").value = 80;
   $("place").addEventListener("change", () => { mapsFor($("place").value.split("|")[0]); fromSet = null; load(); });
   $("map").addEventListener("change", () => { yearsFor(); fromSet = null; load(); });
@@ -448,7 +451,6 @@ async function init() {
   $("useMap").addEventListener("click", () => { fromSet = null; load(); });
   [["fromN", "fromR"], ["fromR", "fromN"]].forEach(([a, b]) => $(a).addEventListener("input", () => { $(b).value = $(a).value; fromSet = $(a).value; later(); }));
   [["toN", "toR"], ["toR", "toN"]].forEach(([a, b]) => $(a).addEventListener("input", () => { $(b).value = $(a).value; later(); }));
-  seg("deaths", v => { deaths = v; load(); });
   seg("metric", v => { metric = v; if (RES) draw(); });
   load();
 }

@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import tomllib
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from functools import cache
 from pathlib import Path
 from typing import Literal
@@ -40,6 +40,7 @@ from . import lag as lags
 from . import paths
 from . import places as places_
 from .impact import Change
+from .inputs import Sources
 from .places import Place
 
 Z95 = stats.norm.ppf(0.95)
@@ -48,7 +49,7 @@ MONTHS = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", 
 DIST_KINDS = ("normal", "lognormal", "uniform", "triangular")
 CHANGE_KEYS = ("delta", "pct", "to", "monthly_delta", "monthly_pct")
 TOP_KEYS = ("name", "places", "start_year", "ramp_years", "duration_years", "p_success",
-            "from_level", "lag", "notes", "change", "cost")
+            "from_level", "lag", "notes", "change", "cost", "sources")
 COST_KEYS = ("once", "annual", "currency", "year", "share_only_on_success")
 CURRENCIES = ("INR", "USD")
 FX_FILE = "fx_inr_usd.csv"
@@ -227,6 +228,7 @@ class Intervention:
     lag: str = "epa20"
     from_level: float | None = None     # what-if: every unit starts here (pm25_override)
     notes: str = ""
+    sources: Sources = Sources()        # [sources]: population, death_rates, deaths
 
     def as_change(self, value: float) -> Change:
         """The impact.Change for one value (e.g. one draw) of the annual change."""
@@ -307,6 +309,19 @@ def _cost(table) -> dict:
                 cost_share_only_on_success=share)
 
 
+def _sources(table) -> Sources:
+    if table is None:
+        return Sources()
+    if not isinstance(table, dict):
+        raise Invalid("sources: must be a table, e.g. [sources] deaths = \"unwpp\"")
+    try:
+        return Sources(**{k: v for k, v in table.items()})
+    except TypeError:
+        raise Invalid(f"sources: keys are {', '.join(f.name for f in fields(Sources))}") from None
+    except ValueError as e:
+        raise Invalid(f"sources.{e}") from None
+
+
 def load(path: Path | str) -> Intervention:
     """Read and check an intervention file."""
     path = Path(path)
@@ -350,4 +365,4 @@ def load(path: Path | str) -> Intervention:
         name=name.strip(), places=_places(t["places"]), change_kind=kind, change=change,
         monthly=monthly, start_year=_integer(t["start_year"], "start_year"), ramp_years=ramp,
         duration_years=duration, p_success=p, lag=lag, from_level=from_level,
-        notes=notes.strip(), **_cost(t.get("cost")))
+        notes=notes.strip(), sources=_sources(t.get("sources")), **_cost(t.get("cost")))

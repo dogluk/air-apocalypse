@@ -52,9 +52,22 @@ def population_note(population_year: int, year: int, places: list[str]) -> str |
             f"has grown since")
 
 
-def deaths_note(recs, deaths: float, deaths_model: float) -> str:
+def sources_note(src) -> str:
+    """Which source each demographic input came from, and whether bodies are mixed."""
+    text = src.text
+    if len(src.bodies) > 1:
+        text += ("; this run mixes the Indian government's and the United Nations' figures "
+                 "(allowed; see airhealth list inputs)")
+    return text
+
+
+def deaths_note(recs, deaths: float, deaths_model: float, un=None) -> str:
     """How the death counts were scaled: `recs` are the states' Reconciliations (none when
-    the counts are unreconciled), deaths the count used and deaths_model the unscaled one."""
+    the counts are not scaled to the SRS), `un` the UN scaling if that was used, deaths the
+    count used and deaths_model the unscaled one."""
+    if un is not None:
+        return (f"{un.text[0].upper()}{un.text[1:]}, the same factors in every state: "
+                f"×{deaths / deaths_model:.2f} overall here; life expectancy is not scaled")
     if not recs:
         return ("Deaths are population × life-table death rates, not reconciled to the SRS "
                 "crude death rate (--deaths model)")
@@ -111,16 +124,20 @@ def rates_note(adjs, fallback=()) -> str | None:
             f"{baseline.PERIOD_TEXT}{tail}; life expectancy moves with them")
 
 
-def period_note(year: int, reconciled: bool) -> str | None:
-    """After the life-table period there is no SRS rate to check the counts against; say so.
+def period_note(year: int, src) -> str | None:
+    """After the life-table period no SRS rate checks the counts; say what they rest on.
     (Early years carry their own rates and scaling, named by rates_note and deaths_note.)"""
     if year <= baseline.LIFE_TABLE_PERIOD[1]:
         return None
-    if not reconciled:
-        return (f"Death rates are the SRS life tables for {baseline.PERIOD_TEXT}, used unchanged "
-                f"for {year}")
+    if src.deaths == "unwpp":
+        return (f"Death counts for {year} are the UN's projection (WPP 2024, Medium variant), "
+                f"not an observed figure")
+    rates = ("the UN's projected death rates" if src.death_rates == "unwpp"
+             else f"{baseline.PERIOD_TEXT} death rates")
+    if src.deaths == "model":
+        return f"Death rates for {year}: {rates}, not checked against any observed figure"
     return (f"Death counts for {year} are not checked against that year's SRS crude death "
-            f"rate: they are projected, {baseline.PERIOD_TEXT} death rates and scaling on "
+            f"rate: they are projected, {rates} and the {baseline.PERIOD_TEXT} scaling on "
             f"{year}'s population")
 
 
@@ -129,9 +146,10 @@ def _auto_notes(impacts: list[Impact]) -> list[str]:
         return []
     i = impacts[0]
     notes = [population_note(i.population_year, i.year, [i.place.name]),
-             deaths_note(i.reconciliations, i.deaths_baseline, i.deaths_model),
+             deaths_note(i.reconciliations, i.deaths_baseline, i.deaths_model, i.un_scaling),
              rates_note(i.rate_adjustments, i.fallback_states),
-             period_note(i.year, bool(i.reconciliations))]
+             period_note(i.year, i.sources),
+             sources_note(i.sources)]
     return [n for n in notes if n]
 
 
@@ -206,13 +224,18 @@ def to_json(impacts: list[Impact], unavailable: dict[str, str] | None = None,
         population=first.population if first else None,
         population_year=first.population_year if first else None,
         deaths_baseline=first.deaths_baseline if first else None,
-        deaths_basis=("srs" if first.reconciliations else "model") if first else None,
+        deaths_basis=first.sources.deaths if first else None,
+        sources=_sources_json(first.sources) if first else None,
         deaths_unscaled=first.deaths_model if first else None,
         death_scaling=_scaling_json(first.reconciliations) if first else [],
         rows=[_row(i) for i in impacts],
         fallback_states=sorted({s for i in impacts for s in i.fallback_states}),
         unavailable=unavailable, notes=list(notes),
         footer=footer(impacts, unavailable, notes))
+
+
+def _sources_json(src) -> dict:
+    return {i.name: s.name for i, s in src.items()}
 
 
 def _scaling_json(recs) -> list[dict]:
@@ -356,9 +379,11 @@ def run_footer(run: Run) -> str:
              "death, at the map year's population and age structure, summed over the "
              "intervention's years",
              population_note(run.population_year, run.year, run.census_places),
-             deaths_note(run.reconciliations, run.deaths_baseline, run.deaths_model),
+             deaths_note(run.reconciliations, run.deaths_baseline, run.deaths_model,
+                         run.un_scaling),
              rates_note(run.rate_adjustments, run.fallback_states),
-             period_note(run.year, bool(run.reconciliations))]
+             period_note(run.year, run.sources),
+             sources_note(run.sources)]
     iv = run.intervention
     if iv.monthly is not None and iv.change_kind == "pct":
         notes.insert(0, "monthly_pct takes every month to be as polluted as the annual mean; "
@@ -424,7 +449,7 @@ def run_json(run: Run) -> dict:
         change=change_text(iv), pm25_before=run.pm25_before,
         annual_mean_change_median=float(np.median(first.pm25_after)) - run.pm25_before,
         population=run.population, deaths_baseline=run.deaths_baseline,
-        deaths_basis="srs" if run.reconciliations else "model",
+        deaths_basis=run.sources.deaths, sources=_sources_json(run.sources),
         deaths_unscaled=run.deaths_model, death_scaling=_scaling_json(run.reconciliations),
         population_year=run.population_year,
         start_year=iv.start_year, duration_years=iv.duration_years, ramp_years=iv.ramp_years,

@@ -39,6 +39,7 @@ from . import curves as curves_
 from . import exposure, impact, intervention
 from . import lag as lags
 from .curves import Curve
+from .inputs import Sources
 from .intervention import Intervention, Invalid
 from .places import Place
 
@@ -95,6 +96,8 @@ class Run:
     deaths_model: float = 0.0       # all-cause deaths a year before reconciliation to the SRS
     reconciliations: tuple = ()     # baseline.Reconciliation per state; empty for deaths="model"
     rate_adjustments: tuple = ()    # baseline.RateAdjustment per state, early years only
+    sources: Sources = Sources()
+    un_scaling: object = None       # baseline.UNScaling for deaths="unwpp"
     population_year: int = 0        # the year the population is for (2011 if any place is a city)
     census_places: tuple = ()       # the places whose population is the Census's, not the map year's
 
@@ -144,12 +147,14 @@ class _Steady:
     deaths_model: float
     reconciliations: tuple
     rate_adjustments: tuple
+    sources: Sources
+    un_scaling: object
     population_year: int
     census_places: tuple
 
 
 def _steady(iv: Intervention, curve: Curve, values: np.ndarray, map_name: str,
-            deaths: str = "srs") -> _Steady:
+            deaths: "str | Sources" = "srs") -> _Steady:
     """Steady-state results for every draw, added over the intervention's places."""
     parts = [impact.steady_state_many(p, curve, map_name, iv.change_kind, values,
                                       pm25_override=iv.from_level, deaths=deaths)
@@ -165,6 +170,7 @@ def _steady(iv: Intervention, curve: Curve, values: np.ndarray, map_name: str,
         deaths_model=float(sum(r.deaths_model for r in parts)),
         reconciliations=tuple(dict.fromkeys(x for r in parts for x in r.reconciliations)),
         rate_adjustments=tuple(dict.fromkeys(x for r in parts for x in r.rate_adjustments)),
+        sources=parts[0].sources, un_scaling=parts[0].un_scaling,
         population_year=min(r.population_year for r in parts),
         census_places=tuple(r.place.name for r in parts if r.population_year != r.year))
 
@@ -178,9 +184,11 @@ def _width(x: np.ndarray) -> float:
 
 
 def run(iv: Intervention, map_name: str = "aqli", curves: list[str] | None = None,
-        n: int = 5000, seed: int = 0, deaths: str = "srs") -> Run:
+        n: int = 5000, seed: int = 0, deaths: "str | Sources | None" = None) -> Run:
     """Run the intervention on every curve asked for (default: every curve that can run).
-    deaths: "srs" (death counts reconciled to the SRS crude death rate) or "model"."""
+    deaths: an inputs.Sources or a deaths basis ("srs", "model", "unwpp"); None takes the
+    intervention file's [sources] table, else the defaults."""
+    deaths = Sources.of(iv.sources if deaths is None else deaths)
     if n < 2:
         raise ValueError(f"n: need at least 2 draws, got {n}")
     if map_name not in exposure.MAPS:
@@ -223,6 +231,7 @@ def run(iv: Intervention, map_name: str = "aqli", curves: list[str] | None = Non
                shares=shares, usd_per_unit=usd, fallback_states=first.fallback,
                unavailable=unavailable, deaths_model=first.deaths_model,
                reconciliations=first.reconciliations, rate_adjustments=first.rate_adjustments,
+               sources=first.sources, un_scaling=first.un_scaling,
                population_year=first.population_year,
                census_places=first.census_places)
 

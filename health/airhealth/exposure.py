@@ -31,6 +31,7 @@ import numpy as np
 import pandas as pd
 
 from . import baseline, paths
+from .inputs import Sources
 from .places import Place
 
 MAPS: tuple[str, ...] = ("aqli", "acag_total", "gbd2019", "cpcb")
@@ -51,13 +52,14 @@ def _table(map_name: str) -> pd.DataFrame:
 
 
 @cache
-def _districts(map_name: str, year: int) -> tuple[pd.DataFrame, int]:
+def _districts(map_name: str, year: int, population: str = "projection") -> tuple[pd.DataFrame, int]:
     """A district map's rows for one year, each state scaled to its projected population."""
     t = _table(map_name)
     t = t[t.year == year]
     if year not in baseline.projection_years():
         return t, MAP_POPULATION_YEAR[map_name]
-    projected = {s: baseline.load(s, year).population.sum() for s in t.state.unique()}
+    src = Sources(population=population)
+    projected = {s: baseline.load(s, year, sources=src).population.sum() for s in t.state.unique()}
     return t.assign(population=t.population * t.state.map(projected)
                     / t.groupby("state").population.transform("sum")), year
 
@@ -84,7 +86,10 @@ def _city(place: Place) -> pd.Series:
         raise KeyError(f"no exposure data for city {place.name!r}") from None
 
 
-def cells(place: Place, map_name: str, year: int | None = None) -> pd.DataFrame:
+def cells(place: Place, map_name: str, year: int | None = None,
+          population: str = "projection") -> pd.DataFrame:
+    """The exposure units of the place on the map, with their PM2.5 and population (scaled to
+    the population source asked for: inputs.REGISTRY["population"])."""
     if map_name not in MAPS:
         raise ValueError(f"unknown exposure map {map_name!r}; choose from {', '.join(MAPS)}")
     t = _table(map_name)
@@ -110,10 +115,11 @@ def cells(place: Place, map_name: str, year: int | None = None) -> pd.DataFrame:
         if place.kind == "state":
             t = t[t.state == place.name]
         out = t.assign(unit=t.state,
-                       population=[baseline.load(s, y).population.sum() for s in t.state])
+                       population=[baseline.load(s, y, sources=Sources(population=population))
+                                   .population.sum() for s in t.state])
 
     else:
-        t, population_year = _districts(map_name, y)
+        t, population_year = _districts(map_name, y, population)
         if place.kind == "country":
             out = t
         elif place.kind == "state":

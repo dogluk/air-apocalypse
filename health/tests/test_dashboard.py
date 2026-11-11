@@ -112,3 +112,23 @@ def test_result_carries_the_map():
     r = dashboard.result({"place": "Delhi", "kind": "state", "map": "aqli", "year": "2015", "to": "80"})
     assert r["districts"]["Delhi|Central"] == pytest.approx(r["map_level"], rel=0.02)
     assert len(r["selected"]) == 11
+
+
+def test_sources_pass_through_like_the_cli(capsys):
+    q = {"place": "Delhi", "kind": "state", "from": "100", "to": "80"}
+    r = dashboard.result({**q, "population": "unwpp", "death_rates": "unwpp", "deaths": "unwpp"})
+    c = _cli(capsys, "compare", "Delhi", "--from", "100", "--to", "80", "--use",
+             "population=unwpp", "--use", "death_rates=unwpp", "--use", "deaths=unwpp")
+    assert r["compare"]["sources"] == c["sources"] == {"population": "unwpp",
+                                                       "death_rates": "unwpp", "deaths": "unwpp"}
+    assert r["compare"]["deaths_baseline"] == pytest.approx(c["deaths_baseline"])
+    with pytest.raises(ValueError):
+        dashboard.result({**q, "deaths": "who"})
+
+
+def test_meta_inputs_come_from_the_registry():
+    m = dashboard.meta()
+    names = [i["name"] for i in m["inputs"]]
+    assert names[:3] == ["population", "death_rates", "deaths"]
+    deaths = m["inputs"][2]
+    assert [s["name"] for s in deaths["sources"]] == ["srs", "model", "unwpp"] and deaths["default"] == "srs"

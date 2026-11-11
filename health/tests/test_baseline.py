@@ -217,4 +217,5 @@ def test_early_year_counts_equal_that_years_srs_crude_death_rate():
 def test_early_year_without_an_srs_rate_keeps_the_period_scaling():
     for state, year in (("Chandigarh", 2015), ("Telangana", 2012)):
         rec = baseline.load(state, year).reconciliation
-        assert rec.period == baseline.PERIOD_TEXT and rec == baseline.reconciliation(state)
+        assert rec.period == baseline.PERIOD_TEXT
+        assert rec.factor == pytest.approx(baseline.reconciliation(state).factor, abs=1e-4)

@@ -226,3 +226,54 @@ def test_curve_chart_labels_say_what_each_line_is_the_risk_of():
     assert charts.line_label(by_name["loglinear_jaganathan"]) == "Jaganathan 2024: all deaths"
     assert charts.age_band(60) == "ages 60-64" and charts.age_band(62) == "ages 60-64"
     assert charts.age_band(85) == "ages 85 and over" and charts.age_band(0) == "ages 0-0"
+
+
+# --- a source for every input (docs/specs/2026-11-11-source-switches.md) ---------------------
+
+def test_footer_names_every_source(capsys):
+    args = ("compare", "Delhi", "--from", "100", "--to", "80", "--curves", "gemm_ncd_lri")
+    footer = run(capsys, *args)[1].strip().splitlines()[-1]
+    assert ("Sources: population by age, projection (default); death rates by age, srs "
+            "(default); death count, srs (default)") in footer
+    assert "mixes" not in footer
+    footer = run(capsys, *args, "--use", "deaths=unwpp")[1].strip().splitlines()[-1]
+    assert "death count, unwpp" in footer and "UN's deaths by age for India, 2023" in footer
+    assert "mixes the Indian government's and the United Nations' figures" in footer
+    result = json.loads(run(capsys, "--json", *args, "--use", "population=unwpp",
+                            "--use", "death_rates=unwpp", "--use", "deaths=unwpp")[1])
+    assert result["sources"] == {"population": "unwpp", "death_rates": "unwpp", "deaths": "unwpp"}
+    assert result["deaths_basis"] == "unwpp" and "mixes" not in result["footer"]
+
+
+def test_deaths_flag_is_shorthand_for_use(capsys):
+    a = json.loads(run(capsys, "--json", "burden", "India", "--deaths", "model")[1])
+    b = json.loads(run(capsys, "--json", "burden", "India", "--use", "deaths=model")[1])
+    assert a["rows"] == b["rows"]
+
+
+def test_several_sources_print_a_result_each_and_the_range(capsys):
+    _, out, _ = run(capsys, "compare", "India", "--to", "20", "--curves", "gemm_ncd_lri",
+                    "--use", "deaths=srs,unwpp,model")
+    assert out.count("Sources: ") == 3
+    spread = next(ln for ln in out.splitlines() if ln.startswith("Across sources"))
+    assert "deaths/yr" in spread and "gemm_ncd_lri" in spread
+    result = json.loads(run(capsys, "--json", "compare", "India", "--to", "20", "--curves",
+                            "gemm_ncd_lri", "--use", "deaths=srs,unwpp")[1])
+    assert [r["sources"]["deaths"] for r in result["results"]] == ["srs", "unwpp"]
+    lo, hi = result["across_sources"]["gemm_ncd_lri"]["deaths_averted"]
+    assert lo < hi
+
+
+def test_list_inputs_prints_the_registry(capsys):
+    _, out, _ = run(capsys, "list", "inputs")
+    for name in ("population", "death_rates", "deaths", "unwpp", "map", "curves"):
+        assert name in out
+
+
+def test_run_takes_sources_from_the_file_or_the_flag(capsys, tmp_path):
+    f = tmp_path / "un.toml"
+    f.write_text((paths.HEALTH / "interventions" / "delhi_100_to_80.toml").read_text()
+                 + '\n[sources]\ndeaths = "unwpp"\n')
+    args = ("--json", "run", str(f), "--n", "50", "--curves", "gemm_ncd_lri")
+    assert json.loads(run(capsys, *args)[1])["sources"]["deaths"] == "unwpp"
+    assert json.loads(run(capsys, *args, "--deaths", "srs")[1])["sources"]["deaths"] == "srs"

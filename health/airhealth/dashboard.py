@@ -17,6 +17,7 @@ import numpy as np
 
 from . import baseline, curves, exposure, paths, places, report
 from .impact import Change, steady_state
+from .inputs import DEMOGRAPHIC, REGISTRY, Sources
 
 PAGE = Path(__file__).with_name("dashboard.html")
 SHAPES = paths.DATA / "districts.geojson"     # scripts/build_district_shapes.py
@@ -36,29 +37,6 @@ SHORT = {
 MAP_SHORT = {"aqli": "AQLI (dust removed)", "acag_total": "ACAG total", "gbd2019": "GBD 2019",
              "cpcb": "CPCB monitors"}
 
-# Every input the result depends on, and how many sources can be switched between today.
-# Kept here, next to the page that shows it, until the inputs get a registry of their own
-# (docs/specs/2026-11-11-source-switches.md).
-INPUTS = [
-    dict(input="Risk curve", now="5 open curves", switch="--curves",
-         pending="GBD 2019, GBD 2023, GEMM five causes (IHME files)"),
-    dict(input="Exposure map", now="AQLI, ACAG total, GBD 2019 (states), CPCB (11 cities)",
-         switch="--map", pending="GBD 2023 exposure (IHME file is downloaded)"),
-    dict(input="Death count", now="SRS-scaled, or population × life-table rates",
-         switch="--deaths", pending="UN WPP 2024; GBD deaths"),
-    dict(input="Counterfactual level", now="each curve's floor, or one number",
-         switch="--counterfactual", pending=""),
-    dict(input="Death rates by age (life table)", now="SRS abridged life tables 2020-24; 2011-19 moved by each year's SRS rates by age",
-         switch="none", pending="UN WPP, GBD life tables"),
-    dict(input="Population by age", now="Government projections 2011-2036",
-         switch="none", pending="UN WPP, GBD population, Census 2011 for cities"),
-    dict(input="Share of deaths from NCD + LRI", now="SRS cause of death 2021-23, all-India",
-         switch="none", pending="GBD cause-specific deaths by state"),
-    dict(input="Timing of benefit (intervention files)", now="immediate, or EPA 20-year lag",
-         switch="lag = in the file", pending=""),
-    dict(input="Exchange rate (intervention files)", now="World Bank annual rates",
-         switch="none", pending=""),
-]
 
 
 def _default_map(place: places.Place) -> str:
@@ -152,7 +130,11 @@ def meta() -> dict:
         unavailable=[dict(name=n, short=SHORT.get(n, n), label=cat.label[n], why=why)
                      for n, why in unavailable.items()],
         shapes=dict(conc=[float(v) for v in conc], age=SHAPE_AGE, rr=shapes),
-        exposure=rows, max_cohort=curves.MAX_COHORT_PM25, inputs=INPUTS,
+        exposure=rows, max_cohort=curves.MAX_COHORT_PM25,
+        inputs=[dict(name=i.name, label=i.label, default=i.default, switch=i.switch,
+                     pending=i.pending, demographic=i in DEMOGRAPHIC,
+                     sources=[dict(name=x.name, label=x.label, body=x.body) for x in i.sources])
+                for i in REGISTRY.values()],
         deaths_bases=list(baseline.DEATHS_BASES),
     )
 
@@ -161,7 +143,7 @@ def result(q: dict) -> dict:
     """What `airhealth compare` and `airhealth burden` would print for these settings."""
     place = places.resolve(q["place"], kind=q.get("kind") or None)
     map_name = q.get("map") or _default_map(place)
-    deaths = q.get("deaths") or "srs"
+    deaths = Sources(**{i.name: q.get(i.name) or i.default for i in DEMOGRAPHIC})
     year = int(q["year"]) if q.get("year") not in (None, "") else None
     run, unavailable = curves.select()
     level = float(exposure.mean(place, map_name, year))

@@ -39,6 +39,7 @@ import pandas as pd
 from . import baseline, exposure, lifetable
 from .ages import AGE_STARTS
 from .curves import Curve
+from .inputs import Sources
 from .places import Place
 
 STARTS = np.array(AGE_STARTS)
@@ -91,7 +92,9 @@ class Impact:
     fallback_states: list[str]
     deaths_model: float = 0.0   # all-cause deaths per year before reconciliation (population × mx)
     reconciliations: tuple[baseline.Reconciliation, ...] = ()
-    rate_adjustments: tuple[baseline.RateAdjustment, ...] = ()   # one per state, early years only   # one per state; empty for deaths="model"
+    rate_adjustments: tuple[baseline.RateAdjustment, ...] = ()   # one per state, early years only
+    sources: Sources = Sources()
+    un_scaling: baseline.UNScaling | None = None   # deaths="unwpp": India's figure, the same in every state   # one per state; empty for deaths="model"
     population_year: int = 0    # the year the population is for (2011 for a city: Census)
 
 
@@ -134,12 +137,14 @@ def _state(b: baseline.Baseline, curve: Curve, before: np.ndarray, after: np.nda
 
 def steady_state(place: Place, curve: Curve, map_name: str, change: Change,
                  year: int | None = None, pm25_override: float | None = None,
-                 deaths: str = "srs") -> Impact:
+                 deaths: "str | Sources" = "srs") -> Impact:
     """Deaths averted per year and change in life expectancy when `change` is applied to
     every exposure unit of `place` on `map_name`. pm25_override, if given, sets every unit's
     starting concentration (population weights unchanged), e.g. Delhi from 100 to 80.
-    deaths: "srs" (death counts reconciled to the SRS crude death rate) or "model" (not)."""
-    cells: pd.DataFrame = exposure.cells(place, map_name, year)
+    deaths: an inputs.Sources, or a deaths basis ("srs", "model", "unwpp") for the defaults
+    with that death count."""
+    src = Sources.of(deaths)
+    cells: pd.DataFrame = exposure.cells(place, map_name, year, src.population)
     year = int(cells.attrs["year"])
     before = cells.pm25.to_numpy(float)
     if pm25_override is not None:
@@ -147,15 +152,16 @@ def steady_state(place: Place, curve: Curve, map_name: str, change: Change,
     after = change.apply(before)
     pop = cells.population.to_numpy(float)
 
-    results, fallback, recs, adjs = [], [], [], []
+    results, fallback, recs, adjs, un = [], [], [], [], None
     for state, rows in cells.groupby("state", sort=True).indices.items():
-        b = baseline.load(state, year, deaths)
+        b = baseline.load(state, year, sources=src)
         if b.fallback:
             fallback.append(state)
         if b.reconciliation:
             recs.append(b.reconciliation)
         if b.rates:
             adjs.append(b.rates)
+        un = b.un_scaling or un
         results.append(_state(b, curve, before[rows], after[rows], pop[rows]))
 
     weights = [r.population for r in results]
@@ -172,12 +178,13 @@ def steady_state(place: Place, curve: Curve, map_name: str, change: Change,
         derived=curve.kind == "life_expectancy",
         fallback_states=fallback,
         deaths_model=float(sum(r.deaths_model for r in results)),
-        reconciliations=tuple(recs), rate_adjustments=tuple(adjs),
+        reconciliations=tuple(recs), rate_adjustments=tuple(adjs), sources=src,
+        un_scaling=un,
         population_year=int(cells.attrs["population_year"]))
 
 
 def burden(place: Place, curve: Curve, map_name: str, counterfactual: float | None = None,
-           year: int | None = None, deaths: str = "srs") -> Impact:
+           year: int | None = None, deaths: "str | Sources" = "srs") -> Impact:
     """The impact of bringing every unit down to the counterfactual (default: the curve's
     floor), i.e. the deaths attributable to the air above it."""
     to = curve.floor if counterfactual is None else counterfactual
@@ -222,6 +229,8 @@ class ImpactDraws:
     deaths_model: float = 0.0
     reconciliations: tuple[baseline.Reconciliation, ...] = ()
     rate_adjustments: tuple[baseline.RateAdjustment, ...] = ()   # one per state, early years only
+    sources: Sources = Sources()
+    un_scaling: baseline.UNScaling | None = None   # deaths="unwpp": India's figure, the same in every state
     population_year: int = 0
 
 
@@ -274,11 +283,13 @@ def _state_many(b: baseline.Baseline, curve: Curve, before: np.ndarray, after: n
 
 def steady_state_many(place: Place, curve: Curve, map_name: str, kind: str,
                       values: np.ndarray, year: int | None = None,
-                      pm25_override: float | None = None, deaths: str = "srs") -> ImpactDraws:
+                      pm25_override: float | None = None,
+                      deaths: "str | Sources" = "srs") -> ImpactDraws:
     """steady_state() for n draws: values[i] is the change (of `kind`: delta, pct or to) in
     draw i, and draw i uses row i of the curve's parameters if the curve came from
     sample_many(), else the curve as it is."""
-    cells: pd.DataFrame = exposure.cells(place, map_name, year)
+    src = Sources.of(deaths)
+    cells: pd.DataFrame = exposure.cells(place, map_name, year, src.population)
     year = int(cells.attrs["year"])
     before = cells.pm25.to_numpy(float)
     if pm25_override is not None:
@@ -286,15 +297,16 @@ def steady_state_many(place: Place, curve: Curve, map_name: str, kind: str,
     after = apply_many(kind, values, before)
     pop = cells.population.to_numpy(float)
 
-    results, fallback, recs, adjs = [], [], [], []
+    results, fallback, recs, adjs, un = [], [], [], [], None
     for state, rows in cells.groupby("state", sort=True).indices.items():
-        b = baseline.load(state, year, deaths)
+        b = baseline.load(state, year, sources=src)
         if b.fallback:
             fallback.append(state)
         if b.reconciliation:
             recs.append(b.reconciliation)
         if b.rates:
             adjs.append(b.rates)
+        un = b.un_scaling or un
         results.append(_state_many(b, curve, before[rows], after[:, rows], pop[rows]))
 
     weights = [r["population"] for r in results]
@@ -311,5 +323,6 @@ def steady_state_many(place: Place, curve: Curve, map_name: str, kind: str,
         derived=curve.kind == "life_expectancy",
         fallback_states=fallback,
         deaths_model=float(sum(r["deaths_model"] for r in results)),
-        reconciliations=tuple(recs), rate_adjustments=tuple(adjs),
+        reconciliations=tuple(recs), rate_adjustments=tuple(adjs), sources=src,
+        un_scaling=un,
         population_year=int(cells.attrs["population_year"]))
