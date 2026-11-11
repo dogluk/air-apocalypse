@@ -10,7 +10,8 @@ checked without logging in; look at what the tool offers and tell us if it diffe
 
 ## Status, 2026-11-11
 
-**Part A is done; Part B (the queries) is not.** The Part A files are in
+**Part A is done. Part B is done for GBD 2023 only:** the Results tool no longer offers
+GBD 2019 (see "Part B as run" below). The Part A files are in
 `health/data_local/ihme_raw/` under IHME's own filenames, with the zips unpacked beside
 them. They were **not** renamed to the names Part A asks for: the loader is not written yet,
 and it should read the files as IHME delivers them. Treat the filenames in Part A below as
@@ -32,16 +33,112 @@ Two traps for whoever writes the loader:
    a risk ratio. The four dated 2025 (IHD, stroke, LRI, dementia) have columns
    `risk, mean, lower, upper` and start at 0: almost certainly the log of the ratio. Confirm
    against IHME's documentation before using either.
-2. **State location ids are not in the codebook.** The exposure CSV does contain rows that
-   look like Indian states, but the ids must come from IHME's location hierarchy, which is
-   not among these files. The Part B query results carry `location_name`, which settles it.
+2. **State location ids are not in the codebook.** Settled by Part B: the query results carry
+   `location_id` and `location_name` (table below). All 32 ids appear in the GBD 2023
+   exposure CSV. That CSV also has ids 43872-43942, 44539 and 44540, which look like
+   urban/rural halves of the states; the Results tool does not offer those, so ignore them.
 
 A first look at the exposure CSV: India (location 163) is **53.6 µg/m³ in 2019 and 54.1 in
 2023**. GBD 2019, as printed in Pandey et al. 2021, had 90.9. So IHME's own newer round has
 moved most of the way to the satellite maps (AQLI 41.2, ACAG 49.8). This bears on gap G7 in
 `lit/gaps.md`. Not yet wired into the tool.
 
-Still to download: everything in Part B, by web query with a free IHME login.
+### Part B as run (2026-11-11, GBD Results tool, signed in)
+
+Files are under `data_local/ihme_raw/part_b/gbd2023/`, kept under IHME's own names, each zip
+unpacked into a folder of the same name. Each zip holds one CSV and a `citation.txt`. **Not**
+renamed to the Part B table's names, for the same reason as Part A.
+
+| What | File (under `part_b/gbd2023/`) | Rows | Contents |
+|---|---|---|---|
+| Deaths | `IHME-GBD_2023_DATA-0b7890d0-1/IHME-GBD_2023_DATA-0b7890d0-1.csv` | 31,872 | Measure Deaths; metric Number and Rate (rate is per 100,000); 8 causes; 32 locations; 27 ages; sex Both; years 2015, 2019, 2023. |
+| Population | `IHME-GBD_2023_DATA-bccbe428-1/IHME-GBD_2023_DATA-bccbe428-1.csv` | 2,592 | Measure Population (measure_id 44); metric Number; same 32 locations, 27 ages, sex Both, 3 years. |
+
+Columns, deaths file: `population_group_id, population_group_name, measure_id,
+measure_name, location_id, location_name, sex_id, sex_name, age_id, age_name, cause_id,
+cause_name, metric_id, metric_name, year, val, upper, lower`. The population file has the same
+columns without `cause_id, cause_name`. `population_group_name` is always "All Population".
+No empty values.
+
+Checks done on 2026-11-11: the 31 states and UTs add up exactly to India (population and
+deaths, every cause, 2023). The age bands add up exactly to "All ages". India 2023, all ages:
+population 1,443.4 M; IHD 1,464,977 deaths; stroke 1,034,796; COPD 1,023,485; LRI
+412,055; lung cancer 101,269; type 2 diabetes 578,366; dementia 140,944; all NCDs 6,971,959.
+
+**Causes (cause_id, name as written):** 322 Lower respiratory infections; 409
+Non-communicable diseases; 426 Tracheal, bronchus, and lung cancer; 493 Ischemic heart
+disease; 494 Stroke; 509 Chronic obstructive pulmonary disease; 543 Alzheimer's disease and
+other dementias; 976 Diabetes mellitus type 2.
+
+IHME **leaves out rows** for ages where a cause is not estimated. These are absent, not
+zero: IHD, COPD, lung cancer and type 2 diabetes start at 15-19 years; dementia starts at
+40-44; LRI, stroke and all NCDs have every age.
+
+**Ages (age_id, name as written):** 22 All ages; 1 <5 years; 2 0-6 days; 3 7-27 days;
+388 1-5 months; 389 6-11 months; 238 12-23 months; 34 2-4 years; 6 5-9; 7 10-14; 8 15-19;
+9 20-24; 10 25-29; 11 30-34; 12 35-39; 13 40-44; 14 45-49; 15 50-54; 16 55-59; 17 60-64;
+18 65-69; 19 70-74; 20 75-79; 30 80-84; 31 85-89; 32 90-94; 235 95+ years. "<5 years" is
+the sum of the six under-5 groups, so do not add it to them.
+
+**Locations, GBD 2023 (location_id, name as written):**
+
+| id | name | id | name |
+|---|---|---|---|
+| 163 | India | 4860 | Maharashtra |
+| 4841 | Andhra Pradesh | 4861 | Manipur |
+| 4842 | Arunachal Pradesh | 4862 | Meghalaya |
+| 4843 | Assam | 4863 | Mizoram |
+| 4844 | Bihar | 4864 | Nagaland |
+| 4846 | Chhattisgarh | 4865 | Odisha |
+| 4849 | Delhi | 4867 | Punjab |
+| 4850 | Goa | 4868 | Rajasthan |
+| 4851 | Gujarat | 4869 | Sikkim |
+| 4852 | Haryana | 4870 | Tamil Nadu |
+| 4853 | Himachal Pradesh | 4871 | Telangana |
+| 4854 | Jammu & Kashmir and Ladakh | 4872 | Tripura |
+| 4855 | Jharkhand | 4873 | Uttar Pradesh |
+| 4856 | Karnataka | 4874 | Uttarakhand |
+| 4857 | Kerala | 4875 | West Bengal |
+| 4859 | Madhya Pradesh | 44538 | Other Union Territories |
+
+That is 30 named states/UTs plus "Other Union Territories". Ladakh is merged with J&K. The
+remaining small UTs (Chandigarh, Puducherry, the islands, Dadra/Daman) are pooled in 44538;
+the tool does not list them separately. Note that a second "Punjab" (Pakistan) exists in the
+tool's location tree; the file has India's, 4867.
+
+**Where the tool differed from the Part B instructions:**
+
+- **Only GBD 2023 is offered.** The tool has no release menu. Its version list holds one
+  version (id 8352, gbd_round 2023, dated 2025-10-29). Footer reads "GBD 2023". So run 1
+  (GBD 2019) **was not obtained**; an older GBD 2019 tool would be needed.
+- GBD Estimate "Cause of death or injury" and "Population" exist under those names. Other
+  menu entries: Probability of death by cause, Risk factor, Etiology, Impairment, SEV, HALE,
+  Injuries by nature, Fertility, All-cause mortality.
+- Measure "Deaths", metrics "Number", "Percent", "Rate": as the doc says. Population's metric
+  is "Number" only.
+- "Diabetes mellitus type 2" is offered (also "Diabetes mellitus" and type 1); took type 2.
+- **Added an eighth cause**, "Alzheimer's disease and other dementias", because the GBD 2023
+  risk curves (Part A) include dementia.
+- No "India group" shortcut was used; India and its 31 children were ticked one by one. No
+  districts or urban/rural splits are offered.
+- Under-5 split is 0-6 days, 7-27 days, 1-5 months, 6-11 months, 12-23 months, 2-4 years
+  (not "Post Neonatal" / "1-4 years"). Aggregates such as "<1 year", "<28 days", "80+" and
+  "Age-standardized" are also offered but were not taken. No single-year ages for deaths.
+- Years offered: 1980-2023.
+- **Sex: Both only.** Male and Female were not taken: the tool caps rows per user per
+  release (the cap is not stated) and adding them would have tripled the deaths file.
+- **Delivery:** the Download button sends the query off and says an email with a link will go
+  to the account address. A progress page linked from the confirmation showed both files
+  ready within a few minutes, and they were downloaded from there in the browser. So nothing
+  depended on email, though IHME will also have emailed links. The progress page keeps files
+  for 7 days. Query IDs: deaths `0b7890d07e934169cbec1557392feb92`, population
+  `bccbe42875baf0561aae5629bed4fdf4`, both submitted about 17:19-17:20 UTC.
+- IDs and names were both requested, hence the paired `_id` / `_name` columns.
+- Single download per query. Neither was split into parts (deaths ~32k rows; the stated
+  per-file maximum is 100,000).
+
+**Still missing:** GBD 2019 deaths and population by state (not in this tool); deaths by
+Male / Female, if ever wanted.
 
 ## Part A. Relative-risk curves (public, no login)
 
