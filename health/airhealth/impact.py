@@ -19,6 +19,12 @@ delta_e0; the deaths are derived by solving for the one multiplier on the state'
 rates, from the curve's min_age (0, as AQLI's estimate is all-age), that gives that change,
 and the result is marked derived.
 
+A cause-specific curve (death_scope "causes": gbd2019, gbd2023, gemm_5cod; ihme_curves.py)
+brings its own deaths: for each cause, the unit's people in the band × IHME's death rate for
+the cause, state and age (not scaled by death_factor), times 1 − that cause's ratio. The life
+table's rate in the band loses the averted rate, Σ_c rate_c × (1 − ratio_c), population-
+weighted over the state's units.
+
 Results are steady state: the change in deaths per year and in period life expectancy once
 the new air has been breathed long enough for the full effect, with today's age structure.
 
@@ -96,6 +102,30 @@ class Impact:
     sources: Sources = Sources()
     un_scaling: baseline.UNScaling | None = None   # deaths="unwpp": India's figure, the same in every state   # one per state; empty for deaths="model"
     population_year: int = 0    # the year the population is for (2011 for a city: Census)
+    curve_note: str = ""        # what a cause-specific curve's deaths are (ihme_curves)
+
+
+def _curve_note(curve: Curve, year: int) -> str:
+    return curve.deaths_note(year) if curve.death_scope == "causes" else ""
+
+
+def _cause_lost(curve: Curve, b: baseline.Baseline, before, after) -> np.ndarray:
+    """Death rate averted per person, unit × band (or draw × unit × band when after is
+    (n, units)): Σ over the curve's causes of IHME's rate × (1 − ratio)."""
+    rates = curve.cause_rates(b.state, b.year)
+    shape = np.broadcast_shapes(np.shape(before), np.shape(after))
+    lost = np.zeros((*shape, len(STARTS)))
+    for risk in curve.risks:
+        rate = rates[risk.cause]
+        cache: dict = {}
+        for k, age in enumerate(STARTS):
+            if rate[k] == 0 or age < risk.min_age:
+                continue
+            key = risk.key(int(age))
+            if key not in cache:
+                cache[key] = 1 - np.broadcast_to(curve.cause_ratio(risk, before, after, int(age)), shape)
+            lost[..., k] += rate[k] * cache[key]
+    return lost
 
 
 @dataclass(frozen=True)
@@ -122,6 +152,15 @@ def _state(b: baseline.Baseline, curve: Curve, before: np.ndarray, after: np.nda
         per_unit = np.array([solved[g] for g in gains])[:, None]
         factor = np.where(STARTS >= curve.min_age, per_unit, 1.0)      # on all-cause rates
         e0_after = table.ex[0] + np.average(gains, weights=pop)
+    elif curve.death_scope == "causes":
+        lost = _cause_lost(curve, b, before, after)                     # unit × band
+        people = model / b.mx
+        averted = (people * lost).sum(axis=0)
+        e0_after = lifetable.e0(b.mx - np.average(lost, axis=0, weights=pop))
+        return _StateResult(
+            population=pop.sum(), deaths_model=model.sum(), deaths_baseline=deaths.sum(),
+            deaths_averted=averted.sum(), yll_averted=(averted * lifetable.ex_at_death(b.mx)).sum(),
+            e0_before=table.ex[0], e0_after=e0_after)
     else:
         scope = b.share_ncd_lri if curve.death_scope == "ncd_lri" else np.ones(len(STARTS))
         ratio = np.column_stack([np.broadcast_to(curve.ratio(before, after, int(age)),
@@ -180,7 +219,8 @@ def steady_state(place: Place, curve: Curve, map_name: str, change: Change,
         deaths_model=float(sum(r.deaths_model for r in results)),
         reconciliations=tuple(recs), rate_adjustments=tuple(adjs), sources=src,
         un_scaling=un,
-        population_year=int(cells.attrs["population_year"]))
+        population_year=int(cells.attrs["population_year"]),
+        curve_note=_curve_note(curve, year))
 
 
 def burden(place: Place, curve: Curve, map_name: str, counterfactual: float | None = None,
@@ -232,6 +272,7 @@ class ImpactDraws:
     sources: Sources = Sources()
     un_scaling: baseline.UNScaling | None = None   # deaths="unwpp": India's figure, the same in every state
     population_year: int = 0
+    curve_note: str = ""
 
 
 def _aqli_factors(mx: np.ndarray, gains: np.ndarray, from_age: int) -> np.ndarray:
@@ -257,6 +298,11 @@ def _state_many(b: baseline.Baseline, curve: Curve, before: np.ndarray, after: n
         factor = np.where(STARTS >= curve.min_age, f[..., None], 1.0)    # draw × unit × band
         e0_after = table.ex[0] + np.average(gains, axis=1, weights=pop)
         averted = np.einsum("ub,nub->nb", deaths, 1 - factor)            # draw × band
+    elif curve.death_scope == "causes":
+        lost = _cause_lost(curve, b, before[None, :], after)             # draw × unit × band
+        people = model / b.mx                                             # unit × band
+        averted = np.einsum("ub,nub->nb", people, lost)
+        e0_after = lifetable.e0_many(b.mx - np.einsum("u,nub->nb", pop / pop.sum(), lost))
     else:
         # Bands whose risk is the same function of concentration share one ratio; with
         # g = 1 − ratio (draw × unit), deaths averted in band b are scope_b × g @ deaths[:, b]
@@ -325,4 +371,5 @@ def steady_state_many(place: Place, curve: Curve, map_name: str, kind: str,
         deaths_model=float(sum(r["deaths_model"] for r in results)),
         reconciliations=tuple(recs), rate_adjustments=tuple(adjs), sources=src,
         un_scaling=un,
-        population_year=int(cells.attrs["population_year"]))
+        population_year=int(cells.attrs["population_year"]),
+        curve_note=_curve_note(curve, year))

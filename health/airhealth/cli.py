@@ -234,15 +234,19 @@ def _list_rows(what: str) -> list[dict]:
     if what == "maps":
         rows = []
         for m in exposure.MAPS:
-            s = sources[f"exposure_{m}.csv"]
+            source = (exposure.LOCAL_MAPS[m] if m in exposure.LOCAL_MAPS
+                      else "{source} {url}".format(**sources[f"exposure_{m}.csv"]))
+            if not exposure.available(m):
+                rows.append(dict(name=m, years=f"no: {curves.IHME_REASON}", label=exposure.LABELS[m],
+                                 source=source))
+                continue
             years = sorted(exposure._table(m).year.unique())
             span = f"{years[0]}-{years[-1]}" if len(years) > 1 else str(years[0])
             usable = [y for y in years if y in baseline.projection_years()]
             if usable != years:     # results need a population, and the projections start in 2011
                 span += (f"; results {usable[0]}-{usable[-1]} (the population projections "
                          f"start in {usable[0]}); earlier years for charts only")
-            rows.append(dict(name=m, years=span, label=exposure.LABELS[m],
-                             source=f"{s['source']} {s['url']}"))
+            rows.append(dict(name=m, years=span, label=exposure.LABELS[m], source=source))
         return rows
     s = sources[PLACES_SOURCE]
     t = places._table()

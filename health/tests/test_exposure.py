@@ -62,6 +62,8 @@ def test_acag_exceeds_aqli_where_dusty():
 
 def test_cells_shape():
     for map_name in exposure.MAPS:
+        if not exposure.available(map_name):      # local tier (IHME) without its file
+            continue
         place = resolve("Mumbai") if map_name == "cpcb" else INDIA
         c = exposure.cells(place, map_name)
         assert list(c.columns) == ["state", "unit", "pm25", "population"]

@@ -41,3 +41,22 @@ model, to be labelled as one.
 The SRS Causes of Death report gives one set of shares for ages 15-29 (cause_share_ncd_lri.csv), dominated by injuries among
 the young, and the 25-29 band takes it. Against GBD 2015 (the GEMM authors' workbook) the tool's NCD+LRI deaths at 25-29 are
 0.64 of GBD's. No SRS table splits 15-29 further; a split would need the Million Death Study or IHME data.
+
+## GBD 2023 risk-curve information sheet (login)
+
+`IHME_GBD_2023_AIR_POLLUTION_1990_2023_INFO_SHEET_Y2025M12D15.PDF` on GHDx record 594794 is behind IHME's login (tried 2026-11-11,
+curl and Exa: sign-in page). The scale of the 2025-dated relative-risk files (ln RR) was settled from the GBD 2023 risk-factor
+appendix, IHME's bopforge code and the files themselves (IHME_DOWNLOADS.md, status); the sheet would confirm it in IHME's words.
+
+## GBD all-cause deaths
+
+The Part B query took seven causes and all NCDs, not all causes, so the tool has no GBD all-cause death count and no `deaths=gbd`
+source. Needed: GBD Results tool, Cause of death or injury, Deaths, Number, cause "All causes", the same 32 locations, ages and
+years as Part B.
+
+## GBD's attributable deaths for India
+
+GBD 2023's 969,726 ambient-PM2.5 deaths for India in 2023 (OWID page of GBD 2023 Results) cannot be reproduced from the files
+here: GBD splits one PM2.5 attributable fraction between ambient and household air by exposure, which needs GBD 2023's household
+air pollution estimates (GHDx record 594794, 'Household Air Pollution Estimates [CSV]', not downloaded). Pandey et al. 2021's
+GBD 2019 figure for India has the same dependency.

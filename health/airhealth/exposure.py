@@ -7,6 +7,10 @@ Maps (sources and methods in data/sources.toml):
               with WorldPop 2023 weights; district shares from WorldPop 2023.
   gbd2019     GBD 2019 state population-weighted means (Pandey et al. 2021), 2019; one
               value per state, population from the official projections (baseline).
+  gbd2023     GBD 2023 state population-weighted means, 1990-2023 (IHME, local tier: read
+              from data_local/ at run time, never committed; ihme.py). Ladakh carries GBD's
+              Jammu & Kashmir and Ladakh, and the six small union territories GBD pools carry
+              the pooled value. Population as for gbd2019.
   cpcb        Ground monitors, mean of hourly cross-station medians, for the cities in
               diwali/config.py only; population is the Census 2011 urban agglomeration,
               the same in every year.
@@ -30,25 +34,45 @@ from functools import cache
 import numpy as np
 import pandas as pd
 
-from . import baseline, paths
+from . import baseline, ihme, paths
 from .inputs import Sources
 from .places import Place
 
-MAPS: tuple[str, ...] = ("aqli", "acag_total", "gbd2019", "cpcb")
+MAPS: tuple[str, ...] = ("aqli", "acag_total", "gbd2019", "gbd2023", "cpcb")
 LABELS = {
     "aqli": "AQLI 2025 release, districts, satellite PM2.5 with dust and sea salt removed",
     "acag_total": "ACAG V6.GL.02.04 total PM2.5, districts, WorldPop-weighted",
     "gbd2019": "GBD 2019 state population-weighted means (Pandey et al. 2021)",
+    "gbd2023": "GBD 2023 state population-weighted means (IHME, local)",
     "cpcb": "CPCB ground monitors, city annual means",
 }
 COLUMNS = ["state", "unit", "pm25", "population"]
 DISTRICT_MAPS = {"aqli": "aqli_units", "acag_total": "acag_units"}
+STATE_MAPS = ("gbd2019", "gbd2023")      # one value per state
+LOCAL_MAPS = {"gbd2023": "IHME, GBD 2023 Air Pollution Exposure Estimates 1990-2023, population-"
+                         "weighted means by location (read from data_local/), "
+                         "https://ghdx.healthdata.org/node/594794"}
 MAP_POPULATION_YEAR = {"aqli": 2023, "acag_total": 2023}  # see data/sources.toml
 
 
-@cache
 def _table(map_name: str) -> pd.DataFrame:
+    if map_name == "gbd2023":
+        return ihme.exposure_table()          # raises ihme.Unavailable without the file
+    return _committed(map_name)
+
+
+@cache
+def _committed(map_name: str) -> pd.DataFrame:
     return pd.read_csv(paths.DATA / f"exposure_{map_name}.csv")
+
+
+def available(map_name: str) -> bool:
+    """Whether the map's data is here (the local-tier maps need IHME files)."""
+    try:
+        _table(map_name)
+        return True
+    except ihme.Unavailable:
+        return False
 
 
 @cache
@@ -108,9 +132,9 @@ def cells(place: Place, map_name: str, year: int | None = None,
         out = pd.DataFrame({"state": [place.state], "unit": [place.name],
                             "pm25": [row.pm25.item()], "population": [_city(place).population]})
 
-    elif map_name == "gbd2019":
+    elif map_name in STATE_MAPS:
         if place.kind in ("district", "city"):
-            raise ValueError(f"gbd2019 is a state-level map; it has no {place.kind} values")
+            raise ValueError(f"{map_name} is a state-level map; it has no {place.kind} values")
         t = t[t.state != "India"]
         if place.kind == "state":
             t = t[t.state == place.name]

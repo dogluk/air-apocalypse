@@ -1,4 +1,4 @@
-"""Open-tier reproduction benchmarks: each case's ratio (ours / published) within its band
+"""Reproduction benchmarks (open tier, and local tier when the IHME files are here): each case's ratio (ours / published) within its band
 around the ratio the case expects."""
 import importlib.util
 
@@ -38,8 +38,17 @@ def test_band_is_around_the_expectation_not_around_one():
     assert abs(1.0 / case["expected_ratio"] - 1) > case["tolerance"]
 
 
+def test_local_cases_skip_cleanly_without_ihme_files(no_ihme):
+    local = [c for c in CASES if c.get("tier") == "local"]
+    assert local
+    for case in local:
+        assert bench.evaluate_or_skip(case)["skipped"]
+
+
 @pytest.mark.parametrize("case", CASES, ids=[c["id"] for c in CASES])
-def test_benchmarks_within_tolerance(case):
+def test_benchmarks_within_tolerance(case, request):
+    if case.get("tier") == "local":
+        request.getfixturevalue("ihme_files")        # skips without the IHME files
     r = bench.evaluate(case)
     assert r["within"], (
         f"{case['id']}: ours {r['ours']:.4g} vs published {case['published']:.4g}, "

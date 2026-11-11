@@ -280,7 +280,7 @@ function shapes() {
 // ---- exposure dot plot ------------------------------------------------------------------
 function exposureChart() {
   const host = $("expChart"); host.innerHTML = "";
-  const keys = ["aqli", "acag_total", "gbd2019"];
+  const keys = ["aqli", "acag_total", "gbd2019", "gbd2023"].filter(k => META.exposure.some(r => r[k] != null));
   const rows = META.exposure.filter(r => r.aqli != null).sort((a, b) => (a.kind === "country" ? -1 : b.kind === "country" ? 1 : b.aqli - a.aqli));
   const W = 540, left = 172, right = 20, rowH = 17, top = 22, H = top + rows.length * rowH + 8;
   const xmax = 225, x = v => left + v / xmax * (W - left - right);
@@ -348,6 +348,7 @@ const MAP_WHAT = {
   aqli: "Each district takes the value of the AQLI district with the same name. AQLI uses older boundaries, so districts created since (and a few renamed beyond recognition) have no value.",
   acag_total: "Each district's own population-weighted mean.",
   gbd2019: "GBD 2019 is a state-level map: every district takes its state's value.",
+  gbd2023: "GBD 2023 is a state-level map: every district takes its state's value (Ladakh takes Jammu & Kashmir and Ladakh's; six small union territories share one pooled value).",
   cpcb: "Ground monitors in ten cities only: each city's districts take its annual mean; everything else has no value.",
 };
 let GEO = null, PATHS = null;

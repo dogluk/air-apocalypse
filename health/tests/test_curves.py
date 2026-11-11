@@ -89,7 +89,7 @@ def test_ihme_curve_without_files_explains(monkeypatch, tmp_path):
         with pytest.raises(Unavailable, match="IHME_DOWNLOADS.md") as e:
             get(name)
         assert ".csv" in str(e.value)
-    with pytest.raises(Unavailable, match="gbd2019_pm_rr_summary.csv"):
+    with pytest.raises(Unavailable, match="IHME-GBD_2023_DATA-0b7890d0-1.csv"):
         get("gbd2019")
 
 

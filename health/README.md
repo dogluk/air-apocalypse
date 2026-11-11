@@ -332,13 +332,13 @@ illustrative placeholders, said so in each file's notes, and should not be quote
 Where a place starts on the curve matters as much as the curve, and the maps disagree
 twofold. Population-weighted annual-mean PM2.5 in µg/m³, from this tool:
 
-| Place | `aqli` 2023 | `aqli` 2019 | `acag_total` 2023 | `gbd2019` 2019 |
-|---|---:|---:|---:|---:|
-| India | 41.2 | 44.6 | 49.8 | 90.9 |
-| Delhi | 88.3 | 92.7 | 98.8 | 217.6 |
-| Uttar Pradesh | 56.2 | 64.8 | 68.2 | 182.9 |
-| Bihar | 60.1 | 68.6 | 64.0 | 167.8 |
-| Kerala | 18.5 | 17.1 | 26.1 | 15.8 |
+| Place | `aqli` 2023 | `aqli` 2019 | `acag_total` 2023 | `gbd2019` 2019 | `gbd2023` 2023 | `gbd2023` 2019 |
+|---|---:|---:|---:|---:|---:|---:|
+| India | 41.2 | 44.6 | 49.8 | 90.9 | 54.0 | 53.3 |
+| Delhi | 88.3 | 92.7 | 98.8 | 217.6 | 105.3 | 104.4 |
+| Uttar Pradesh | 56.2 | 64.8 | 68.2 | 182.9 | 80.5 | 81.2 |
+| Bihar | 60.1 | 68.6 | 64.0 | 167.8 | 73.3 | 75.1 |
+| Kerala | 18.5 | 17.1 | 26.1 | 15.8 | 21.8 | 19.7 |
 
 Delhi's own ground monitors (`cpcb`, the city, mean of hourly medians across stations): 104.7
 in 2019, 97.5 in 2023, 94.3 in 2025.
@@ -349,12 +349,21 @@ in 2019, 97.5 in 2023, 94.3 in 2025.
   averaged to districts by this repo.
 - `gbd2019`: the Global Burden of Disease 2019 state values, as printed in Pandey et al. 2021
   (a model fusing satellites, chemistry models and monitors). One value per state.
+- `gbd2023`: the Global Burden of Disease 2023 state values, from IHME's own file (local
+  tier: read from `data_local/` at run time, never committed; 1990-2023, results from 2011).
+  GBD has one value for Jammu & Kashmir and Ladakh, used for both, and one pooled value for
+  six small union territories (Andaman & Nicobar, Chandigarh, Dadra & Nagar Haveli, Daman &
+  Diu, Lakshadweep, Puducherry), used for each, as `gbd2019` does. India is the states
+  weighted by the tool's population: 53.97 for 2023, against IHME's own 54.05.
 - `cpcb`: the Central Pollution Control Board's monitors, for eleven cities only.
 
 Keeping dust moves India from 41 to 50: dust explains under a fifth of the gap to GBD's 91.
 The rest is concentrated in the northern plain (Uttar Pradesh 56 against 183); in Kerala
 the three maps land within 16 to 26. In Delhi the monitors side with the satellites, not with GBD 2019. Why GBD
-2019 sits so high is an open question; see G7 in [`../lit/gaps.md`](../lit/gaps.md).
+2019 sits so high is an open question; see G7 in [`../lit/gaps.md`](../lit/gaps.md). IHME's
+own newer round has moved most of the way: GBD 2023 puts India at 54 and Uttar Pradesh at 81
+for 2019 (GBD 2023 changed its exposure model to the ACAG satellite product calibrated to
+monitors), and for Delhi it lands on the monitors (104 for 2019, against 105 at the monitors).
 
 ## How many deaths a year? The count is tied to the SRS
 
@@ -448,6 +457,52 @@ death rate for India against the SRS's: within 1% in 2011-14, 4-11% higher in 20
 and 24% higher in 2020 and 2021 (the pandemic), within 3.5% in 2022-24. So "about a tenth"
 is a 2020-24 average carried by the pandemic years; in a normal year the two are closer.
 
+## The IHME tier: three more curves, from IHME's files
+
+With IHME's files in `data_local/` (never committed; [`IHME_DOWNLOADS.md`](IHME_DOWNLOADS.md)
+says what and how), three more curves run beside the open ones, and a fifth map (`gbd2023`,
+above). Without the files they are named as not run, with why.
+
+- `gbd2023`: the Global Burden of Disease 2023 relative risks for **seven causes of death**
+  (ischaemic heart disease, stroke, COPD, lung cancer, lower respiratory infection, type 2
+  diabetes, dementia). One curve per cause, the same at every age.
+- `gbd2019`: GBD 2019's six causes (no dementia), with IHD and stroke by five-year age.
+- `gemm_5cod`: Burnett 2018's GEMM for its five causes (IHD and stroke by age), parameters
+  from the authors' calculator (committed: `data/curves_gemm_5cod.csv`).
+
+All three take their **deaths from IHME**: the GBD 2023 round's death rates by cause, state
+and age, times this tool's population. So for them the death count is GBD's, not the SRS's,
+and `--deaths` does not move it; their "% of deaths" is of the tool's all-cause count. GBD
+2019-round deaths are no longer served by IHME, so `gbd2019` runs on the GBD 2023 round's
+deaths, and every result says so. Each curve is scored against GBD's counterfactual, the
+midpoint (4.15 µg/m³) of its 2.4-5.9 range. How the files were read (two of the GBD 2023 files
+are relative risks, four are their logarithm) and every source are in `IHME_DOWNLOADS.md` and
+the docstring of `airhealth/ihme_curves.py`.
+
+```
+$ airhealth compare Delhi --from 100 --to 80        (IHME files present)
+curve                  PM2.5 µg/m³  % of deaths  deaths/yr  life exp. yrs  life-years/yr
+loglinear_jaganathan  100.0 → 80.0        15.2%     15,126          +2.25        313,030
+gemm_ncd_lri          100.0 → 80.0         4.1%      4,031          +0.53         67,113
+gbd2019               100.0 → 80.0         1.4%      1,369          +0.14         20,460
+gbd2023               100.0 → 80.0         2.2%      2,160          +0.21         27,667
+gemm_5cod             100.0 → 80.0         3.3%      3,295          +0.32         50,287
+
+$ airhealth burden India                            (AQLI map, 2023)
+gemm_ncd_lri           41.2 → 2.4        16.4%  1,531,850          +2.59     24,997,876
+gbd2019                41.2 → 4.2        12.0%  1,123,386          +1.57     17,892,049
+gbd2023                41.2 → 4.2        14.9%  1,395,628          +2.04     20,242,495
+gemm_5cod              41.2 → 2.4        13.9%  1,299,500          +1.80     18,668,623
+```
+
+For Delhi from 100 to 80, IHME's curves give a tenth to a fifth of what the Indian district
+study does:
+they flatten at high concentrations, and they cover only the causes they name. GBD's own count
+for India in 2023, 969,726 deaths from ambient PM2.5, is not reproduced yet: on the same
+curve, map and year this tool gives 1.61 million, and the main reason is known but not
+computable from these files (GBD splits one attributable fraction between outdoor air and
+cooking smoke; here outdoor air is scored alone). See `IHME_DOWNLOADS.md`.
+
 ## Benchmarks: does it reproduce published numbers?
 
 `python benchmarks/run.py` runs each published estimate's curve, counterfactual and year on
@@ -464,13 +519,18 @@ narrow band of that expectation.
 | aqli2025_delhi_years | years | 8.20 years | 8.17 years | 0.996 | 1 ±3% |
 | burnett2018_india_maps | deaths | 2.22 M deaths/yr | 1.31 M deaths/yr | 0.591 | 0.619 ±8% |
 | burnett2018_india_forced74 | deaths | 2.22 M deaths/yr | 1.82 M deaths/yr | 0.818 | 0.816 ±5% |
+| burnett2018_india_5cod_forced74 (IHME tier) | deaths | 1.87 M deaths/yr | 1.57 M deaths/yr | 0.839 | 0.843 ±3% |
+| gbd2023_india_exposure (IHME tier) | PM2.5 | 54.05 µg/m³ | 53.97 µg/m³ | 0.999 | 1 ±2% |
 
 In short: the shares and life-expectancy gains match. The counts differ because the papers
 counted different sets of deaths. Jaganathan used registered deaths only, which miss many.
 Burnett's GEMM paper used the Global Burden of Disease's deaths for 2015, 6.46 million at
 ages 25 and over from the causes the curve covers, where this tool, tied to the SRS, has
 5.27 million; fed the paper's own deaths, this tool's curve reproduces the paper's 2,219,057
-exactly. The paper also put India at 74 µg/m³ against AQLI's 45 for 2015.
+exactly. The paper also put India at 74 µg/m³ against AQLI's 45 for 2015. The same holds
+for its five-cause GEMM: fed the paper's deaths, `gemm_5cod` gives its 1,867,342; fed the GBD
+2023 round's deaths for 2015 (16% fewer from those causes, mostly COPD and LRI), 0.84 of it.
+The two IHME-tier cases skip where the IHME files are absent.
 
 ## Known limitations
 
@@ -522,13 +582,28 @@ exactly. The paper also put India at 74 µg/m³ against AQLI's 45 for 2015.
   results instead), the death rates, the death count or the population. AQLI has no
   published interval, and its row shows none.
 - **Costs are converted at one annual exchange rate and not adjusted for inflation.**
+- **The IHME-tier curves (gbd2019, gbd2023, gemm_5cod) count IHME's deaths, not the SRS's.**
+  Their deaths are the GBD 2023 round's rates by cause, state and age times this tool's
+  population, unscaled; their share of deaths divides by the tool's (SRS-scaled) all-cause
+  count. `gbd2019` uses GBD 2023-round deaths because GBD 2019's are no longer served. Ladakh
+  takes GBD's Jammu & Kashmir and Ladakh rates and six small union territories GBD's pooled
+  "Other Union Territories". Years between 2015, 2019 and 2023 are interpolated; outside,
+  the nearest is used.
+- **The IHME-tier curves use mean curves and a point counterfactual.** GBD draws the TMREL
+  (2.4-5.9) and the curve together, 1,000 times; here the floor is 4.15 and the curve its mean,
+  which IHME says gives slightly smaller attributable fractions. Their Monte Carlo moves every
+  cause's log relative risk together by one standard normal times its own standard error.
+- **GBD's own burden is not reproduced.** GBD splits one attributable fraction between outdoor
+  air and cooking smoke, adds neonatal deaths through birth weight and gestation, and works on
+  grid cells; this tool does none of these (see `IHME_DOWNLOADS.md`).
+- **No GBD all-cause death count.** The IHME files hold seven causes and all NCDs, not all
+  causes, so `--deaths` has no GBD source.
 
 ## Not built yet
 
-- **IHME-tier curves** (GBD 2019 and 2023, GEMM five causes). They need files IHME will not
-  let us redistribute; [`IHME_DOWNLOADS.md`](IHME_DOWNLOADS.md) says what to download and
-  where to put it. The risk-curve files are downloaded (2026-11-11); the deaths-by-cause
-  queries are not, and no loader exists yet, so the tool still names them as unavailable.
+- **A reproduction of GBD's own India burden** (needs GBD's household air pollution file and
+  its joint ambient-household split), and a **GBD all-cause death source** (needs an "All
+  causes" query). See `IHME_DOWNLOADS.md`.
 - **A switch for every input.** Only the curve, the map, the death-count basis and the
   counterfactual can be switched today. The life table, population, cause shares and the
   rest are fixed in code. Design note: [`../docs/specs/2026-11-11-source-switches.md`](../docs/specs/2026-11-11-source-switches.md).
@@ -548,7 +623,7 @@ exactly. The paper also put India at 74 µg/m³ against AQLI's 45 for 2015.
 airhealth/        the package: places, exposure, baseline, lifetable, curves, impact,
                   intervention, lag, simulate, report, charts, cli, dashboard (+ .html)
 data/             committed tables, each with an entry in data/sources.toml; MISSING.md
-data_local/       IHME files, never committed (git-ignored)
+data_local/       IHME files, never committed (git-ignored); read by airhealth/ihme.py
 interventions/    the template and three examples
 benchmarks/       cases.toml, run.py, README.md (generated)
 charts/           charts drawn by the commands above

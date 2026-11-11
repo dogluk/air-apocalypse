@@ -11,12 +11,6 @@ def run(capsys, *argv):
     return code, out, err
 
 
-@pytest.fixture
-def no_ihme(monkeypatch, tmp_path):
-    """An empty data_local/, so the IHME curves are unavailable whatever is on this machine."""
-    monkeypatch.setattr(paths, "LOCAL", tmp_path)
-
-
 def test_compare_delhi_lists_every_available_curve(capsys):
     code, out, _ = run(capsys, "compare", "Delhi", "--from", "100", "--to", "80")
     assert code == 0
@@ -35,7 +29,7 @@ def test_compare_from_sets_the_starting_level(capsys):
     assert all(r["deaths_averted"] > 0 for r in rows)
 
 
-def test_json_flag_emits_valid_json_with_curve_and_map_on_every_row(capsys):
+def test_json_flag_emits_valid_json_with_curve_and_map_on_every_row(capsys, no_ihme):
     for argv in (["--json", "compare", "Delhi", "--from", "100", "--to", "80"],
                  ["compare", "Delhi", "--to", "80", "--json"],
                  ["--json", "burden", "Delhi"]):
@@ -113,7 +107,7 @@ def test_footer_says_how_deaths_were_scaled(capsys):
     assert "Deaths scaled by ×0.57" in footer and "Chandigarh" in footer
 
 
-def test_deaths_model_switches_the_scaling_off(capsys):
+def test_deaths_model_switches_the_scaling_off(capsys, no_ihme):
     args = ("--json", "compare", "Delhi", "--from", "100", "--to", "80")
     srs = json.loads(run(capsys, *args)[1])
     model = json.loads(run(capsys, *args, "--deaths", "model")[1])

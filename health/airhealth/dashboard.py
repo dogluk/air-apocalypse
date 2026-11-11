@@ -22,7 +22,7 @@ from .inputs import DEMOGRAPHIC, REGISTRY, Sources
 PAGE = Path(__file__).with_name("dashboard.html")
 SHAPES = paths.DATA / "districts.geojson"     # scripts/build_district_shapes.py
 SHAPE_AGE = 60
-STATE_MAPS = ("aqli", "acag_total", "gbd2019")
+STATE_MAPS = ("aqli", "acag_total", "gbd2019", "gbd2023")   # compared in the exposure table
 
 SHORT = {
     "loglinear_jaganathan": "Jaganathan 2024",
@@ -35,7 +35,7 @@ SHORT = {
     "gemm_5cod": "GEMM five causes",
 }
 MAP_SHORT = {"aqli": "AQLI (dust removed)", "acag_total": "ACAG total", "gbd2019": "GBD 2019",
-             "cpcb": "CPCB monitors"}
+             "gbd2023": "GBD 2023", "cpcb": "CPCB monitors"}
 
 
 
@@ -66,7 +66,7 @@ def district_values(map_name: str, year: int) -> dict[str, float]:
     city's (CPCB, the city's districts only)."""
     t = exposure._table(map_name)
     t = t[t.year == year]
-    if map_name == "gbd2019":
+    if map_name in exposure.STATE_MAPS:
         by_state = dict(zip(t.state, t.pm25))
         return {_key(d["state"], d["unit"]): float(by_state[d["state"]])
                 for d in _districts() if d["state"] in by_state}
@@ -117,14 +117,14 @@ def meta() -> dict:
         for m in STATE_MAPS:
             try:
                 row[m] = round(float(exposure.mean(place, m)), 1)
-            except (KeyError, ValueError):
+            except (KeyError, ValueError, curves.Unavailable):
                 row[m] = None
         rows.append(row)
     cat = curves.catalogue().set_index("name")
     return dict(
         places=plist,
         maps=[dict(name=m, short=MAP_SHORT[m], label=exposure.LABELS[m], years=_years(m))
-              for m in exposure.MAPS],
+              for m in exposure.MAPS if exposure.available(m)],
         curves=[dict(name=c.name, short=SHORT.get(c.name, c.name), label=c.label, floor=c.floor,
                      min_age=c.min_age, kind=c.kind, source=c.source) for c in run],
         unavailable=[dict(name=n, short=SHORT.get(n, n), label=cat.label[n], why=why)

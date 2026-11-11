@@ -141,11 +141,28 @@ def period_note(year: int, src) -> str | None:
             f"{year}'s population")
 
 
+def ihme_note(curves_: list, year: int) -> str | None:
+    """Where a cause-specific curve's deaths come from (ihme_curves): IHME's, not the SRS's."""
+    cause = [c for c in curves_ if c.death_scope == "causes"]
+    if not cause:
+        return None
+    from . import ihme
+    text = (f"Deaths for {', '.join(c.name for c in cause)}: the GBD 2023 round's death rates by "
+            f"state, cause and age for {ihme.rates_text(year)} × this tool's population, not "
+            f"scaled to the SRS; their share of deaths is of the all-cause count above. "
+            f"Ladakh takes GBD's Jammu & Kashmir and Ladakh, and Andaman & Nicobar, Chandigarh, "
+            f"Dadra & Nagar Haveli, Daman & Diu, Lakshadweep and Puducherry GBD's pooled Other "
+            f"Union Territories")
+    extra = [f"{c.name}: {c._note}" for c in cause if getattr(c, "_note", "")]
+    return text + "".join(f"; {e}" for e in extra)
+
+
 def _auto_notes(impacts: list[Impact]) -> list[str]:
     if not impacts:
         return []
     i = impacts[0]
-    notes = [population_note(i.population_year, i.year, [i.place.name]),
+    notes = [ihme_note([x.curve for x in impacts], i.year),
+             population_note(i.population_year, i.year, [i.place.name]),
              deaths_note(i.reconciliations, i.deaths_baseline, i.deaths_model, i.un_scaling),
              rates_note(i.rate_adjustments, i.fallback_states),
              period_note(i.year, i.sources),
@@ -378,6 +395,7 @@ def run_footer(run: Run) -> str:
     notes = ["Life-years = deaths postponed by age × remaining life expectancy at the age of "
              "death, at the map year's population and age structure, summed over the "
              "intervention's years",
+             ihme_note([c.curve for c in run.per_curve.values()], run.year),
              population_note(run.population_year, run.year, run.census_places),
              deaths_note(run.reconciliations, run.deaths_baseline, run.deaths_model,
                          run.un_scaling),

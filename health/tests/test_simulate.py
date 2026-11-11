@@ -277,7 +277,7 @@ def test_invalid_file_is_one_line_exit_1(capsys, tmp_path):
     assert "Traceback" not in err
 
 
-def test_run_json_and_charts(capsys, tmp_path):
+def test_run_json_and_charts(capsys, tmp_path, no_ihme):
     import json
     code = cli.main(["--json", "run", str(IV / "punjab_haryana_10pct.toml"), "--n", "200",
                      "--charts", str(tmp_path)])

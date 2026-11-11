@@ -46,7 +46,7 @@ def test_bad_input_raises_value_error():
         dashboard.result({"place": "Kerala", "map": "cpcb", "to": "10"})
 
 
-def test_meta_lists_what_the_page_needs():
+def test_meta_lists_what_the_page_needs(no_ihme):
     m = dashboard.meta()
     assert {p["kind"] for p in m["places"]} == {"country", "state", "city"}
     assert "aqli" not in m["shapes"]["rr"]          # AQLI is years of life, not a risk ratio

@@ -249,6 +249,29 @@ thousand. The all-age '25+' row (0.143, 0.01807) and the 'EXcluding China' block
 Check against the workbook, 2026-11-10: all 60 parameter cells and 12 age labels compared by script (openpyxl, values only), no mismatch.
 """
 
+["curves_gemm_5cod.csv"]
+source = "Burnett R, Chen H, Szyszkowicz M, et al. Global estimates of mortality associated with long-term exposure to outdoor fine particulate matter. PNAS 2018; 115(38): 9592-97. doi:10.1073/pnas.1803222115. Cause-specific parameters as deposited by the authors in the paper's data repository (DataGEMM)."
+url = "https://github.com/mszyszkowicz/DataGEMM/blob/c0640d86a852e2e3565392ba014964bd43edb8ff/GEMM%20Calculator%20(PNAS)_ab.zip"
+catalog = "https://pmc.ncbi.nlm.nih.gov/articles/PMC6156628/"
+sha256 = "fb8073c703b3ce77a17ab7134f7120999d1ecff466e6d890c980e086c5c03e7e"
+locator = "GEMM Calculator (PNAS)_ab.zip -> 'GEMM Calculator (PNAS)_ab.xlsx' (sha256 d33564165209dd0dc9208f40c37993fb3c45d98c181a71682bd1f0c1ce60961f), sheet 'GEMM fit parameters', blocks 'All-regions, INcluding China' (row 5): 'Ischaemic Heart Disease' I12:N23, 'Strokes' P12:U23, 'Chronic Obstructive Pulomonary Disease' W12:AB23, 'Lung Cancer' AD12:AI23, 'Lower Respiratory Infections' AK12:AP23 (age groups 25-29 to 80+)."
+retrieved = "2026-11-11"
+licence = "The repository has no licence. Published parameters re-typed with citation; no code copied. The PNAS article is CC BY-NC-ND 4.0."
+method = "transcribed"
+notes = """
+Columns: cause (ihd, stroke, copd, lung_cancer, lri), age_start, age_group (as printed; '30-35' is the sheet's label for 30-34),
+theta, se_theta, alpha, mu, nu. Read cell by cell with openpyxl (values only) from the zip whose sha256 is above, the same deposit
+as curves_gemm_ncd_lri.csv. Column meaning read from the workbook's own formulas, e.g. sheet 'Burden_YesCN_IHD' cell C21:
+(1-1/EXP(LN(1+MAX(0,PM-2.4)/L12)/(1+EXP((M12-MAX(0,PM-2.4))/N12))*J12)) × baseline, so for IHD J = theta, K = se, L = alpha,
+M = mu, N = nu; the other causes' blocks have the same layout (Q-U, X-AB, AE-AI, AL-AP). COPD, lung cancer and LRI have one
+parameter set repeated on every age row (equal to their '25+' row 11); IHD and stroke are age-specific. 80+ covers 85+.
+Tie to the paper: the workbook's India burdens with age-specific functions (sheets Burden_YesCN_IHD, _CeVD, _COPD, _LC, _LRI, cell
+AN91: 834,644; 313,477; 442,032; 39,503; 237,686 deaths, PM2.5 74.0) sum to 1,867,342, PNAS Table 1, India, GEMM 5-COD, 100%
+rollback: 1,867 thousand. The workbook's GBD 2015 baselines that produce those figures are IHME's and are not copied here.
+The 'EXcluding China' blocks and the all-age '25+' rows are not used. Used by the gemm_5cod curve (airhealth/ihme_curves.py),
+which also needs IHME's deaths by cause (local tier).
+"""
+
 ["fx_inr_usd.csv"]
 source = "World Bank, World Development Indicators: PA.NUS.FCRF 'Official exchange rate (LCU per US$, period average)', India (World Bank API, source id 2, last updated 2026-10-08)."
 url = "https://api.worldbank.org/v2/country/IND/indicator/PA.NUS.FCRF?format=json&per_page=100&date=2000:2026"

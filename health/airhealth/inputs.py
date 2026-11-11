@@ -55,14 +55,14 @@ DEMOGRAPHIC = (
         Source("srs", "scaled at ages 45+ to each state's SRS crude death rate", INDIA),
         Source("model", "population × death rates, not scaled", None),
         Source("unwpp", "scaled band by band to the UN's deaths by age for India", UN)),
-        switch="--use deaths=… (or --deaths)", pending="GBD deaths"),
+        switch="--use deaths=… (or --deaths)",
+        pending="GBD all-cause deaths (needs an 'All causes' query; the IHME curves already use GBD's deaths by cause)"),
 )
 
 OTHER = (
-    Input("map", "Exposure (PM2.5) map", "aqli", (), switch="--map",
-          pending="GBD 2023 exposure (IHME file is downloaded)"),
-    Input("curves", "Risk curve", "all that can run", (), switch="--curves",
-          pending="GBD 2019, GBD 2023, GEMM five causes (need IHME files)"),
+    Input("map", "Exposure (PM2.5) map", "aqli", (), switch="--map (gbd2023 needs IHME files)"),
+    Input("curves", "Risk curve", "all that can run", (),
+          switch="--curves (gbd2019, gbd2023, gemm_5cod need IHME files)"),
     Input("counterfactual", "Counterfactual level", "each curve's floor", (),
           switch="--counterfactual"),
     Input("cause_share", "Share of deaths that are NCD + LRI", "SRS cause of death 2021-23, all-India",

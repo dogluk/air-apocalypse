@@ -5,33 +5,38 @@ Last updated 2026-11-11. Read this first when picking the project up.
 ## In plain words (rewritten at the end of every session)
 
 **What we are building.** A calculator: "if PM2.5 in place X goes from A to B, how many deaths
-a year are avoided and how many years of life are gained?" It answers on five published risk
-curves side by side, never one, because they disagree by several times. Later it prices
-interventions (cost per life-year) and becomes a public page on dogl.uk. Akash's role:
-direction and taste, and bringing in researchers to check and push it; Claude makes the
-technical calls and writes them down so an expert can check them quickly.
+a year are avoided and how many years of life are gained?" It answers on several published
+risk curves side by side, never one, because they disagree by several times. Next it ranks
+interventions by expected life-years per rupee, city by city, long shots included. Akash's
+role: direction and taste; Claude makes the technical calls and writes them down. Priority:
+datasets, models, evals, benchmarks (not reviewer write-ups for now).
 
 **Where it is.** Works for India, every state and ten cities, from the command line and a
 local dashboard (`airhealth dashboard`): place, map, year, a source for each input, a district
-map. Checks itself against three published studies and lands where it should.
+map. Eight curves (five open, three on IHME's local files), five exposure maps. Eight
+benchmarks against published studies, all within band.
 
-**Done 2026-11-11 (all committed locally, nothing pushed).**
-1. Years before 2020 use that year's own SRS death figures (was up to a sixth off).
+**Done 2026-11-11 (committed locally, nothing pushed).**
+1. Years before 2020 use that year's own SRS death figures.
 2. Dashboard: a year selector and a district map of PM2.5.
-3. A switch for every input: population, death rates and the death count can each come from
-   the Indian government or the UN (World Population Prospects 2024); the result names its
-   sources and says when it mixes them; giving several sources prints the range. Finding:
-   across sources India's numbers move about 15%; across risk curves, about 8 times. The
-   curve is the choice that matters.
+3. A switch for every input (government or UN population, death rates, death count).
+   Across sources India's numbers move ~15%; across curves ~8×.
+4. IHME: GBD 2023 deaths and population downloaded (Akash signed in, an agent drove the
+   browser); GBD 2023 exposure map and three IHME curves built (gbd2023, gbd2019, gemm_5cod).
+5. Research notes in `lit/`: `prior-rankings.md` (nobody ranks Indian interventions on one
+   metric, curve-sensitive, city by city, with odds of success), `city-sources.md` (an open
+   49-city source table exists, APnA; ~60 NCAP city reports as PDFs; methods disagree by
+   multiples), `open-work-and-people.md`.
 
-**Next session.** The IHME (GBD) risk curves, once the Part B data is downloaded. Akash
-signs in to IHME in a browser window Claude drives (Playwright); Claude runs the queries
-in `health/IHME_DOWNLOADS.md` Part B and writes the loader. Without that, next is either
-the evidence review (`lit/evidence.md`, which interventions are observed to work) or a
-one-page "methods for reviewers" note to send to researchers.
+**Next session.** Design the intervention ranking (brainstorm under way): causes-by-city
+dataset (APnA + McDuffie + NCAP reports, every study side by side, with the share blown in
+from outside) → intervention library (what it cuts, by how much, cost, odds, citations) →
+share × cut gives the PM2.5 change → life-years on every curve → a ranking per curve, flips
+flagged → benchmarks against the PES-for-stubble ($3,600-5,400/life), scrubber and World Bank
+figures. Open question to Akash: one airshed deep, or ~50 cities thin (Claude leans thin).
 
-**Waiting on Akash.** (1) Fifteen minutes to sign in to IHME in the browser Claude opens.
-(2) When to push.
+**Waiting on Akash.** (1) Deep vs wide, above. (2) X API credits ran out (402), if X search
+is wanted. (3) When to push.
 
 ## What exists
 
@@ -51,7 +56,7 @@ cd health
 ../.venv/bin/airhealth compare Delhi --from 100 --to 80
 ../.venv/bin/airhealth burden India
 ../.venv/bin/airhealth run interventions/november_only_delhi.toml
-../.venv/bin/python -m pytest -q                       # 215 tests
+../.venv/bin/python -m pytest -q                       # 241 tests (18 skip without IHME files)
 ```
 
 ## Git
@@ -62,22 +67,29 @@ are never committed.
 
 ## Waiting on Akash
 
-1. **IHME queries (Part B of [`health/IHME_DOWNLOADS.md`](../health/IHME_DOWNLOADS.md)).**
-   Deaths by cause, age and state, and population, from the GBD Results tool. The risk-curve
-   files (Part A) are already in `health/data_local/ihme_raw/`.
+1. **IHME:** Part A and Part B are downloaded and in use. Next sign-in, two small extras: the
+   GBD 2023 risk-curve information sheet and an "All causes" deaths query (see Next builds).
 2. **Death-count default.** Deferred on purpose. SRS-scaled stays the default; see the
    source-switches note below.
 3. **When to push.**
 
 ## Next builds, in order
 
-1. **IHME curves** (design stage 3): loaders for GBD 2019 and GBD 2023 curves and GEMM five
-   causes. Needs the Part B queries (Claude drives the browser; Akash signs in). Read the
-   status section of `IHME_DOWNLOADS.md` first: the 2023 files are on two different scales.
-   GBD deaths then become a third source for `deaths` (`airhealth/inputs.py`).
-2. **GBD 2023 exposure as a fifth map.** The file is downloaded. Needs IHME's state ids.
-3. **A methods note for reviewers**: one page per input and curve, what was chosen and why,
-   what would change the answer most. For Akash to send to researchers.
+Done 2026-11-11 (evening, not yet committed when written): design stage 3, the IHME tier.
+A fifth map, `gbd2023` (IHME's state values, read from `data_local/` at run time), and three
+curves, `gbd2023`, `gbd2019`, `gemm_5cod`, on IHME's deaths by cause, state and age
+(`health/airhealth/ihme.py`, `ihme_curves.py`; `tests/test_ihme.py`; two new benchmarks,
+both within band). The two-scales question is settled (the 2025-dated files are ln RR), the
+TMREL is GBD's 2.4-5.9 midpoint. See the status section of `health/IHME_DOWNLOADS.md`.
+
+1. **Reproduce GBD's own India burden** (969,726 ambient-PM deaths in 2023; this tool gives
+   1.61 million on the same curve, map and year). Needs GBD 2023's household air pollution
+   file (GHDx record 594794, 13.9 MB, no login) and GBD's proportional ambient/household
+   split. Then a benchmark for `gbd2023`, and one for `gbd2019` against Pandey et al. 2021.
+2. **A GBD all-cause death source** (`--deaths gbd`): one more Results-tool query, "All
+   causes" deaths by state and age. Also the GBD 2023 information sheet for the risk curves
+   (login), to confirm the log scale in IHME's own words.
+3. **The intervention ranking** (design in progress, see "Next session" above).
 4. Cohort run to 2050 (stage 4), valuation presets (stage 5), the Surat 25× case (stage 6).
 5. Air-response layer (emissions to concentration), the dome effect, a public web page.
 

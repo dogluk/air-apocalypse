@@ -7,8 +7,8 @@ Open tier (parameters committed in data/, sources in data/sources.toml):
   gemm_ncd_lri          Burnett et al. 2018 GEMM, NCD+LRI deaths, age-specific.
   aqli                  AQLI, 0.98 years of life expectancy per 10 µg/m³ above 5.
 Local tier (IHME files in data_local/, see IHME_DOWNLOADS.md): gbd2019, gbd2023,
-gemm_5cod. They are registered here with their file check only; get() raises Unavailable
-while the files are missing and NotImplementedError once they are present.
+gemm_5cod, risk by cause of death applied to IHME's deaths by cause (ihme_curves.py). get()
+raises Unavailable while their files are missing.
 
 Each curve applies from its own min_age; younger bands get a relative risk of 1.0. The
 log-linear curves carry min_age in data/curves_loglinear.csv (Jaganathan 0: all-age deaths;
@@ -45,7 +45,7 @@ from typing import Literal
 import numpy as np
 import pandas as pd
 
-from . import paths
+from . import ihme, paths
 from .ages import ADULT_FROM
 
 Z95 = 1.959964
@@ -76,8 +76,7 @@ AQLI_SOURCE = (
 )
 
 
-class Unavailable(Exception):
-    """A registered curve whose input files are not in health/data_local/."""
+Unavailable = ihme.Unavailable   # a registered curve whose input files are not in data_local/
 
 
 def _scalar_or_array(x: np.ndarray) -> float | np.ndarray:
@@ -254,17 +253,15 @@ class AQLILinear(Curve):
 # --- registry -----------------------------------------------------------------------------
 
 IHME = {
-    "gbd2019": ("GBD 2019 MR-BRT, six causes, by age (IHME, local)",
-                ("gbd2019_pm_rr_summary.csv", "gbd2019_pm_tmrel_draws.csv",
-                 "gbd2019_deaths_cause_age_state.csv"),
+    "gbd2019": ("GBD 2019 MR-BRT relative risks, six causes, IHD and stroke by age (IHME, local)",
                 "IHME, GBD 2019 particulate matter risk curves, https://ghdx.healthdata.org/record/"
-                "ihme-data/global-burden-disease-study-2019-gbd-2019-particulate-matter-risk-curves"),
-    "gbd2023": ("GBD 2023 relative risks, by cause (IHME, local)",
-                ("gbd2023_rr.csv", "gbd2023_codebook.csv", "gbd2023_deaths_cause_age_state.csv"),
+                "ihme-data/global-burden-disease-study-2019-gbd-2019-particulate-matter-risk-curves; "
+                "deaths by cause from the GBD 2023 Results tool, https://vizhub.healthdata.org/gbd-results"),
+    "gbd2023": ("GBD 2023 relative risks, seven causes, no age split (IHME, local)",
                 "IHME, GBD 2023 air pollution exposure estimates and risk curves 1990-2023, "
-                "https://ghdx.healthdata.org/node/594794"),
-    "gemm_5cod": ("GEMM five causes (Burnett 2018), with IHME cause-specific deaths (local)",
-                  ("gbd2023_deaths_cause_age_state.csv",),
+                "https://ghdx.healthdata.org/node/594794; deaths by cause from the GBD 2023 "
+                "Results tool, https://vizhub.healthdata.org/gbd-results"),
+    "gemm_5cod": ("GEMM five causes (Burnett 2018), IHD and stroke by age, with IHME deaths (local)",
                   "Burnett et al. 2018, https://pmc.ncbi.nlm.nih.gov/articles/PMC6156628/; deaths "
                   "by cause from IHME GBD Results, https://vizhub.healthdata.org/gbd-results"),
 }
@@ -299,8 +296,10 @@ def _open() -> dict[str, Curve]:
     return {**_loglinear(), "gemm_ncd_lri": _gemm(), "aqli": AQLILinear()}
 
 
-def _missing(name: str) -> list[str]:
-    return [f for f in IHME[name][1] if not (paths.LOCAL / f).exists()]
+def ihme_files(name: str) -> tuple[str, ...]:
+    """The IHME files (relative to data_local/) a local-tier curve reads."""
+    from . import ihme_curves
+    return ihme_curves.files(name)
 
 
 def get(name: str) -> Curve:
@@ -308,12 +307,8 @@ def get(name: str) -> Curve:
     if name in curves:
         return curves[name]
     if name in IHME:
-        missing = _missing(name)
-        if missing:
-            raise Unavailable(
-                f"{name} needs IHME files not found in {paths.LOCAL}: {', '.join(missing)}. "
-                "See health/IHME_DOWNLOADS.md for how to download them.")
-        raise NotImplementedError(f"{name}: files present, but this curve is not built yet")
+        from . import ihme_curves
+        return ihme_curves.load(name)          # raises Unavailable while files are missing
     raise KeyError(f"unknown curve {name!r}; choose from {', '.join([*curves, *IHME])}")
 
 
@@ -337,7 +332,7 @@ def select(names: list[str] | None = None) -> tuple[list[Curve], dict[str, str]]
 
 
 def available() -> list[Curve]:
-    """Curves that run now: the open tier (the IHME tier is not implemented yet)."""
+    """The open-tier curves, which always run (the local tier: select())."""
     return list(_open().values())
 
 
@@ -347,7 +342,13 @@ def catalogue() -> pd.DataFrame:
     for c in available():
         rows.append(dict(name=c.name, label=c.label, available=True,
                          needs=files[type(c)], source=c.source))
-    for name, (label, files, source) in IHME.items():
-        rows.append(dict(name=name, label=label, available=False,
-                         needs="; ".join(f"data_local/{f}" for f in files), source=source))
+    for name, (label, source) in IHME.items():
+        try:
+            get(name)
+            ok = True
+        except Unavailable:
+            ok = False
+        rows.append(dict(name=name, label=label, available=ok,
+                         needs=f"data_local/ (IHME files; {len(ihme_files(name))} of them, "
+                               "see IHME_DOWNLOADS.md)", source=source))
     return pd.DataFrame(rows, columns=["name", "label", "available", "needs", "source"])

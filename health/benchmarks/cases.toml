@@ -152,3 +152,54 @@ in_short = "With every district set to the paper's 74.0 µg/m³ we land 18% belo
 why_different = """
 Every district is set to the paper's national level, 74.0 µg/m³, which is also how the paper computed it: the authors' workbook (data/sources.toml, curves_gemm_ncd_lri.csv) applies each age's curve once per country at the country's mean. Fed the workbook's own baseline deaths by age, this tool's GEMM curve at 74.0 gives 2,219,057 deaths, the workbook's and the paper's figure to the last death, so the curve is reproduced and the whole gap is the baseline. The workbook's baseline is GBD 2015 (sheet 'NCD+ LRI baseline', 'Source: Global Health Data Exchange (http://ghdx.healthdata.org/gbd-results-tool)', 'Based on data retrieved on July 31st, 2017'): India, 25 and over, 6,457,516 deaths from non-communicable disease plus lower respiratory infection, among 692 million people of that age. Ours for 2015: SRS 2020-24 death rates by age, each band moved by the SRS's own rates by age for 2014-16 against 2020-24, × the 2015 projected population × the SRS 2021-23 share of deaths that are non-communicable or respiratory infection, with deaths at 45 and over scaled to each state's SRS crude death rate for 2015 (data/death_reconciliation_by_year.csv): 5,269,644 deaths among 669 million. Before that scaling: 5,860,966 (0.908 of the workbook's). By age, ours before scaling: 4.54 million at 30 to 79, 1.27 million at 80 and over (against the workbook's 1.42 million, about 0.89) and 0.05 million at 25-29 (about 0.64: the SRS cause table has one share for ages 15-29, which is dominated by injuries among the young). After it: 4.11 million at 30 to 79, 1.10 million at 80 and over (about 0.78). GBD's estimate of deaths in old age is above what the SRS records, so a tool whose counts follow the SRS will sit below a GBD-based paper. (Before 2026-11-11 the tool applied 2020-24 rates and scaling to 2015: 4,869,398, ratio 0.754, at 5.8 deaths per 1,000 against the SRS's 6.5. Moving the rates to 2015's raised deaths at 80 and over most: SRS rates there were 1.3 to 1.6 times 2020-24's.) The IHME table itself is not committed; only these totals are quoted.
 """
+
+# --- Local tier: need IHME files in data_local/ (never committed); skipped without them. ---------
+# Write-ups quote totals only, as the design allows; no IHME table is copied here.
+
+[[case]]
+id = "burnett2018_india_5cod_forced74"
+tier = "local"
+study = "Burnett et al. 2018 (GEMM 5-COD), India 2015, at the paper's 74.0 µg/m³"
+measures = "deaths"
+published = 1_867_000
+published_text = "India 2015, population-weighted PM2.5 74.0 µg/m³, 100% rollback: 1,867 thousand excess deaths (GEMM 5-COD: IHD, stroke, COPD, lung cancer, LRI)"
+source_url = "https://pmc.ncbi.nlm.nih.gov/articles/PMC6156628/"
+locator = "Table 1, row 'India', rollback 100%: PM2.5 exposure 74.0 µg/m3, GEMM 5-COD 1,867 (thousands). The authors' deposited calculator gives 1,867,342 (sheets Burden_YesCN_IHD, _CeVD, _COPD, _LC, _LRI, cell AN91, summed; see data/sources.toml, curves_gemm_5cod.csv)."
+place = "India"
+curve = "gemm_5cod"
+map = "aqli"
+year = 2015
+counterfactual = 2.4
+pm25_override = 74.0
+expected_ratio = 0.843
+tolerance = 0.03
+expected_why = """
+At the paper's exposure the only difference left is the deaths the curves multiply. The paper's are GBD 2015's, in the authors' workbook (sheets 'IHD baseline', 'Stroke baseline', 'COPD baseline', 'LC baseline', 'LRI baseline', row 'India', ages 25-29 to 80+): 3,853,257 deaths at 25 and over from the five causes. Ours are the GBD 2023 round's death rates for 2015 by state, cause and age, times the 2015 population projection: 3,249,296. 3.249 / 3.853 = 0.843.
+"""
+band_why = "The band holds the difference in the cause and age mix of the two sets of deaths (each cause and age has its own curve); the totals are known. Fed the workbook's own deaths, this tool's curves give its 1,867,342 to the death."
+in_short = "Same five curves (the authors' parameters, China cohort included), same year, same 74.0 µg/m³ and counterfactual. Fed the paper's own deaths, this tool's GEMM 5-COD gives the paper's 1,867,342 exactly. The rest is the deaths: IHME's current round (GBD 2023) puts India's 2015 deaths from the five causes at 25 and over 16% below what GBD 2015 had, mostly COPD and LRI."
+why_different = """
+The curves are reproduced exactly: with the workbook's GBD 2015 baseline deaths by cause and age and PM2.5 74.0, this tool's GEMMRisk gives 834,644 (IHD), 313,477 (stroke), 442,032 (COPD), 39,503 (lung cancer) and 237,686 (LRI), the workbook's AN91 on each sheet, total 1,867,342 = PNAS Table 1. The whole gap is the deaths. The workbook's are GBD 2015 (retrieved by the authors from the GBD results tool on 31 July 2017). Ours are the GBD 2023 round's estimates for 2015 (GBD Results tool, 2026-11-11; data_local, never committed), as rates by state, cause and age times the 2015 projected population (1,280 million). By cause, ours over GBD 2015's: IHD 1,341,018 / 1,596,330 = 0.84; stroke 826,587 / 790,409 = 1.05; COPD 759,563 / 1,031,607 = 0.74; lung cancer 62,760 / 81,557 = 0.77; LRI 259,368 / 353,354 = 0.73. IHME has revised India's 2015 COPD and LRI deaths down by about a quarter since GBD 2015. LRI and COPD carry higher attributable fractions at 74 µg/m³ than stroke, so the result's ratio (0.839) sits just under the plain ratio of totals (0.843).
+"""
+
+[[case]]
+id = "gbd2023_india_exposure"
+tier = "local"
+study = "GBD 2023 exposure, India 2023 (IHME's own national mean)"
+measures = "pm25"
+published = 54.05
+published_text = "India (location 163), 2023: population-weighted annual-mean ambient PM2.5 54.05 µg/m³ (GBD 2023)"
+source_url = "https://ghdx.healthdata.org/node/594794"
+locator = "GBD 2023 Air Pollution Exposure Estimates and Risk Curves 1990-2023, 'Ambient Particulate Matter Exposure Estimates [CSV]' (IHME_GBD_2023_AIR_POLLUTION_1990_2023_PM_Y20250930.CSV), row year_id 2023, location_id 163, column mean: 54.0522. Read 2026-11-11 (data_local)."
+place = "India"
+curve = "gbd2023"
+map = "gbd2023"
+year = 2023
+counterfactual = 4.15
+expected_ratio = 1.0
+tolerance = 0.02
+band_why = "Same state values; only the weights differ. IHME weights by its own population (GBD has India at 1,443 million in 2023); this tool weights each state's value by the 2023 population projection (1,390 million), with Ladakh and six small union territories carrying the pooled values they share in GBD."
+in_short = "The gbd2023 map is IHME's own state values; weighted by this tool's population it gives India 53.97 µg/m³ against IHME's own 54.05. GBD's newer round has India at 54, against GBD 2019's 91 (Pandey et al. 2021) and the satellite maps' 41 (AQLI) to 50 (ACAG)."
+why_different = """
+The map reads IHME's population-weighted means for the 31 GBD locations in India (30 states and union territories, J&K and Ladakh together, and 'Other Union Territories'), and the tool, as for every map, weights them by its own population for the year: the 2023 projection, state by state. IHME weights by its own population. The two give 53.97 and 54.05 µg/m³ for 2023 (53.28 and 53.60 for 2019). The GBD 2023 round uses ACAG's V5.GL.04 satellite product calibrated to monitors (appendix 2 to the GBD 2023 risk-factor paper, 'Ambient particulate matter pollution', exposure section), a change from the DIMAQ model behind GBD 2019's 91 µg/m³ for India; so the round, not the population, is what moves India from 91 to 54 between GBD 2019 and GBD 2023.
+"""

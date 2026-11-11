@@ -24,14 +24,18 @@ BAND = "#efeeea"
 # surface; aqua and yellow sit under 3:1 contrast, so every line is also labelled directly).
 SERIES = ("#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#6250d6", "#e34948")
 SHORT = {"loglinear_jaganathan": "Jaganathan 2024", "loglinear_brown": "Brown 2022",
-         "loglinear_vodonos": "Vodonos 2018", "gemm_ncd_lri": "GEMM NCD+LRI", "aqli": "AQLI"}
+         "loglinear_vodonos": "Vodonos 2018", "gemm_ncd_lri": "GEMM NCD+LRI", "aqli": "AQLI",
+         "gbd2019": "GBD 2019", "gbd2023": "GBD 2023", "gemm_5cod": "GEMM 5 causes"}
 CITE = {"loglinear_jaganathan": "Jaganathan et al. 2024, Lancet Planet Health",
         "loglinear_brown": "Brown et al. 2022, Environ Health Perspect",
         "loglinear_vodonos": "Vodonos et al. 2018, Environ Res",
         "gemm_ncd_lri": "Burnett et al. 2018, PNAS (GEMM)"}
 
 # What each line is the risk of: a relative risk applies to the deaths its curve covers.
-COVERS = {"all": "all deaths", "ncd_lri": "NCD+LRI deaths only"}
+# A cause-specific (IHME-tier) curve is drawn on all deaths: 1 + Σ share_c × (RR_c − 1), with
+# India's 2023 share of deaths from each cause in the band (ihme_curves.CauseCurve.rr).
+COVERS = {"all": "all deaths", "ncd_lri": "NCD+LRI deaths only",
+          "causes": "all deaths, via its causes (India's 2023 mix)"}
 
 
 def age_band(age: int) -> str:
