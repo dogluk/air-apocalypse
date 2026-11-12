@@ -531,7 +531,7 @@ def causes_table(city: str, df, show_all: bool, harmonised: tuple) -> str:
     covers = all (every group with show_all), a row per harmonised cause, a total row."""
     groups = _groups(df)
     whole = [g for g in groups if set(g[2].covers) == {"all"}]
-    partial = [g for g in groups if g not in whole]
+    partial = [g for g in groups if set(g[2].covers) != {"all"}]
     cols = groups if show_all else whole
     def split(study):       # a long id wraps at its last underscore: arai_teri_delhi2018 / receptor
         a, _, b = study.rpartition("_")
@@ -556,10 +556,10 @@ def causes_table(city: str, df, show_all: bool, harmonised: tuple) -> str:
         lines.append("[E] = share of emissions, not of PM2.5 concentration; do not compare it with "
                      "the other columns")
     if show_all and partial:
-        lines.append("[P] = partial: one piece of a split (e.g. stubble only); the total is not "
+        lines.append("[P] = partial: one piece of a split (not the whole split); the total is not "
                      "shown and it can overlap an `outside` row")
     if partial and not show_all:
-        lines.append(f"{len(partial)} partial estimate(s) (one piece of a split, e.g. stubble only; "
+        lines.append(f"{len(partial)} partial estimate(s) (one piece of a split, not the whole; "
                      f"they can overlap an `outside` row) are not columns; --all shows them. Listed here:")
         listed: dict[tuple, list[str]] = defaultdict(list)
         for s, se, g in partial:
@@ -570,12 +570,15 @@ def causes_table(city: str, df, show_all: bool, harmonised: tuple) -> str:
         for (c, m), items in listed.items():
             lines.append(f"  {c}, {m}: " + ", ".join(items))
     lines.append("")
+    lines.append("origin: inside = sources inside the airshed only (outside is its own row); all_origins = "
+                 "that sector's contribution from everywhere; region = a split by where the pollution comes "
+                 "from. Shares with different origins are not the same quantity.")
     lines.append("Studies:")
     for s in dict.fromkeys(g[0] for g in groups):
         r = df[df.study == s]
         uniq = lambda col: ", ".join(dict.fromkeys(str(v) for v in r[col]))  # noqa: E731
         lines.append(f"  {s}: {uniq('method')}, {', '.join(dict.fromkeys(_year(y) for y in r.year_sampled))}, boundary "
-                     f"{uniq('boundary')}, evidence {_evidence(r.evidence_key)}")
+                     f"{uniq('boundary')}, origin {uniq('origin')}, evidence {_evidence(r.evidence_key)}")
         lines.append(f"    {uniq('url')}")
     return "\n".join(lines)
 

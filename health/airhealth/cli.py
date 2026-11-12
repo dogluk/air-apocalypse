@@ -311,7 +311,11 @@ def cmd_causes(args) -> None:
             raise ValueError(f"no {args.season!r} season for {city}"
                              + (f" in {args.study}" if args.study else "") + f"; seasons: {', '.join(have)}")
     if args.json:
-        print(json.dumps(df.to_dict("records"), indent=2, default=float, ensure_ascii=False))
+        df = df.copy()
+        for c in ("year_sampled", "n_sites", "n_days"):     # blank -> null, whole numbers stay whole
+            df[c] = df[c].astype("Int64")
+        df = df.astype(object).where(df.notna(), None)
+        print(json.dumps(df.to_dict("records"), indent=2, default=float, ensure_ascii=False, allow_nan=False))
     else:
         print(report.causes_table(city, df, args.all, causes.HARMONISED))
 

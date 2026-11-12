@@ -5,7 +5,9 @@
 Inputs (all committed, each with its own entry in data/sources.toml):
   data/apna_source_apportionment.csv   APnA, UrbanEmissions.Info: CAMx source shares for 49 airsheds
   data/causes_transcribed.csv          city studies transcribed by hand from their reports
-  McDuffie et al. 2021 Supplementary Data 1 (xlsx, downloaded to a folder outside the repo)
+  McDuffie et al. 2021 Supplementary Data 1 (xlsx, downloaded to a folder outside the repo; its sha256
+  is checked against data/sources.toml and the build stops on a mismatch). Rows: grid_cell boundary,
+  origin = all_origins.
 Rows for a place that is not one of the 50 cities are dropped and counted. The result is
 checked by airhealth.causes.validate (the check causes.table() runs); the build raises,
 naming the group, if it fails. Sorted by city, study, season, source_harmonised.
@@ -14,7 +16,8 @@ APnA
   Categories (Zenodo record 6919069): A all transport, B residential, C industries without
   brick kilns, D all dust, E open waste burning, F diesel generator sets, G brick
   manufacturing, H sea salt (blank where not applicable: no row is written), I outside.
-  Annual mean, concentration shares, CAMx, airshed box, whole split (covers = all).
+  Annual mean, concentration shares, CAMx, airshed box, whole split (covers = all). origin = inside
+  for the sector rows (emissions inside the airshed), region for column I (everything from outside).
   The CSV's study_uear is the report batch (2017: 20 cities; 2019: 30), not the model year.
   Base years are read in the reports, not the CSV (BASE_YEAR below):
     2017 batch -> 2015: 'Air Pollution Knowledge Assessments (APnA) for Indian cities',
@@ -30,6 +33,7 @@ APnA
   doi:10.1016/j.uclim.2018.11.005 (not read here; the two reports above were).
 """
 import sys
+import tomllib
 from pathlib import Path
 
 import openpyxl
@@ -75,7 +79,8 @@ def apna_rows(cities: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
             rows.append(dict(
                 city=city, study=f"apna_{year}", institution="UrbanEmissions.Info", year_sampled=year,
                 season="annual", months="1-12", size_fraction="PM2.5", method="CAMx",
-                metric="concentration_share", boundary="airshed_box", covers="all", source_raw=label,
+                metric="concentration_share", boundary="airshed_box",
+                origin="region" if name == "outside" else "inside", covers="all", source_raw=label,
                 source_harmonised=name, share_pct=float(str(r[col]).rstrip("%")), n_sites=None, n_days=None,
                 url=RECORD,
                 locator=f"APnA_50airsheds_PM25_Source_Apportionment_CAMxOutputs.csv, airshed '{r.City}', column "
@@ -95,7 +100,8 @@ def apna_rows(cities: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
 # emissions) shares applied to population-weighted PM2.5 over the area's boundary, "defined using T3 urban extent
 # data from the Atlas of Urban Expansion" (200 metropolitan areas > 100,000 people in 2010; the model grid is
 # 2 x 2.5 degrees outside North America, Europe and East Asia). The urban extent is the nearest of this
-# schema's boundaries to `municipal`.
+# schema's boundaries, but the shares come from a 2 x 2.5 degree model cell downscaled to it, so the
+# boundary is written `grid_cell`.
 MCDUFFIE_URL = ("https://static-content.springer.com/esm/art%3A10.1038%2Fs41467-021-23853-y/MediaObjects/"
                 "41467_2021_23853_MOESM4_ESM.xlsx")
 MCDUFFIE_PAPER = "https://www.nature.com/articles/s41467-021-23853-y"
@@ -137,7 +143,7 @@ MCDUFFIE_SECTORS = {
 }
 MCDUFFIE_LOCATOR = ("Supplementary Data 1 (41467_2021_23853_MOESM4_ESM.xlsx), sheet 1, row '{city}' under India, "
                     "column '{col} Contribution (%)'; annual 2017 GEOS-Chem shares of population-weighted PM2.5 over "
-                    "the city's Atlas of Urban Expansion T3 urban extent (Nat Commun 12:3594, main text, 'Sub-national "
+                    "the city's Atlas of Urban Expansion T3 urban extent; boundary grid_cell because the shares come from the model cell (Nat Commun 12:3594, main text, 'Sub-national "
                     "area boundaries are identified by the nearest dominant city and are defined using T3 urban "
                     "extent data from the Atlas of Urban Expansion'; shares from 'gridded model sensitivity "
                     "simulation results (... 2 x 2.5 degrees elsewhere)' applied 'to the sub-national exposure "
@@ -168,7 +174,7 @@ def mcduffie_rows(cities: pd.DataFrame, xlsx: Path) -> tuple[pd.DataFrame, list[
                 city=city, study="mcduffie2021", institution="Dalhousie University / Washington University / "
                 "PNNL / Univ. of Toronto et al. (McDuffie et al.)", year_sampled=2017, season="annual",
                 months="1-12", size_fraction="PM2.5", method="GEOS-Chem", metric="concentration_share",
-                boundary="municipal", covers="all", source_raw=col, source_harmonised=name, share_pct=share,
+                boundary="grid_cell", origin="all_origins", covers="all", source_raw=col, source_harmonised=name, share_pct=share,
                 n_sites=None, n_days=None, url=MCDUFFIE_PAPER,
                 locator=MCDUFFIE_LOCATOR.format(city=r[0], col=col), evidence_key="O"))
     return pd.DataFrame(out, columns=causes.COLUMNS), dropped
@@ -178,7 +184,12 @@ def main() -> None:
     cities = pd.read_csv(paths.DATA / "cities.csv")
     apna, dropped = apna_rows(cities)
     folder = _fetch.workdir(sys.argv, "causes")
-    mcd, mcd_dropped = mcduffie_rows(cities, _fetch.fetch(MCDUFFIE_URL, folder, "mcduffie2021_supp_data_1.xlsx"))
+    xlsx = _fetch.fetch(MCDUFFIE_URL, folder, "mcduffie2021_supp_data_1.xlsx")
+    want = tomllib.loads((paths.DATA / "sources.toml").read_text())["mcduffie2021_supp_data_1.xlsx"]["sha256"]
+    if _fetch.sha256(xlsx) != want:
+        sys.exit(f"{xlsx.name}: sha256 {_fetch.sha256(xlsx)} differs from data/sources.toml ({want}); "
+                 "the file changed, re-read it before rebuilding")
+    mcd, mcd_dropped = mcduffie_rows(cities, xlsx)
     transcribed = pd.read_csv(paths.DATA / "causes_transcribed.csv", dtype={"months": str})
     parts = [apna, mcd, transcribed[list(causes.COLUMNS)]]
     out = pd.concat([p for p in parts if len(p)], ignore_index=True)

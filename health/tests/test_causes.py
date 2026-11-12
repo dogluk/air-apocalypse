@@ -48,7 +48,8 @@ def test_for_city_and_studies():
 
 def _row(**kw):
     r = dict(city="Chennai", study="s", institution="i", year_sampled=2020, season="annual", months="1-12",
-             size_fraction="PM2.5", method="CMB", metric="concentration_share", boundary="site", covers="all",
+             size_fraction="PM2.5", method="CMB", metric="concentration_share", boundary="site",
+             origin="all_origins", covers="all",
              source_raw="x", source_harmonised="transport", share_pct=100.0, n_sites=None, n_days=None,
              url="u", locator="l", evidence_key="O")
     r.update(kw)
@@ -56,9 +57,9 @@ def _row(**kw):
 
 
 def test_validate_names_the_bad_group():
-    ok = pd.DataFrame([_row(share_pct=60.0), _row(source_harmonised="other", share_pct=40.0)])
+    ok = pd.DataFrame([_row(share_pct=60.0), _row(source_raw="y", source_harmonised="other", share_pct=40.0)])
     causes.validate(ok)
-    bad = pd.DataFrame([_row(share_pct=60.0), _row(source_harmonised="other", share_pct=30.0)])
+    bad = pd.DataFrame([_row(share_pct=60.0), _row(source_raw="y", source_harmonised="other", share_pct=30.0)])
     with pytest.raises(ValueError, match="Chennai.*sum"):
         causes.validate(bad)
     with pytest.raises(ValueError, match="Atlantis"):
@@ -66,7 +67,7 @@ def test_validate_names_the_bad_group():
     with pytest.raises(ValueError, match="smoke"):
         causes.validate(pd.DataFrame([_row(source_harmonised="smoke")]))
     with pytest.raises(ValueError, match="metric"):
-        causes.validate(pd.DataFrame([_row(share_pct=50.0), _row(source_harmonised="other", share_pct=50.0,
+        causes.validate(pd.DataFrame([_row(share_pct=50.0), _row(source_raw="y", source_harmonised="other", share_pct=50.0,
                                                                    metric="emission_share")]))
     with pytest.raises(ValueError, match="columns"):
         causes.validate(ok.drop(columns=["url"]))
@@ -88,9 +89,9 @@ def test_mcduffie_rows():
     # one pinned value per transcribed study, each read in the report PDF (locator in the row says where)
     ("Delhi", "arai_teri_delhi2018_receptor", "winter", "secondary_unassigned", 26),      # Fig E.5, p. E7
     ("Delhi", "arai_teri_delhi2018_dispersion", "summer", "dust", 38),                    # Table E.2, p. E13
-    ("Delhi", "arai_teri_delhi2018_region", "winter", "other", 36),                       # Fig E.9, p. E18: Delhi's own
+    ("Delhi", "arai_teri_delhi2018_region", "winter", "local_all", 36),                      # Fig E.9, p. E18: Delhi's own
     ("Delhi", "govardhan2024_dss", "post-monsoon", "outside", 59),                        # Fig 7b: 25 + 8 + 26
-    ("Kolkata", "teri_kolkata2025_cmb", "annual", "residential", 29),                     # Fig E4: cooking
+    ("Kolkata", "teri_kolkata2025_cmb", "winter+summer campaigns", "residential", 29),                    # Fig E4: cooking
     ("Kolkata", "teri_kolkata2025_cmaq", "winter", "residential", 18),                    # Table 42
     ("Kolkata", "teri_kolkata2025_cmaq_region", "winter", "outside", 68),                 # Fig 73: 15 + 10 + 43
     ("Lucknow", "teri_lucknow2022_cmaq", "winter", "residential", 27),                    # Table 26
@@ -112,8 +113,6 @@ def test_mcduffie_rows():
     ("Surat", "teri_surat2021_cmaq_region", "winter", "outside", 83),                     # Fig 6.4: 7 + 76
     ("Delhi", "biswal2025_2023", "post-monsoon", "agri_burning", 16),                     # Sec. 3.4 / Fig 7
     ("Delhi", "kulkarni2020", "post-monsoon", "agri_burning", 20),                        # abstract
-    ("Delhi", "dss_loksabha2025_2024", "post-monsoon", "agri_burning", 10.6),             # press (S)
-    ("Kanpur", "nagar_sharma2022", "post-monsoon", "agri_burning", 21),                   # press (S)
 ])
 def test_transcribed_values(city, study, season, cause, share):
     t = causes.for_city(city, study)
@@ -127,6 +126,87 @@ def test_stubble_rows_are_partial():
     assert "Delhi" in set(s.city)
     assert set(s.months.unique()) <= {"10,11", "10,11,12", "11", "10"}   # whatever the studies state; no annual
     assert set(s.metric) == {"concentration_share"}
-    # every stubble estimate not read at source is flagged S and says so in its locator
-    press = s[s.evidence_key == "S"]
-    assert len(press) and press.locator.str.contains("PRESS ONLY").all()
+    assert set(s.origin) == {"all_origins"}
+
+
+def test_no_press_or_memory_rows():
+    assert set(causes.table().evidence_key) == {"O"}
+    assert not causes.table().study.str.startswith(("dss_loksabha", "nagar_sharma")).any()
+
+
+def test_origin_vocabulary_and_assignment():
+    t = causes.table()
+    assert set(t.origin) == set(causes.ORIGINS)
+    apna = t[t.study.str.startswith("apna")]
+    assert (apna[apna.source_harmonised == "outside"].origin == "region").all()
+    assert (apna[apna.source_harmonised != "outside"].origin == "inside").all()
+    for kind in ("mcduffie2021", "_cmb", "_pmf", "_receptor", "_dispersion", "teri_kolkata2025_cmaq",
+                 "teri_lucknow2022_cmaq", "teri_surat2021_cmaq"):
+        sel = t[t.study.str.contains(kind) & ~t.study.str.contains("_region")]
+        assert len(sel) and set(sel.origin) == {"all_origins"}, kind
+    geo = t[t.study.str.endswith("_region") | (t.study == "govardhan2024_dss")]
+    assert set(geo.origin) == {"region"}
+    assert (t[t.covers == "partial"].study.str.endswith("_region")
+            | (t[t.covers == "partial"].origin == "all_origins")).all()
+    assert (t[t.study == "mcduffie2021"].boundary == "grid_cell").all()
+
+
+def test_geographic_splits_use_local_all_and_outside_only():
+    t = causes.table()
+    geo = t[t.study.str.endswith("_region")]
+    assert set(geo.source_harmonised) == {"local_all", "outside"}
+    assert set(t[t.source_harmonised == "local_all"].origin) == {"region"}
+    gov = t[(t.study == "govardhan2024_dss") & (t.season == "winter")].set_index("source_harmonised")
+    assert gov.loc["local_all", "share_pct"] == 20
+
+
+def test_kolkata_summer_region_is_complete_with_derived_row():
+    g = causes.for_city("Kolkata", "teri_kolkata2025_cmaq_region").query("season == 'summer'")
+    assert set(g.covers) == {"all"} and g.share_pct.sum() == pytest.approx(100)
+    d = g[g.source_raw.str.contains("derived")].iloc[0]
+    assert d.share_pct == 2 and "DERIVED" in d.locator
+
+
+def test_shares_is_nan_for_unreported_causes():
+    s = causes.shares("Delhi", "govardhan2024_dss", "winter")
+    assert list(s.index) == list(causes.HARMONISED)
+    assert s["transport"] == 14 and s["local_all"] == 20
+    assert pd.isna(s["industry"]) and pd.isna(s["dust"])          # not reported, not 0
+    k = causes.shares("Kanpur", "iitk_kanpur2022_pmf", "winter")
+    assert k["other"] >= 3.5 and pd.isna(k["residential"])
+    with pytest.raises(KeyError):
+        causes.shares("Delhi", "govardhan2024_dss", "monsoon")
+    with pytest.raises(KeyError):
+        causes.shares("Atlantis", "x", "annual")
+
+
+def test_coal_and_fly_ash_is_other():
+    t = causes.table()
+    f = t[t.source_raw.str.contains("fly ?ash", case=False) & t.study.str.contains("iitk")]
+    assert len(f) == 6 and set(f.source_harmonised) == {"other"}
+
+
+def test_kolkata_cmb_is_not_labelled_annual():
+    k = causes.for_city("Kolkata", "teri_kolkata2025_cmb")
+    assert set(k.season) == {"winter+summer campaigns"} and set(k.months) == {"12,1,4,5"}
+
+
+@pytest.mark.parametrize("change, match", [
+    (dict(evidence_key="S"), "evidence_key"),
+    (dict(evidence_key="R"), "evidence_key"),
+    (dict(origin="everywhere"), "origin"),
+    (dict(size_fraction="PM10"), "size_fraction"),
+    (dict(method="guess"), "method"),
+    (dict(boundary="county"), "boundary"),
+    (dict(months="13"), "months"),
+    (dict(months="winter"), "months"),
+    (dict(source_harmonised="local_all"), "local_all"),
+])
+def test_validate_rejects_bad_vocabulary(change, match):
+    with pytest.raises(ValueError, match=match):
+        causes.validate(pd.DataFrame([_row(**change)]))
+
+
+def test_validate_rejects_duplicates():
+    with pytest.raises(ValueError, match="duplicate"):
+        causes.validate(pd.DataFrame([_row(share_pct=50.0), _row(share_pct=50.0)]))

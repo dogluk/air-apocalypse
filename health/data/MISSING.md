@@ -81,10 +81,10 @@ GBD 2019 figure for India has the same dependency.
 - **Kulkarni et al. 2020 (ES&T 54(8): 4790)**: the 20% is read from the abstract on the publisher page; the ACS full text is paywalled, so
   the year simulated and the figure behind the number were not opened (year_sampled is blank).
 - **Lok Sabha written answer of 10 March 2025 (DSS season means 2020-24).** The answer text was not found on sansad.in (search engines
-  returned only the 9 Feb 2026 answer on a different question); the values are written from the Times of India report of the answer,
-  evidence S, flagged 'PRESS ONLY' in the locator.
+  returned only the 9 Feb 2026 answer on a different question); the values were taken from the Times of India report of the answer and are
+  now in the leads section at the end (not in the table).
 - **Nagar and Sharma 2022 (Urban Climate 41: 101084)**: the ScienceDirect page gave no abstract to the tools used; Delhi 31% and Kanpur 21%
-  are from a Hindustan Times report (19 Jan 2022), evidence S. Biswal et al. quote the Delhi value for 'October to December', the press
+  are from a Hindustan Times report (19 Jan 2022); now in the leads section at the end (not in the table). Biswal et al. quote the Delhi value for 'October to December', the press
   for October-November.
 - **Mumbai AERMOD column (Table 7.1 col. C)** and the other dispersion results of the Maharashtra, Hyderabad and Bengaluru reports are for
   'PM' of unstated size and are not transcribed.
@@ -94,4 +94,22 @@ GBD 2019 figure for India has the same dependency.
   then be written as boundary = region rows.
 - **Lok Sabha answer of 10 March 2025 (re-checked in the fix round).** Searches restricted to pib.gov.in, sansad.in, loksabhadocs.nic.in and
   eparlib.nic.in returned only unrelated PIB releases (Nov and Dec 2024 Winter Action Plan material); the answer text is not reachable with the
-  normal fetch tools, so the five dss_loksabha2025_* rows stay evidence S.
+  normal fetch tools, so the five values are now only in the leads section at the end (evidence S rows were removed from the table).
+
+## Leads to confirm (press-only values taken out of causes.csv)
+
+These were transcribed from press reports (evidence S). The table now accepts only values read at source, and Delhi has O stubble
+values (Kulkarni, Biswal 2022-24, Govardhan, ARAI), so they are not in `causes.csv`. Each needs its primary source opened before it can come back.
+
+- **Delhi, DSS stubble contribution to PM2.5, season means (Oct-Nov), Lok Sabha written answer of 10 March 2025:** 2020 13%, 2021 13%,
+  2022 9%, 2023 11%, 2024 10.6% (WRF-Chem decision support system, MoES/IITM). Source of the values: Times of India, "Stubble burning
+  contributed 10.6% to Delhi's PM2.5 levels in late 2024, Centre's data"
+  (https://timesofindia.indiatimes.com/city/chandigarh/stubble-burning-contributed-10-6-to-delhis-pm2-5-levels-in-late-2024-centres-data/articleshow/118856480.cms).
+  Not used: the answer text itself was not reachable (sansad.in, pib.gov.in, loksabhadocs.nic.in, eparlib.nic.in returned nothing relevant), and
+  this is the only 2020-23 series, so confirming it would fill Delhi's stubble-by-year gap. Confirm by opening the Lok Sabha answer.
+- **Delhi 31% and Kanpur 21%, post-monsoon (Oct-Nov, 2013-14), Nagar and Sharma 2022 (Urban Climate 41: 101084):** crop-residue burning's
+  share of PM2.5 (via secondary particulate), from Hindustan Times, 19 Jan 2022
+  (https://www.hindustantimes.com/india-news/crop-residue-burning-contributes-to-secondary-particulate-matter-study-101642571118252.html).
+  Not used: press report of a paper whose abstract was not opened; Delhi has O stubble values. Kanpur has none, so confirming the 21% from the paper
+  (ScienceDirect, doi 10.1016/j.uclim.2022.101084 area; check the table) would give Kanpur its only stubble row. Biswal et al. quote the Delhi value for
+  October to December, the press for October-November.

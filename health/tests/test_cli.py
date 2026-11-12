@@ -300,11 +300,26 @@ def test_causes_delhi_default_hides_partial_columns_and_lists_stubble(capsys):
     assert "[P]" in full and "kulkarni2020" in full.split("Studies:")[0]
 
 
+def test_causes_json_is_valid_json(capsys):
+    code, out, _ = run(capsys, "causes", "Delhi", "--json")
+    assert code == 0 and "NaN" not in out
+    rows = json.loads(out)
+    assert rows and "origin" in rows[0]
+    kul = [r for r in rows if r["study"] == "kulkarni2020"][0]
+    assert kul["year_sampled"] is None and kul["n_sites"] is None
+    assert any(r["year_sampled"] == 2016 for r in rows)
+
+
+def test_causes_shows_origin(capsys):
+    _, out, _ = run(capsys, "causes", "Kolkata")
+    assert "origin all_origins" in out and "origin region" in out
+
+
 def test_causes_filters_and_marks(capsys):
     code, out, _ = run(capsys, "causes", "Kanpur", "--study", "iitk_kanpur2022_pmf", "--season", "winter")
     assert code == 0 and "summer" not in out and "mcduffie" not in out
     _, out, _ = run(capsys, "causes", "Kanpur", "--all")
-    assert "press only" in out
+    assert "press only" not in out
 
 
 def test_causes_unknown_city_is_one_line(capsys):

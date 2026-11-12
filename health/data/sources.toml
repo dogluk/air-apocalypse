@@ -653,32 +653,42 @@ review), which are not read here.
 """
 
 ["causes.csv"]
-source = "Causes of PM2.5 by city, every study side by side (schema in airhealth/causes.py). APnA rows: UrbanEmissions.Info (Guttikunda SK, Nishadh KA, Jawahar P), Zenodo record 6919069, CC BY 4.0, CAMx shares of annual PM2.5 by source, 49 airsheds. Base years from the APnA batch reports (urbanemissions.info/india-apna)."
+source = "Causes of PM2.5 by city, every study side by side (schema in airhealth/causes.py), built by scripts/build_causes.py from three inputs: (1) APnA, UrbanEmissions.Info (Guttikunda SK, Nishadh KA, Jawahar P), Zenodo record 6919069, CAMx shares of annual PM2.5 by source for 49 airsheds; (2) McDuffie et al. 2021, Nature Communications 12:3594, Supplementary Data 1, GEOS-Chem shares for 9 of the 50 cities (the xlsx has its own entry below); (3) causes_transcribed.csv, 316 rows from 23 study ids (city, NCAP and journal studies read by hand; own entry below). 896 rows, 26 study ids, 50 cities."
 url = "https://zenodo.org/records/6919069"
 page = "https://www.urbanemissions.info/india-apna"
-locator = "One row per city x study x season x size fraction x source; each row's own `locator` column gives the file, column and report page it was read from. APnA 2015 base year (2017 batch): program booklet, Nov 2017, PDF p. 2 and the table on p. 6 headed 'in 2015' (https://urbanemissions.info/wp-content/uploads/apna/docs/apna_program_summary_booklet.pdf). APnA 2018 base year (2019 batch): summary report, July 2019, PDF p. 9 and Table 3 on p. 15 (https://urbanemissions.info/wp-content/uploads/apna/docs/2019-07-APnA30city_summary_report.pdf). Methods paper: doi:10.1016/j.uclim.2018.11.005."
+locator = "One row per city x study x season x size fraction x source; each row's own `locator` column gives the file, column, table or figure and report page it was read from. Columns: city, study, institution, year_sampled, season, months, size_fraction, method, metric, boundary (receptor area only), origin (inside | all_origins | region: what a sector share counts, see airhealth/causes.py), covers, source_raw, source_harmonised, share_pct, n_sites, n_days, url, locator, evidence_key. APnA 2015 base year (2017 batch): program booklet, Nov 2017, PDF p. 2 and the table on p. 6 headed 'in 2015' (https://urbanemissions.info/wp-content/uploads/apna/docs/apna_program_summary_booklet.pdf). APnA 2018 base year (2019 batch): summary report, July 2019, PDF p. 9 and Table 3 on p. 15 (https://urbanemissions.info/wp-content/uploads/apna/docs/2019-07-APnA30city_summary_report.pdf). Methods paper: doi:10.1016/j.uclim.2018.11.005."
 retrieved = "2026-11-12"
-licence = "APnA: CC BY 4.0. Attribute UrbanEmissions.info and the Zenodo record. Other studies in later tasks carry their own licences in their rows."
+licence = "APnA: CC BY 4.0 (attribute UrbanEmissions.info and the Zenodo record). McDuffie 2021 supplementary data: CC BY 4.0 (open-access article). City, NCAP and journal studies: copyright with their authors and commissioners; the reports are not redistributed, only the figures, with citation, are tabulated (facts)."
 method = "derived"
 script = "scripts/build_causes.py"
 notes = """
-Built from apna_source_apportionment.csv plus causes_transcribed.csv plus McDuffie 2021 (study mcduffie2021: annual 2017 GEOS-Chem shares for 9 of the 50 cities, one row per McDuffie sector, boundary municipal = the paper's T3 urban extent; sector map and reasons in scripts/build_causes.py; the 20 sector shares sum to 100 +/- 0.2, so there is no remainder row). APnA: A transport, B residential,
-C industry, D dust, E waste_burning, F dg_sets, G brick_kilns, H natural (sea salt; blank H = no row), I outside. Annual, CAMx, airshed box,
-covers = all; study id apna_<base year>. The CSV's study_uear is the report batch (2017, 2019), not the model year: base year 2015 for the
-2017 batch and 2018 for the 2019 batch, read in the batch reports (locator). 49 cities (Varanasi is not in the APnA file; Delhi has no
-airshed). The 2017 booklet's printed table differs from the Zenodo CSV by 0.1 point in places (Chennai transport 24.6 vs 24.5); the CSV
-is used. Emission shares and concentration shares never share a group (metric column).
+Evidence rule: only evidence_key O (read at source by whoever wrote the row) is allowed; causes.validate refuses S (press) and R (memory).
+Press-only numbers (Delhi DSS 2020-24 stubble shares via a Lok Sabha answer, Nagar and Sharma 2022) are listed in MISSING.md as leads to confirm.
+origin: APnA sector rows inside (emissions inside the airshed), APnA `outside` row region; CMAQ, GEOS-Chem and WRF-Chem sector splits, receptor
+(CMB, PMF) shares and partial stubble estimates all_origins; geographic splits (city vs rest of district/state/India, local_all + outside) region.
+APnA: A transport, B residential, C industry, D dust, E waste_burning, F dg_sets, G brick_kilns, H natural (sea salt; blank H = no row), I outside.
+Annual, CAMx, airshed box, covers = all; study id apna_<base year>. The CSV's study_uear is the report batch (2017, 2019), not the model year:
+base year 2015 for the 2017 batch and 2018 for the 2019 batch, read in the batch reports (locator). 49 cities (Varanasi is not in the APnA
+file; Delhi has no airshed). The 2017 booklet's printed table differs from the Zenodo CSV by 0.1 point in places (Chennai transport 24.6 vs
+24.5); the CSV is used. McDuffie: annual 2017, one row per McDuffie sector, boundary grid_cell (a 2 x 2.5 degree model cell downscaled to the
+Atlas of Urban Expansion T3 urban extent), origin all_origins; sector map and reasons in scripts/build_causes.py; the 20 shares sum to 100 +/- 0.2.
+The build checks the McDuffie xlsx sha256 against its entry below. Emission shares and concentration shares never share a group (metric column).
+A cause a group does not list is not reported, not zero (causes.shares returns NaN).
 """
 
 ["causes_transcribed.csv"]
-source = "City source-apportionment studies transcribed by hand from their reports, one row per source (schema in airhealth/causes.py). Header only until the transcription tasks add rows."
-url = "https://github.com/dogluk/air-apocalypse"
-locator = "Each row's own `locator` column: the report, table or figure and page."
+source = "City, NCAP and journal source-apportionment studies transcribed by hand from their reports, one row per source, same columns as causes.csv (schema in airhealth/causes.py; origin included). 316 rows, 23 study ids, 16 cities' reports and papers: ARAI/TERI Delhi 2018, Govardhan et al. 2024 (GMD), Biswal et al. 2025 and Kulkarni et al. 2020 (Delhi stubble), TERI Kolkata 2025, Lucknow 2022, Patna 2021, Surat 2021, IIT Kanpur Kanpur 2022, Agra 2021, Hyderabad 2023, NEERI/IITB Mumbai 2023 and Pune 2024, CSTEP Bengaluru 2022. Read by scripts/build_causes.py."
+url = "per row: each row's own `url` column (the report PDF or journal page the row was read from); there is no single URL"
+locator = "Each row's own `locator` column: the table or figure, the page where the shares are printed, and where the sampling months are stated."
 retrieved = "2026-11-12"
-licence = "Reports are not redistributed; only the figures, with citation, are tabulated (facts). Each study's licence is stated in its rows."
+licence = "The reports and papers keep their own copyright and licences (state and NCAP reports, journal articles); none is redistributed and no PDF is in the repo. Only the figures are tabulated, with citation (facts), per row."
 method = "transcribed"
 notes = """
-Same columns as causes.csv. Read by scripts/build_causes.py. No rows yet.
+Every row is evidence O (read in the report or the paper). No press-only or from-memory number is in the file; those leads are in MISSING.md.
+Sectors and `origin` follow the study type: CMAQ/WRF-Chem sector tables and CMB/PMF receptor shares are all_origins, geographic splits are region
+(local_all = the city's own sources, all sectors). A group with covers = all sums to 100 +/- 2; partial groups (stubble-only, Lucknow monsoon)
+do not. Derived values are marked DERIVED in their locator (Kolkata summer HMC slice = 60 - 12 - 46). Mapping calls (coal and fly ash -> other,
+Kolkata cooking -> residential, transport including DG sets) are stated in the locators; source_raw keeps each report's own words.
 """
 
 ["mcduffie2021_supp_data_1.xlsx"]
