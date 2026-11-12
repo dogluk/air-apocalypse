@@ -82,3 +82,28 @@ def test_mcduffie_rows():
     kanpur = m[m.city == "Kanpur"].groupby("source_harmonised").share_pct.sum()
     assert kanpur["residential"] == pytest.approx(RESIDENTIAL_KANPUR, abs=0.05)
     assert (m.method == "GEOS-Chem").all() and (m.year_sampled == 2017).all()
+
+
+@pytest.mark.parametrize("city, study, season, cause, share", [
+    # one pinned value per transcribed study, each read in the report PDF (locator in the row says where)
+    ("Delhi", "arai_teri_delhi2018_receptor", "winter", "secondary_unassigned", 26),      # Fig E.5, p. E7
+    ("Delhi", "arai_teri_delhi2018_dispersion", "summer", "dust", 38),                    # Table E.2, p. E13
+    ("Delhi", "arai_teri_delhi2018_region", "winter", "other", 36),                       # Fig E.9, p. E18: Delhi's own
+    ("Delhi", "govardhan2024_dss", "post-monsoon", "outside", 59),                        # Fig 7b: 25 + 8 + 26
+    ("Kolkata", "teri_kolkata2025_cmb", "annual", "residential", 29),                     # Fig E4: cooking
+    ("Kolkata", "teri_kolkata2025_cmaq", "winter", "residential", 18),                    # Table 42
+    ("Kolkata", "teri_kolkata2025_cmaq_region", "winter", "outside", 68),                 # Fig 73: 15 + 10 + 43
+    ("Lucknow", "teri_lucknow2022_cmaq", "winter", "residential", 27),                    # Table 26
+    ("Lucknow", "teri_lucknow2022_region", "summer", "outside", 81),                      # Fig 60: 5 + 5 + 52 + 19
+    ("Kanpur", "iitk_kanpur2022_pmf", "winter", "transport", 29.9),                       # Table 4.8
+    ("Kanpur", "iitk_kanpur2022_pmf", "summer", "dust", 33.8),                            # Table 4.12: 21.9 + 11.9
+    ("Patna", "teri_patna2021_cmb", "winter", "secondary_unassigned", 38),                # Fig 4.3
+    ("Patna", "teri_patna2021_cmb", "summer", "industry", 27),                            # Fig 4.3
+    ("Agra", "iitk_agra2021_pmf", "winter", "transport", 22.8),                           # Table 4.8
+    ("Agra", "iitk_agra2021_pmf", "summer", "dust", 37.4),                                # Table 4.12: 34.5 + 2.9
+])
+def test_transcribed_values(city, study, season, cause, share):
+    t = causes.for_city(city, study)
+    assert len(t), f"no rows for {city} / {study}"
+    got = t[(t.season == season) & (t.source_harmonised == cause)].share_pct.sum()
+    assert got == pytest.approx(share, abs=0.05)
