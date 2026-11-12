@@ -645,8 +645,38 @@ Kept byte for byte as published, including the misspelt column name study_uear. 
 (construction and resuspension); E open waste burning; F diesel generator sets; G brick manufacturing; H sea salt (where applicable);
 I outside/regional contribution. H is blank for airsheds without sea salt. Shares are printed as strings with a % sign; parse them
 where they are used, not here.
-study_uear is the only year field in the file: 2017 for 19 airsheds, 2019 for 30. The record page does not state the base year
-of each airshed, so none is written here.
+study_uear is the only year field in the file: 2017 for 19 airsheds, 2019 for 30. It is the report batch, not the model year; the
+record page does not state base years. They are read in the batch reports (see causes.csv): 2015 for the 2017 batch (program booklet,
+Nov 2017, PDF p. 2 and p. 6) and 2018 for the 2019 batch (summary report, July 2019, PDF p. 9 and Table 3 on p. 15).
 The record says the results are explained and discussed in journal articles; it lists two (APnA for 20 Indian cities, and NCAP
 review), which are not read here.
+"""
+
+["causes.csv"]
+source = "Causes of PM2.5 by city, every study side by side (schema in airhealth/causes.py). APnA rows: UrbanEmissions.Info (Guttikunda SK, Nishadh KA, Jawahar P), Zenodo record 6919069, CC BY 4.0, CAMx shares of annual PM2.5 by source, 49 airsheds. Base years from the APnA batch reports (urbanemissions.info/india-apna)."
+url = "https://zenodo.org/records/6919069"
+page = "https://www.urbanemissions.info/india-apna"
+locator = "One row per city x study x season x size fraction x source; each row's own `locator` column gives the file, column and report page it was read from. APnA 2015 base year (2017 batch): program booklet, Nov 2017, PDF p. 2 and the table on p. 6 headed 'in 2015' (https://urbanemissions.info/wp-content/uploads/apna/docs/apna_program_summary_booklet.pdf). APnA 2018 base year (2019 batch): summary report, July 2019, PDF p. 9 and Table 3 on p. 15 (https://urbanemissions.info/wp-content/uploads/apna/docs/2019-07-APnA30city_summary_report.pdf). Methods paper: doi:10.1016/j.uclim.2018.11.005."
+retrieved = "2026-11-12"
+licence = "APnA: CC BY 4.0. Attribute UrbanEmissions.info and the Zenodo record. Other studies in later tasks carry their own licences in their rows."
+method = "derived"
+script = "scripts/build_causes.py"
+notes = """
+Built from apna_source_apportionment.csv plus causes_transcribed.csv (plus McDuffie 2021 in a later task). APnA: A transport, B residential,
+C industry, D dust, E waste_burning, F dg_sets, G brick_kilns, H natural (sea salt; blank H = no row), I outside. Annual, CAMx, airshed box,
+covers = all; study id apna_<base year>. The CSV's study_uear is the report batch (2017, 2019), not the model year: base year 2015 for the
+2017 batch and 2018 for the 2019 batch, read in the batch reports (locator). 49 cities (Varanasi is not in the APnA file; Delhi has no
+airshed). The 2017 booklet's printed table differs from the Zenodo CSV by 0.1 point in places (Chennai transport 24.6 vs 24.5); the CSV
+is used. Emission shares and concentration shares never share a group (metric column).
+"""
+
+["causes_transcribed.csv"]
+source = "City source-apportionment studies transcribed by hand from their reports, one row per source (schema in airhealth/causes.py). Header only until the transcription tasks add rows."
+url = "https://github.com/dogluk/air-apocalypse"
+locator = "Each row's own `locator` column: the report, table or figure and page."
+retrieved = "2026-11-12"
+licence = "Reports are not redistributed; only the figures, with citation, are tabulated (facts). Each study's licence is stated in its rows."
+method = "transcribed"
+notes = """
+Same columns as causes.csv. Read by scripts/build_causes.py. No rows yet.
 """
