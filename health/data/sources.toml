@@ -662,7 +662,7 @@ licence = "APnA: CC BY 4.0. Attribute UrbanEmissions.info and the Zenodo record.
 method = "derived"
 script = "scripts/build_causes.py"
 notes = """
-Built from apna_source_apportionment.csv plus causes_transcribed.csv (plus McDuffie 2021 in a later task). APnA: A transport, B residential,
+Built from apna_source_apportionment.csv plus causes_transcribed.csv plus McDuffie 2021 (study mcduffie2021: annual 2017 GEOS-Chem shares for 9 of the 50 cities, one row per McDuffie sector, boundary municipal = the paper's T3 urban extent; sector map and reasons in scripts/build_causes.py; the 20 sector shares sum to 100 +/- 0.2, so there is no remainder row). APnA: A transport, B residential,
 C industry, D dust, E waste_burning, F dg_sets, G brick_kilns, H natural (sea salt; blank H = no row), I outside. Annual, CAMx, airshed box,
 covers = all; study id apna_<base year>. The CSV's study_uear is the report batch (2017, 2019), not the model year: base year 2015 for the
 2017 batch and 2018 for the 2019 batch, read in the batch reports (locator). 49 cities (Varanasi is not in the APnA file; Delhi has no
@@ -679,4 +679,20 @@ licence = "Reports are not redistributed; only the figures, with citation, are t
 method = "transcribed"
 notes = """
 Same columns as causes.csv. Read by scripts/build_causes.py. No rows yet.
+"""
+
+["mcduffie2021_supp_data_1.xlsx"]
+source = "McDuffie EE, Martin RV, Spadaro JV, Burnett R, Smith SJ, et al. Source sector and fuel contributions to ambient PM2.5 and attributable mortality across multiple spatial scales. Nature Communications 12:3594 (2021). Supplementary Data 1 (MOESM4): PM2.5 exposure estimates and sectoral source contributions for 21 regions, 204 countries and 200 sub-national areas, 2017."
+url = "https://static-content.springer.com/esm/art%3A10.1038%2Fs41467-021-23853-y/MediaObjects/41467_2021_23853_MOESM4_ESM.xlsx"
+page = "https://www.nature.com/articles/s41467-021-23853-y"
+locator = "One sheet; header row 'Country Name'; India's sub-national areas sit between the 'India' and 'Nepal' rows; column B population-weighted annual mean PM2.5, columns C-V the 20 sector shares (%)."
+retrieved = "2026-11-12"
+sha256 = "81a563fe2662bb81931efa0bcab204c7818410a80cd3c41f3e65c3b5ab7aed13"
+licence = "CC BY 4.0 (open-access article). Not committed to the repo: scripts/build_causes.py downloads it to a folder outside the repo."
+method = "downloaded"
+script = "scripts/build_causes.py"
+notes = """
+MOESM5 is Data File 2 (fuel-type contributions) and MOESM6 Data File 3 (2019 exposure); only MOESM4 is used. 17 India areas: 9 are
+among the 50 cities (Jaipur, Ahmedabad, Kanpur, Kolkata, Mumbai, Pune, Hyderabad, Vijayawada, Coimbatore); dropped and counted by the
+build: Belgaum, Hindupur, Jalna, Kozhikode, Malegaon, Parbhani, Singrauli, Sitapur. Delhi is not in the file as a sub-national area.
 """

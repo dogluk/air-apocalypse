@@ -70,3 +70,15 @@ def test_validate_names_the_bad_group():
                                                                    metric="emission_share")]))
     with pytest.raises(ValueError, match="columns"):
         causes.validate(ok.drop(columns=["url"]))
+
+
+# Kanpur, McDuffie 2021 Supplementary Data 1: Residential Coal 1.6 + Biofuel 24.5 + Other 2.2, read in the xlsx
+RESIDENTIAL_KANPUR = 28.3
+
+
+def test_mcduffie_rows():
+    m = causes.table().query("study == 'mcduffie2021'")
+    assert {"Kanpur", "Mumbai", "Kolkata"} <= set(m.city)
+    kanpur = m[m.city == "Kanpur"].groupby("source_harmonised").share_pct.sum()
+    assert kanpur["residential"] == pytest.approx(RESIDENTIAL_KANPUR, abs=0.05)
+    assert (m.method == "GEOS-Chem").all() and (m.year_sampled == 2017).all()
