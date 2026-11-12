@@ -190,6 +190,31 @@ Srinagar appears in 2025 only, with under 75% of hours, so it has a cpcb_cities 
 Dhanbad's stations only (Bokaro has none). Many new city-years fall under the 75% cut and are dropped; the script prints them.
 """
 
+["monthly_cpcb.csv"]
+source = "Central Pollution Control Board continuous ambient air quality monitoring stations (CAAQMS), 15-minute data compiled by Vonter/india-cpcb-aqi (parquet releases 2016-2025), as downloaded by diwali/download.sh."
+url = "https://github.com/Vonter/india-cpcb-aqi/releases"
+locator = "diwali/data/raw/cpcb-air-quality-YYYY.parquet (git-ignored), columns City, State, Station ID, Timestamp, 'PM2.5 (µg/m³)', 'PM10 (µg/m³)'; cities and their CPCB city names from the CITIES table in scripts/build_exposure_cpcb.py (cities.csv, column cpcb_cities)."
+retrieved = "2026-11-12"
+licence = "ODbL 1.0 (the compilation); the derived table is shared under ODbL 1.0."
+method = "derived"
+script = "scripts/build_exposure_cpcb.py"
+notes = """
+Columns: city, year, month (1-12), pm25 (mean over the month's hours of the median across the city's stations of
+station-hour means, µg/m³), hours_share (share of the month's hours with a city value). Built in the same pass as
+exposure_cpcb.csv: same QC (the Diwali track's, applied to the whole year), same hourly city medians, same cities and
+CPCB names, timestamps IST wall-clock. Hours in a month are the calendar's (February has 29 days in 2016, 2020, 2024).
+A month-year is kept only if at least 75% of its hours have a value, the annual table's rule applied per month.
+Years 2016-2025, every city with a monitor. Because the rule is per month, a city can have some months of a year the annual
+table drops (and the reverse: a city-year kept annually may miss a monsoon month).
+City-months present in the data but dropped for coverage, per city (counting months of city-years the annual table also
+drops; months of years absent from the files are not counted): Agartala 8, Agra 4, Ahmedabad 4, Amritsar 11,
+Asansol-Durgapur 7, Bengaluru 3, Bhopal 3, Bhubaneswar 1, Chandigarh 2, Chennai 2, Coimbatore 27, Dehradun 10,
+Dhanbad-Bokaro 22, Gaya 15, Guwahati 1, Gwalior 1, Hubli-Dharwad 20, Indore 4, Jaipur 3, Jodhpur 11, Kanpur 5, Kochi 23,
+Kolkata 4, Kota 3, Lucknow 2, Ludhiana 6, Madurai 1, Mumbai 2, Nagpur 24, Nashik 15, Patna 15, Puducherry 2, Pune 11,
+Raipur-Durg-Bhilai 11, Srinagar 7, Surat 14, Thiruvananthapuram 9, Tiruchirappalli 9, Vijayawada 24, Visakhapatnam 11.
+Delhi has none.
+"""
+
 ["cities.csv"]
 source = "Office of the Registrar General & Census Commissioner, India. Census of India 2011, table A-04 (I): Towns and urban agglomerations classified by population size class in 2011 with variation between 1901 and 2011 - Class I. Airshed names: APnA 50 airsheds (apna_source_apportionment.csv), UrbanEmissions.info, CC BY 4.0."
 url = "https://censusindia.gov.in/nada/index.php/catalog/42876/download/46544"

@@ -16,6 +16,10 @@ readings are averaged to hours; the city value for an hour is the median across 
 the annual mean is the mean of those hourly medians. Timestamps are read as IST wall-clock
 (see diwali/extract.py). A city-year is kept only if at least 75% of its hours have a value.
 
+monthly_cpcb.csv: city, year, month, pm25, hours_share, from the same hourly city values grouped by
+calendar month (the month's real number of hours, so February has 29 days in 2016, 2020, 2024). A
+month-year is kept only if at least 75% of that month's hours have a value.
+
 exposure_cpcb.csv: city, state, year, pm25, stations (stations with any valid hour that
 year), hours_share (share of the year's hours with a city value).
 
@@ -28,6 +32,7 @@ mean over those districts. apna_airshed is the airshed's name in the APnA table 
 cpcb_cities the CPCB city names whose stations make up the city (empty if there are none).
 census_name and cpcb_cities are ';'-separated.
 """
+import calendar
 import re
 import sys
 from pathlib import Path
@@ -206,7 +211,7 @@ def main() -> None:
     con = duckdb.connect()
     check_cpcb_names(con)
     con.register("cmap", pd.DataFrame({"cpcb_city": list(cpcb_names), "airshed_city": list(cpcb_names.values())}))
-    rows = []
+    rows, months = [], []
     for path in sorted((DIWALI / "data" / "raw").glob("cpcb-air-quality-*.parquet")):
         year = int(path.stem.rsplit("-", 1)[1])
         first, last = con.execute(f"""SELECT min(timezone('UTC', "Timestamp")),
@@ -214,11 +219,19 @@ def main() -> None:
         assert (first.month, first.day, last.month, last.day) == (1, 1, 12, 31), (path, first, last)
         con.execute(QC_SQL.format(path=path, cities=city_list, year=year))
         hours_in_year = pd.Timestamp(year=year, month=12, day=31).day_of_year * 24
+        con.execute("""
+            CREATE OR REPLACE TABLE valid AS
+            SELECT m.airshed_city AS city, h.station_id, h.hour, h.pm25
+            FROM hourly h JOIN cmap m ON h.city = m.cpcb_city WHERE h.pm25 IS NOT NULL;
+            CREATE OR REPLACE TABLE cityhour AS
+            SELECT city, hour, median(pm25) AS pm25 FROM valid GROUP BY 1, 2""")
+        mo = con.execute("""SELECT city, month(hour) AS month, avg(pm25) AS pm25, count(*) AS n
+                            FROM cityhour GROUP BY 1, 2""").df()
+        mo["year"] = year
+        mo["hours_share"] = mo.n / [calendar.monthrange(year, m)[1] * 24 for m in mo.month]
+        months.append(mo.drop(columns="n"))
         df = con.execute(f"""
-            WITH valid AS (SELECT m.airshed_city AS city, h.station_id, h.hour, h.pm25
-                           FROM hourly h JOIN cmap m ON h.city = m.cpcb_city WHERE h.pm25 IS NOT NULL),
-            cityhour AS (SELECT city, hour, median(pm25) AS pm25 FROM valid GROUP BY 1, 2),
-            annual AS (SELECT city, avg(pm25) AS pm25, count(*) / {hours_in_year} AS hours_share
+            WITH annual AS (SELECT city, avg(pm25) AS pm25, count(*) / {hours_in_year} AS hours_share
                        FROM cityhour GROUP BY 1),
             meta AS (SELECT city, count(DISTINCT station_id) AS stations FROM valid GROUP BY 1)
             SELECT a.city, a.pm25, a.hours_share, m.stations
@@ -237,6 +250,15 @@ def main() -> None:
     out["hours_share"] = out.hours_share.round(3)
     out = out[["city", "state", "year", "pm25", "stations", "hours_share"]].sort_values(["city", "year"])
     out.to_csv(DATA / "exposure_cpcb.csv", index=False)
+
+    monthly = pd.concat(months)
+    mdrop = monthly[monthly.hours_share < MIN_HOURS_SHARE]
+    print("city-months dropped for coverage:", mdrop.groupby("city").size().to_dict())
+    monthly = monthly[monthly.hours_share >= MIN_HOURS_SHARE].copy()
+    monthly["pm25"] = monthly.pm25.round(1)
+    monthly["hours_share"] = monthly.hours_share.round(3)
+    monthly[["city", "year", "month", "pm25", "hours_share"]].sort_values(
+        ["city", "year", "month"]).to_csv(DATA / "monthly_cpcb.csv", index=False)
 
     census = census_populations(xlsx)
     cities = pd.DataFrame([{
