@@ -271,3 +271,50 @@ def test_run_takes_sources_from_the_file_or_the_flag(capsys, tmp_path):
     args = ("--json", "run", str(f), "--n", "50", "--curves", "gemm_ncd_lri")
     assert json.loads(run(capsys, *args)[1])["sources"]["deaths"] == "unwpp"
     assert json.loads(run(capsys, *args, "--deaths", "srs")[1])["sources"]["deaths"] == "srs"
+
+
+def test_causes_command_shows_every_study(capsys):
+    from airhealth import causes
+    code, out, _ = run(capsys, "causes", "Kolkata")
+    assert code == 0
+    for study in causes.studies("Kolkata"):
+        assert study in out
+    assert "outside" in out and "transport" in out
+
+
+def test_causes_lists_cities(capsys):
+    code, out, _ = run(capsys, "causes")
+    assert code == 0 and "Delhi" in out
+    lines = [ln for ln in out.splitlines() if "stud" in ln and not ln.startswith("airhealth")]
+    assert len(lines) == 50
+    counts = [int(ln.split()[-2]) for ln in lines]
+    assert counts == sorted(counts, reverse=True)
+
+
+def test_causes_delhi_default_hides_partial_columns_and_lists_stubble(capsys):
+    code, out, _ = run(capsys, "causes", "Delhi")
+    assert code == 0
+    assert "agri_burning, Oct-Nov:" in out and "kulkarni2020 20" in out
+    assert "kulkarni2020" not in out.split("Studies:")[0].split("partial estimate")[0]
+    _, full, _ = run(capsys, "causes", "Delhi", "--all")
+    assert "[P]" in full and "kulkarni2020" in full.split("Studies:")[0]
+
+
+def test_causes_filters_and_marks(capsys):
+    code, out, _ = run(capsys, "causes", "Kanpur", "--study", "iitk_kanpur2022_pmf", "--season", "winter")
+    assert code == 0 and "summer" not in out and "mcduffie" not in out
+    _, out, _ = run(capsys, "causes", "Kanpur", "--all")
+    assert "press only" in out
+
+
+def test_causes_unknown_city_is_one_line(capsys):
+    code, out, err = run(capsys, "causes", "Kanpurr")
+    assert code == 1 and out == "" and "Kanpur" in err and "Traceback" not in err
+    assert len(err.strip().splitlines()) == 1
+    code, _, err = run(capsys, "causes", "Delhi", "--study", "nope")
+    assert code == 1 and "nope" in err
+
+
+def test_list_inputs_shows_causes(capsys):
+    _, out, _ = run(capsys, "list", "inputs")
+    assert "causes: Causes of PM2.5 by city" in out

@@ -479,3 +479,108 @@ def run_json(run: Run) -> dict:
         rows=run_rows(run), across_curve_spread=across_curve_spread(run),
         fallback_states=run.fallback_states, unavailable=run.unavailable,
         footer=run_footer(run))
+
+
+# ---- airhealth causes: every study's split of a city's PM2.5, side by side ----
+
+_MON = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+
+def months_text(months: str) -> str:
+    """'10,11' -> 'Oct-Nov'; '1-12' -> 'annual'; '12,1,2' -> 'Dec-Feb'; gaps are listed."""
+    if months == "1-12":
+        return "annual"
+    ms = [int(m) for m in str(months).split(",")]
+    if all((b - a) % 12 == 1 for a, b in zip(ms, ms[1:])):
+        return _MON[ms[0] - 1] if len(ms) == 1 else f"{_MON[ms[0] - 1]}-{_MON[ms[-1] - 1]}"
+    return ",".join(_MON[m - 1] for m in ms)
+
+
+def _pct(x: float) -> str:
+    return f"{x:.1f}".rstrip("0").rstrip(".")
+
+
+def _groups(df):
+    """One entry per (study, season): its rows, in the order studies() gives (APnA first)."""
+    order = list(dict.fromkeys(df.study))
+    order.sort(key=lambda s: (not s.startswith("apna"), s))
+    out = []
+    for s in order:
+        sub = df[df.study == s]
+        for season in sorted(sub.season.unique(), key=lambda x: (x != "annual", x)):
+            out.append((s, season, sub[sub.season == season]))
+    return out
+
+
+def _evidence(keys) -> str:
+    return ", ".join(sorted(set(keys))) + (" (press only)" if set(keys) == {"S"} else "")
+
+
+def _cols_ruled(head, rows, header_rows: int) -> list[str]:
+    """_columns with the rule moved under `header_rows` extra header lines."""
+    out = _columns(head, rows)
+    return [out[0], *out[2:2 + header_rows], out[1], *out[2 + header_rows:]]
+
+
+def _year(y) -> str:
+    return "year not stated" if y != y else f"sampled {int(y)}"
+
+
+def causes_table(city: str, df, show_all: bool, harmonised: tuple) -> str:
+    """The city's causes rows as one table: a column per (study, season) group whose
+    covers = all (every group with show_all), a row per harmonised cause, a total row."""
+    groups = _groups(df)
+    whole = [g for g in groups if set(g[2].covers) == {"all"}]
+    partial = [g for g in groups if g not in whole]
+    cols = groups if show_all else whole
+    def split(study):       # a long id wraps at its last underscore: arai_teri_delhi2018 / receptor
+        a, _, b = study.rpartition("_")
+        return (a, b) if len(study) > 14 and a else (study, "")
+    head = ("", *(split(s)[0] for s, _, _ in cols))
+    second = ("", *(split(s)[1] for s, _, _ in cols))
+    season = ("season", *(f"{se}" + ("".join(
+        f" [{m}]" for m, on in (("P", set(g.covers) != {"all"}),
+                               ("E", "emission_share" in set(g.metric))) if on))
+                         for _, se, g in cols))
+    present = [c for c in harmonised if c in set(df.source_harmonised)]
+    rows = [second, season]
+    for c in present:
+        rows.append((c, *(_pct(g[g.source_harmonised == c].share_pct.sum())
+                          if (g.source_harmonised == c).any() else "—" for _, _, g in cols)))
+    rows.append(("total", *(_pct(g.share_pct.sum()) if set(g.covers) == {"all"} else "—"
+                            for _, _, g in cols)))
+    lines = [f"{city}: PM2.5 by source, each column one study and season; % of the study's own "
+             f"total, — = not reported",
+             *(_cols_ruled(head, rows, 2) if cols else ["(no complete split matches)"])]
+    if cols and any("emission_share" in set(g.metric) for _, _, g in cols):
+        lines.append("[E] = share of emissions, not of PM2.5 concentration; do not compare it with "
+                     "the other columns")
+    if show_all and partial:
+        lines.append("[P] = partial: one piece of a split (e.g. stubble only); the total is not "
+                     "shown and it can overlap an `outside` row")
+    if partial and not show_all:
+        lines.append(f"{len(partial)} partial estimate(s) (one piece of a split, e.g. stubble only; "
+                     f"they can overlap an `outside` row) are not columns; --all shows them. Listed here:")
+        listed: dict[tuple, list[str]] = defaultdict(list)
+        for s, se, g in partial:
+            for c in harmonised:
+                sel = g[g.source_harmonised == c]
+                if len(sel):
+                    listed[(c, months_text(sel.months.iloc[0]))].append(f"{s} {_pct(sel.share_pct.sum())}")
+        for (c, m), items in listed.items():
+            lines.append(f"  {c}, {m}: " + ", ".join(items))
+    lines.append("")
+    lines.append("Studies:")
+    for s in dict.fromkeys(g[0] for g in groups):
+        r = df[df.study == s]
+        uniq = lambda col: ", ".join(dict.fromkeys(str(v) for v in r[col]))  # noqa: E731
+        lines.append(f"  {s}: {uniq('method')}, {', '.join(dict.fromkeys(_year(y) for y in r.year_sampled))}, boundary "
+                     f"{uniq('boundary')}, evidence {_evidence(r.evidence_key)}")
+        lines.append(f"    {uniq('url')}")
+    return "\n".join(lines)
+
+
+def causes_cities(counts: list[tuple[str, int]]) -> str:
+    w = max(len(c) for c, _ in counts)
+    return "\n".join([*(f"{c.ljust(w)}  {n} {'study' if n == 1 else 'studies'}" for c, n in counts),
+                      "", "airhealth causes CITY shows each study's split of a city's PM2.5."])

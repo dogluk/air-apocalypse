@@ -5,6 +5,7 @@
   airhealth burden PLACE [--map M] [--counterfactual C] [--curves a,b] [--use input=source]
   airhealth chart PLACE [PLACE ...] [--map M] [--age A] [--out FILE]
   airhealth run FILE [--map M] [--curves a,b] [--n N] [--seed S] [--charts DIR] [--use ...]
+  airhealth causes [CITY] [--study ID] [--season S] [--all]   every study's split of a city's PM2.5
   airhealth dashboard [--port 8765] [--no-open]     a local page over the same functions
 
 --use input=source picks a source for population, death_rates or deaths (airhealth list
@@ -23,7 +24,7 @@ import numpy as np
 
 from pathlib import Path
 
-from . import baseline, curves, exposure, intervention, paths, places, provenance, report, simulate
+from . import baseline, causes, curves, exposure, intervention, paths, places, provenance, report, simulate
 from .impact import Change, steady_state
 from .inputs import DEMOGRAPHIC, REGISTRY, Choice
 from .places import KINDS
@@ -285,6 +286,36 @@ def cmd_list(args) -> None:
         print(f"{r['name']}  [{extra}]\n  {r['label']}\n  Source: {r['source']}\n")
 
 
+def cmd_causes(args) -> None:
+    if args.city is None:
+        counts = {c: len(causes.studies(c)) for c in causes.known_cities()}
+        counts = sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))
+        if args.json:
+            print(json.dumps([dict(city=c, studies=n) for c, n in counts], indent=2))
+        else:
+            print(report.causes_cities(counts))
+        return
+    try:
+        city = places.resolve(args.city, kind="city").name
+    except KeyError:
+        raise ValueError(f"unknown city {args.city!r}{places._suggest(args.city.partition(',')[0])}") from None
+    if city not in causes.known_cities():
+        raise ValueError(f"{args.city!r} is not one of the cities in data/cities.csv")
+    df = causes.for_city(city, args.study)
+    if args.study and df.empty:
+        raise ValueError(f"{city} has no study {args.study!r}; it has: {', '.join(causes.studies(city))}")
+    if args.season:
+        have = sorted(df.season.unique())
+        df = df[df.season == args.season]
+        if df.empty:
+            raise ValueError(f"no {args.season!r} season for {city}"
+                             + (f" in {args.study}" if args.study else "") + f"; seasons: {', '.join(have)}")
+    if args.json:
+        print(json.dumps(df.to_dict("records"), indent=2, default=float, ensure_ascii=False))
+    else:
+        print(report.causes_table(city, df, args.all, causes.HARMONISED))
+
+
 def cmd_dashboard(args) -> None:
     from . import dashboard  # http.server only when asked for
     dashboard.serve(port=args.port, open_browser=not args.no_open)
@@ -355,6 +386,20 @@ def _parser() -> argparse.ArgumentParser:
     d.add_argument("--port", type=int, default=8765)
     d.add_argument("--no-open", action="store_true", help="do not open a browser tab")
     d.set_defaults(func=cmd_dashboard)
+
+    ca = sub.add_parser("causes", parents=[shared], help="what a city's PM2.5 is made of, every study side by side",
+                        description="Every study's split of a city's PM2.5, one column per study and season, "
+                        "one row per source (data/causes.csv). Shares are % of the study's own total; studies "
+                        "differ in method, year and boundary (named below the table), so read them side by side, "
+                        "not as an average. With no city: each city and how many studies it has.")
+    ca.add_argument("city", nargs="?", help="one of the fifty cities (omit to list them)")
+    ca.add_argument("--study", help="only this study id")
+    ca.add_argument("--season", help="only this season (annual, winter, summer, monsoon, post-monsoon)")
+    ca.add_argument("--all", action="store_true",
+                    help="show every study-season as a column. By default only complete splits "
+                    "(covers = all) are columns, and partial estimates such as stubble-only shares are "
+                    "counted and listed under the table, to keep it readable")
+    ca.set_defaults(func=cmd_causes)
 
     ls = sub.add_parser("list", parents=[shared], help="curves, maps or places, each with its source")
     ls.add_argument("what", choices=("curves", "maps", "places", "inputs"))

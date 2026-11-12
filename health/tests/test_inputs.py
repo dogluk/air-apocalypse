@@ -105,3 +105,7 @@ def test_deaths_choice_never_touches_life_expectancy():
     for d in ("model", "unwpp"):
         assert lifetable.e0(baseline.load("Bihar", 2019, sources=Sources(deaths=d)).mx) == base
     assert len(AGE_STARTS) == len(baseline.load("Bihar", 2019, sources=UN).death_factor)
+
+
+def test_registry_has_causes():
+    assert REGISTRY["causes"].default == "apna"

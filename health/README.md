@@ -105,6 +105,32 @@ district. The district needs `--kind district` (`airhealth place Patna --kind di
 bare name is the state or union territory, and the city (airshed) needs `--kind city`.
 Intervention files take bare names, so they get these defaults.
 
+### `causes`: what a city's PM2.5 is made of, every study side by side
+
+```
+$ airhealth causes Kanpur
+Kanpur: PM2.5 by source, each column one study and season; % of the study's own total, — = not reported
+                      apna_2015  iitk_kanpur2022  iitk_kanpur2022  mcduffie2021
+                                             pmf              pmf
+season                   annual           summer           winter        annual
+--------------------  ---------  ---------------  ---------------  ------------
+transport                  13.7              7.1             29.9           7.9
+residential                33.8                —                —          28.3
+...
+outside                    22.5                —                —             —
+other                         —                —                —          19.5
+total                      99.5              100              100           100
+1 partial estimate(s) (...) are not columns; --all shows them. Listed here:
+  agri_burning, Oct-Nov: nagar_sharma2022 21
+
+Studies:
+  apna_2015: CAMx, sampled 2015, boundary airshed_box, evidence O
+    https://zenodo.org/records/6919069
+  ...
+```
+
+One column per study and season, one row per source (the harmonised names, in a fixed order), a total row, and a footer naming each study's method, year, boundary, URL and evidence key (`S` rows are marked "press only"). By default only complete splits (`covers = all`) are columns; partial estimates such as stubble-only shares are counted and listed under the table so Delhi's twenty-odd groups stay readable, and `--all` makes them columns too (marked `[P]`; emission shares are marked `[E]`). `--study ID` and `--season S` filter. `airhealth causes` alone lists the fifty cities and how many studies each has. `list inputs` shows the entry; choosing a split per run comes later.
+
 ### `compare`: one place, one change, every curve
 
 Shown above. `--from` sets the starting level for every district (the map then supplies
@@ -371,7 +397,7 @@ in 2019, 97.5 in 2023, 94.3 in 2025.
   six small union territories (Andaman & Nicobar, Chandigarh, Dadra & Nagar Haveli, Daman &
   Diu, Lakshadweep, Puducherry), used for each, as `gbd2019` does. India is the states
   weighted by the tool's population: 53.97 for 2023, against IHME's own 54.05.
-- `cpcb`: the Central Pollution Control Board's monitors, for the fifty cities only (those with a CPCB station).
+- `cpcb`: the Central Pollution Control Board's monitors, for the 43 cities that have a CPCB station (not Aurangabad, Jamshedpur, Panaji, Rajkot, Shimla, Vadodara or Ranchi, which fall back to `aqli`).
 
 Keeping dust moves India from 41 to 50: dust explains under a fifth of the gap to GBD's 91.
 The rest is concentrated in the northern plain (Uttar Pradesh 56 against 183); in Kerala
