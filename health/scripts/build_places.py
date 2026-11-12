@@ -65,6 +65,11 @@ CITY_ALIASES = {
     "Chennai": ["Madras"],
     "Ahmedabad": ["Ahmadabad"],
     "Pune": ["Poona"],
+    "Allahabad": ["Prayagraj"],
+    "Hubli-Dharwad": ["Dharwad-Hubli", "Hubballi-Dharwad"],
+    "Panaji": ["Panjim"],
+    "Tiruchirappalli": ["Trichy", "Tiruchirapalli"],
+    "Visakhapatnam": ["Vizag"],
 }
 
 

@@ -1,12 +1,51 @@
-city,state,population,census_name,aqli_units,acag_units
-Delhi,Delhi,16349831,Delhi  U.A.,NCT of Delhi,Central;East;New Delhi;North;North East;North West;Shahdara;South;South East;South West;West
-Mumbai,Maharashtra,18394912,Greater Mumbai U.A.,Mumbai City;Mumbai Suburban,Mumbai;Mumbai Suburban
-Kolkata,West Bengal,14057991,Kolkata U.A.,Kolkata,Kolkata
-Bengaluru,Karnataka,8520435,Bruhat Bangalore U.A.,Bangalore,Bangalore
-Chennai,Tamil Nadu,8653521,Chennai U.A. $,Chennai,Chennai
-Hyderabad,Telangana,7677018,Hyderabad U.A.  @,Hyderabad,Hyderabad
-Ahmedabad,Gujarat,6357693,Ahmadabad U.A.,Ahmadabad,Ahmadabad
-Pune,Maharashtra,5057709,Pune U.A.,Pune,Pune
-Surat,Gujarat,4591246,Surat U.A.,Surat,Surat
-Jaipur,Rajasthan,3046163,Jaipur *,Jaipur,Jaipur
-Lucknow,Uttar Pradesh,2902920,Lucknow U.A.,Lucknow,Lucknow
+city,state,population,census_name,aqli_units,acag_units,apna_airshed,cpcb_cities
+Delhi,Delhi,16349831,Delhi  U.A.,NCT of Delhi,Central;East;New Delhi;North;North East;North West;Shahdara;South;South East;South West;West,,Delhi
+Mumbai,Maharashtra,18394912,Greater Mumbai U.A.,Mumbai City;Mumbai Suburban,Mumbai;Mumbai Suburban,Mumbai,Mumbai
+Kolkata,West Bengal,14057991,Kolkata U.A.,Kolkata,Kolkata,Kolkata-Howarh,Kolkata
+Bengaluru,Karnataka,8520435,Bruhat Bangalore U.A.,Bangalore,Bangalore,Bengaluru,Bengaluru
+Chennai,Tamil Nadu,8653521,Chennai U.A. $,Chennai,Chennai,Chennai,Chennai
+Hyderabad,Telangana,7677018,Hyderabad U.A.  @,Hyderabad,Hyderabad,Hyderabad,Hyderabad
+Ahmedabad,Gujarat,6357693,Ahmadabad U.A.,Ahmadabad,Ahmadabad,Ahmedabad-Gandhi-Nagar,Ahmedabad
+Pune,Maharashtra,5057709,Pune U.A.,Pune,Pune,Pune-Pimpri-Chinchwad,Pune
+Surat,Gujarat,4591246,Surat U.A.,Surat,Surat,Surat,Surat
+Jaipur,Rajasthan,3046163,Jaipur *,Jaipur,Jaipur,Jaipur,Jaipur
+Lucknow,Uttar Pradesh,2902920,Lucknow U.A.,Lucknow,Lucknow,Lucknow,Lucknow
+Agartala,Tripura,400004,Agartala #,West Tripura,West Tripura,Agartala,Agartala
+Allahabad,Uttar Pradesh,1212395,Allahabad U.A.,Prayagraj,Allahabad,Allahabad,Prayagraj
+Asansol-Durgapur,West Bengal,1824404,Asansol U.A.!;Durgapur U.A.,Barddhaman,Paschim Barddhaman,Asansol-Durgapur,Asansol;Durgapur
+Aurangabad,Maharashtra,1193167,Aurangabad U.A.,Aurangabad,Aurangabad,Aurangabad,
+Hubli-Dharwad,Karnataka,943788,Hubli-Dharwad,Dharwad,Dharwad,Dharwad-Hubli,Hubballi;Dharwad
+Dhanbad-Bokaro,Jharkhand,1760533,Dhanbad U.A.;Bokaro Steel City U.A.,Dhanbad;Bokaro,Dhanbad;Bokaro,Dhanbad-Bokaro,Dhanbad
+Gaya,Bihar,475987,Gaya U.A.,Gaya,Gaya,Gaya,Gaya
+Guwahati,Assam,962334,Guwahati U.A.,Kamrup Metropolitan,Kamrup Metropolitan,Guwahati-Dispur,Guwahati
+Gwalior,Madhya Pradesh,1102884,Gwalior U.A.,Gwalior,Gwalior,Gwalior,Gwalior
+Jamshedpur,Jharkhand,1339438,Jamshedpur U.A.,Purbi Singhbhum,Purbi Singhbhum,Jamshedpur,
+Jodhpur,Rajasthan,1138300,Jodhpur U.A.,Jodhpur,Jodhpur,Jodhpur,Jodhpur
+Kota,Rajasthan,1001694,Kota*,Kota,Kota,Kota,Kota
+Madurai,Tamil Nadu,1465625,Madurai U.A. $,Madurai,Madurai,Madurai,Madurai
+Nashik,Maharashtra,1561809,Nashik U.A.,Nashik,Nashik,Nashik,Nashik
+Panaji,Goa,322569,Panaji U.A;Mormugao U.A.;Margao U.A.,North Goa;South Goa,North Goa;South Goa,Panjim-Vasco-Margao,
+Puducherry,Puducherry,830845,Puducherry  U.A.;Cuddalore,Puducherry,Puducherry,Puducherry-Cuddalore,Puducherry;Cuddalore
+Rajkot,Gujarat,1390640,Rajkot U.A.,Rajkot,Rajkot,Rajkot,
+Shimla,Himachal Pradesh,171640,Shimla U.A.,Shimla,Shimla,Shimla,
+Srinagar,Jammu & Kashmir,1264202,Srinagar U.A.,Srinagar,Srinagar,Srinagar,
+Thiruvananthapuram,Kerala,1679754,Thiruvananthapuram U.A.,Thiruvananthapuram,Thiruvananthapuram,Thiruvananthapuram,Thiruvananthapuram
+Tiruchirappalli,Tamil Nadu,1022518,Tiruchirappalli U.A. $,Tiruchirappalli,Tiruchirappalli,Tiruchirapalli,Tiruchirappalli
+Vadodara,Gujarat,1822221,Vadodara U.A.,Vadodara,Vadodara,Vadodara,
+Vijayawada,Andhra Pradesh,2311941,Vijayawada U.A.@;Guntur U.A.;Tenali,Krishna;Guntur,Krishna;Guntur,Vijayawada-Guntur-Tenali,Vijayawada
+Visakhapatnam,Andhra Pradesh,1728128,Visakhapatnam @,Visakhapatnam,Visakhapatnam,Visakhapatnam,Visakhapatnam
+Agra,Uttar Pradesh,1760285,Agra U.A.,Agra,Agra,Agra,Agra
+Amritsar,Punjab,1183549,Amritsar U.A.,Amritsar;Tarn Taran,Amritsar;Tarn Taran,Amritsar-Tarn Taran,Amritsar
+Bhopal,Madhya Pradesh,1886100,Bhopal U.A.,Bhopal,Bhopal,Bhopal,Bhopal
+Bhubaneswar,Odisha,885363,Bhubaneswar  U.A.,Khordha,Khordha,Bhubaneswar,Bhubaneswar
+Chandigarh,Chandigarh,1622266,Chandigarh  U.A.;Patiala U.A.;Ambala  U.A.,Chandigarh,Chandigarh,Chandigarh-Patiala-Ambala,Chandigarh;Patiala;Ambala
+Coimbatore,Tamil Nadu,2136916,Coimbatore U.A. $,Coimbatore,Coimbatore,Coimbatore,Coimbatore
+Dehradun,Uttarakhand,706124,Dehradun U.A. $,Dehradun,Dehradun,Dehradun,Dehradun
+Indore,Madhya Pradesh,2170295,Indore U.A.,Indore,Indore,Indore,Indore
+Kanpur,Uttar Pradesh,2920496,Kanpur U.A.,Kanpur Nagar,Kanpur Nagar,Kanpur,Kanpur
+Kochi,Kerala,2119724,Kochi U.A.,Ernakulam,Ernakulam,Kochi,Kochi
+Ludhiana,Punjab,1618879,Ludhiana,Ludhiana;Jalandhar,Ludhiana;Jalandhar,Ludhiana-Phillaur,Ludhiana
+Nagpur,Maharashtra,2497870,Nagpur U.A.,Nagpur,Nagpur,Nagpur,Nagpur
+Patna,Bihar,2049156,Patna U.A.,Patna,Patna,Patna,Patna
+Raipur-Durg-Bhilai,Chhattisgarh,2187780,Raipur U.A.;Durg-Bhilainagar U.A.,Raipur;Durg,Raipur;Durg,Raipur-Durg-Bhillai,Raipur;Bhilai
+Ranchi,Jharkhand,1126720,Ranchi U.A.,Ranchi,Ranchi,Ranchi,

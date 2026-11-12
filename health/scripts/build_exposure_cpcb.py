@@ -7,7 +7,8 @@ downloads (diwali/download.sh: github.com/Vonter/india-cpcb-aqi releases, ODbL).
 hold every station's 15-minute readings for whole calendar years (checked: 1 Jan 00:00 to
 31 Dec 23:45 in every year 2016-2025).
 
-Cities are those in diwali/config.py (CITIES, with their CPCB city names). Per station,
+Cities are the CITIES table below: Delhi plus the 49 APnA airsheds, each with its CPCB city
+names (none for airsheds CPCB has no station in). Per station,
 15-minute PM2.5 gets the Diwali track's QC (diwali/extract.py): readings >= 999 kept as 999
 only when the city's hourly median of unsaturated readings is >= 250, otherwise dropped;
 <= 0 dropped; runs of >= 8 identical values dropped; PM2.5 > 1.1 x PM10 dropped. Station
@@ -18,13 +19,16 @@ the annual mean is the mean of those hourly medians. Timestamps are read as IST 
 exposure_cpcb.csv: city, state, year, pm25, stations (stations with any valid hour that
 year), hours_share (share of the year's hours with a city value).
 
-cities.csv: city, state, population, census_name, aqli_units, acag_units. Population is the
-Census 2011 figure for the urban agglomeration (Jaipur: the city, which the census does not
-list as a UA), from Census table A-04 (I), downloaded here. aqli_units and acag_units name the
-district(s) holding the city core in each satellite map, ';'-separated; a satellite map's
-value for a city is the population-weighted mean over those districts.
+cities.csv: city, state, population, census_name, aqli_units, acag_units, apna_airshed,
+cpcb_cities. Population is the sum of the Census 2011 figures of the Class I entries (urban
+agglomerations, or the city where the census lists no UA) in census_name, from Census table
+A-04 (I), downloaded here. aqli_units and acag_units name the district(s) holding the city in
+each satellite map, ';'-separated; a satellite map's value for a city is the population-weighted
+mean over those districts. apna_airshed is the airshed's name in the APnA table (empty for Delhi);
+cpcb_cities the CPCB city names whose stations make up the city (empty if there are none).
+census_name and cpcb_cities are ';'-separated.
 """
-import importlib.util
+import re
 import sys
 from pathlib import Path
 
@@ -40,22 +44,84 @@ DIWALI = HEALTH.parent / "diwali"
 CENSUS = "https://censusindia.gov.in/nada/index.php/catalog/42876/download/46544"
 MIN_HOURS_SHARE = 0.75
 
-# City -> (Census A-04 (I) entry, AQLI gadm2 districts, geoBoundaries ADM2 districts)
+# City -> (state, Census A-04 (I) entries, AQLI gadm2 districts, geoBoundaries ADM2 districts,
+#          APnA airshed, CPCB city names). The first 11 are the original cities and keep their
+# values. The others are the other 39 APnA airsheds (Zenodo 6919069, data/apna_source_apportionment.csv).
+# state: the state of the city's first town. A satellite map's district units must lie in it, so an
+# airshed that crosses a state line (Chandigarh-Patiala-Ambala, Puducherry-Cuddalore) lists only the
+# units of its home state. Census entries are summed; a listed town that is not Class I is left out
+# (see sources.toml). cpcb_cities is empty where CPCB has no station in the airshed.
 CITIES = {
-    "Delhi": ("Delhi U.A.", ["NCT of Delhi"],
+    "Delhi": ("Delhi", ["Delhi U.A."], ["NCT of Delhi"],
               ["Central", "East", "New Delhi", "North", "North East", "North West", "Shahdara",
-               "South", "South East", "South West", "West"]),
-    "Mumbai": ("Greater Mumbai U.A.", ["Mumbai City", "Mumbai Suburban"], ["Mumbai", "Mumbai Suburban"]),
-    "Kolkata": ("Kolkata U.A.", ["Kolkata"], ["Kolkata"]),
-    "Bengaluru": ("Bruhat Bangalore U.A.", ["Bangalore"], ["Bangalore"]),
-    "Chennai": ("Chennai U.A.", ["Chennai"], ["Chennai"]),
-    "Hyderabad": ("Hyderabad U.A.", ["Hyderabad"], ["Hyderabad"]),
-    "Ahmedabad": ("Ahmadabad U.A.", ["Ahmadabad"], ["Ahmadabad"]),
-    "Pune": ("Pune U.A.", ["Pune"], ["Pune"]),
-    "Surat": ("Surat U.A.", ["Surat"], ["Surat"]),
-    "Jaipur": ("Jaipur", ["Jaipur"], ["Jaipur"]),
-    "Lucknow": ("Lucknow U.A.", ["Lucknow"], ["Lucknow"]),
+               "South", "South East", "South West", "West"], None, ["Delhi"]),
+    "Mumbai": ("Maharashtra", ["Greater Mumbai U.A."], ["Mumbai City", "Mumbai Suburban"],
+               ["Mumbai", "Mumbai Suburban"], "Mumbai", ["Mumbai"]),
+    "Kolkata": ("West Bengal", ["Kolkata U.A."], ["Kolkata"], ["Kolkata"], "Kolkata-Howarh", ["Kolkata"]),
+    "Bengaluru": ("Karnataka", ["Bruhat Bangalore U.A."], ["Bangalore"], ["Bangalore"], "Bengaluru", ["Bengaluru"]),
+    "Chennai": ("Tamil Nadu", ["Chennai U.A."], ["Chennai"], ["Chennai"], "Chennai", ["Chennai"]),
+    "Hyderabad": ("Telangana", ["Hyderabad U.A."], ["Hyderabad"], ["Hyderabad"], "Hyderabad", ["Hyderabad"]),
+    "Ahmedabad": ("Gujarat", ["Ahmadabad U.A."], ["Ahmadabad"], ["Ahmadabad"], "Ahmedabad-Gandhi-Nagar", ["Ahmedabad"]),
+    "Pune": ("Maharashtra", ["Pune U.A."], ["Pune"], ["Pune"], "Pune-Pimpri-Chinchwad", ["Pune"]),
+    "Surat": ("Gujarat", ["Surat U.A."], ["Surat"], ["Surat"], "Surat", ["Surat"]),
+    "Jaipur": ("Rajasthan", ["Jaipur"], ["Jaipur"], ["Jaipur"], "Jaipur", ["Jaipur"]),
+    "Lucknow": ("Uttar Pradesh", ["Lucknow U.A."], ["Lucknow"], ["Lucknow"], "Lucknow", ["Lucknow"]),
+    "Agartala": ("Tripura", ["Agartala"], ["West Tripura"], ["West Tripura"], "Agartala", ["Agartala"]),
+    "Allahabad": ("Uttar Pradesh", ["Allahabad U.A."], ["Prayagraj"], ["Allahabad"], "Allahabad", ["Prayagraj"]),
+    "Asansol-Durgapur": ("West Bengal", ["Asansol U.A.", "Durgapur U.A."], ["Barddhaman"],
+                         ["Paschim Barddhaman"], "Asansol-Durgapur", ["Asansol", "Durgapur"]),
+    "Aurangabad": ("Maharashtra", ["Aurangabad U.A."], ["Aurangabad"], ["Aurangabad"], "Aurangabad", []),
+    "Hubli-Dharwad": ("Karnataka", ["Hubli-Dharwad"], ["Dharwad"], ["Dharwad"], "Dharwad-Hubli",
+                      ["Hubballi", "Dharwad"]),
+    "Dhanbad-Bokaro": ("Jharkhand", ["Dhanbad U.A.", "Bokaro Steel City U.A."], ["Dhanbad", "Bokaro"],
+                       ["Dhanbad", "Bokaro"], "Dhanbad-Bokaro", ["Dhanbad"]),
+    "Gaya": ("Bihar", ["Gaya U.A."], ["Gaya"], ["Gaya"], "Gaya", ["Gaya"]),
+    "Guwahati": ("Assam", ["Guwahati U.A."], ["Kamrup Metropolitan"], ["Kamrup Metropolitan"],
+                 "Guwahati-Dispur", ["Guwahati"]),
+    "Gwalior": ("Madhya Pradesh", ["Gwalior U.A."], ["Gwalior"], ["Gwalior"], "Gwalior", ["Gwalior"]),
+    "Jamshedpur": ("Jharkhand", ["Jamshedpur U.A."], ["Purbi Singhbhum"], ["Purbi Singhbhum"], "Jamshedpur", []),
+    "Jodhpur": ("Rajasthan", ["Jodhpur U.A."], ["Jodhpur"], ["Jodhpur"], "Jodhpur", ["Jodhpur"]),
+    "Kota": ("Rajasthan", ["Kota"], ["Kota"], ["Kota"], "Kota", ["Kota"]),
+    "Madurai": ("Tamil Nadu", ["Madurai U.A."], ["Madurai"], ["Madurai"], "Madurai", ["Madurai"]),
+    "Nashik": ("Maharashtra", ["Nashik U.A."], ["Nashik"], ["Nashik"], "Nashik", ["Nashik"]),
+    "Panaji": ("Goa", ["Panaji U.A.", "Mormugao U.A.", "Margao U.A."], ["North Goa", "South Goa"],
+               ["North Goa", "South Goa"], "Panjim-Vasco-Margao", []),
+    "Puducherry": ("Puducherry", ["Puducherry U.A.", "Cuddalore"], ["Puducherry"], ["Puducherry"],
+                   "Puducherry-Cuddalore", ["Puducherry", "Cuddalore"]),
+    "Rajkot": ("Gujarat", ["Rajkot U.A."], ["Rajkot"], ["Rajkot"], "Rajkot", []),
+    "Shimla": ("Himachal Pradesh", ["Shimla U.A."], ["Shimla"], ["Shimla"], "Shimla", []),
+    "Srinagar": ("Jammu & Kashmir", ["Srinagar U.A."], ["Srinagar"], ["Srinagar"], "Srinagar", []),
+    "Thiruvananthapuram": ("Kerala", ["Thiruvananthapuram U.A."], ["Thiruvananthapuram"],
+                           ["Thiruvananthapuram"], "Thiruvananthapuram", ["Thiruvananthapuram"]),
+    "Tiruchirappalli": ("Tamil Nadu", ["Tiruchirappalli U.A."], ["Tiruchirappalli"], ["Tiruchirappalli"],
+                        "Tiruchirapalli", ["Tiruchirappalli"]),
+    "Vadodara": ("Gujarat", ["Vadodara U.A."], ["Vadodara"], ["Vadodara"], "Vadodara", []),
+    "Vijayawada": ("Andhra Pradesh", ["Vijayawada U.A.", "Guntur U.A.", "Tenali"], ["Krishna", "Guntur"],
+                   ["Krishna", "Guntur"], "Vijayawada-Guntur-Tenali", ["Vijayawada"]),
+    "Visakhapatnam": ("Andhra Pradesh", ["Visakhapatnam"], ["Visakhapatnam"], ["Visakhapatnam"],
+                      "Visakhapatnam", ["Visakhapatnam"]),
+    "Agra": ("Uttar Pradesh", ["Agra U.A."], ["Agra"], ["Agra"], "Agra", ["Agra"]),
+    "Amritsar": ("Punjab", ["Amritsar U.A."], ["Amritsar", "Tarn Taran"], ["Amritsar", "Tarn Taran"],
+                 "Amritsar-Tarn Taran", ["Amritsar"]),
+    "Bhopal": ("Madhya Pradesh", ["Bhopal U.A."], ["Bhopal"], ["Bhopal"], "Bhopal", ["Bhopal"]),
+    "Bhubaneswar": ("Odisha", ["Bhubaneswar U.A."], ["Khordha"], ["Khordha"], "Bhubaneswar", ["Bhubaneswar"]),
+    "Chandigarh": ("Chandigarh", ["Chandigarh U.A.", "Patiala U.A.", "Ambala U.A."], ["Chandigarh"],
+                   ["Chandigarh"], "Chandigarh-Patiala-Ambala", ["Chandigarh", "Patiala", "Ambala"]),
+    "Coimbatore": ("Tamil Nadu", ["Coimbatore U.A."], ["Coimbatore"], ["Coimbatore"], "Coimbatore", ["Coimbatore"]),
+    "Dehradun": ("Uttarakhand", ["Dehradun U.A."], ["Dehradun"], ["Dehradun"], "Dehradun", ["Dehradun"]),
+    "Indore": ("Madhya Pradesh", ["Indore U.A."], ["Indore"], ["Indore"], "Indore", ["Indore"]),
+    "Kanpur": ("Uttar Pradesh", ["Kanpur U.A."], ["Kanpur Nagar"], ["Kanpur Nagar"], "Kanpur", ["Kanpur"]),
+    "Kochi": ("Kerala", ["Kochi U.A."], ["Ernakulam"], ["Ernakulam"], "Kochi", ["Kochi"]),
+    "Ludhiana": ("Punjab", ["Ludhiana"], ["Ludhiana", "Jalandhar"], ["Ludhiana", "Jalandhar"],
+                 "Ludhiana-Phillaur", ["Ludhiana"]),
+    "Nagpur": ("Maharashtra", ["Nagpur U.A."], ["Nagpur"], ["Nagpur"], "Nagpur", ["Nagpur"]),
+    "Patna": ("Bihar", ["Patna U.A."], ["Patna"], ["Patna"], "Patna", ["Patna"]),
+    "Raipur-Durg-Bhilai": ("Chhattisgarh", ["Raipur U.A.", "Durg-Bhilainagar U.A."], ["Raipur", "Durg"],
+                           ["Raipur", "Durg"], "Raipur-Durg-Bhillai", ["Raipur", "Bhilai"]),
+    "Ranchi": ("Jharkhand", ["Ranchi U.A."], ["Ranchi"], ["Ranchi"], "Ranchi", []),
 }
+# CPCB cities of an airshed that crosses a state line may be in these states too.
+CPCB_OTHER_STATES = {"Chandigarh": {"Punjab", "Haryana"}, "Puducherry": {"Tamil Nadu"}}
 
 QC_SQL = """
 CREATE OR REPLACE TABLE q AS
@@ -92,40 +158,52 @@ FROM clean WHERE year(ts) = {year} GROUP BY 1, 2, 4;
 """
 
 
-def diwali_cities() -> dict:
-    spec = importlib.util.spec_from_file_location("diwali_config", DIWALI / "config.py")
-    config = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(config)
-    return config.CITIES
-
-
 def census_populations(xlsx: Path) -> dict[str, tuple[str, int]]:
-    """2011 persons for each city's entry in Census table A-04 (I)."""
+    """Normalised name -> (entry as printed, 2011 persons) for each Census entry the table uses."""
     d = pd.read_excel(xlsx, sheet_name=0, header=None)
     heads = d[pd.to_numeric(d[0], errors="coerce").notna()]
+    wanted = {norm(e) for _, entries, *_ in CITIES.values() for e in entries}
     found = {}
     for i, r in heads.iterrows():
-        name = norm(str(r[1]))
-        for city, (entry, _, _) in CITIES.items():
-            if name == norm(entry):
-                block = d.loc[i:i + 12]
-                row = block[block[3].astype(str).str.strip() == "2011"]
-                assert len(row) == 1, (city, entry)
-                assert city not in found, f"{entry} appears twice"
-                found[city] = (" ".join(str(r[1]).split()), int(row[6].item()))
-    assert set(found) == set(CITIES), set(CITIES) - set(found)
+        key = norm(str(r[1]))
+        if key in wanted:
+            block = d.loc[i:i + 12]
+            # the year cell is '2011', or '!!2011' / '!! 2011' where the census footnotes it
+            row = block[block[3].map(lambda y: re.sub(r"\D", "", str(y))) == "2011"]
+            assert len(row), r[1]      # the first is the entry's own; sub-entries (i), (ii) follow
+            assert key not in found, f"{r[1]} appears twice"
+            found[key] = (str(r[1]).strip(), int(row[6].iloc[0]))
+    assert set(found) == wanted, wanted - set(found)
     return found
+
+
+def check_cpcb_names(con: duckdb.DuckDBPyConnection) -> None:
+    """Every CPCB name is a city in the 2024 file, in the city's state (or a neighbour's for an
+    airshed across a state line); a CPCB name serves one city only."""
+    path = DIWALI / "data" / "raw" / "cpcb-air-quality-2024.parquet"
+    have = dict(con.execute(f"SELECT City, mode(State) FROM read_parquet('{path}') GROUP BY 1").fetchall())
+    seen = {}
+    for city, (state, _, _, _, _, names) in CITIES.items():
+        for n in names:
+            assert n in have, (city, n, "not in the 2024 CPCB file")
+            ok = {state} | CPCB_OTHER_STATES.get(city, set())
+            assert canonical_state(have[n]) in ok, (city, n, have[n])
+            assert n not in seen, (n, city, seen[n])
+            seen[n] = city
 
 
 def main() -> None:
     folder = workdir(sys.argv, "cpcb")
     xlsx = fetch(CENSUS, folder, "PC11_A04-I_CLASS_I.xlsx")
-    config = diwali_cities()
-    assert set(config) == set(CITIES), set(config) ^ set(CITIES)
-    cpcb_names = {n: city for city, v in config.items() for n in v["cpcb_city"]}
+    names = [c for c, v in CITIES.items() if not v[5]]
+    print("no CPCB station:", ", ".join(names))
+    assert len({v[4] for v in CITIES.values()}) == len(CITIES)
+    cpcb_names = {n: city for city, v in CITIES.items() for n in v[5]}
     city_list = ", ".join(f"'{n}'" for n in cpcb_names)
 
     con = duckdb.connect()
+    check_cpcb_names(con)
+    con.register("cmap", pd.DataFrame({"cpcb_city": list(cpcb_names), "airshed_city": list(cpcb_names.values())}))
     rows = []
     for path in sorted((DIWALI / "data" / "raw").glob("cpcb-air-quality-*.parquet")):
         year = int(path.stem.rsplit("-", 1)[1])
@@ -135,21 +213,20 @@ def main() -> None:
         con.execute(QC_SQL.format(path=path, cities=city_list, year=year))
         hours_in_year = pd.Timestamp(year=year, month=12, day=31).day_of_year * 24
         df = con.execute(f"""
-            WITH valid AS (SELECT * FROM hourly WHERE pm25 IS NOT NULL),
+            WITH valid AS (SELECT m.airshed_city AS city, h.station_id, h.hour, h.pm25
+                           FROM hourly h JOIN cmap m ON h.city = m.cpcb_city WHERE h.pm25 IS NOT NULL),
             cityhour AS (SELECT city, hour, median(pm25) AS pm25 FROM valid GROUP BY 1, 2),
             annual AS (SELECT city, avg(pm25) AS pm25, count(*) / {hours_in_year} AS hours_share
                        FROM cityhour GROUP BY 1),
-            meta AS (SELECT city, mode(state) AS state, count(DISTINCT station_id) AS stations
-                     FROM valid GROUP BY 1)
-            SELECT a.city, m.state, a.pm25, a.hours_share, m.stations
+            meta AS (SELECT city, count(DISTINCT station_id) AS stations FROM valid GROUP BY 1)
+            SELECT a.city, a.pm25, a.hours_share, m.stations
             FROM annual a JOIN meta m USING (city)""").df()
         df["year"] = year
         rows.append(df)
         print(year, ", ".join(f"{r.city} {r.pm25:.0f} ({r.stations}, {r.hours_share:.0%})"
                               for r in df.sort_values("city").itertuples()))
     out = pd.concat(rows)
-    out["city"] = out.city.map(cpcb_names)
-    out["state"] = out.state.map(canonical_state)
+    out["state"] = out.city.map({c: v[0] for c, v in CITIES.items()})
     dropped = out[out.hours_share < MIN_HOURS_SHARE]
     print("dropped for coverage:", ", ".join(f"{r.city} {r.year} ({r.hours_share:.0%})"
                                              for r in dropped.itertuples()) or "none")
@@ -160,17 +237,21 @@ def main() -> None:
     out.to_csv(DATA / "exposure_cpcb.csv", index=False)
 
     census = census_populations(xlsx)
-    states = out.groupby("city").state.agg(lambda s: s.mode().item())
     cities = pd.DataFrame([{
-        "city": city, "state": states[city], "population": census[city][1],
-        "census_name": census[city][0], "aqli_units": ";".join(aqli), "acag_units": ";".join(acag),
-    } for city, (_, aqli, acag) in CITIES.items()])
+        "city": city, "state": state,
+        "population": sum(census[norm(e)][1] for e in entries),
+        "census_name": ";".join(census[norm(e)][0] for e in entries),
+        "aqli_units": ";".join(aqli), "acag_units": ";".join(acag),
+        "apna_airshed": airshed, "cpcb_cities": ";".join(cpcb),
+    } for city, (state, entries, aqli, acag, airshed, cpcb) in CITIES.items()])
     for col, f in (("aqli_units", "exposure_aqli.csv"), ("acag_units", "exposure_acag_total.csv")):
         t = pd.read_csv(DATA / f, usecols=["state", "unit"]).drop_duplicates()
         have = set(zip(t.state, t.unit))
         for c in cities.itertuples():
             for unit in getattr(c, col).split(";"):
                 assert (c.state, unit) in have, (f, c.state, unit)
+    apna = pd.read_csv(DATA / "apna_source_apportionment.csv").City
+    assert sorted(cities.apna_airshed.dropna()) == sorted(apna), "cities must cover the APnA airsheds"
     cities.to_csv(DATA / "cities.csv", index=False)
     print(cities.to_string())
 

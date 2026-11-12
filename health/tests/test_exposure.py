@@ -1,6 +1,7 @@
+import pandas as pd
 import pytest
 
-from airhealth import baseline, exposure, provenance
+from airhealth import baseline, exposure, paths, places, provenance
 from airhealth.places import resolve
 
 INDIA = resolve("India")
@@ -86,3 +87,9 @@ def test_unknown_map_and_year():
         exposure.cells(INDIA, "nasa")
     with pytest.raises(KeyError, match="1990"):
         exposure.cells(INDIA, "aqli", 1990)
+
+
+def test_every_city_has_a_level_on_both_district_maps():
+    for city in pd.read_csv(paths.DATA / "cities.csv").city:
+        for m in ("aqli", "acag_total"):
+            assert exposure.mean(places.resolve(city), m) > 0, (city, m)

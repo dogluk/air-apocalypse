@@ -12,8 +12,8 @@ Maps (sources and methods in data/sources.toml):
               Jammu & Kashmir and Ladakh, and the six small union territories GBD pools carry
               the pooled value. Population as for gbd2019.
   cpcb        Ground monitors, mean of hourly cross-station medians, for the cities in
-              diwali/config.py only; population is the Census 2011 urban agglomeration,
-              the same in every year.
+              data/cities.csv that have a monitor; population is the Census 2011 figure of the
+              city's agglomeration(s), the same in every year.
 
 Population on the district maps: each map carries one population (AQLI's and WorldPop's are
 both 2023 figures). cells() scales each state's districts so the state's total is the
@@ -124,7 +124,7 @@ def cells(place: Place, map_name: str, year: int | None = None,
     if map_name == "cpcb":
         population_year = 2011
         if place.kind != "city":
-            raise ValueError(f"cpcb covers only the cities in diwali/config.py "
+            raise ValueError(f"cpcb covers only the cities in data/cities.csv "
                              f"({', '.join(_cities().index)}), not a {place.kind}")
         row = t[t.city == place.name]
         if row.empty:

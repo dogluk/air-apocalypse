@@ -167,7 +167,7 @@ Other small union territories (24 cells), all match.
 ["exposure_cpcb.csv"]
 source = "Central Pollution Control Board continuous ambient air quality monitoring stations (CAAQMS), 15-minute data compiled by Vonter/india-cpcb-aqi (parquet releases 2016-2025), as downloaded by diwali/download.sh."
 url = "https://github.com/Vonter/india-cpcb-aqi/releases"
-locator = "diwali/data/raw/cpcb-air-quality-YYYY.parquet (git-ignored), columns City, State, Station ID, Timestamp, 'PM2.5 (µg/m³)', 'PM10 (µg/m³)'; cities and CPCB city names from diwali/config.py CITIES."
+locator = "diwali/data/raw/cpcb-air-quality-YYYY.parquet (git-ignored), columns City, State, Station ID, Timestamp, 'PM2.5 (µg/m³)', 'PM10 (µg/m³)'; cities and their CPCB city names from the CITIES table in scripts/build_exposure_cpcb.py (cities.csv, column cpcb_cities)."
 retrieved = "2026-11-09"
 licence = "ODbL 1.0 (the compilation); the derived table is shared under ODbL 1.0."
 method = "derived"
@@ -180,23 +180,49 @@ script). QC is the Diwali track's (diwali/extract.py), applied to the whole year
 City-years with under 75% of hours are dropped: Ahmedabad 2016 (45%), Kolkata 2016 (0%), Ahmedabad 2017 (40%), Jaipur 2017
 (37%), Mumbai 2018 (59%), Pune 2018 (50%), Kolkata 2018 (56%), Surat 2022 (14%), Pune 2022 (64%), Surat 2023 (74%).
 Not in the files at all: Jaipur 2016, Kolkata 2017, Surat 2016-2021. Surat has a single station in every year kept.
+Fifty cities (2026-11-12): the 11 original cities are built exactly as before (one CPCB city name each; Kolkata and Pune
+do not add Howrah or Pimpri-Chinchwad, Ahmedabad not Gandhinagar). A new city's hourly value is the median over the
+stations of all its cpcb_cities (Chandigarh: Chandigarh, Patiala, Ambala; Raipur-Durg-Bhilai: Raipur, Bhilai;
+Puducherry: Puducherry, Cuddalore; Asansol-Durgapur, Hubli-Dharwad likewise). The city's state in this file is the state
+in cities.csv. No rows (no CPCB station in the 2024 file under that name in the city's state) for Aurangabad (CPCB's
+Aurangabad is the one in Bihar), Jamshedpur, Panaji, Rajkot, Shimla, Srinagar, Vadodara and Ranchi. Dhanbad-Bokaro is
+Dhanbad's stations only (Bokaro has none). Many new city-years fall under the 75% cut and are dropped; the script prints them.
 """
 
 ["cities.csv"]
-source = "Office of the Registrar General & Census Commissioner, India. Census of India 2011, table A-04 (I): Towns and urban agglomerations classified by population size class in 2011 with variation between 1901 and 2011 - Class I."
+source = "Office of the Registrar General & Census Commissioner, India. Census of India 2011, table A-04 (I): Towns and urban agglomerations classified by population size class in 2011 with variation between 1901 and 2011 - Class I. Airshed names: APnA 50 airsheds (apna_source_apportionment.csv), UrbanEmissions.info, CC BY 4.0."
 url = "https://censusindia.gov.in/nada/index.php/catalog/42876/download/46544"
 catalog = "https://censusindia.gov.in/nada/index.php/catalog/42876"
 sha256 = "8ab1bafd6e49aec4a6b2709398dbdeaab2b53bc369a53e62eacac601647a58dd"
-locator = "Sheet 'CLASS I', the numbered entries Greater Mumbai U.A. (1), Delhi U.A. (2), Kolkata U.A. (3), Chennai U.A. (4), Bruhat Bangalore U.A. (5), Hyderabad U.A. (6), Ahmadabad U.A. (7), Pune U.A. (8), Surat U.A. (9), Jaipur (10, a city; no UA), Lucknow U.A. (12); row 'Census year 2011', column 'Persons'."
-retrieved = "2026-11-10"
-licence = "Government of India publication; no licence stated on the catalog page. Factual statistics reproduced with attribution."
+locator = "Sheet 'CLASS I', the entries named in the census_name column of each row (';'-separated, as printed there: urban agglomerations 'U.A.', or the town itself where the census lists no UA, e.g. Jaipur, Kota, Ludhiana, Tenali, Cuddalore, Visakhapatnam, Agartala, Hubli-Dharwad); row 'Census year 2011' (printed '2011', or '!!2011' for Guwahati), column 'Persons', taken from the entry's own block (not its sub-entries). The satellite-map units (aqli_units, acag_units) and the cpcb_cities are in the script's CITIES table."
+retrieved = "2026-11-12"
+licence = "Government of India publication; no licence stated on the catalog page. Factual statistics reproduced with attribution. apna_airshed names: CC BY 4.0."
 method = "derived"
 script = "scripts/build_exposure_cpcb.py"
 notes = """
-Columns: city (as in diwali/config.py), state (from the CPCB files), population (Census 2011 persons), census_name (entry as
-printed), aqli_units and acag_units (';'-separated districts holding the city core in each satellite map; chosen by hand,
-and checked by the script to exist in the map's table). These are final 2011 figures, not the provisional ones.
-Spot check against the workbook, 2026-11-10: all eleven 2011 'Persons' cells match.
+Fifty cities: Delhi plus every airshed of the APnA table (49; Varanasi is missing there). Columns: city, state, population
+(Census 2011 persons), census_name, aqli_units and acag_units (';'-separated districts holding the city in each satellite
+map; chosen by hand, checked by the script to exist in the map's table in the city's state), apna_airshed (the APnA 'City'
+string, empty for Delhi), cpcb_cities (';'-separated CPCB city names; empty where CPCB has no station). These are final
+2011 figures, not the provisional ones. The original 11 rows (Delhi to Lucknow) are unchanged.
+Claude's call (not in any source): an airshed's population is the SUM of the Class I entries for the towns its APnA name
+lists. A town inside another listed entry's U.A. is not added again (Howrah in Kolkata U.A.; Pimpri-Chinchwad in Pune U.A.;
+Gandhinagar in Ahmadabad U.A.; Vasco da Gama taken to be in Mormugao U.A.). A listed town that is not a Class I entry is
+left out: Tarn Taran (Amritsar) and Phillaur (Ludhiana). Dispur is part of Guwahati U.A.
+City names: the 11 original names stay; a new city takes the first town of its APnA name, or the usual twin-city name
+(Hubli-Dharwad for 'Dharwad-Hubli', Asansol-Durgapur, Dhanbad-Bokaro, Raipur-Durg-Bhilai for 'Raipur-Durg-Bhillai',
+Panaji for 'Panjim-Vasco-Margao', Tiruchirappalli for 'Tiruchirapalli'). Allahabad keeps APnA's spelling (Prayagraj is an
+alias in places.csv). Chandigarh and Puducherry are also state names, so the bare name resolves to the state, as Delhi does.
+Entries used: Panaji = Panaji U.A + Mormugao U.A. + Margao U.A.; Puducherry = Puducherry U.A. + Cuddalore (Tamil Nadu);
+Chandigarh = Chandigarh U.A. + Patiala U.A. + Ambala U.A. (not the separate Ambala town, which the U.A. contains);
+Vijayawada = Vijayawada U.A. + Guntur U.A. + Tenali; Dhanbad-Bokaro = Dhanbad U.A. + Bokaro Steel City U.A.;
+Raipur-Durg-Bhilai = Raipur U.A. + Durg-Bhilainagar U.A.; Asansol-Durgapur = Asansol U.A. + Durgapur U.A.
+Units: the satellite maps need all units in the city's state, so the two airsheds across a state line (Chandigarh: Patiala
+in Punjab, Ambala in Haryana; Puducherry: Cuddalore in Tamil Nadu) list only the home state's unit, though their population
+and CPCB stations cover the whole airshed. Units are whole districts, so a city's satellite value is its district's (for
+Ludhiana-Phillaur and Amritsar-Tarn Taran, the districts of every named town, Jalandhar and Tarn Taran included). Asansol-Durgapur:
+AQLI Barddhaman, ACAG Paschim Barddhaman (the district after the 2017 split). Guwahati: Kamrup Metropolitan in both. Allahabad:
+AQLI 'Prayagraj', ACAG 'Allahabad'.
 """
 
 ["curves_loglinear.csv"]
