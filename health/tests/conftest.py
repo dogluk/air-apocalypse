@@ -17,3 +17,12 @@ def ihme_files():
     needed = {*ihme_curves.files("gbd2023"), *ihme_curves.files("gbd2019"), ihme.EXPOSURE_2023}
     if ihme.missing(needed):
         pytest.skip("IHME files not in health/data_local/ (see IHME_DOWNLOADS.md)")
+
+
+@pytest.fixture(autouse=True)
+def fresh_month_shapes():
+    """months.shape caches its profiles; a test that swaps the tables must not leak them."""
+    from airhealth import months
+    months.clear_cache()
+    yield
+    months.clear_cache()

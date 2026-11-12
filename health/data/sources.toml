@@ -215,6 +215,24 @@ Raipur-Durg-Bhilai 11, Srinagar 7, Surat 14, Thiruvananthapuram 9, Tiruchirappal
 Delhi has none.
 """
 
+["monthly_cpcb_state.csv"]
+source = "Central Pollution Control Board continuous ambient air quality monitoring stations (CAAQMS), 15-minute data compiled by Vonter/india-cpcb-aqi (parquet releases 2016-2025), as downloaded by diwali/download.sh."
+url = "https://github.com/Vonter/india-cpcb-aqi/releases"
+locator = "diwali/data/raw/cpcb-air-quality-YYYY.parquet (git-ignored), columns State, Station ID, Timestamp, 'PM2.5 (µg/m³)', 'PM10 (µg/m³)'; every station, grouped by the State column."
+retrieved = "2026-11-12"
+licence = "ODbL 1.0 (the compilation); the derived table is shared under ODbL 1.0."
+method = "derived"
+script = "scripts/build_exposure_cpcb.py"
+notes = """
+Columns: state (canonical name, airhealth.places.canonical_state, of the parquet's State), year, month (1-12), pm25
+(mean over the month's hours of the median across ALL the state's CPCB stations of station-hour means, µg/m³), stations
+(stations of the state with any valid hour that year), hours_share. Same QC as monthly_cpcb.csv (the Diwali track's,
+whole-year; its saturation rule uses the state's hourly median in place of the city's), same hourly-median-across-stations
+method, same 75% month coverage rule, built in the same pass. Used by airhealth.months for a state or city with no
+complete profile among the 50 cities (Claude's call: a state's monitors, wherever in the state, stand in for the shape;
+Haryana's are mostly Gurugram, Faridabad and the rest of the NCR). Every monitor is used, not only those of the 50 cities.
+"""
+
 ["cities.csv"]
 source = "Office of the Registrar General & Census Commissioner, India. Census of India 2011, table A-04 (I): Towns and urban agglomerations classified by population size class in 2011 with variation between 1901 and 2011 - Class I. Airshed names: APnA 50 airsheds (apna_source_apportionment.csv), UrbanEmissions.info, CC BY 4.0."
 url = "https://censusindia.gov.in/nada/index.php/catalog/42876/download/46544"
@@ -240,7 +258,9 @@ City names: the 11 original names stay; a new city takes the first town of its A
 Panaji for 'Panjim-Vasco-Margao', Tiruchirappalli for 'Tiruchirapalli'). Allahabad keeps APnA's spelling (Prayagraj is an
 alias in places.csv). Chandigarh and Puducherry are also state names, so the bare name resolves to the state, as Delhi does.
 Entries used: Panaji = Panaji U.A + Mormugao U.A. + Margao U.A.; Puducherry = Puducherry U.A. + Cuddalore (Tamil Nadu);
-Chandigarh = Chandigarh U.A. + Patiala U.A. + Ambala U.A. (not the separate Ambala town, which the U.A. contains);
+Chandigarh = Chandigarh U.A. + Patiala U.A. + Ambala U.A. (205,418: Ambala Sadar, Ambala Cantt., Babiyal, Kardhan) +
+Ambala (entry 239, Ambala City, M.Cl., 195,153; it is a separate entry, not inside the Ambala U.A.; checked in the workbook
+2026-11-12), 1,817,419 in all;
 Vijayawada = Vijayawada U.A. + Guntur U.A. + Tenali; Dhanbad-Bokaro = Dhanbad U.A. + Bokaro Steel City U.A.;
 Raipur-Durg-Bhilai = Raipur U.A. + Durg-Bhilainagar U.A.; Asansol-Durgapur = Asansol U.A. + Durgapur U.A.
 Units: the satellite maps need all units in the city's state, so the two airsheds across a state line (Chandigarh: Patiala

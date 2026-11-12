@@ -29,6 +29,13 @@ class Place:
     name: str
     state: str | None
 
+    @property
+    def label(self) -> str:
+        """Unique per place: 'Delhi (state)', 'Aurangabad, Bihar (district)'."""
+        if self.kind in ("country", "state"):
+            return f"{self.name} ({self.kind})"
+        return f"{self.name}, {self.state} ({self.kind})"
+
 
 def norm(text: str) -> str:
     """Matching key: no accents, lower case, '&' as 'and', punctuation as spaces."""

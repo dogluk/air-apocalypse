@@ -23,6 +23,15 @@ def test_delhi_winter_is_dirtier_than_monsoon():
     assert d[11] / d[7] > 4
 
 
+def test_shape_is_cached_and_the_cache_clears(monkeypatch):
+    first = months._profiles((2023, 2025))
+    assert months._profiles((2023, 2025)) is first
+    t = months._table()
+    monkeypatch.setattr(months, "_table", lambda: t[t.city != "Delhi"])
+    months.clear_cache()
+    assert "Delhi" not in set(months._profiles((2023, 2025)).city)
+
+
 # --- shapes (Task 4) ---------------------------------------------------------------------
 
 def _row(city, month, pm25, year=2024):
@@ -48,14 +57,45 @@ def test_delhi_own_shape():
 def test_city_without_monitor_borrows():
     s = months.shape(places.resolve("Rajkot"))      # Gujarat; no CPCB data
     assert s.borrowed and "borrowed from" in s.basis
-    assert s.basis == "borrowed from Ahmedabad"     # largest Gujarat city with a profile
+    assert s.basis == "borrowed from Ahmedabad, CPCB 2023-25"     # largest Gujarat city with a profile
     assert np.allclose(s.values, months.shape(places.resolve("Ahmedabad")).values)
 
 
 def test_no_state_profile_borrows_india():
-    s = months.shape(places.resolve("Ranchi"))      # Jharkhand has no complete city
-    assert s.borrowed and "India" in s.basis
+    # Jharkhand has no complete city, and its monitors cover only four months of 2023-25
+    # (and of 2016-25), so its state-wide profile is incomplete too.
+    st = pd.read_csv(paths.DATA / "monthly_cpcb_state.csv")
+    assert st[(st.state == "Jharkhand")].month.nunique() < 12
+    s = months.shape(places.resolve("Ranchi"))
+    assert s.borrowed and s.basis.startswith("borrowed from India")
     assert np.allclose(s.values, months.shape(places.resolve("India")).values)
+    assert months.shape(places.resolve("Jharkhand")).basis.startswith("borrowed from India")
+
+
+def test_state_without_a_complete_city_takes_its_state_wide_shape():
+    h = months.shape(places.resolve("Haryana"))     # no Haryana city among the 50
+    assert h.borrowed and h.basis.startswith("Haryana: all ") and h.basis.endswith(" CPCB monitors, 2023-25")
+    india = months.shape(places.resolve("India"))
+    assert not np.allclose(h.values, india.values)
+    assert h.values[10] > india.values[10]          # November: the NCR's stubble-and-winter peak
+    # a district there takes it too
+    d = months.shape(places.resolve("Gurugram", kind="district"))
+    assert np.allclose(d.values, h.values)
+
+
+def test_city_without_a_city_in_its_state_takes_the_state_wide_shape():
+    s = months.shape(places.resolve("Shimla"))      # no monitor in Shimla; none complete in Himachal
+    assert s.borrowed and s.basis.startswith("Himachal Pradesh: ")
+    assert np.allclose(s.values, months.shape(places.resolve("Himachal Pradesh")).values)
+
+
+def test_state_table_is_all_monitors():
+    st = pd.read_csv(paths.DATA / "monthly_cpcb_state.csv")
+    assert list(st.columns) == ["state", "year", "month", "pm25", "stations", "hours_share"]
+    assert st.hours_share.min() >= 0.75 and not st.duplicated(["state", "year", "month"]).any()
+    assert all(places.canonical_state(s) == s for s in set(st.state))
+    # Haryana has far more monitors than the one city CPCB names Haryana's cities
+    assert st[(st.state == "Haryana") & (st.year == 2024)].stations.max() > 10
 
 
 def test_missing_month_falls_back(monkeypatch):
@@ -63,7 +103,7 @@ def test_missing_month_falls_back(monkeypatch):
     cut = t[~((t.city == "Gaya") & (t.month == 7))]     # Gaya loses July in every year
     monkeypatch.setattr(months, "_table", lambda: cut)
     s = months.shape(places.resolve("Gaya"))
-    assert s.borrowed and s.basis == "borrowed from Patna"
+    assert s.borrowed and s.basis == "borrowed from Patna, CPCB 2023-25"
 
 
 def test_missing_month_in_window_widens_to_all_years(monkeypatch):
@@ -78,7 +118,7 @@ def test_missing_month_in_window_widens_to_all_years(monkeypatch):
 
 def test_incomplete_city_borrows_from_state():
     s = months.shape(places.resolve("Surat"))       # 9 months in every year it has
-    assert s.borrowed and s.basis == "borrowed from Ahmedabad"
+    assert s.borrowed and s.basis == "borrowed from Ahmedabad, CPCB 2023-25"
 
 
 def test_state_shape_is_population_weighted(monkeypatch):
@@ -91,5 +131,5 @@ def test_state_shape_is_population_weighted(monkeypatch):
     a = months._normalise(np.array([20.0] + [10.0] * 11))
     b = months._normalise(np.array([10.0, 20.0] + [10.0] * 10))
     s = months.shape(places.Place("state", "Testland", "Testland"))
-    assert s.borrowed and s.basis == "Testland: 2 monitored cities"
+    assert s.borrowed and s.basis == "Testland: 2 monitored cities, CPCB 2023-25"
     assert np.allclose(s.values, months._normalise(0.75 * a + 0.25 * b))

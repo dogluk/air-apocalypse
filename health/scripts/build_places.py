@@ -66,10 +66,14 @@ CITY_ALIASES = {
     "Ahmedabad": ["Ahmadabad"],
     "Pune": ["Poona"],
     "Allahabad": ["Prayagraj"],
-    "Hubli-Dharwad": ["Dharwad-Hubli", "Hubballi-Dharwad"],
     "Panaji": ["Panjim"],
     "Tiruchirappalli": ["Trichy", "Tiruchirapalli"],
     "Visakhapatnam": ["Vizag"],
+    # a bare name that is only part of a twin-city airshed (or also a district) resolves to the city
+    "Raipur-Durg-Bhilai": ["Raipur"],
+    "Hubli-Dharwad": ["Dharwad-Hubli", "Hubballi-Dharwad", "Hubli", "Hubballi"],
+    "Asansol-Durgapur": ["Asansol", "Durgapur"],
+    "Dhanbad-Bokaro": ["Dhanbad"],
 }
 
 

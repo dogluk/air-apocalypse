@@ -25,8 +25,7 @@ select_curves = curves.select     # the selection lives with the curves; kept he
 
 
 def place_label(impact: Impact) -> str:
-    p = impact.place
-    return f"{p.name} ({p.kind})" if p.kind in ("country", "state") else f"{p.name}, {p.state} ({p.kind})"
+    return impact.place.label
 
 
 def _row(i: Impact) -> dict:
@@ -404,10 +403,12 @@ def run_footer(run: Run) -> str:
              sources_note(run.sources)]
     iv = run.intervention
     if iv.monthly is not None and iv.change_kind == "pct":
-        for name, sh in run.shapes.items():
-            notes.insert(0, f"monthly_pct weights each month by {name}'s PM2.5 shape "
-                         f"(CPCB 2023-25 monthly means): {sh.basis}"
-                         + ("; borrowed, not this place's own monitors" if sh.borrowed else ""))
+        shape_notes = [f"monthly_pct weights each month by the PM2.5 shape of {label} (CPCB monthly "
+                       f"means): {sh.basis}"
+                       + ("; borrowed, not this place's own monitors"
+                          if sh.borrowed and not sh.basis.startswith("borrowed") else "")
+                       for label, sh in run.shapes.items()]
+        notes = shape_notes + notes
     notes = [n for n in notes if n]
     return _footer({(run.map_name, run.year): None}, run.fallback_states, run.unavailable, notes)
 

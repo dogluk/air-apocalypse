@@ -93,8 +93,17 @@ loglinear_brown  [yes]
 
 `list maps` and `list places` work the same way; `list maps` says which years can give
 results (the population projections start in 2011). Places are India, its states and union
-territories, its districts, and eleven cities; any common spelling is accepted ("Orissa",
-"NCT of Delhi"), and a misspelling gets suggestions.
+territories, its districts, and fifty cities (the 49 airsheds of APnA's source apportionment
+plus Delhi; `data/cities.csv`); any common spelling is accepted ("Orissa", "NCT of Delhi"), and a
+misspelling gets suggestions.
+
+A bare name that is both a city and a district is the city: `airhealth place Patna`, Gaya, Kota,
+Agra, Nagpur, Indore, and also Raipur, Hubli, Asansol, Dhanbad (aliases of their twin-city airshed)
+mean the city, which runs on the `cpcb` map with its Census 2011 population, not the AQLI
+district. The district needs `--kind district` (`airhealth place Patna --kind district`;
+`"Patna, Bihar"` also returns the city). Delhi, Chandigarh and Puducherry are the other way: the
+bare name is the state or union territory, and the city (airshed) needs `--kind city`.
+Intervention files take bare names, so they get these defaults.
 
 ### `compare`: one place, one change, every curve
 
@@ -323,9 +332,11 @@ December too. A drawn change never takes the air below 0 µg/m³. `monthly_pct` 
 by the place's own PM2.5 shape: twelve numbers, January first, with a day-weighted mean of 1,
 from the CPCB monthly means of 2023-25 (`data/monthly_cpcb.csv`), so a winter-only cut counts for
 more where winters are dirtier (a November cut in Delhi, about 2.4 times the annual mean).
-A city without a complete year of monitoring borrows the largest monitored city in its state, a
-state or district takes its monitored cities' population-weighted shape, and anywhere with none
-falls back to India's; the run says which it used, and where it borrowed. `monthly_delta` is
+A city with all twelve months in its CPCB data uses its own monitors (all of 2016-25 if 2023-25
+lacks a month). A city without borrows the largest such city in its state, else the state-wide
+shape of all CPCB monitors in its state (`data/monthly_cpcb_state.csv`); a state or district takes
+its such cities' population-weighted shape, else the state-wide shape; anywhere with none falls
+back to India's. The run says which it used, and where it borrowed. `monthly_delta` is
 in µg/m³ and is unaffected. The worked example is `november_pct_delhi.toml`.
 
 The examples: `delhi_100_to_80.toml` (the what-if above, no cost or odds),
@@ -360,7 +371,7 @@ in 2019, 97.5 in 2023, 94.3 in 2025.
   six small union territories (Andaman & Nicobar, Chandigarh, Dadra & Nagar Haveli, Daman &
   Diu, Lakshadweep, Puducherry), used for each, as `gbd2019` does. India is the states
   weighted by the tool's population: 53.97 for 2023, against IHME's own 54.05.
-- `cpcb`: the Central Pollution Control Board's monitors, for eleven cities only.
+- `cpcb`: the Central Pollution Control Board's monitors, for the fifty cities only (those with a CPCB station).
 
 Keeping dust moves India from 41 to 50: dust explains under a fifth of the gap to GBD's 91.
 The rest is concentrated in the northern plain (Uttar Pradesh 56 against 183); in Kerala

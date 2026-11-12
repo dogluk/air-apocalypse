@@ -69,4 +69,16 @@ def test_multi_town_airsheds_sum_their_census_entries():
     c = pd.read_csv(paths.DATA / "cities.csv").set_index("city")
     assert c.loc["Raipur-Durg-Bhilai", "census_name"] == "Raipur U.A.;Durg-Bhilainagar U.A."
     assert c.loc["Raipur-Durg-Bhilai", "population"] == 1123558 + 1064222
+    assert c.loc["Chandigarh", "census_name"].split(";")[-1] == "Ambala"     # Ambala City, entry 239
+    # Chandigarh, Patiala, Ambala U.A. (205,418, not containing Ambala City) = 1,622,266; Ambala City 195,153
+    assert c.loc["Chandigarh", "population"] == 1_622_266 + 195_153 == 1_817_419
     assert pd.isna(c.loc["Aurangabad", "cpcb_cities"])        # CPCB's Aurangabad is the Bihar one
+
+
+def test_bare_names_of_twin_cities_resolve_to_the_city():
+    for text, city in [("Raipur", "Raipur-Durg-Bhilai"), ("Hubli", "Hubli-Dharwad"),
+                       ("Hubballi", "Hubli-Dharwad"), ("Asansol", "Asansol-Durgapur"),
+                       ("Durgapur", "Asansol-Durgapur"), ("Dhanbad", "Dhanbad-Bokaro")]:
+        p = places.resolve(text)
+        assert (p.kind, p.name) == ("city", city), text
+    assert places.resolve("Raipur", kind="district").kind == "district"

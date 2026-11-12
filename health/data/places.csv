@@ -50,10 +50,10 @@ Jaipur,city,Rajasthan,
 Lucknow,city,Uttar Pradesh,
 Agartala,city,Tripura,
 Allahabad,city,Uttar Pradesh,Prayagraj
-Asansol-Durgapur,city,West Bengal,
+Asansol-Durgapur,city,West Bengal,Asansol;Durgapur
 Aurangabad,city,Maharashtra,
-Hubli-Dharwad,city,Karnataka,Dharwad-Hubli;Hubballi-Dharwad
-Dhanbad-Bokaro,city,Jharkhand,
+Hubli-Dharwad,city,Karnataka,Dharwad-Hubli;Hubballi-Dharwad;Hubli;Hubballi
+Dhanbad-Bokaro,city,Jharkhand,Dhanbad
 Gaya,city,Bihar,
 Guwahati,city,Assam,
 Gwalior,city,Madhya Pradesh,
@@ -85,7 +85,7 @@ Kochi,city,Kerala,
 Ludhiana,city,Punjab,
 Nagpur,city,Maharashtra,
 Patna,city,Bihar,
-Raipur-Durg-Bhilai,city,Chhattisgarh,
+Raipur-Durg-Bhilai,city,Chhattisgarh,Raipur
 Ranchi,city,Jharkhand,
 Nicobar Islands,district,Andaman & Nicobar Islands,
 Nicobars,district,Andaman & Nicobar Islands,

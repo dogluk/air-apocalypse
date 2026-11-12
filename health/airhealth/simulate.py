@@ -1,7 +1,8 @@
 """Run an intervention file: Monte Carlo over its PM2.5 change, the curve parameters and cost.
 
-For each curve, n draws. A draw takes one value of the PM2.5 change (the same n values for
-every curve), one set of curve parameters (Curve.sample_many) and one value of each cost.
+For each curve, n draws. A draw takes one quantile of the PM2.5 change (the same n quantiles for
+every curve; each place turns it into its own change, which differs by place only for
+monthly_pct, whose months are weighted by the place's shape), one set of curve parameters (Curve.sample_many) and one value of each cost.
 Which curve and which map are not sampled: each curve is its own result, and a run uses one
 map. The probability of success is not sampled either. Every array in a CurveRun is
 conditional on the intervention working; summary() multiplies by p_success for the expected
@@ -100,7 +101,7 @@ class Run:
     un_scaling: object = None       # baseline.UNScaling for deaths="unwpp"
     population_year: int = 0        # the year the population is for (2011 if any place is a city)
     census_places: tuple = ()       # the places whose population is the Census's, not the map year's
-    shapes: dict = field(default_factory=dict)   # months.Shape by place name; monthly_pct runs only
+    shapes: dict = field(default_factory=dict)   # months.Shape by Place.label; monthly_pct runs only
 
 
 def realised_shares(iv: Intervention) -> np.ndarray:
@@ -235,7 +236,7 @@ def run(iv: Intervention, map_name: str = "aqli", curves: list[str] | None = Non
                sources=first.sources, un_scaling=first.un_scaling,
                population_year=first.population_year,
                census_places=first.census_places,
-               shapes={p.name: months.shape(p) for p in iv.places}
+               shapes={p.label: months.shape(p) for p in iv.places}
                if iv.monthly is not None and iv.change_kind == "pct" else {})
 
 

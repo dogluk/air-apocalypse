@@ -20,6 +20,13 @@ monthly_cpcb.csv: city, year, month, pm25, hours_share, from the same hourly cit
 calendar month (the month's real number of hours, so February has 29 days in 2016, 2020, 2024). A
 month-year is kept only if at least 75% of that month's hours have a value.
 
+monthly_cpcb_state.csv: state, year, month, pm25, stations, hours_share. The same method over ALL
+CPCB monitors in each state (the parquet's State column, as the canonical state name of
+airhealth.places.canonical_state), whatever their city: the same QC (the saturation rule's
+hourly median is the state's), the hourly value is the median across the state's stations, the
+month's value the mean of those, a month-year kept at >= 75% of its hours. stations = stations
+with any valid hour that year. months.py uses it for a state with no complete city of the 50.
+
 exposure_cpcb.csv: city, state, year, pm25, stations (stations with any valid hour that
 year), hours_share (share of the year's hours with a city value).
 
@@ -111,7 +118,7 @@ CITIES = {
                  "Amritsar-Tarn Taran", ["Amritsar"]),
     "Bhopal": ("Madhya Pradesh", ["Bhopal U.A."], ["Bhopal"], ["Bhopal"], "Bhopal", ["Bhopal"]),
     "Bhubaneswar": ("Odisha", ["Bhubaneswar U.A."], ["Khordha"], ["Khordha"], "Bhubaneswar", ["Bhubaneswar"]),
-    "Chandigarh": ("Chandigarh", ["Chandigarh U.A.", "Patiala U.A.", "Ambala U.A."], ["Chandigarh"],
+    "Chandigarh": ("Chandigarh", ["Chandigarh U.A.", "Patiala U.A.", "Ambala U.A.", "Ambala"], ["Chandigarh"],
                    ["Chandigarh"], "Chandigarh-Patiala-Ambala", ["Chandigarh", "Patiala", "Ambala"]),
     "Coimbatore": ("Tamil Nadu", ["Coimbatore U.A."], ["Coimbatore"], ["Coimbatore"], "Coimbatore", ["Coimbatore"]),
     "Dehradun": ("Uttarakhand", ["Dehradun U.A."], ["Dehradun"], ["Dehradun"], "Dehradun", ["Dehradun"]),
@@ -131,9 +138,9 @@ CPCB_OTHER_STATES = {"Chandigarh": {"Punjab", "Haryana"}, "Puducherry": {"Tamil 
 
 QC_SQL = """
 CREATE OR REPLACE TABLE q AS
-SELECT "Station ID" AS station_id, City AS city, State AS state,
+SELECT "Station ID" AS station_id, {group} AS city, State AS state,
   timezone('UTC', "Timestamp") AS ts, "PM2.5 (µg/m³)" AS pm25, "PM10 (µg/m³)" AS pm10
-FROM read_parquet('{path}') WHERE City IN ({cities});
+FROM read_parquet('{path}') {join} WHERE {where};
 
 CREATE OR REPLACE TABLE hourly AS
 WITH cityhr AS (
@@ -210,14 +217,20 @@ def main() -> None:
 
     con = duckdb.connect()
     check_cpcb_names(con)
+    raw_states = set()
+    for path in sorted((DIWALI / "data" / "raw").glob("cpcb-air-quality-*.parquet")):
+        raw_states |= {r[0] for r in con.execute(f"SELECT DISTINCT State FROM read_parquet('{path}')").fetchall()}
+    con.register("smap", pd.DataFrame({"raw_state": sorted(raw_states),
+                                       "canon": [canonical_state(r) for r in sorted(raw_states)]}))
     con.register("cmap", pd.DataFrame({"cpcb_city": list(cpcb_names), "airshed_city": list(cpcb_names.values())}))
-    rows, months = [], []
+    rows, months, state_months = [], [], []
     for path in sorted((DIWALI / "data" / "raw").glob("cpcb-air-quality-*.parquet")):
         year = int(path.stem.rsplit("-", 1)[1])
         first, last = con.execute(f"""SELECT min(timezone('UTC', "Timestamp")),
             max(timezone('UTC', "Timestamp")) FROM read_parquet('{path}')""").fetchone()
         assert (first.month, first.day, last.month, last.day) == (1, 1, 12, 31), (path, first, last)
-        con.execute(QC_SQL.format(path=path, cities=city_list, year=year))
+        con.execute(QC_SQL.format(path=path, year=year, group="City", join="",
+                                  where=f"City IN ({city_list})"))
         hours_in_year = pd.Timestamp(year=year, month=12, day=31).day_of_year * 24
         con.execute("""
             CREATE OR REPLACE TABLE valid AS
@@ -238,6 +251,20 @@ def main() -> None:
             FROM annual a JOIN meta m USING (city)""").df()
         df["year"] = year
         rows.append(df)
+        # the same QC and hourly-median method over every monitor in each state
+        con.execute(QC_SQL.format(path=path, year=year, group="smap.canon",
+                                  join="JOIN smap ON State = smap.raw_state", where="TRUE"))
+        sm = con.execute("""
+            WITH statehour AS (SELECT city AS state, hour, median(pm25) AS pm25 FROM hourly
+                               WHERE pm25 IS NOT NULL GROUP BY 1, 2),
+            meta AS (SELECT city AS state, count(DISTINCT station_id) AS stations FROM hourly
+                     WHERE pm25 IS NOT NULL GROUP BY 1)
+            SELECT s.state, month(s.hour) AS month, avg(s.pm25) AS pm25, count(*) AS n,
+                   any_value(m.stations) AS stations
+            FROM statehour s JOIN meta m USING (state) GROUP BY 1, 2""").df()
+        sm["year"] = year
+        sm["hours_share"] = sm.n / [calendar.monthrange(year, m)[1] * 24 for m in sm.month]
+        state_months.append(sm.drop(columns="n"))
         print(year, ", ".join(f"{r.city} {r.pm25:.0f} ({r.stations}, {r.hours_share:.0%})"
                               for r in df.sort_values("city").itertuples()))
     out = pd.concat(rows)
@@ -259,6 +286,14 @@ def main() -> None:
     monthly["hours_share"] = monthly.hours_share.round(3)
     monthly[["city", "year", "month", "pm25", "hours_share"]].sort_values(
         ["city", "year", "month"]).to_csv(DATA / "monthly_cpcb.csv", index=False)
+
+    sm = pd.concat(state_months)
+    print("state-months dropped for coverage:", int((sm.hours_share < MIN_HOURS_SHARE).sum()))
+    sm = sm[sm.hours_share >= MIN_HOURS_SHARE].copy()
+    sm["pm25"] = sm.pm25.round(1)
+    sm["hours_share"] = sm.hours_share.round(3)
+    sm[["state", "year", "month", "pm25", "stations", "hours_share"]].sort_values(
+        ["state", "year", "month"]).to_csv(DATA / "monthly_cpcb_state.csv", index=False)
 
     census = census_populations(xlsx)
     cities = pd.DataFrame([{

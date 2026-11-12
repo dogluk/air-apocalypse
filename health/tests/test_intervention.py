@@ -206,14 +206,30 @@ def test_monthly_pct_two_places(tmp_path):
         assert iv.annual_change(p, q) == pytest.approx(-10 * (s[9] * 31 + s[10] * 30) / 365)
     assert not np.allclose(*shapes.values())
     run = simulate.run(iv, curves=["gemm_ncd_lri"], n=200)
-    assert set(run.shapes) == {"Punjab", "Haryana"}
+    assert set(run.shapes) == {"Punjab (state)", "Haryana (state)"}
+    # the run adds the two places, each cut by its own shape: the same as two one-place runs
+    # (same seed, so the same quantiles), averaged by population
+    one = [simulate.run(replace(iv, places=[p]), curves=["gemm_ncd_lri"], n=200) for p in iv.places]
+    pops = [r.population for r in one]
+    assert run.population == pytest.approx(sum(pops))
+    both = run.per_curve["gemm_ncd_lri"]
+    alone = [r.per_curve["gemm_ncd_lri"] for r in one]
+    assert np.allclose(both.pm25_after, np.average([a.pm25_after for a in alone], axis=0, weights=pops))
+    assert np.allclose(both.deaths_postponed, sum(a.deaths_postponed for a in alone))
+    # and a flat (shape-blind) cut would give different answers
+    assert not np.allclose(*(a.pm25_after for a in alone))
 
 
 def test_monthly_pct_with_from_level():
     iv = load(INTERVENTIONS / "november_pct_delhi.toml")
-    q = np.random.default_rng(1).random(50)
     p = iv.places[0]
-    assert np.array_equal(iv.annual_change(p, q), replace(iv, from_level=100).annual_change(p, q))
+    pct = float(iv.annual_change(p, np.array([0.5]))[0])
+    run = simulate.run(replace(iv, from_level=100), curves=["gemm_ncd_lri"], n=2001)
+    after = run.per_curve["gemm_ncd_lri"].pm25_after
+    assert np.median(after) == pytest.approx(100 * (1 + pct / 100), rel=0.005)
+    # the draws are exactly level x (1 + annual pct at each quantile)
+    q = simulate._rng(0, 0).random(2001)
+    assert np.allclose(after, 100 * (1 + iv.annual_change(p, q) / 100))
 
 
 def test_report_names_the_shape():

@@ -17,10 +17,12 @@ Exposure maps are annual means, so a percent cut has to be turned into an annual
 months are not equally polluted: a 20% cut in a month that is 2.4 times the annual mean is a
 48% cut of the mean for that month. monthly_pct therefore weights each month by the place's
 own PM2.5 shape (airhealth/months.py): twelve numbers, January first, with day-weighted mean 1,
-from the CPCB monthly means of 2023-25 (data/monthly_cpcb.csv). A city uses its own monitors;
-a city without a complete year borrows the largest monitored city in its state, a state or
-district takes the population-weighted shape of its monitored cities, and anywhere with none
-falls back to India's. Each result says which (Run.shapes, the report footer). monthly_delta
+from the CPCB monthly means of 2023-25 (data/monthly_cpcb.csv, data/monthly_cpcb_state.csv; all
+of 2016-25 if the window lacks a month). A city with all twelve months in its CPCB data uses its
+own monitors; a city without borrows the largest such city in its state, else the state-wide
+shape of all CPCB monitors in the state; a state or district takes the population-weighted shape
+of its such cities, else the state-wide shape; anywhere with none falls back to India's. Each
+result says which (Run.shapes, the report footer). monthly_delta
 is in µg/m³ and is unaffected. When
 months are given as distributions they are drawn together (one percentile for all twelve in
 each draw): an intervention that does better than expected in November is taken to do
@@ -45,7 +47,7 @@ import pandas as pd
 from scipy import optimize, stats
 
 from . import lag as lags
-from . import paths
+from . import months, paths
 from . import places as places_
 from .impact import Change
 from .inputs import Sources
@@ -247,7 +249,6 @@ class Intervention:
         """The annual change at quantiles q for this place: monthly_pct weights months by the
         place's shape; every other kind ignores the place."""
         if self.monthly is not None and self.change_kind == "pct":
-            from . import months
             return self.change.ppf(q, MONTH_DAYS * months.shape(place).values / MONTH_DAYS.sum())
         return self.change.ppf(q)
 
