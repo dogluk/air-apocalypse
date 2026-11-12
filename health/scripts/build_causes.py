@@ -122,8 +122,10 @@ MCDUFFIE_SECTORS = {
                               "kept out of `residential` so that group is homes only"),
     "Other Combustion": ("other", "uncategorised combustion (paper: 'uncategorized combustion sources')"),
     "Solvent": ("other", "solvent use, non-combustion"),
-    "Waste": ("other", "waste incineration/disposal (paper: 'waste incineration'); not stated to be open burning, "
-              "so not `waste_burning`"),
+    "Waste": ("waste_burning", "controller ruling: McDuffie's sectors follow CEDS, whose waste sector in South Asia is mostly "
+              "open burning. The paper does not define the sector as anything else: Fig. 2 caption lists 'waste "
+              "incineration' and the text compares the waste sector's deaths with 'the only previous estimate of "
+              "domestic waste burning'"),
     "International Shipping": ("transport", "APnA's transport group includes shipping"),
     "Agricultural Waste Burning": ("agri_burning", "crop-residue burning"),
     "Other Open Fire": ("natural", "paper: deforestation, boreal forest, peat, savannah and temperate forest fires"),
@@ -137,7 +139,10 @@ MCDUFFIE_LOCATOR = ("Supplementary Data 1 (41467_2021_23853_MOESM4_ESM.xlsx), sh
                     "column '{col} Contribution (%)'; annual 2017 GEOS-Chem shares of population-weighted PM2.5 over "
                     "the city's Atlas of Urban Expansion T3 urban extent (Nat Commun 12:3594, main text, 'Sub-national "
                     "area boundaries are identified by the nearest dominant city and are defined using T3 urban "
-                    "extent data'; 'Global and national sector and fuel-type contributions' for the 2017 base year)")
+                    "extent data from the Atlas of Urban Expansion'; shares from 'gridded model sensitivity "
+                    "simulation results (... 2 x 2.5 degrees elsewhere)' applied 'to the sub-national exposure "
+                    "levels'; i.e. Atlas of Urban Expansion T3 urban extent, 2x2.5 deg model downscaled; 2017 base "
+                    "year per 'Global and national sector and fuel-type contributions')")
 
 
 def mcduffie_rows(cities: pd.DataFrame, xlsx: Path) -> tuple[pd.DataFrame, list[str]]:
