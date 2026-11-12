@@ -28,14 +28,14 @@ Panaji,Goa,322569,Panaji U.A;Mormugao U.A.;Margao U.A.,North Goa;South Goa,North
 Puducherry,Puducherry,830845,Puducherry  U.A.;Cuddalore,Puducherry,Puducherry,Puducherry-Cuddalore,Puducherry;Cuddalore
 Rajkot,Gujarat,1390640,Rajkot U.A.,Rajkot,Rajkot,Rajkot,
 Shimla,Himachal Pradesh,171640,Shimla U.A.,Shimla,Shimla,Shimla,
-Srinagar,Jammu & Kashmir,1264202,Srinagar U.A.,Srinagar,Srinagar,Srinagar,
+Srinagar,Jammu & Kashmir,1264202,Srinagar U.A.,Srinagar,Srinagar,Srinagar,Srinagar
 Thiruvananthapuram,Kerala,1679754,Thiruvananthapuram U.A.,Thiruvananthapuram,Thiruvananthapuram,Thiruvananthapuram,Thiruvananthapuram
 Tiruchirappalli,Tamil Nadu,1022518,Tiruchirappalli U.A. $,Tiruchirappalli,Tiruchirappalli,Tiruchirapalli,Tiruchirappalli
 Vadodara,Gujarat,1822221,Vadodara U.A.,Vadodara,Vadodara,Vadodara,
 Vijayawada,Andhra Pradesh,2311941,Vijayawada U.A.@;Guntur U.A.;Tenali,Krishna;Guntur,Krishna;Guntur,Vijayawada-Guntur-Tenali,Vijayawada
 Visakhapatnam,Andhra Pradesh,1728128,Visakhapatnam @,Visakhapatnam,Visakhapatnam,Visakhapatnam,Visakhapatnam
 Agra,Uttar Pradesh,1760285,Agra U.A.,Agra,Agra,Agra,Agra
-Amritsar,Punjab,1183549,Amritsar U.A.,Amritsar;Tarn Taran,Amritsar;Tarn Taran,Amritsar-Tarn Taran,Amritsar
+Amritsar,Punjab,1183549,Amritsar U.A.,Amritsar,Amritsar,Amritsar-Tarn Taran,Amritsar
 Bhopal,Madhya Pradesh,1886100,Bhopal U.A.,Bhopal,Bhopal,Bhopal,Bhopal
 Bhubaneswar,Odisha,885363,Bhubaneswar  U.A.,Khordha,Khordha,Bhubaneswar,Bhubaneswar
 Chandigarh,Chandigarh,1622266,Chandigarh  U.A.;Patiala U.A.;Ambala  U.A.,Chandigarh,Chandigarh,Chandigarh-Patiala-Ambala,Chandigarh;Patiala;Ambala
@@ -44,7 +44,7 @@ Dehradun,Uttarakhand,706124,Dehradun U.A. $,Dehradun,Dehradun,Dehradun,Dehradun
 Indore,Madhya Pradesh,2170295,Indore U.A.,Indore,Indore,Indore,Indore
 Kanpur,Uttar Pradesh,2920496,Kanpur U.A.,Kanpur Nagar,Kanpur Nagar,Kanpur,Kanpur
 Kochi,Kerala,2119724,Kochi U.A.,Ernakulam,Ernakulam,Kochi,Kochi
-Ludhiana,Punjab,1618879,Ludhiana,Ludhiana;Jalandhar,Ludhiana;Jalandhar,Ludhiana-Phillaur,Ludhiana
+Ludhiana,Punjab,1618879,Ludhiana,Ludhiana,Ludhiana,Ludhiana-Phillaur,Ludhiana
 Nagpur,Maharashtra,2497870,Nagpur U.A.,Nagpur,Nagpur,Nagpur,Nagpur
 Patna,Bihar,2049156,Patna U.A.,Patna,Patna,Patna,Patna
 Raipur-Durg-Bhilai,Chhattisgarh,2187780,Raipur U.A.;Durg-Bhilainagar U.A.,Raipur;Durg,Raipur;Durg,Raipur-Durg-Bhillai,Raipur;Bhilai

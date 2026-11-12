@@ -49,7 +49,8 @@ MIN_HOURS_SHARE = 0.75
 # values. The others are the other 39 APnA airsheds (Zenodo 6919069, data/apna_source_apportionment.csv).
 # state: the state of the city's first town. A satellite map's district units must lie in it, so an
 # airshed that crosses a state line (Chandigarh-Patiala-Ambala, Puducherry-Cuddalore) lists only the
-# units of its home state. Census entries are summed; a listed town that is not Class I is left out
+# units of its home state. Units are the districts of the towns counted in the population.
+# Census entries are summed; a listed town that is not Class I is left out
 # (see sources.toml). cpcb_cities is empty where CPCB has no station in the airshed.
 CITIES = {
     "Delhi": ("Delhi", ["Delhi U.A."], ["NCT of Delhi"],
@@ -90,7 +91,7 @@ CITIES = {
                    "Puducherry-Cuddalore", ["Puducherry", "Cuddalore"]),
     "Rajkot": ("Gujarat", ["Rajkot U.A."], ["Rajkot"], ["Rajkot"], "Rajkot", []),
     "Shimla": ("Himachal Pradesh", ["Shimla U.A."], ["Shimla"], ["Shimla"], "Shimla", []),
-    "Srinagar": ("Jammu & Kashmir", ["Srinagar U.A."], ["Srinagar"], ["Srinagar"], "Srinagar", []),
+    "Srinagar": ("Jammu & Kashmir", ["Srinagar U.A."], ["Srinagar"], ["Srinagar"], "Srinagar", ["Srinagar"]),
     "Thiruvananthapuram": ("Kerala", ["Thiruvananthapuram U.A."], ["Thiruvananthapuram"],
                            ["Thiruvananthapuram"], "Thiruvananthapuram", ["Thiruvananthapuram"]),
     "Tiruchirappalli": ("Tamil Nadu", ["Tiruchirappalli U.A."], ["Tiruchirappalli"], ["Tiruchirappalli"],
@@ -101,7 +102,7 @@ CITIES = {
     "Visakhapatnam": ("Andhra Pradesh", ["Visakhapatnam"], ["Visakhapatnam"], ["Visakhapatnam"],
                       "Visakhapatnam", ["Visakhapatnam"]),
     "Agra": ("Uttar Pradesh", ["Agra U.A."], ["Agra"], ["Agra"], "Agra", ["Agra"]),
-    "Amritsar": ("Punjab", ["Amritsar U.A."], ["Amritsar", "Tarn Taran"], ["Amritsar", "Tarn Taran"],
+    "Amritsar": ("Punjab", ["Amritsar U.A."], ["Amritsar"], ["Amritsar"],
                  "Amritsar-Tarn Taran", ["Amritsar"]),
     "Bhopal": ("Madhya Pradesh", ["Bhopal U.A."], ["Bhopal"], ["Bhopal"], "Bhopal", ["Bhopal"]),
     "Bhubaneswar": ("Odisha", ["Bhubaneswar U.A."], ["Khordha"], ["Khordha"], "Bhubaneswar", ["Bhubaneswar"]),
@@ -112,7 +113,7 @@ CITIES = {
     "Indore": ("Madhya Pradesh", ["Indore U.A."], ["Indore"], ["Indore"], "Indore", ["Indore"]),
     "Kanpur": ("Uttar Pradesh", ["Kanpur U.A."], ["Kanpur Nagar"], ["Kanpur Nagar"], "Kanpur", ["Kanpur"]),
     "Kochi": ("Kerala", ["Kochi U.A."], ["Ernakulam"], ["Ernakulam"], "Kochi", ["Kochi"]),
-    "Ludhiana": ("Punjab", ["Ludhiana"], ["Ludhiana", "Jalandhar"], ["Ludhiana", "Jalandhar"],
+    "Ludhiana": ("Punjab", ["Ludhiana"], ["Ludhiana"], ["Ludhiana"],
                  "Ludhiana-Phillaur", ["Ludhiana"]),
     "Nagpur": ("Maharashtra", ["Nagpur U.A."], ["Nagpur"], ["Nagpur"], "Nagpur", ["Nagpur"]),
     "Patna": ("Bihar", ["Patna U.A."], ["Patna"], ["Patna"], "Patna", ["Patna"]),
@@ -178,14 +179,15 @@ def census_populations(xlsx: Path) -> dict[str, tuple[str, int]]:
 
 
 def check_cpcb_names(con: duckdb.DuckDBPyConnection) -> None:
-    """Every CPCB name is a city in the 2024 file, in the city's state (or a neighbour's for an
-    airshed across a state line); a CPCB name serves one city only."""
-    path = DIWALI / "data" / "raw" / "cpcb-air-quality-2024.parquet"
-    have = dict(con.execute(f"SELECT City, mode(State) FROM read_parquet('{path}') GROUP BY 1").fetchall())
+    """Every CPCB name is a city in some year's file (2016-2025), in the city's state (or a
+    neighbour's for an airshed across a state line); a CPCB name serves one city only."""
+    have = {}
+    for path in sorted((DIWALI / "data" / "raw").glob("cpcb-air-quality-*.parquet")):
+        have.update(con.execute(f"SELECT City, mode(State) FROM read_parquet('{path}') GROUP BY 1").fetchall())
     seen = {}
     for city, (state, _, _, _, _, names) in CITIES.items():
         for n in names:
-            assert n in have, (city, n, "not in the 2024 CPCB file")
+            assert n in have, (city, n, "not in any year of the CPCB files")
             ok = {state} | CPCB_OTHER_STATES.get(city, set())
             assert canonical_state(have[n]) in ok, (city, n, have[n])
             assert n not in seen, (n, city, seen[n])

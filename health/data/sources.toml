@@ -184,8 +184,9 @@ Fifty cities (2026-11-12): the 11 original cities are built exactly as before (o
 do not add Howrah or Pimpri-Chinchwad, Ahmedabad not Gandhinagar). A new city's hourly value is the median over the
 stations of all its cpcb_cities (Chandigarh: Chandigarh, Patiala, Ambala; Raipur-Durg-Bhilai: Raipur, Bhilai;
 Puducherry: Puducherry, Cuddalore; Asansol-Durgapur, Hubli-Dharwad likewise). The city's state in this file is the state
-in cities.csv. No rows (no CPCB station in the 2024 file under that name in the city's state) for Aurangabad (CPCB's
-Aurangabad is the one in Bihar), Jamshedpur, Panaji, Rajkot, Shimla, Srinagar, Vadodara and Ranchi. Dhanbad-Bokaro is
+in cities.csv. No rows (no CPCB station in any year 2016-2025 under that name in the city's state) for Aurangabad (CPCB's
+Aurangabad is the one in Bihar), Jamshedpur, Panaji, Rajkot, Shimla, Vadodara and Ranchi (all names scanned across every year's file;
+Srinagar appears in 2025 only, with under 75% of hours, so it has a cpcb_cities entry but no rows). Dhanbad-Bokaro is
 Dhanbad's stations only (Bokaro has none). Many new city-years fall under the 75% cut and are dropped; the script prints them.
 """
 
@@ -219,8 +220,8 @@ Vijayawada = Vijayawada U.A. + Guntur U.A. + Tenali; Dhanbad-Bokaro = Dhanbad U.
 Raipur-Durg-Bhilai = Raipur U.A. + Durg-Bhilainagar U.A.; Asansol-Durgapur = Asansol U.A. + Durgapur U.A.
 Units: the satellite maps need all units in the city's state, so the two airsheds across a state line (Chandigarh: Patiala
 in Punjab, Ambala in Haryana; Puducherry: Cuddalore in Tamil Nadu) list only the home state's unit, though their population
-and CPCB stations cover the whole airshed. Units are whole districts, so a city's satellite value is its district's (for
-Ludhiana-Phillaur and Amritsar-Tarn Taran, the districts of every named town, Jalandhar and Tarn Taran included). Asansol-Durgapur:
+and CPCB stations cover the whole airshed. A city's units are the districts of the towns counted in its population. Units are whole districts, so a city's satellite value is its district's (for
+Ludhiana-Phillaur and Amritsar-Tarn Taran, only the districts of the towns counted in the population: Ludhiana and Amritsar; Phillaur's Jalandhar and Tarn Taran are not Class I, so their districts are not used). Asansol-Durgapur:
 AQLI Barddhaman, ACAG Paschim Barddhaman (the district after the 2017 split). Guwahati: Kamrup Metropolitan in both. Allahabad:
 AQLI 'Prayagraj', ACAG 'Allahabad'.
 """
