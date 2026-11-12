@@ -556,3 +556,25 @@ Each district carries the state and unit names exposure_acag_total.csv uses, and
 district it takes its value from, matched by name within the state (exact, then closest spelling, then hand-checked ALIASES in
 the script), or null. 673 of 735 districts have one; they cover AQLI units holding 94.8% of AQLI's population (2023).
 """
+
+["apna_source_apportionment.csv"]
+source = "UrbanEmissions.info (Guttikunda SK, Nishadh KA, Jawahar P). Air pollution knowledge assessments (APnA) - PM2.5 Source Apportionment Results for 50 Indian Cities. Zenodo record 6919069, published 2022-03-01, CAMx output, shares by source category."
+url = "https://zenodo.org/api/records/6919069/files/APnA_50airsheds_PM25_Source_Apportionment_CAMxOutputs.csv/content"
+catalog = "https://zenodo.org/records/6919069"
+page = "https://www.urbanemissions.info/india-apna"
+sha256 = "c3222ffb4c41f1c31d8a6da55c0ea800af3e7fdd7088f8059c17a86717381dcf"
+locator = "Whole file, APnA_50airsheds_PM25_Source_Apportionment_CAMxOutputs.csv (Zenodo record 6919069; the record lists it with md5 aff5953f4cdc31724fb842e4fc186e58, 3,682 bytes). Columns: Airshed, City, A to I (share of city PM2.5 from each source, printed as percent strings), study_uear (2017 or 2019)."
+retrieved = "2026-11-12"
+licence = "CC BY 4.0 (the Zenodo record's licence). Attribute UrbanEmissions.info and the record."
+method = "downloaded"
+notes = """
+Kept byte for byte as published, including the misspelt column name study_uear. 49 airsheds: Varanasi is not in the file. Categories
+(record description): A all transport (road, rail, aviation, shipping); B residential; C industries (without brick kilns); D all dust
+(construction and resuspension); E open waste burning; F diesel generator sets; G brick manufacturing; H sea salt (where applicable);
+I outside/regional contribution. H is blank for airsheds without sea salt. Shares are printed as strings with a % sign; parse them
+where they are used, not here.
+study_uear is the only year field in the file: 2017 for 19 airsheds, 2019 for 30. The record page does not state the base year
+of each airshed, so none is written here.
+The record says the results are explained and discussed in journal articles; it lists two (APnA for 20 Indian cities, and NCAP
+review), which are not read here.
+"""
