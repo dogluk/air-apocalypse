@@ -6,40 +6,37 @@ Last updated 2026-11-11. Read this first when picking the project up.
 
 **What we are building.** A calculator: "if PM2.5 in place X goes from A to B, how many deaths
 a year are avoided and how many years of life are gained?" It answers on several published
-risk curves side by side, never one, because they disagree by several times. Next it ranks
-interventions by expected life-years per rupee, city by city, long shots included. Akash's
-role: direction and taste; Claude makes the technical calls and writes them down. Priority:
-datasets, models, evals, benchmarks (not reviewer write-ups for now).
+risk curves side by side, never one, because they disagree by several times. Now being
+extended to rank measures by expected life-years per rupee across ~50 Indian cities, long
+shots included. Akash's role: direction and taste; Claude makes the technical calls and
+writes them down. Audience for the first ranking: researchers who can check it (CREA, Sarath
+Guttikunda) and smart friends.
 
-**Where it is.** Works for India, every state and ten cities, from the command line and a
-local dashboard (`airhealth dashboard`): place, map, year, a source for each input, a district
-map. Eight curves (five open, three on IHME's local files), five exposure maps. Eight
-benchmarks against published studies, all within band.
+**Where it is.** India, every state and **50 cities** (APnA's 49 airsheds plus Delhi), from the
+command line and a local dashboard. Eight curves, five exposure maps, eight benchmarks within
+band. Every place now has a **month-by-month PM2.5 pattern** from CPCB monitors (Delhi:
+November 2.4× its annual mean, July 0.3×); places without their own monitors borrow from their
+state's cities, then all the state's monitors, then India, and say so. A percent cut in
+chosen months is now weighted by how dirty those months are (it used to treat every month
+as average, understating a Delhi winter cut ~2.4×).
 
-**Done 2026-11-11 (committed locally, nothing pushed).**
-1. Years before 2020 use that year's own SRS death figures.
-2. Dashboard: a year selector and a district map of PM2.5.
-3. A switch for every input (government or UN population, death rates, death count).
-   Across sources India's numbers move ~15%; across curves ~8×.
-4. IHME: GBD 2023 deaths and population downloaded (Akash signed in, an agent drove the
-   browser); GBD 2023 exposure map and three IHME curves built (gbd2023, gbd2019, gemm_5cod).
-5. Research notes in `lit/`: `prior-rankings.md` (nobody ranks Indian interventions on one
-   metric, curve-sensitive, city by city, with odds of success), `city-sources.md` (an open
-   49-city source table exists, APnA; ~60 NCAP city reports as PDFs; methods disagree by
-   multiples), `open-work-and-people.md`.
+**Done 2026-11-12 (committed locally, nothing pushed).**
+1. Ranking design agreed: `docs/specs/2026-11-12-intervention-ranking-design.md` (Akash:
+   thin and wide; exposure measures in; all-India table as the headline plus one per city;
+   the funder's rupees).
+2. Plan A of four built and reviewed: `docs/plans/2026-11-12-cities-and-months.md` (50 cities,
+   monthly tables, `airhealth/months.py`, the monthly_pct fix). 267 tests pass.
+3. X searched (credits back): thin; leads in `lit/open-work-and-people.md`.
 
-**Next session.** Design the intervention ranking (brainstorm under way): causes-by-city
-dataset (APnA + McDuffie + NCAP reports, every study side by side, with the share blown in
-from outside) → intervention library (what it cuts, by how much, cost, odds, citations) →
-share × cut gives the PM2.5 change → life-years on every curve → a ranking per curve, flips
-flagged → benchmarks against the PES-for-stubble ($3,600-5,400/life), scrubber and World Bank
-figures. Akash chose ~50 cities thin over one airshed deep (2026-11-12). Everything runs
-month by month: winter-only measures (stubble, heating) are scored on what they do to the
-annual mean, using each city's monthly PM2.5 profile from CPCB.
-
-Exposure measures (purifiers, masks, school days) are in: Akash said yes 2026-11-12. Claude's
-call: scored as a cut in the exposure people actually get (people covered × hours × indoor cut),
-with lower odds because no trial shows they cut deaths; clean cooking is in too, in a second pass.
+**Next session: plan B, causes by city.** Write and run the plan for spec part 2: parse APnA
+into `data/causes.csv` (spec schema), add McDuffie 2021's 17 cities and the big-city NCAP/TERI
+studies from `lit/city-sources.md`, a `--use causes=` switch, and a monthly stubble share for
+IGP cities (APnA has none; it sits inside "outside"). Carry-overs: confirm APnA's base years
+from its papers before using them (the Zenodo record does not state them); fix the README line
+saying all fifty cities have a CPCB station (seven have none); `census_name` keeps the
+workbook's footnote markers (strip before joining); Asansol's two satellite maps use different
+district sets; Jharkhand and 10 other states still use India's monthly pattern (their monitors
+miss months). Then plan C (library and engine) and plan D (ranking, benchmarks, dashboard tab).
 
 **Waiting on Akash.** (1) When to push. X search done 2026-11-12: thin,
 see `lit/open-work-and-people.md`.
