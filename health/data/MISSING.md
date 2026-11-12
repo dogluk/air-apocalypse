@@ -60,3 +60,31 @@ GBD 2023's 969,726 ambient-PM2.5 deaths for India in 2023 (OWID page of GBD 2023
 here: GBD splits one PM2.5 attributable fraction between ambient and household air by exposure, which needs GBD 2023's household
 air pollution estimates (GHDx record 594794, 'Household Air Pollution Estimates [CSV]', not downloaded). Pandey et al. 2021's
 GBD 2019 figure for India has the same dependency.
+
+## Causes by city: studies and values not transcribed (Task 4, 2026-11-12)
+
+- **Chennai (IIT Madras for TNPCB/GCC).** Only the interim report is public
+  (https://chennaicorporation.gov.in/gcc/pdf/Intrim%20report%20SA,EI%20and%20CC,%20IITM.pdf, 29 pages, read in full 2026-11-12). It has
+  the site list, a gridded emission inventory for five source groups, wind roses and AERMOD PM10 contour plots at four sites, and says
+  the EC/OC, metals and ion analyses are 'in progress'. It prints no source-apportionment shares and no PM2.5 emission shares, so no
+  Chennai study row is written (APnA and, where it covers Chennai, other tables remain). Needed: the final IIT Madras report.
+- **Ahmedabad (GEMI, 5 Nov 2020, PRANA file Ahmedabad.pdf).** The only shares are of the emission inventory (Table 5.1.1, Fig. 5.1.1: road
+  dust 36%, domestic 34%, construction and demolition 16%, point sources 14%, line sources 2%, of 53,873 kg/day), and the report calls the
+  pollutant 'PM' with no size cut (its dispersion model is PM10 and its receptor section shows PM10 source contributions only). Not PM2.5,
+  so left out (size_fraction must be PM2.5). Needed: a PM2.5 split from GEMI or the NCAP final report.
+- **Ludhiana, Amritsar, Chandigarh: Biswal et al. 2025 regional stubble shares** (North Punjab 28/24/11%, Central Haryana 25/31/9%,
+  Southwest Punjab 39/48/27% for 16 Oct-30 Nov 2022/23/24; doi 10.1039/d5ea00052a, Sec. 3.4). The rule is that a regional value goes to a city only
+  if the paper's own map (Fig. 3, regions drawn as coloured lines over the CUPI-G sites) puts the city in the region. The figure is an
+  image on the RSC site, which blocked every automated fetch (HTTP 403, Cloudflare), so no city could be placed and no row is written.
+  Table S2 (the sites used per region) is in the supplement, also not reachable. Needed: open Fig. 3 in a browser and say which of these
+  three cities (and Patiala, Jalandhar and similar if added) falls inside North Punjab, Southwest Punjab or Central Haryana.
+- **Kulkarni et al. 2020 (ES&T 54(8): 4790)**: the 20% is read from the abstract on the publisher page; the ACS full text is paywalled, so
+  the year simulated and the figure behind the number were not opened (year_sampled is blank).
+- **Lok Sabha written answer of 10 March 2025 (DSS season means 2020-24).** The answer text was not found on sansad.in (search engines
+  returned only the 9 Feb 2026 answer on a different question); the values are written from the Times of India report of the answer,
+  evidence S, flagged 'PRESS ONLY' in the locator.
+- **Nagar and Sharma 2022 (Urban Climate 41: 101084)**: the ScienceDirect page gave no abstract to the tools used; Delhi 31% and Kanpur 21%
+  are from a Hindustan Times report (19 Jan 2022), evidence S. Biswal et al. quote the Delhi value for 'October to December', the press
+  for October-November.
+- **Mumbai AERMOD column (Table 7.1 col. C)** and the other dispersion results of the Maharashtra, Hyderabad and Bengaluru reports are for
+  'PM' of unstated size and are not transcribed.

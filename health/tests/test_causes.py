@@ -101,9 +101,32 @@ def test_mcduffie_rows():
     ("Patna", "teri_patna2021_cmb", "summer", "industry", 27),                            # Fig 4.3
     ("Agra", "iitk_agra2021_pmf", "winter", "transport", 22.8),                           # Table 4.8
     ("Agra", "iitk_agra2021_pmf", "summer", "dust", 37.4),                                # Table 4.12: 34.5 + 2.9
+    ("Mumbai", "neeri_iitb_mumbai2023_pmf", "summer", "natural", 26),                     # Table 4.1: marine aerosols
+    ("Pune", "neeri_iitb_pune2024_pmf", "winter", "dust", 21),                            # Table 4.1: road dust 9 + construction 12
+    ("Bengaluru", "cstep_bengaluru2022_cmb", "annual", "transport", 39.9),                # Fig 15
+    ("Bengaluru", "cstep_bengaluru2022_cmb", "winter", "secondary_unassigned", 20),       # Table 30: 4 + 16
+    ("Hyderabad", "iitk_hyderabad2023_pmf", "winter", "transport", 29.5),                 # Table 4.8
+    ("Hyderabad", "iitk_hyderabad2023_pmf", "summer", "dust", 43.3),                      # Table 4.12: 31.5 + 11.8
+    ("Surat", "teri_surat2021_cmb", "winter", "secondary_unassigned", 33),                # Fig 4.3
+    ("Surat", "teri_surat2021_cmaq", "summer", "outside", 57),                            # Table 6.1: international
+    ("Surat", "teri_surat2021_cmaq_region", "winter", "outside", 83),                     # Fig 6.4: 7 + 76
+    ("Delhi", "biswal2025_2023", "post-monsoon", "agri_burning", 16),                     # Sec. 3.4 / Fig 7
+    ("Delhi", "kulkarni2020", "post-monsoon", "agri_burning", 20),                        # abstract
+    ("Delhi", "dss_loksabha2025_2024", "post-monsoon", "agri_burning", 10.6),             # press (S)
+    ("Kanpur", "nagar_sharma2022", "post-monsoon", "agri_burning", 21),                   # press (S)
 ])
 def test_transcribed_values(city, study, season, cause, share):
     t = causes.for_city(city, study)
     assert len(t), f"no rows for {city} / {study}"
     got = t[(t.season == season) & (t.source_harmonised == cause)].share_pct.sum()
     assert got == pytest.approx(share, abs=0.05)
+
+
+def test_stubble_rows_are_partial():
+    s = causes.table().query("source_harmonised == 'agri_burning' and covers == 'partial'")
+    assert "Delhi" in set(s.city)
+    assert set(s.months.unique()) <= {"10,11", "10,11,12", "11", "10"}   # whatever the studies state; no annual
+    assert set(s.metric) == {"concentration_share"}
+    # every stubble estimate not read at source is flagged S and says so in its locator
+    press = s[s.evidence_key == "S"]
+    assert len(press) and press.locator.str.contains("PRESS ONLY").all()

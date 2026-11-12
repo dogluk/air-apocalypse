@@ -519,6 +519,10 @@ curve, map and year this tool gives 1.61 million, and the main reason is known b
 computable from these files (GBD splits one attributable fraction between outdoor air and
 cooking smoke; here outdoor air is scored alone). See `IHME_DOWNLOADS.md`.
 
+## What causes the PM2.5
+
+`data/causes.csv` puts every published answer to "what is this city's PM2.5 made of" side by side, one row per city, study, season, size fraction and source: UrbanEmissions' APnA runs for the 49 airsheds it covers, McDuffie et al.'s global-model shares for nine of the 50, and the city studies and stubble estimates transcribed by hand from state, NCAP and journal reports (`data/causes_transcribed.csv`; each row's `locator` names the table or figure and the page where the sampling months are stated). It never picks a winner or averages across studies, because they disagree by multiples, not points: Kanpur's household share is 34% in APnA, 25% in McDuffie and 3% (winter biomass) in IIT Kanpur's filter study, and Lucknow's share from outside the city is 30% or 81% (`lit/city-sources.md` section 3). Two things to keep in mind when reading it. APnA's `outside` rows already contain stubble smoke from upwind states, so the `agri_burning` rows (all `covers = partial`, stubble-only estimates for a stated October-December window, some from press reports and flagged `S`) overlap APnA's `outside` and must not be added to it. And emission shares (`metric = emission_share`) are never mixed with concentration shares. `airhealth.causes.for_city(city, study)` returns the rows; `build_causes.py` rebuilds the file and refuses groups that do not sum to 100 +/- 2.
+
 ## Benchmarks: does it reproduce published numbers?
 
 `python benchmarks/run.py` runs each published estimate's curve, counterfactual and year on
