@@ -24,19 +24,30 @@ as average, understating a Delhi winter cut ~2.4×).
 1. Ranking design agreed: `docs/specs/2026-11-12-intervention-ranking-design.md` (Akash:
    thin and wide; exposure measures in; all-India table as the headline plus one per city;
    the funder's rupees).
-2. Plan A of four built and reviewed: `docs/plans/2026-11-12-cities-and-months.md` (50 cities,
-   monthly tables, `airhealth/months.py`, the monthly_pct fix). 267 tests pass.
-3. X searched (credits back): thin; leads in `lit/open-work-and-people.md`.
+2. Plan A built and reviewed (`docs/plans/2026-11-12-cities-and-months.md`): 50 cities, monthly
+   tables, `airhealth/months.py`, the monthly_pct fix.
+3. Plan B built and reviewed (`docs/plans/2026-11-12-causes-by-city.md`): `data/causes.csv`, what
+   causes PM2.5 in each city by every study read at source, side by side: APnA for 49 cities,
+   McDuffie 2021 for 9, government and research studies for 11 (Delhi, Kolkata, Lucknow, Kanpur,
+   Patna, Agra, Mumbai, Pune, Bengaluru, Hyderabad, Surat), stubble shares for Delhi. Every row
+   says where its pollution comes from (`origin`: inside the city, from anywhere, or a
+   geographic split). `airhealth causes Kanpur` shows them side by side. A reviewer re-read ~230
+   rows at source and found no wrong number. 328 tests pass.
+4. X searched (credits back): thin; leads in `lit/open-work-and-people.md`.
 
-**Next session: plan B, causes by city.** Write and run the plan for spec part 2: parse APnA
-into `data/causes.csv` (spec schema), add McDuffie 2021's 17 cities and the big-city NCAP/TERI
-studies from `lit/city-sources.md`, a `--use causes=` switch, and a monthly stubble share for
-IGP cities (APnA has none; it sits inside "outside"). Carry-overs: confirm APnA's base years
-from its papers before using them (the Zenodo record does not state them); fix the README line
-saying all fifty cities have a CPCB station (seven have none); `census_name` keeps the
-workbook's footnote markers (strip before joining); Asansol's two satellite maps use different
-district sets; Jharkhand and 10 other states still use India's monthly pattern (their monitors
-miss months). Then plan C (library and engine) and plan D (ranking, benchmarks, dashboard tab).
+**Next session: plan C, the library and the engine.** Its first task must clear plan B's
+leftovers: Govardhan 2024's "Delhi other sectors" rows are tagged `local_all` but leave out
+Delhi transport (relabel `other`); `sources.toml` says 16 transcribed cities (11); a few
+locators miss a separator. Power plants sit inside `industry` everywhere, so FGD measures need
+`source_raw` or a new cause. Then: measure files (kind, scope, targets, exposure, cost drivers),
+2025 rupees, a common horizon with 3% discounting, covered-population runs, regional measures,
+the first ~25 measures. Then plan D (ranking, benchmarks, dashboard tab).
+
+**Gaps a person could close in minutes** (`health/data/MISSING.md`): open Fig. 3 of Biswal et
+al. 2025 (RSC blocks automated downloads) to place Ludhiana, Amritsar and Chandigarh in its
+stubble regions; find the Lok Sabha written answer of 10 March 2025 (DSS stubble shares for
+Delhi 2020-24, now only in press reports); Nagar & Sharma 2022's own numbers (Urban Climate
+41:101084). Chennai (interim report, no shares) and Ahmedabad (PM, not PM2.5) have no city study.
 
 **Waiting on Akash.** (1) When to push. X search done 2026-11-12: thin,
 see `lit/open-work-and-people.md`.
@@ -92,7 +103,7 @@ TMREL is GBD's 2.4-5.9 midpoint. See the status section of `health/IHME_DOWNLOAD
 2. **A GBD all-cause death source** (`--deaths gbd`): one more Results-tool query, "All
    causes" deaths by state and age. Also the GBD 2023 information sheet for the risk curves
    (login), to confirm the log scale in IHME's own words.
-3. **The intervention ranking** (design in progress, see "Next session" above).
+3. **The intervention ranking**: plans A and B done; C and D next (see "Next session" above).
 4. Cohort run to 2050 (stage 4), valuation presets (stage 5), the Surat 25× case (stage 6).
 5. Air-response layer (emissions to concentration), the dome effect, a public web page.
 
