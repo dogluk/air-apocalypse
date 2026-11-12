@@ -88,3 +88,10 @@ GBD 2019 figure for India has the same dependency.
   for October-November.
 - **Mumbai AERMOD column (Table 7.1 col. C)** and the other dispersion results of the Maharashtra, Hyderabad and Bengaluru reports are for
   'PM' of unstated size and are not transcribed.
+- **Biswal et al. 2025 Fig. 3 needs a person to open it.** A person with a normal browser session should open the RSC article
+  (doi 10.1039/d5ea00052a, Fig. 3, the region map) and say which of Ludhiana, Amritsar and Chandigarh lie inside North Punjab,
+  Southwest Punjab, Central Haryana or Delhi-NCR; the 2022/2023/2024 values for those regions are already in Sec. 3.4 (see above) and can
+  then be written as boundary = region rows.
+- **Lok Sabha answer of 10 March 2025 (re-checked in the fix round).** Searches restricted to pib.gov.in, sansad.in, loksabhadocs.nic.in and
+  eparlib.nic.in returned only unrelated PIB releases (Nov and Dec 2024 Winter Action Plan material); the answer text is not reachable with the
+  normal fetch tools, so the five dss_loksabha2025_* rows stay evidence S.
