@@ -33,10 +33,16 @@ dataset (APnA + McDuffie + NCAP reports, every study side by side, with the shar
 from outside) → intervention library (what it cuts, by how much, cost, odds, citations) →
 share × cut gives the PM2.5 change → life-years on every curve → a ranking per curve, flips
 flagged → benchmarks against the PES-for-stubble ($3,600-5,400/life), scrubber and World Bank
-figures. Open question to Akash: one airshed deep, or ~50 cities thin (Claude leans thin).
+figures. Akash chose ~50 cities thin over one airshed deep (2026-11-12). Everything runs
+month by month: winter-only measures (stubble, heating) are scored on what they do to the
+annual mean, using each city's monthly PM2.5 profile from CPCB.
 
-**Waiting on Akash.** (1) Deep vs wide, above. (2) X API credits ran out (402), if X search
-is wanted. (3) When to push.
+Exposure measures (purifiers, masks, school days) are in: Akash said yes 2026-11-12. Claude's
+call: scored as a cut in the exposure people actually get (people covered × hours × indoor cut),
+with lower odds because no trial shows they cut deaths; clean cooking is in too, in a second pass.
+
+**Waiting on Akash.** (1) When to push. X search done 2026-11-12: thin,
+see `lit/open-work-and-people.md`.
 
 ## What exists
 

@@ -10,7 +10,8 @@ before anyone is contacted.
 
 **How this was searched, and its blind spot.** GitHub: about 70 repository searches, 8 code
 searches, and direct listings of the accounts of the groups named in `landscape.md`. X: the
-X API returned HTTP 402 (out of credits) on the first call, so no X search was run. Exa does
+X API returned HTTP 402 on the first pass; a later search (2026-11-12, bottom of this file)
+found little. Exa does
 not return x.com post pages for these queries; it returns the blogs, op-eds, papers,
 LinkedIn posts and news stories that quote X posts. So the people below were found through
 their long-form writing, and the "threads" section is mostly not threads. Anyone who argues
@@ -291,7 +292,29 @@ What nobody has open-sourced, as far as these searches reach:
 9. **Farm-level stubble economics as code.** The cost numbers (₹800–2,500/acre payments,
    ₹1,500–1,800/t to bale and move straw, Happy Seeder savings) live in papers and PDFs, not
    models.
-10. **The X conversation itself.** Not searched (API out of credits). Whether a quantitative
-    X community on Indian air exists beyond the institutions above is still open. If credits
-    return, five searches on `stubble`, `FGD`, `smog tower`, `cloud seeding` and `mixing height`
-    during this smog season would settle it.
+10. **The X conversation itself.** Searched 2026-11-12 (credits back; see below). Thin.
+
+
+## X search, 2026-11-12
+
+Eight full-archive searches (since 2017, by relevance) on cost-effectiveness, stubble payments,
+source apportionment, effective-altruism framings and winter policy. Result: almost nothing
+quantitative. No thread ranks Indian interventions on one metric, which agrees with
+[`prior-rankings.md`](prior-rankings.md). Most hits were press releases, political accounts and
+Grok replies. What was worth keeping [R unless marked]:
+
+- **Seema Jayachandran's threads on the stubble payment paper** (Nov 2022): pay-after-compliance
+  had no effect; part-upfront payment was cost-effective. This is the PES anchor already used.
+  J-PAL's earlier ₹2,500/acre transfer result was shared by Saksham Khosla (Oct 2021).
+- **TERI, "cost-effective interventions" for Delhi** (reported by India Water Portal, Dec 2021).
+  Already in `prior-rankings.md` [O]: ~15 measures in ₹ bn per µg/m³, the closest thing to a
+  costed Delhi ranking. A benchmark candidate.
+- **A new Delhi-NCR source study at 500 m**, announced 26 Oct 2026 (via a post quoting the
+  article). The first in about a decade. Worth tracking as a future input to the causes dataset.
+- **CREA on NCAP spending vs outcomes** (Oct 2026, via a post): ₹12,087 cr since 2019, 117 of 130
+  cities still above the PM10 limit; Chennai's PM10 up 9.1% on ₹449 cr. A candidate benchmark
+  for "money spent vs µg/m³ moved".
+- **1.24 lakh deaths a year** attributed to exempting coal plants from FGD (May 2026, via a post;
+  likely a CREA figure). Check the source before use.
+
+Raw results: session scratchpad only, not committed.
