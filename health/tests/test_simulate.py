@@ -361,7 +361,7 @@ def test_city_run_names_its_population_year(tmp_path):
     assert state.population_year == state.year and "Census" not in report.run_footer(state)
 
 
-def test_monthly_pct_prints_its_assumption(tmp_path):
+def test_monthly_pct_prints_its_shape(tmp_path):
     f = tmp_path / "pct.toml"
     text = (IV / "november_only_delhi.toml").read_text()
     assert "monthly_delta" in text
@@ -369,5 +369,7 @@ def test_monthly_pct_prints_its_assumption(tmp_path):
     f.write_text(re.sub(r"monthly_delta\s*=\s*\[[^\]]*\]",
                         "monthly_pct = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -30, 0]", text))
     result = simulate.run(intervention.load(f), n=50, curves=["gemm_ncd_lri"])
-    assert "monthly_pct takes every month to be as polluted" in report.run_footer(result)
+    foot = report.run_footer(result)
+    assert "PM2.5 shape" in foot and "Delhi: 1 monitored city" in foot and "borrowed" in foot
+    assert "as polluted" not in foot
     assert "monthly_pct" not in report.run_footer(simulate.run(nov(), n=50, curves=["gemm_ncd_lri"]))

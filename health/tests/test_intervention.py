@@ -168,3 +168,58 @@ def test_defaults(tmp_path):
     assert i.cost_once.median == 0 and i.from_level is None and i.monthly is None
     assert isinstance(intervention.load(write(tmp_path, BASE.format(change="pct = -5"))).change,
                       Dist)
+
+
+# --- monthly_pct weights months by the place's shape ------------------------------------------
+
+from dataclasses import replace  # noqa: E402
+
+from airhealth import months, simulate  # noqa: E402
+
+INTERVENTIONS = paths.HEALTH / "interventions"
+
+
+def test_monthly_pct_weights_by_shape():
+    iv = load(INTERVENTIONS / "november_pct_delhi.toml")
+    s = months.shape(iv.places[0]).values
+    q = np.array([0.5])
+    assert iv.annual_change(iv.places[0], q) == pytest.approx(-20 * s[10] * 30 / 365)
+
+
+def test_draws_unchanged_for_other_kinds():
+    for f in ("delhi_100_to_80.toml", "november_only_delhi.toml", "punjab_haryana_10pct.toml"):
+        iv = load(INTERVENTIONS / f)
+        old = iv.change.sample(simulate._rng(0, 0), 500)
+        new = iv.annual_change(iv.places[0], simulate._rng(0, 0).random(500))
+        assert np.array_equal(old, new)
+
+
+def test_monthly_pct_two_places(tmp_path):
+    text = BASE.replace('places = ["Delhi"]', 'places = ["Punjab", "Haryana"]').format(
+        change="monthly_pct = [0, 0, 0, 0, 0, 0, 0, 0, 0, -10, -10, 0]")
+    iv = load(write(tmp_path, text))
+    q = np.array([0.5])
+    shapes = {}
+    for p in iv.places:
+        s = months.shape(p).values
+        shapes[p.name] = s
+        assert iv.annual_change(p, q) == pytest.approx(-10 * (s[9] * 31 + s[10] * 30) / 365)
+    assert not np.allclose(*shapes.values())
+    run = simulate.run(iv, curves=["gemm_ncd_lri"], n=200)
+    assert set(run.shapes) == {"Punjab", "Haryana"}
+
+
+def test_monthly_pct_with_from_level():
+    iv = load(INTERVENTIONS / "november_pct_delhi.toml")
+    q = np.random.default_rng(1).random(50)
+    p = iv.places[0]
+    assert np.array_equal(iv.annual_change(p, q), replace(iv, from_level=100).annual_change(p, q))
+
+
+def test_report_names_the_shape():
+    from airhealth import report
+    iv = load(INTERVENTIONS / "november_pct_delhi.toml")
+    run = simulate.run(iv, curves=["gemm_ncd_lri"], n=50)
+    footer_text = report.run_footer(run)
+    assert "shape" in footer_text and "CPCB 2023-25" in footer_text and "borrowed" in footer_text
+    assert "as polluted as the annual mean" not in footer_text

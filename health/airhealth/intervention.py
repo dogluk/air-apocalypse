@@ -13,7 +13,15 @@ cross zero; a negative one (a cut) is the mirror image of a positive one.
 The change is given exactly one way: delta (µg/m³, signed, negative = cleaner), pct (signed
 percent of each unit's level), to (a target level), or a twelve-month profile, monthly_delta
 or monthly_pct, which becomes an annual delta or pct by annual_from_monthly (day-weighted).
-Exposure maps are annual means, so monthly_pct treats every month as equally polluted. When
+Exposure maps are annual means, so a percent cut has to be turned into an annual one, and
+months are not equally polluted: a 20% cut in a month that is 2.4 times the annual mean is a
+48% cut of the mean for that month. monthly_pct therefore weights each month by the place's
+own PM2.5 shape (airhealth/months.py): twelve numbers, January first, with day-weighted mean 1,
+from the CPCB monthly means of 2023-25 (data/monthly_cpcb.csv). A city uses its own monitors;
+a city without a complete year borrows the largest monitored city in its state, a state or
+district takes the population-weighted shape of its monitored cities, and anywhere with none
+falls back to India's. Each result says which (Run.shapes, the report footer). monthly_delta
+is in µg/m³ and is unaffected. When
 months are given as distributions they are drawn together (one percentile for all twelve in
 each draw): an intervention that does better than expected in November is taken to do
 better in December too.
@@ -197,8 +205,10 @@ class MonthlyMean:
     """The annual change from twelve monthly ones, drawn together (see module docstring)."""
     months: tuple[Dist, ...]
 
-    def ppf(self, q) -> np.ndarray:
-        return sum(w * m.ppf(q) for w, m in zip(MONTH_DAYS / MONTH_DAYS.sum(), self.months))
+    def ppf(self, q, weights: np.ndarray | None = None) -> np.ndarray:
+        """Weighted sum of the months' quantiles; weights default to days / 365."""
+        w = MONTH_DAYS / MONTH_DAYS.sum() if weights is None else weights
+        return sum(wi * m.ppf(q) for wi, m in zip(w, self.months))
 
     def sample(self, rng: np.random.Generator, n: int) -> np.ndarray:
         return self.ppf(rng.random(n))
@@ -232,6 +242,14 @@ class Intervention:
     def as_change(self, value: float) -> Change:
         """The impact.Change for one value (e.g. one draw) of the annual change."""
         return Change(**{self.change_kind: float(value)})
+
+    def annual_change(self, place: Place, q: np.ndarray) -> np.ndarray:
+        """The annual change at quantiles q for this place: monthly_pct weights months by the
+        place's shape; every other kind ignores the place."""
+        if self.monthly is not None and self.change_kind == "pct":
+            from . import months
+            return self.change.ppf(q, MONTH_DAYS * months.shape(place).values / MONTH_DAYS.sum())
+        return self.change.ppf(q)
 
 
 def _places(value) -> list[Place]:

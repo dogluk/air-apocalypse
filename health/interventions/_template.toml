@@ -49,10 +49,14 @@ a placeholder rather than an estimate.
 #   monthly_delta = [ ... ]  twelve values, January to December, µg/m³ (each may be a Dist)
 #   monthly_pct = [ ... ]    twelve values, January to December, percent (each may be a Dist)
 # A monthly profile becomes an annual change, weighted by days in the month: -40 in November
-# alone is -40 × 30/365 = -3.3 on the annual mean. Exposure maps are annual means, so
-# monthly_pct treats every month as equally polluted (in north India November is dirtier
-# than average, so a winter-only percent cut is understated). Monthly distributions are
-# drawn together: a draw that is good for one month is equally good for the others.
+# alone is -40 × 30/365 = -3.3 on the annual mean. monthly_pct is weighted by each place's own
+# PM2.5 shape as well: twelve numbers (January first, day-weighted mean 1) from the CPCB monthly
+# means of 2023-25 (data/monthly_cpcb.csv), so a cut in a dirty month (November in Delhi is about
+# 2.4 times the annual mean) counts for more. A city without a complete year of monitoring borrows
+# the largest monitored city in its state; a state or district takes its monitored cities'
+# population-weighted shape; anywhere else falls back to India's. The run says which was used.
+# monthly_delta is in µg/m³ and is unaffected. Monthly distributions are drawn together: a draw
+# that is good for one month is equally good for the others.
 pct = { dist = "normal", p5 = -15, p95 = -5 }
 
 [cost]

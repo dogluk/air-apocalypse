@@ -404,9 +404,10 @@ def run_footer(run: Run) -> str:
              sources_note(run.sources)]
     iv = run.intervention
     if iv.monthly is not None and iv.change_kind == "pct":
-        notes.insert(0, "monthly_pct takes every month to be as polluted as the annual mean; "
-                     "where the months cut are dirtier than average (a north Indian winter) "
-                     "the annual change, and so every result here, is understated")
+        for name, sh in run.shapes.items():
+            notes.insert(0, f"monthly_pct weights each month by {name}'s PM2.5 shape "
+                         f"(CPCB 2023-25 monthly means): {sh.basis}"
+                         + ("; borrowed, not this place's own monitors" if sh.borrowed else ""))
     notes = [n for n in notes if n]
     return _footer({(run.map_name, run.year): None}, run.fallback_states, run.unavailable, notes)
 

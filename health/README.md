@@ -319,12 +319,17 @@ Any number in `[change]` or `[cost]` can be a range instead: give its 5th and 95
 percentiles and a shape, `normal`, `lognormal` (skewed, never crossing zero), `uniform`, or
 `triangular` (with a `mode`). Twelve monthly values are averaged by days in the month; when
 they are ranges they are drawn together, so a draw that is good for November is good for
-December too. A drawn change never takes the air below 0 µg/m³. `monthly_pct` takes every
-month to be as polluted as the annual mean, which understates a winter-only cut where
-winters are dirtier than the rest of the year; a run that uses it says so.
+December too. A drawn change never takes the air below 0 µg/m³. `monthly_pct` weights each month
+by the place's own PM2.5 shape: twelve numbers, January first, with a day-weighted mean of 1,
+from the CPCB monthly means of 2023-25 (`data/monthly_cpcb.csv`), so a winter-only cut counts for
+more where winters are dirtier (a November cut in Delhi, about 2.4 times the annual mean).
+A city without a complete year of monitoring borrows the largest monitored city in its state, a
+state or district takes its monitored cities' population-weighted shape, and anywhere with none
+falls back to India's; the run says which it used, and where it borrowed. `monthly_delta` is
+in µg/m³ and is unaffected. The worked example is `november_pct_delhi.toml`.
 
-The three examples: `delhi_100_to_80.toml` (the what-if above, no cost or odds),
-`november_only_delhi.toml`, and `punjab_haryana_10pct.toml`. Their odds and costs are
+The examples: `delhi_100_to_80.toml` (the what-if above, no cost or odds),
+`november_only_delhi.toml`, `november_pct_delhi.toml`, and `punjab_haryana_10pct.toml`. Their odds and costs are
 illustrative placeholders, said so in each file's notes, and should not be quoted.
 
 ## The exposure maps, and how much they disagree

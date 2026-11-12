@@ -36,7 +36,7 @@ from itertools import combinations
 import numpy as np
 
 from . import curves as curves_
-from . import exposure, impact, intervention
+from . import exposure, impact, intervention, months
 from . import lag as lags
 from .curves import Curve
 from .inputs import Sources
@@ -100,6 +100,7 @@ class Run:
     un_scaling: object = None       # baseline.UNScaling for deaths="unwpp"
     population_year: int = 0        # the year the population is for (2011 if any place is a city)
     census_places: tuple = ()       # the places whose population is the Census's, not the map year's
+    shapes: dict = field(default_factory=dict)   # months.Shape by place name; monthly_pct runs only
 
 
 def realised_shares(iv: Intervention) -> np.ndarray:
@@ -153,10 +154,10 @@ class _Steady:
     census_places: tuple
 
 
-def _steady(iv: Intervention, curve: Curve, values: np.ndarray, map_name: str,
+def _steady(iv: Intervention, curve: Curve, q: np.ndarray, map_name: str,
             deaths: "str | Sources" = "srs") -> _Steady:
     """Steady-state results for every draw, added over the intervention's places."""
-    parts = [impact.steady_state_many(p, curve, map_name, iv.change_kind, values,
+    parts = [impact.steady_state_many(p, curve, map_name, iv.change_kind, iv.annual_change(p, q),
                                       pm25_override=iv.from_level, deaths=deaths)
              for p in iv.places]
     pop = np.array([r.population for r in parts])
@@ -198,8 +199,8 @@ def run(iv: Intervention, map_name: str = "aqli", curves: list[str] | None = Non
     if not chosen:
         raise ValueError("no curve can run: " + "; ".join(f"{k}: {v}" for k, v in unavailable.items()))
 
-    values = iv.change.sample(_rng(seed, 0), n)
-    median_values = np.full(n, iv.change.median)
+    q = _rng(seed, 0).random(n)
+    median_q = np.full(n, 0.5)
     usd = intervention.usd_per(iv.cost_currency, iv.cost_year)
     cost_rng = _rng(seed, 1)
     cost_usd = (iv.cost_once.sample(cost_rng, n)
@@ -210,9 +211,9 @@ def run(iv: Intervention, map_name: str = "aqli", curves: list[str] | None = Non
     per_curve, first = {}, None
     for curve in chosen:
         batch = curve.sample_many(_rng(seed, 2, zlib.crc32(curve.name.encode())), n)
-        joint = _steady(iv, batch, values, map_name, deaths)
-        change_only = joint if batch is curve else _steady(iv, curve, values, map_name, deaths)
-        curve_only = _steady(iv, batch, median_values, map_name, deaths)
+        joint = _steady(iv, batch, q, map_name, deaths)
+        change_only = joint if batch is curve else _steady(iv, curve, q, map_name, deaths)
+        curve_only = _steady(iv, batch, median_q, map_name, deaths)
         if first is None:
             first = joint
         alone = {"pm25_change": change_only.yll * years, "curve_parameters": curve_only.yll * years}
@@ -233,7 +234,9 @@ def run(iv: Intervention, map_name: str = "aqli", curves: list[str] | None = Non
                reconciliations=first.reconciliations, rate_adjustments=first.rate_adjustments,
                sources=first.sources, un_scaling=first.un_scaling,
                population_year=first.population_year,
-               census_places=first.census_places)
+               census_places=first.census_places,
+               shapes={p.name: months.shape(p) for p in iv.places}
+               if iv.monthly is not None and iv.change_kind == "pct" else {})
 
 
 def across_curve_spread(run: Run) -> float:
