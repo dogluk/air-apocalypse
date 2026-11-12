@@ -16,6 +16,7 @@ import numpy as np
 from . import baseline, curves, exposure
 from .curves import IHME_REASON, NOT_BUILT  # noqa: F401  (re-exported for callers)
 from .impact import Impact
+from .months import MONTHS
 
 if TYPE_CHECKING:
     from .simulate import Run
@@ -263,7 +264,6 @@ def _scaling_json(recs) -> list[dict]:
 
 # --- intervention runs ----------------------------------------------------------------------
 
-MONTHS = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 NO_INTERVAL = "no published interval"
 
 

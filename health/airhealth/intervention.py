@@ -41,11 +41,10 @@ from . import paths
 from . import places as places_
 from .impact import Change
 from .inputs import Sources
+from .months import MONTH_DAYS, MONTHS  # noqa: F401  (re-exported: tests and callers use them here)
 from .places import Place
 
 Z95 = stats.norm.ppf(0.95)
-MONTH_DAYS = np.array([31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31])
-MONTHS = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 DIST_KINDS = ("normal", "lognormal", "uniform", "triangular")
 CHANGE_KEYS = ("delta", "pct", "to", "monthly_delta", "monthly_pct")
 TOP_KEYS = ("name", "places", "start_year", "ramp_years", "duration_years", "p_success",
