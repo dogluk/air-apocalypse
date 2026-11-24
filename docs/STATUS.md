@@ -1,6 +1,7 @@
 # Where this stands
 
-Last updated 2026-11-11. Read this first when picking the project up.
+Last updated 2026-11-24. Read this first when picking the project up. Arriving cold (a model,
+or a person new to it)? Read [`../AGENTS.md`](../AGENTS.md) before this.
 
 ## In plain words (rewritten at the end of every session)
 
@@ -35,10 +36,21 @@ as average, understating a Delhi winter cut ~2.4×).
    rows at source and found no wrong number. 328 tests pass.
 4. X searched (credits back): thin; leads in `lit/open-work-and-people.md`.
 
-**Next session: plan C, the library and the engine.** Its first task must clear plan B's
-leftovers: Govardhan 2024's "Delhi other sectors" rows are tagged `local_all` but leave out
-Delhi transport (relabel `other`); `sources.toml` says 16 transcribed cities (11); a few
-locators miss a separator. Power plants sit inside `industry` everywhere, so FGD measures need
+**Done 2026-11-24 (branch `agent-ready`, committed locally, nothing pushed): made ready for a
+first push.**
+1. Plan B's leftovers are cleared. Govardhan 2024's "Delhi other sectors" rows are `other`, not
+   `local_all` (they leave out Delhi transport), and `validate()` now refuses any row but
+   `outside` beside a `local_all`. `sources.toml` says 11 transcribed cities (it said 16). Ten
+   locators that ran two sentences together are fixed. No share changed.
+2. [`AGENTS.md`](../AGENTS.md) at the repo root: how to get running, the rules (first: no
+   number unless read at its source), what is not solid, and open work sized for one sitting.
+3. The gap to GBD's own India count (969,726 against this tool's 1.61 million) is stated near
+   the top of `health/README.md`, not only in the IHME section.
+4. The example outputs in `health/README.md` match what a fresh clone prints (they had drifted
+   in the last digits), and a local folder path is out of the chart example.
+
+**Next session: plan C, the library and the engine.** Power plants sit inside `industry`
+everywhere, so FGD measures need
 `source_raw` or a new cause. Then: measure files (kind, scope, targets, exposure, cost drivers),
 2025 rupees, a common horizon with 3% discounting, covered-population runs, regional measures,
 the first ~25 measures. Then plan D (ranking, benchmarks, dashboard tab).
@@ -70,7 +82,7 @@ cd health
 ../.venv/bin/airhealth compare Delhi --from 100 --to 80
 ../.venv/bin/airhealth burden India
 ../.venv/bin/airhealth run interventions/november_only_delhi.toml
-../.venv/bin/python -m pytest -q                       # 241 tests (18 skip without IHME files)
+../.venv/bin/python -m pytest -q                       # all pass; 18 skip without IHME files
 ```
 
 ## Git

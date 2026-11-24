@@ -18,15 +18,15 @@ it went from 100 to 80?
 ```
 $ airhealth compare Delhi --from 100 --to 80
 Delhi (state): PM2.5 100 → 80 µg/m³
-Population 21.5 M; all-cause deaths 99,445 a year (4.6 per 1,000). Steady state, per year.
+Population 21.5 M; all-cause deaths 99,440 a year (4.6 per 1,000). Steady state, per year.
 
 curve                  PM2.5 µg/m³  % of deaths  deaths/yr  life exp. yrs  life-years/yr
 --------------------  ------------  -----------  ---------  -------------  -------------
-loglinear_jaganathan  100.0 → 80.0        15.2%     15,126          +2.25        313,040
-loglinear_brown       100.0 → 80.0         1.9%      1,855          +0.24         33,078
-loglinear_vodonos     100.0 → 80.0        13.8%     13,744          +1.97        228,660
-gemm_ncd_lri          100.0 → 80.0         4.1%      4,031          +0.53         67,116
-aqli *                100.0 → 80.0        13.4%     13,330          +1.96        275,871
+loglinear_jaganathan  100.0 → 80.0        15.2%     15,126          +2.25        313,030
+loglinear_brown       100.0 → 80.0         1.9%      1,855          +0.24         33,076
+loglinear_vodonos     100.0 → 80.0        13.8%     13,744          +1.97        228,651
+gemm_ncd_lri          100.0 → 80.0         4.1%      4,031          +0.53         67,113
+aqli *                100.0 → 80.0        13.4%     13,330          +1.96        275,862
 ...
 ```
 
@@ -51,6 +51,14 @@ held for a lifetime. **Life-years** are the extra years lived: here, each death 
 times the years a person of that age would still expect to live. The **crude death rate** is
 deaths in a year per 1,000 people. The **SRS** (Sample Registration System) is the
 government survey that measures India's death rates.
+
+**Before you quote a number from this tool.** It does not yet reproduce the Global Burden of
+Disease's own count for India. GBD 2023 reports 969,726 deaths from outdoor PM2.5 in India in
+2023; on GBD's own curve, map and year this tool gives 1.61 million. The likely main reason is
+that GBD splits one risk between outdoor air and cooking smoke, and this tool scores outdoor
+air alone. That has not been shown with numbers yet (see "The IHME tier" below and
+`IHME_DOWNLOADS.md`). No air pollution specialist has reviewed the method yet either; the
+calls made along the way are listed under "Known limitations" so that one can.
 
 ## Install
 
@@ -118,11 +126,11 @@ transport                  13.7              7.1             29.9           7.9
 residential                33.8                —                —          28.3
 ...
 outside                    22.5                —                —             —
-other                         —                —                —          19.5
+other                         —              3.5              3.5          19.5
 total                      99.5              100              100           100
 
 Studies:
-  apna_2015: CAMx, sampled 2015, boundary airshed_box, origin inside, evidence O
+  apna_2015: CAMx, sampled 2015, boundary airshed_box, origin inside, region, evidence O
     https://zenodo.org/records/6919069
   ...
 ```
@@ -141,15 +149,15 @@ counts no further benefit.
 ```
 $ airhealth burden India
 India (country): deaths attributable to PM2.5 above each curve's own floor
-Population 1,390.3 M; all-cause deaths 9,365,121 a year (6.7 per 1,000). Steady state, per year.
+Population 1,390.3 M; all-cause deaths 9,365,088 a year (6.7 per 1,000). Steady state, per year.
 
 curve                 PM2.5 µg/m³  % of deaths  deaths/yr  life exp. yrs  life-years/yr
 --------------------  -----------  -----------  ---------  -------------  -------------
-loglinear_jaganathan   41.2 → 5.0        24.9%  2,330,389          +4.57     52,713,269
-loglinear_brown        41.2 → 2.0         3.4%    317,303          +0.49      5,569,111
-loglinear_vodonos      41.2 → 5.0        21.5%  2,011,725          +3.71     32,923,807
-gemm_ncd_lri           41.2 → 2.4        16.4%  1,531,856          +2.59     24,997,970
-aqli *                 41.2 → 5.0        20.1%  1,884,073          +3.55     42,487,031
+loglinear_jaganathan   41.2 → 5.0        24.9%  2,330,382          +4.57     52,713,154
+loglinear_brown        41.2 → 2.0         3.4%    317,302          +0.49      5,569,093
+loglinear_vodonos      41.2 → 5.0        21.5%  2,011,718          +3.71     32,923,691
+gemm_ncd_lri           41.2 → 2.4        16.4%  1,531,850          +2.59     24,997,876
+aqli *                 41.2 → 5.0        20.1%  1,884,068          +3.55     42,486,945
 
   loglinear_jaganathan: Log-linear, Jaganathan 2024 (Indian districts, all-cause, all ages)
   loglinear_brown: Log-linear, Brown 2022 Million Death Study (non-accidental; studied at ages 15-69, applied from 15, extrapolated above 69)
@@ -158,7 +166,7 @@ aqli *                 41.2 → 5.0        20.1%  1,884,073          +3.55     4
   aqli: AQLI linear, 0.98 years of life expectancy per 10 µg/m³
   * deaths derived from the life-expectancy change, not a relative risk
 
-Map: aqli 2023 (AQLI 2025 release, districts, satellite PM2.5 with dust and sea salt removed). Deaths scaled to each state's SRS crude death rate, 2020-24: ×0.87 overall, ×0.57 to ×0.95 by state (data/death_reconciliation.csv); life expectancy is from the unscaled life tables. All-India death rates used for Andaman & Nicobar Islands, Arunachal Pradesh, Chandigarh, Dadra & Nagar Haveli, Daman & Diu, Goa, Ladakh, Lakshadweep, Manipur, Meghalaya, Mizoram, Nagaland, Puducherry, Sikkim, Tripura (no SRS life table). Not run: gbd2019, gbd2023, gemm_5cod: need IHME files in health/data_local/ (see health/IHME_DOWNLOADS.md).
+Map: aqli 2023 (AQLI 2025 release, districts, satellite PM2.5 with dust and sea salt removed). Deaths scaled to each state's SRS crude death rate for 2020-24: ×0.87 overall, ×0.57 to ×0.95 by state (data/death_reconciliation.csv); life expectancy is from the unscaled life tables. Sources: population by age, projection (default); death rates by age, srs (default); death count, srs (default). All-India death rates used for Andaman & Nicobar Islands, Arunachal Pradesh, Chandigarh, Dadra & Nagar Haveli, Daman & Diu, Goa, Ladakh, Lakshadweep, Manipur, Meghalaya, Mizoram, Nagaland, Puducherry, Sikkim, Tripura (no SRS life table). Not run: gbd2019, gbd2023, gemm_5cod: need IHME files in health/data_local/ (see health/IHME_DOWNLOADS.md).
 ```
 
 AQLI gives a change in life expectancy, not a relative risk. To put it in the same table,
@@ -171,7 +179,7 @@ floor.
 
 ```
 $ airhealth chart Delhi India
-/Users/ask/git/gitcat/indian_health/air-apocalypse/health/charts/curves_delhi.png
+/path/to/air-apocalypse/health/charts/curves_delhi.png
 ```
 
 ![The risk curves from 0 to 150 µg/m³, with Delhi and India marked](charts/curves_delhi.png)
@@ -223,16 +231,16 @@ $ airhealth run interventions/november_only_delhi.toml
 November-only cut in Delhi
 Delhi (state). 2027-2036: 10 years, no ramp, lag epa20; these deliver 7.0 years of the full effect. Probability it works: 50%.
 Change: monthly delta: Nov -40 µg/m³; other months 0; annual-mean change -3.29 µg/m³ (PM2.5 88.3 → 85.1, population-weighted; median draw).
-Population 21.5 M; all-cause deaths 99,445 a year (4.6 per 1,000). 5,000 draws, seed 0.
+Population 21.5 M; all-cause deaths 99,440 a year (4.6 per 1,000). 5,000 draws, seed 0.
 
 If it works, totals over the run (median, 5-95% range):
 curve                                      life-years                deaths postponed  life exp. at full effect, yrs
 --------------------  -------------------------------  ------------------------------  -----------------------------
 loglinear_jaganathan     383,000 (308,000 to 459,000)       18,500 (14,900 to 22,200)         +0.36 (+0.29 to +0.44)
 loglinear_brown             37,800 (-9,340 to 84,400)           2,120 (-524 to 4,730)         +0.04 (-0.01 to +0.09)
-loglinear_vodonos        281,000 (195,000 to 363,000)       16,900 (11,800 to 21,800)         +0.32 (+0.22 to +0.41)
+loglinear_vodonos        281,000 (195,000 to 363,000)       16,900 (11,700 to 21,800)         +0.32 (+0.22 to +0.41)
 gemm_ncd_lri                82,000 (69,600 to 94,600)          4,920 (4,180 to 5,670)         +0.09 (+0.08 to +0.11)
-aqli *                340,000 (no published interval)  16,400 (no published interval)  +0.32 (no published interval)
+aqli *                339,000 (no published interval)  16,400 (no published interval)  +0.32 (no published interval)
 
 Expected = mean if it works × probability it works (0.5). Cost if it works: $18.2 M ($5.78 M to $61.6 M), 2025 prices, ₹87.16 per $ (World Bank 2025 average), no inflation adjustment; all of it spent whether or not it works.
 curve                 expected life-years  cost per life-year if it works  expected cost per expected life-year
@@ -261,7 +269,7 @@ Across curves, the largest median life-years is 10.1× the smallest.
   aqli: AQLI linear, 0.98 years of life expectancy per 10 µg/m³
   * deaths derived from the life-expectancy change, not a relative risk
 
-Map: aqli 2023 (AQLI 2025 release, districts, satellite PM2.5 with dust and sea salt removed). Life-years = deaths postponed by age × remaining life expectancy at the age of death, at the map year's population and age structure, summed over the intervention's years. Deaths at ages 45 and over scaled by ×0.72 to the SRS crude death rate for Delhi, 2020-24 (4.5 per 1,000); life expectancy is from the unscaled life table. Not run: gbd2019, gbd2023, gemm_5cod: need IHME files in health/data_local/ (see health/IHME_DOWNLOADS.md).
+Map: aqli 2023 (AQLI 2025 release, districts, satellite PM2.5 with dust and sea salt removed). Life-years = deaths postponed by age × remaining life expectancy at the age of death, at the map year's population and age structure, summed over the intervention's years. Deaths at ages 45 and over scaled by ×0.72 to the SRS crude death rate for Delhi, 2020-24 (4.5 per 1,000); life expectancy is from the unscaled life table. Sources: population by age, projection (default); death rates by age, srs (default); death count, srs (default). Not run: gbd2019, gbd2023, gemm_5cod: need IHME files in health/data_local/ (see health/IHME_DOWNLOADS.md).
 ```
 
 How to read it:
@@ -545,7 +553,7 @@ cooking smoke; here outdoor air is scored alone). See `IHME_DOWNLOADS.md`.
 
 ## What causes the PM2.5
 
-`data/causes.csv` puts every published answer to "what is this city's PM2.5 made of" side by side, one row per city, study, season, size fraction and source: UrbanEmissions' APnA runs for the 49 airsheds it covers, McDuffie et al.'s global-model shares for nine of the 50, and the city studies and stubble estimates transcribed by hand from state, NCAP and journal reports (`data/causes_transcribed.csv`; each row's `locator` names the table or figure and the page where the sampling months are stated). It never picks a winner or averages across studies, because they disagree by multiples, not points: Kanpur's household share is 34% in APnA, 25% in McDuffie and 3% (winter biomass) in IIT Kanpur's filter study, and Lucknow's share from outside the city is 30% or 81% (`lit/city-sources.md` section 3). Things to keep in mind when reading it. (1) **`origin` says what a share counts.** `inside` (APnA's sector rows): emissions inside the airshed only, everything from outside is the `outside` row. `all_origins` (CMAQ, GEOS-Chem and WRF-Chem sector splits, McDuffie, receptor CMB/PMF shares, stubble estimates): that sector's contribution from every origin, so "cut Lucknow transport 30%" is not the same quantity there as in APnA. `region` (APnA's `outside` row and the geographic splits): a split by where the pollution comes from, where `local_all` is the city's own sources, all sectors, and the rest is `outside`. Do not apply an inside-the-city cut to an `all_origins` share. (2) **A cause a study does not list is "not reported", never 0.** `airhealth.causes.shares(city, study, season)` returns every harmonised cause with NaN for the unreported ones. (3) **`months`, not `season`, decides which months a share covers.** Kolkata's filter study is labelled `winter+summer campaigns` (months 12,1,4,5), not annual. (4) APnA's `outside` rows already contain stubble smoke from upwind states; `agri_burning` rows with `covers = partial` are stubble-only estimates for a stated October-December window and overlap APnA's `outside`; do not add them. `agri_burning` also appears inside complete splits (ARAI dispersion, Govardhan, TERI Lucknow, Kolkata and Surat CMAQ, Surat CMB, McDuffie), so filter on `covers` too. McDuffie's household share is 28.3% (`residential`, of which biofuel 24.5). (5) "Residential" is not defined the same way everywhere: Kolkata's CMB "cooking" (households and eateries) is `residential`, while Kolkata's CMAQ puts eateries in `other` and McDuffie's commercial sector is `other`. Coal and fly ash is `other` (a mixed factor), and `transport` includes diesel generator sets in IIT Kanpur's Kanpur and Agra studies. (6) Only evidence `O` (read at source) is in the table; press-only numbers are leads in `data/MISSING.md`. (7) Emission shares (`metric = emission_share`) are never mixed with concentration shares. `airhealth.causes.for_city(city, study)` returns the rows; `build_causes.py` rebuilds the file (checking the McDuffie download's sha256) and refuses groups that do not sum to 100 +/- 2.
+`data/causes.csv` puts every published answer to "what is this city's PM2.5 made of" side by side, one row per city, study, season, size fraction and source: UrbanEmissions' APnA runs for the 49 airsheds it covers, McDuffie et al.'s global-model shares for nine of the 50, and the city studies and stubble estimates transcribed by hand from state, NCAP and journal reports (`data/causes_transcribed.csv`; each row's `locator` names the table or figure and the page where the sampling months are stated). It never picks a winner or averages across studies, because they disagree by multiples, not points: Kanpur's household share is 34% in APnA, 25% in McDuffie and 3% (winter biomass) in IIT Kanpur's filter study, and Lucknow's share from outside the city is 30% or 81% (`lit/city-sources.md` section 3). Things to keep in mind when reading it. (1) **`origin` says what a share counts.** `inside` (APnA's sector rows): emissions inside the airshed only, everything from outside is the `outside` row. `all_origins` (CMAQ, GEOS-Chem and WRF-Chem sector splits, McDuffie, receptor CMB/PMF shares, stubble estimates): that sector's contribution from every origin, so "cut Lucknow transport 30%" is not the same quantity there as in APnA. `region` (APnA's `outside` row and the geographic splits): a split by where the pollution comes from, where `local_all` is the city's own sources, all sectors, and the rest is `outside`. Govardhan 2024 is the one hybrid: it splits Delhi's own share into Delhi transport (`transport`) and Delhi's other sectors (`other`), so it has no `local_all` row. Do not apply an inside-the-city cut to an `all_origins` share. (2) **A cause a study does not list is "not reported", never 0.** `airhealth.causes.shares(city, study, season)` returns every harmonised cause with NaN for the unreported ones. (3) **`months`, not `season`, decides which months a share covers.** Kolkata's filter study is labelled `winter+summer campaigns` (months 12,1,4,5), not annual. (4) APnA's `outside` rows already contain stubble smoke from upwind states; `agri_burning` rows with `covers = partial` are stubble-only estimates for a stated October-December window and overlap APnA's `outside`; do not add them. `agri_burning` also appears inside complete splits (ARAI dispersion, Govardhan, TERI Lucknow, Kolkata and Surat CMAQ, Surat CMB, McDuffie), so filter on `covers` too. McDuffie's household share is 28.3% (`residential`, of which biofuel 24.5). (5) "Residential" is not defined the same way everywhere: Kolkata's CMB "cooking" (households and eateries) is `residential`, while Kolkata's CMAQ puts eateries in `other` and McDuffie's commercial sector is `other`. Coal and fly ash is `other` (a mixed factor), and `transport` includes diesel generator sets in IIT Kanpur's Kanpur and Agra studies. (6) Only evidence `O` (read at source) is in the table; press-only numbers are leads in `data/MISSING.md`. (7) Emission shares (`metric = emission_share`) are never mixed with concentration shares. `airhealth.causes.for_city(city, study)` returns the rows; `build_causes.py` rebuilds the file (checking the McDuffie download's sha256) and refuses groups that do not sum to 100 +/- 2.
 
 ## Benchmarks: does it reproduce published numbers?
 
@@ -665,10 +673,11 @@ The two IHME-tier cases skip where the IHME files are absent.
 
 ```
 airhealth/        the package: places, exposure, baseline, lifetable, curves, impact,
-                  intervention, lag, simulate, report, charts, cli, dashboard (+ .html)
+                  intervention, lag, simulate, months, causes, ihme, provenance, report,
+                  charts, cli, dashboard (+ .html)
 data/             committed tables, each with an entry in data/sources.toml; MISSING.md
 data_local/       IHME files, never committed (git-ignored); read by airhealth/ihme.py
-interventions/    the template and three examples
+interventions/    the template and four examples
 benchmarks/       cases.toml, run.py, README.md (generated)
 charts/           charts drawn by the commands above
 scripts/          the scripts that build data/ from the sources

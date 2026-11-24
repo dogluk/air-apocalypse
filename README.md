@@ -43,6 +43,12 @@ protects the lungs directly. Sorting proposals by which term they touch, and whe
 physics permits it, kills most of them quickly. The survivors are mostly about
 **measurement** — you cannot regulate or trade what you cannot credibly count.
 
+## Picking this up
+
+If you are a model, or a person arriving cold, start with [`AGENTS.md`](AGENTS.md): how to
+get it running in a minute, the rules (the first is that no number goes in unless it was read
+at its source), what is not yet solid, and a list of open work sized for one sitting.
+
 ## Licence
 
 Code MIT; derived data ODbL (inherited from the CPCB compilation); fonts OFL. See `LICENSE`.
