@@ -677,7 +677,7 @@ A cause a group does not list is not reported, not zero (causes.shares returns N
 """
 
 ["causes_transcribed.csv"]
-source = "City, NCAP and journal source-apportionment studies transcribed by hand from their reports, one row per source, same columns as causes.csv (schema in airhealth/causes.py; origin included). 316 rows, 23 study ids, 16 cities' reports and papers: ARAI/TERI Delhi 2018, Govardhan et al. 2024 (GMD), Biswal et al. 2025 and Kulkarni et al. 2020 (Delhi stubble), TERI Kolkata 2025, Lucknow 2022, Patna 2021, Surat 2021, IIT Kanpur Kanpur 2022, Agra 2021, Hyderabad 2023, NEERI/IITB Mumbai 2023 and Pune 2024, CSTEP Bengaluru 2022. Read by scripts/build_causes.py."
+source = "City, NCAP and journal source-apportionment studies transcribed by hand from their reports, one row per source, same columns as causes.csv (schema in airhealth/causes.py; origin included). 316 rows, 23 study ids, 11 cities' reports and papers: ARAI/TERI Delhi 2018, Govardhan et al. 2024 (GMD), Biswal et al. 2025 and Kulkarni et al. 2020 (Delhi stubble), TERI Kolkata 2025, Lucknow 2022, Patna 2021, Surat 2021, IIT Kanpur Kanpur 2022, Agra 2021, Hyderabad 2023, NEERI/IITB Mumbai 2023 and Pune 2024, CSTEP Bengaluru 2022. Read by scripts/build_causes.py."
 url = "per row: each row's own `url` column (the report PDF or journal page the row was read from); there is no single URL"
 locator = "Each row's own `locator` column: the table or figure, the page where the shares are printed, and where the sampling months are stated."
 retrieved = "2026-11-12"

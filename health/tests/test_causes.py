@@ -1,3 +1,5 @@
+import tomllib
+
 import pandas as pd
 import pytest
 
@@ -157,7 +159,30 @@ def test_geographic_splits_use_local_all_and_outside_only():
     assert set(geo.source_harmonised) == {"local_all", "outside"}
     assert set(t[t.source_harmonised == "local_all"].origin) == {"region"}
     gov = t[(t.study == "govardhan2024_dss") & (t.season == "winter")].set_index("source_harmonised")
-    assert gov.loc["local_all", "share_pct"] == 20
+    assert gov.loc["other", "share_pct"] == 20       # Delhi's sectors except transport: not all of Delhi's own
+    assert "local_all" not in gov.index
+
+
+def test_validate_rejects_local_all_beside_a_sector_row():
+    rows = [_row(origin="region", source_harmonised="local_all", share_pct=40.0),
+            _row(origin="region", source_raw="y", source_harmonised="outside", share_pct=60.0)]
+    causes.validate(pd.DataFrame(rows))
+    rows[1] = _row(origin="region", source_raw="y", source_harmonised="transport", share_pct=60.0)
+    with pytest.raises(ValueError, match="local_all.*transport"):
+        causes.validate(pd.DataFrame(rows))
+
+
+def test_sources_toml_states_the_real_counts():
+    src = tomllib.loads((paths.DATA / "sources.toml").read_text())
+    t = pd.read_csv(paths.DATA / "causes_transcribed.csv")
+    assert (f"{len(t)} rows, {t.study.nunique()} study ids, {t.city.nunique()} cities"
+            in src["causes_transcribed.csv"]["source"])
+    c = causes.table()
+    assert f"{len(c)} rows, {c.study.nunique()} study ids, {c.city.nunique()} cities" in src["causes.csv"]["source"]
+
+
+def test_locator_sentences_are_separated():
+    assert not causes.table().locator.str.contains(r"[a-z] (?:Mapped to|Transport includes)").any()
 
 
 def test_kolkata_summer_region_is_complete_with_derived_row():
@@ -170,7 +195,7 @@ def test_kolkata_summer_region_is_complete_with_derived_row():
 def test_shares_is_nan_for_unreported_causes():
     s = causes.shares("Delhi", "govardhan2024_dss", "winter")
     assert list(s.index) == list(causes.HARMONISED)
-    assert s["transport"] == 14 and s["local_all"] == 20
+    assert s["transport"] == 14 and s["other"] == 20 and pd.isna(s["local_all"])
     assert pd.isna(s["industry"]) and pd.isna(s["dust"])          # not reported, not 0
     k = causes.shares("Kanpur", "iitk_kanpur2022_pmf", "winter")
     assert k["other"] >= 3.5 and pd.isna(k["residential"])

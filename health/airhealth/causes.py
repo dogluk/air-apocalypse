@@ -23,7 +23,11 @@ share as another's:
               inside the city must not be applied to these shares as if they were all inside.
   region      a split by where the pollution comes from: the APnA `outside` row, and the geographic
               splits (`local_all` = the city's own sources, all sectors, plus `outside` pieces).
-              `local_all` appears only in these.
+              `local_all` appears only in these, and only with `outside` rows beside it (validate()
+              refuses anything else). Govardhan 2024 is a hybrid: it splits Delhi's own share into
+              Delhi transport (`transport`) and Delhi's other sectors (`other`), then the rest by
+              geography, so it has no `local_all` row and its `transport` and `other` rows are
+              Delhi's own emissions only, although the group's origin is `region`.
 
 A harmonised cause a group does not list is NOT REPORTED by that study, never 0: use shares(),
 which returns NaN for those. `months`, not `season`, says which months a share covers (a
@@ -92,6 +96,12 @@ def validate(df: pd.DataFrame) -> None:
     if len(local):
         raise ValueError("local_all is only for geographic splits (origin = region): "
                          f"{sorted(set(local.study))}")
+    names = df.groupby(["city", "study", "season"]).source_harmonised.agg(set)
+    beside = {k: sorted(v - {"local_all", "outside"}) for k, v in names.items()
+              if "local_all" in v and v - {"local_all", "outside"}}
+    if beside:
+        raise ValueError("local_all means all of the city's own sources, so its group may hold only "
+                         f"local_all and outside rows; found beside local_all: {beside}")
     dup = df[df.duplicated(["city", "study", "season", "source_raw"], keep=False)]
     if len(dup):
         raise ValueError("duplicate (city, study, season, source_raw): "
