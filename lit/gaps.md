@@ -149,13 +149,64 @@ but it still leaves fires, festivals and industrial episodes.
 
 ---
 
+## G7. Why do the exposure maps disagree twofold?
+
+**Confidence that it's unstudied: medium at best.** The search for a published
+reconciliation was light, and GBD has revised its exposure model since 2019; the GBD 2021
+and 2023 values were not checked.
+
+India's population-weighted PM2.5 is **41.2 µg/m³** on AQLI's map (satellite-derived, dust
+and sea salt removed, 2023), **49.8** on the same satellite family with dust kept (ACAG V6,
+this repo's own district aggregation, 2023), and **90.9** in GBD 2019 as printed state by
+state in Pandey et al. 2021 (91.7 in its main text). The year is not the explanation: AQLI
+for 2019 is 44.6. Delhi is **88.3 / 98.8 / 217.6**, and the city's CPCB monitors, as this
+repo averages them, read **104.7** in 2019 and **97.5** in 2023. Uttar Pradesh is 56.2 /
+68.2 / 182.9; Kerala is 18.5 / 26.1 / 15.8. (All from `airhealth`, the `health/` track.)
+
+So keeping dust explains under a fifth of the national gap (8.6 of about 50 µg/m³), the
+disagreement is concentrated in the northern plain, and Delhi's monitors side with the
+satellites, not with GBD 2019. A twofold gap in the input that every burden estimate rests
+on, with the ground truth in the one place it can be checked pointing one way, looks like a
+question someone should have answered in print.
+
+**What would kill it:** GBD's newer rounds having already converged on the satellite values,
+or a paper that already reconciles the two. Check GBD 2021 and 2023 state means first.
+
+**First check, 2026-11-11: it has largely converged.** IHME's GBD 2023 exposure file gives
+India **53.6 µg/m³ for 2019 and 54.1 for 2023**, against 90.9 for 2019 in the GBD 2019 round.
+That is within a few points of ACAG's total (49.8). So the question shrinks from "why do the
+maps disagree" to "what did IHME change between rounds, and how many of the burden figures
+still quoted rest on the old map". State values were not checked (the file identifies places
+by number and the key is not among the downloaded files). The file is IHME's and is not in
+this repo; see `health/IHME_DOWNLOADS.md`.
+
+**Why it matters:** the choice of map moves where every place sits on the risk curve. On a
+bending curve, a city at 90 and the same city at 220 are in different regimes, and an
+intervention's benefit changes with it.
+
+**A note on the 1.5 million.** Jaganathan et al. 2024's 1.5 million deaths a year
+attributable to PM2.5 is a share of *registered* deaths: the paper reports 4.5 million (2009)
+to 7.3 million (2019) registered deaths a year, with death registration 30-100% complete
+depending on the state. So it is a count of registered deaths, not of all deaths. The
+paper's own share, 24.9%, applied to all deaths in 2014 as the Sample Registration System
+counts them (6.7 per 1,000, about 8.5 million) would be about 2.1 million. The `airhealth`
+tool, running the paper's slope on AQLI's map, gets a share of about 26% and 1.9 million for
+2014 (the `jaganathan2024_deaths` case in
+[`health/benchmarks/README.md`](../health/benchmarks/README.md); its 2014 death count is
+known to be low) and 2.3 million on the 2023 map (`airhealth burden India`). These counts
+move by a tenth or more with how many deaths India is taken to have, which the official
+sources themselves disagree on (see the health README, "How many deaths a year"). The
+share, about a quarter of deaths, is the comparable figure.
+
+---
+
 ## Deliberately not on this list
 
 Well covered already; don't spend time here.
 
 - **Source apportionment of Delhi** — [done exhaustively](https://www.mdpi.com/2071-1050/15/5/4209), and the disagreement is about method, not missing analysis.
 - **COVID lockdown effects** — one of the most over-studied natural experiments in the field.
-- **Burden-of-disease estimates** — AQLI and GBD own this; adding another estimate adds nothing.
+- **Burden-of-disease estimates** — another estimate adds nothing; AQLI and GBD own that. A tool that exposes *why* the estimates differ (the risk curve, the exposure map, which deaths are counted) does add something: that is [`health/`](../health/).
 - **Does stubble burning affect Delhi** — settled; the argument is now about shares and timing.
 - **Whether smog towers work** — settled. They don't, and the [arithmetic is not close](https://www.downtoearth.org.in/pollution/smog-towers-ineffective-at-least-40-000-needed-in-delhi-to-combat-toxic-air-dpcc-tells-ngt-92841).
 

@@ -1,0 +1,22 @@
+# The design's signature what-if: Delhi breathing 100 µg/m³, brought down to 80.
+name = "Delhi from 100 to 80 µg/m³"
+places = ["Delhi"]          # the state (NCT of Delhi)
+from_level = 100            # start every unit at 100, whatever the map says
+start_year = 2027
+duration_years = 10
+p_success = 1.0
+lag = "epa20"
+notes = """
+A what-if, not an intervention: no policy, cost or odds are claimed. p_success is 1 and the
+cost 0 so the result is the health effect of the move alone. Delhi is the state (NCT of
+Delhi); the exposure map supplies only its population.
+"""
+
+[change]
+to = 80
+
+[cost]
+once = 0
+annual = 0
+currency = "INR"
+year = 2025

@@ -1,0 +1,387 @@
+state,year,cdr_per_1000
+India,2011,7.1
+Andhra Pradesh,2011,7.5
+Assam,2011,8.0
+Bihar,2011,6.7
+Chhattisgarh,2011,7.9
+Delhi,2011,4.3
+Gujarat,2011,6.7
+Haryana,2011,6.5
+Himachal Pradesh,2011,6.7
+Jammu & Kashmir,2011,5.5
+Jharkhand,2011,6.9
+Karnataka,2011,7.1
+Kerala,2011,7.0
+Madhya Pradesh,2011,8.2
+Maharashtra,2011,6.3
+Odisha,2011,8.5
+Punjab,2011,6.8
+Rajasthan,2011,6.7
+Tamil Nadu,2011,7.4
+Uttar Pradesh,2011,7.9
+West Bengal,2011,6.2
+India,2012,7.0
+Andhra Pradesh,2012,7.4
+Assam,2012,7.9
+Bihar,2012,6.6
+Chhattisgarh,2012,7.9
+Delhi,2012,4.2
+Gujarat,2012,6.6
+Haryana,2012,6.4
+Himachal Pradesh,2012,6.7
+Jammu & Kashmir,2012,5.4
+Jharkhand,2012,6.8
+Karnataka,2012,7.1
+Kerala,2012,6.9
+Madhya Pradesh,2012,8.1
+Maharashtra,2012,6.3
+Odisha,2012,8.5
+Punjab,2012,6.8
+Rajasthan,2012,6.6
+Tamil Nadu,2012,7.4
+Uttar Pradesh,2012,7.7
+West Bengal,2012,6.3
+India,2013,7.0
+Andhra Pradesh,2013,7.3
+Assam,2013,7.8
+Bihar,2013,6.6
+Chhattisgarh,2013,7.9
+Delhi,2013,4.1
+Gujarat,2013,6.5
+Haryana,2013,6.3
+Himachal Pradesh,2013,6.7
+Jammu & Kashmir,2013,5.3
+Jharkhand,2013,6.8
+Karnataka,2013,7.0
+Kerala,2013,6.9
+Madhya Pradesh,2013,8.0
+Maharashtra,2013,6.2
+Odisha,2013,8.4
+Punjab,2013,6.7
+Rajasthan,2013,6.5
+Tamil Nadu,2013,7.3
+Uttar Pradesh,2013,7.7
+West Bengal,2013,6.4
+India,2014,6.7
+Andhra Pradesh,2014,7.3
+Assam,2014,7.2
+Bihar,2014,6.2
+Chhattisgarh,2014,7.7
+Delhi,2014,3.8
+Gujarat,2014,6.2
+Haryana,2014,6.1
+Himachal Pradesh,2014,6.7
+Jammu & Kashmir,2014,5.1
+Jharkhand,2014,5.9
+Karnataka,2014,6.8
+Kerala,2014,6.6
+Madhya Pradesh,2014,7.8
+Maharashtra,2014,6.0
+Odisha,2014,7.9
+Punjab,2014,6.4
+Rajasthan,2014,6.4
+Tamil Nadu,2014,7.0
+Telangana,2014,6.7
+Uttar Pradesh,2014,7.4
+Uttarakhand,2014,6.0
+West Bengal,2014,6.1
+India,2015,6.5
+Andhra Pradesh,2015,7.1
+Assam,2015,7.1
+Bihar,2015,6.2
+Chhattisgarh,2015,7.5
+Delhi,2015,3.6
+Gujarat,2015,6.1
+Haryana,2015,6.1
+Himachal Pradesh,2015,6.6
+Jammu & Kashmir,2015,4.9
+Jharkhand,2015,5.8
+Karnataka,2015,6.6
+Kerala,2015,6.6
+Madhya Pradesh,2015,7.5
+Maharashtra,2015,5.8
+Odisha,2015,7.6
+Punjab,2015,6.2
+Rajasthan,2015,6.3
+Tamil Nadu,2015,6.7
+Telangana,2015,6.5
+Uttar Pradesh,2015,7.2
+Uttarakhand,2015,6.4
+West Bengal,2015,5.9
+India,2016,6.4
+Andhra Pradesh,2016,6.8
+Assam,2016,6.7
+Bihar,2016,6.0
+Chhattisgarh,2016,7.4
+Delhi,2016,4.0
+Gujarat,2016,6.1
+Haryana,2016,5.9
+Himachal Pradesh,2016,6.8
+Jammu & Kashmir,2016,5.0
+Jharkhand,2016,5.5
+Karnataka,2016,6.7
+Kerala,2016,7.6
+Madhya Pradesh,2016,7.1
+Maharashtra,2016,5.9
+Odisha,2016,7.8
+Punjab,2016,6.0
+Rajasthan,2016,6.1
+Tamil Nadu,2016,6.4
+Telangana,2016,6.1
+Uttar Pradesh,2016,6.9
+Uttarakhand,2016,6.7
+West Bengal,2016,5.8
+India,2017,6.3
+Andhra Pradesh,2017,7.2
+Assam,2017,6.5
+Bihar,2017,5.8
+Chhattisgarh,2017,7.5
+Delhi,2017,3.7
+Gujarat,2017,6.2
+Haryana,2017,5.8
+Himachal Pradesh,2017,6.6
+Jammu & Kashmir,2017,4.8
+Jharkhand,2017,5.5
+Karnataka,2017,6.5
+Kerala,2017,6.8
+Madhya Pradesh,2017,6.8
+Maharashtra,2017,5.7
+Odisha,2017,7.4
+Punjab,2017,7.0
+Rajasthan,2017,6.0
+Tamil Nadu,2017,6.7
+Telangana,2017,6.6
+Uttar Pradesh,2017,6.7
+Uttarakhand,2017,6.7
+West Bengal,2017,5.8
+India,2018,6.2
+Andhra Pradesh,2018,6.7
+Assam,2018,6.4
+Bihar,2018,5.8
+Chhattisgarh,2018,8.0
+Delhi,2018,3.3
+Gujarat,2018,5.9
+Haryana,2018,5.9
+Himachal Pradesh,2018,6.9
+Jammu & Kashmir,2018,4.9
+Jharkhand,2018,5.4
+Karnataka,2018,6.3
+Kerala,2018,6.9
+Madhya Pradesh,2018,6.7
+Maharashtra,2018,5.5
+Odisha,2018,7.3
+Punjab,2018,6.6
+Rajasthan,2018,5.9
+Tamil Nadu,2018,6.5
+Telangana,2018,6.3
+Uttar Pradesh,2018,6.6
+Uttarakhand,2018,6.2
+West Bengal,2018,5.6
+India,2019,6.0
+Andhra Pradesh,2019,6.4
+Assam,2019,6.3
+Bihar,2019,5.5
+Chhattisgarh,2019,7.3
+Delhi,2019,3.2
+Gujarat,2019,5.6
+Haryana,2019,5.9
+Himachal Pradesh,2019,6.9
+Jammu & Kashmir,2019,4.6
+Jharkhand,2019,5.3
+Karnataka,2019,6.2
+Kerala,2019,7.1
+Madhya Pradesh,2019,6.6
+Maharashtra,2019,5.4
+Odisha,2019,7.1
+Punjab,2019,6.6
+Rajasthan,2019,5.7
+Tamil Nadu,2019,6.1
+Telangana,2019,6.1
+Uttar Pradesh,2019,6.5
+Uttarakhand,2019,6.0
+West Bengal,2019,5.3
+India,2020,6.0
+Andhra Pradesh,2020,6.3
+Assam,2020,6.2
+Bihar,2020,5.4
+Chhattisgarh,2020,7.9
+Delhi,2020,3.6
+Gujarat,2020,5.6
+Haryana,2020,6.1
+Jammu & Kashmir,2020,4.6
+Jharkhand,2020,5.2
+Karnataka,2020,6.2
+Kerala,2020,7.0
+Madhya Pradesh,2020,6.5
+Maharashtra,2020,5.5
+Odisha,2020,7.3
+Punjab,2020,7.2
+Rajasthan,2020,5.6
+Tamil Nadu,2020,6.1
+Telangana,2020,6.0
+Uttar Pradesh,2020,6.5
+Uttarakhand,2020,6.3
+West Bengal,2020,5.5
+Arunachal Pradesh,2020,5.7
+Goa,2020,5.9
+Himachal Pradesh,2020,6.8
+Manipur,2020,4.3
+Meghalaya,2020,5.3
+Mizoram,2020,4.2
+Nagaland,2020,3.7
+Sikkim,2020,4.1
+Tripura,2020,5.7
+A & N Islands,2020,5.8
+Chandigarh,2020,3.9
+Dadra and Nagar Haveli and Daman and Diu,2020,3.7
+Ladakh,2020,5.0
+Puducherry,2020,5.4
+Lakshadweep,2020,6.5
+India,2021,7.5
+Andhra Pradesh,2021,8.0
+Assam,2021,6.6
+Bihar,2021,6.6
+Chhattisgarh,2021,10.1
+Delhi,2021,5.4
+Gujarat,2021,8.5
+Haryana,2021,8.2
+Himachal Pradesh,2021,8.6
+Jammu & Kashmir,2021,5.7
+Jharkhand,2021,6.5
+Karnataka,2021,8.5
+Kerala,2021,9.0
+Madhya Pradesh,2021,8.1
+Maharashtra,2021,7.4
+Odisha,2021,8.6
+Punjab,2021,8.7
+Rajasthan,2021,6.7
+Tamil Nadu,2021,8.3
+Telangana,2021,6.5
+Uttar Pradesh,2021,7.0
+Uttarakhand,2021,6.9
+West Bengal,2021,6.8
+Arunachal Pradesh,2021,5.7
+Goa,2021,8.1
+Manipur,2021,5.5
+Meghalaya,2021,6.4
+Mizoram,2021,6.2
+Nagaland,2021,6.0
+Sikkim,2021,5.7
+Tripura,2021,6.7
+A & N Islands,2021,7.0
+Chandigarh,2021,5.4
+Ladakh,2021,5.7
+Lakshadweep,2021,7.2
+Puducherry,2021,7.3
+Dadra and Nagar Haveli and Daman and Diu,2021,6.5
+India,2022,6.8
+Andhra Pradesh,2022,7.5
+Assam,2022,6.5
+Bihar,2022,6.4
+Chhattisgarh,2022,9.0
+Delhi,2022,4.6
+Gujarat,2022,6.9
+Haryana,2022,7.3
+Himachal Pradesh,2022,6.9
+Jammu & Kashmir,2022,5.9
+Jharkhand,2022,5.8
+Karnataka,2022,7.4
+Kerala,2022,7.6
+Madhya Pradesh,2022,7.1
+Maharashtra,2022,6.6
+Odisha,2022,7.8
+Punjab,2022,8.3
+Rajasthan,2022,6.2
+Tamil Nadu,2022,7.3
+Telangana,2022,6.6
+Uttar Pradesh,2022,6.6
+Uttarakhand,2022,6.3
+West Bengal,2022,6.3
+Arunachal Pradesh,2022,5.9
+Goa,2022,8.2
+Manipur,2022,4.9
+Meghalaya,2022,5.9
+Mizoram,2022,6.0
+Nagaland,2022,5.4
+Sikkim,2022,4.9
+Tripura,2022,6.8
+A & N Islands,2022,6.0
+Chandigarh,2022,4.2
+Ladakh,2022,6.1
+Lakshadweep,2022,5.6
+Puducherry,2022,6.6
+Dadra and Nagar Haveli and Daman and Diu,2022,5.2
+India,2023,6.4
+Andhra Pradesh,2023,6.9
+Assam,2023,6.2
+Bihar,2023,6.1
+Chhattisgarh,2023,8.3
+Delhi,2023,4.5
+Gujarat,2023,6.4
+Haryana,2023,6.8
+Himachal Pradesh,2023,6.7
+Jammu & Kashmir,2023,5.6
+Jharkhand,2023,6.3
+Karnataka,2023,6.8
+Kerala,2023,7.2
+Madhya Pradesh,2023,6.8
+Maharashtra,2023,6.1
+Odisha,2023,7.7
+Punjab,2023,7.3
+Rajasthan,2023,5.9
+Tamil Nadu,2023,6.9
+Telangana,2023,6.3
+Uttar Pradesh,2023,6.5
+Uttarakhand,2023,6.1
+West Bengal,2023,5.7
+Arunachal Pradesh,2023,5.5
+Goa,2023,6.8
+Manipur,2023,4.5
+Meghalaya,2023,5.5
+Mizoram,2023,5.9
+Nagaland,2023,5.5
+Sikkim,2023,4.8
+Tripura,2023,6.2
+A & N Islands,2023,6.3
+Chandigarh,2023,4.0
+Ladakh,2023,5.5
+Lakshadweep,2023,5.5
+Puducherry,2023,6.4
+Dadra and Nagar Haveli and Daman and Diu,2023,4.8
+India,2024,6.4
+Andhra Pradesh,2024,6.6
+Assam,2024,6.1
+Bihar,2024,5.9
+Chhattisgarh,2024,8.4
+Delhi,2024,4.5
+Gujarat,2024,6.2
+Haryana,2024,6.7
+Himachal Pradesh,2024,6.7
+Jammu & Kashmir,2024,5.5
+Jharkhand,2024,6.2
+Karnataka,2024,7.0
+Kerala,2024,7.3
+Madhya Pradesh,2024,6.7
+Maharashtra,2024,6.0
+Odisha,2024,7.9
+Punjab,2024,7.1
+Rajasthan,2024,5.8
+Tamil Nadu,2024,6.8
+Telangana,2024,6.5
+Uttar Pradesh,2024,6.3
+Uttarakhand,2024,6.0
+West Bengal,2024,5.8
+Arunachal Pradesh,2024,5.4
+Goa,2024,6.5
+Manipur,2024,4.4
+Meghalaya,2024,5.4
+Mizoram,2024,5.7
+Nagaland,2024,5.3
+Sikkim,2024,4.7
+Tripura,2024,5.9
+A & N Islands,2024,5.8
+Chandigarh,2024,3.9
+Dadra and Nagar Haveli and Daman and Diu,2024,4.8
+Ladakh,2024,5.4
+Lakshadweep,2024,5.4
+Puducherry,2024,6.2

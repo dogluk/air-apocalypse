@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "airhealth"
+version = "0.1.0"
+description = "Health effects of air pollution in India: risk curves, exposure maps, deaths."
+requires-python = ">=3.11"  # tomllib
+dependencies = ["numpy", "pandas", "scipy", "matplotlib", "pyarrow"]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+# Only for rebuilding data/ with scripts/build_exposure_*.py; the package never imports these.
+build = ["duckdb", "rasterio", "geopandas", "openpyxl"]
+
+[project.scripts]
+airhealth = "airhealth.cli:main"
+
+[tool.setuptools]
+packages = ["airhealth"]
+
+[tool.setuptools.package-data]
+airhealth = ["*.html"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

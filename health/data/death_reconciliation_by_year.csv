@@ -1,0 +1,202 @@
+state,period,srs_unit,srs_cdr_per_1000,reference_year,modelled_cdr_per_1000,from_age,factor
+India,2011,India,7.1,2011,7.006,45,1.02
+Andhra Pradesh,2011,Andhra Pradesh,7.5,2011,7.727,45,0.9592
+Assam,2011,Assam,8.0,2011,7.877,45,1.0262
+Bihar,2011,Bihar,6.7,2011,5.592,45,1.3669
+Chhattisgarh,2011,Chhattisgarh,7.9,2011,7.857,45,1.0083
+Delhi,2011,Delhi,4.3,2011,4.662,45,0.892
+Gujarat,2011,Gujarat,6.7,2011,6.555,45,1.0339
+Haryana,2011,Haryana,6.5,2011,6.89,45,0.9152
+Himachal Pradesh,2011,Himachal Pradesh,6.7,2011,6.402,45,1.063
+Jammu & Kashmir,2011,Jammu & Kashmir,5.5,2011,5.34,45,1.0462
+Jharkhand,2011,Jharkhand,6.9,2011,6.518,45,1.1007
+Karnataka,2011,Karnataka,7.1,2011,7.41,45,0.9436
+Kerala,2011,Kerala,7.0,2011,6.529,45,1.0818
+Madhya Pradesh,2011,Madhya Pradesh,8.2,2011,8.276,45,0.9844
+Maharashtra,2011,Maharashtra,6.3,2011,6.427,45,0.9748
+Odisha,2011,Odisha,8.5,2011,8.304,45,1.0362
+Punjab,2011,Punjab,6.8,2011,6.753,45,1.0093
+Rajasthan,2011,Rajasthan,6.7,2011,6.605,45,1.0255
+Tamil Nadu,2011,Tamil Nadu,7.4,2011,7.581,45,0.9699
+Uttar Pradesh,2011,Uttar Pradesh,7.9,2011,7.779,45,1.0262
+West Bengal,2011,West Bengal,6.2,2011,6.535,45,0.9322
+India,2012,India,7.0,2012,7.097,45,0.9799
+Andhra Pradesh,2012,Andhra Pradesh,7.4,2012,7.772,45,0.9349
+Assam,2012,Assam,7.9,2012,7.988,45,0.9819
+Bihar,2012,Bihar,6.6,2012,5.619,45,1.3148
+Chhattisgarh,2012,Chhattisgarh,7.9,2012,8.047,45,0.9724
+Delhi,2012,Delhi,4.2,2012,4.793,45,0.8284
+Gujarat,2012,Gujarat,6.6,2012,6.594,45,1.0014
+Haryana,2012,Haryana,6.4,2012,6.92,45,0.8888
+Himachal Pradesh,2012,Himachal Pradesh,6.7,2012,6.456,45,1.0499
+Jammu & Kashmir,2012,Jammu & Kashmir,5.4,2012,5.223,45,1.0508
+Jharkhand,2012,Jharkhand,6.8,2012,6.556,45,1.061
+Karnataka,2012,Karnataka,7.1,2012,7.521,45,0.9253
+Kerala,2012,Kerala,6.9,2012,6.625,45,1.0469
+Madhya Pradesh,2012,Madhya Pradesh,8.1,2012,8.325,45,0.9549
+Maharashtra,2012,Maharashtra,6.3,2012,6.488,45,0.9631
+Odisha,2012,Odisha,8.5,2012,8.499,45,1.0001
+Punjab,2012,Punjab,6.8,2012,6.771,45,1.0056
+Rajasthan,2012,Rajasthan,6.6,2012,6.646,45,0.9881
+Tamil Nadu,2012,Tamil Nadu,7.4,2012,7.738,45,0.9458
+Uttar Pradesh,2012,Uttar Pradesh,7.7,2012,7.908,45,0.956
+West Bengal,2012,West Bengal,6.3,2012,6.777,45,0.9092
+India,2013,India,7.0,2013,7.072,45,0.9855
+Andhra Pradesh,2013,Andhra Pradesh,7.3,2013,7.693,45,0.9324
+Assam,2013,Assam,7.8,2013,7.717,45,1.0173
+Bihar,2013,Bihar,6.6,2013,5.493,45,1.3454
+Chhattisgarh,2013,Chhattisgarh,7.9,2013,8.225,45,0.9421
+Delhi,2013,Delhi,4.1,2013,4.65,45,0.8403
+Gujarat,2013,Gujarat,6.5,2013,6.515,45,0.9967
+Haryana,2013,Haryana,6.3,2013,6.923,45,0.8709
+Himachal Pradesh,2013,Himachal Pradesh,6.7,2013,6.452,45,1.0497
+Jammu & Kashmir,2013,Jammu & Kashmir,5.3,2013,5.023,45,1.0817
+Jharkhand,2013,Jharkhand,6.8,2013,6.268,45,1.1374
+Karnataka,2013,Karnataka,7.0,2013,7.652,45,0.8891
+Kerala,2013,Kerala,6.9,2013,6.642,45,1.0441
+Madhya Pradesh,2013,Madhya Pradesh,8.0,2013,8.261,45,0.9484
+Maharashtra,2013,Maharashtra,6.2,2013,6.434,45,0.9537
+Odisha,2013,Odisha,8.4,2013,8.287,45,1.0196
+Punjab,2013,Punjab,6.7,2013,6.706,45,0.9989
+Rajasthan,2013,Rajasthan,6.5,2013,6.678,45,0.9565
+Tamil Nadu,2013,Tamil Nadu,7.3,2013,7.991,45,0.895
+Uttar Pradesh,2013,Uttar Pradesh,7.7,2013,7.97,45,0.9451
+West Bengal,2013,West Bengal,6.4,2013,6.91,45,0.9071
+India,2014,India,6.7,2014,7.072,45,0.9268
+Andhra Pradesh,2014,Andhra Pradesh,7.3,2014,7.741,45,0.9271
+Assam,2014,Assam,7.2,2014,7.48,45,0.9427
+Bihar,2014,Bihar,6.2,2014,5.554,45,1.1921
+Chhattisgarh,2014,Chhattisgarh,7.7,2014,8.303,45,0.8973
+Delhi,2014,Delhi,3.8,2014,4.52,45,0.7855
+Gujarat,2014,Gujarat,6.2,2014,6.506,45,0.9328
+Haryana,2014,Haryana,6.1,2014,6.929,45,0.8344
+Himachal Pradesh,2014,Himachal Pradesh,6.7,2014,6.4,45,1.06
+Jammu & Kashmir,2014,Jammu & Kashmir,5.1,2014,4.796,45,1.0907
+Jharkhand,2014,Jharkhand,5.9,2014,6.112,45,0.9473
+Karnataka,2014,Karnataka,6.8,2014,7.878,45,0.8259
+Kerala,2014,Kerala,6.6,2014,6.736,45,0.9772
+Madhya Pradesh,2014,Madhya Pradesh,7.8,2014,8.211,45,0.9212
+Maharashtra,2014,Maharashtra,6.0,2014,6.433,45,0.9147
+Odisha,2014,Odisha,7.9,2014,8.054,45,0.9736
+Punjab,2014,Punjab,6.4,2014,6.582,45,0.9643
+Rajasthan,2014,Rajasthan,6.4,2014,6.709,45,0.9287
+Tamil Nadu,2014,Tamil Nadu,7.0,2014,8.117,45,0.8357
+Telangana,2014,Telangana,6.7,2014,7.396,45,0.879
+Uttar Pradesh,2014,Uttar Pradesh,7.4,2014,8.045,45,0.8731
+Uttarakhand,2014,Uttarakhand,6.0,2014,7.043,45,0.805
+West Bengal,2014,West Bengal,6.1,2014,6.812,45,0.8707
+India,2015,India,6.5,2015,7.028,45,0.898
+Andhra Pradesh,2015,Andhra Pradesh,7.1,2015,7.758,45,0.8937
+Assam,2015,Assam,7.1,2015,7.029,45,1.0154
+Bihar,2015,Bihar,6.2,2015,5.501,45,1.1971
+Chhattisgarh,2015,Chhattisgarh,7.5,2015,8.325,45,0.8604
+Delhi,2015,Delhi,3.6,2015,4.539,45,0.7292
+Gujarat,2015,Gujarat,6.1,2015,6.535,45,0.9082
+Haryana,2015,Haryana,6.1,2015,6.893,45,0.8421
+Himachal Pradesh,2015,Himachal Pradesh,6.6,2015,6.511,45,1.0172
+Jammu & Kashmir,2015,Jammu & Kashmir,4.9,2015,4.758,45,1.0412
+Jharkhand,2015,Jharkhand,5.8,2015,5.842,45,0.9892
+Karnataka,2015,Karnataka,6.6,2015,8.138,45,0.7645
+Kerala,2015,Kerala,6.6,2015,7.234,45,0.9024
+Madhya Pradesh,2015,Madhya Pradesh,7.5,2015,8.034,45,0.8976
+Maharashtra,2015,Maharashtra,5.8,2015,6.535,45,0.8599
+Odisha,2015,Odisha,7.6,2015,7.732,45,0.9769
+Punjab,2015,Punjab,6.2,2015,6.502,45,0.9401
+Rajasthan,2015,Rajasthan,6.3,2015,6.737,45,0.9028
+Tamil Nadu,2015,Tamil Nadu,6.7,2015,8.163,45,0.789
+Telangana,2015,Telangana,6.5,2015,7.532,45,0.8251
+Uttar Pradesh,2015,Uttar Pradesh,7.2,2015,7.938,45,0.8565
+Uttarakhand,2015,Uttarakhand,6.4,2015,6.849,45,0.9164
+West Bengal,2015,West Bengal,5.9,2015,6.597,45,0.8698
+India,2016,India,6.4,2016,7.077,45,0.8719
+Andhra Pradesh,2016,Andhra Pradesh,6.8,2016,7.956,45,0.8206
+Assam,2016,Assam,6.7,2016,6.865,45,0.964
+Bihar,2016,Bihar,6.0,2016,5.631,45,1.0963
+Chhattisgarh,2016,Chhattisgarh,7.4,2016,8.394,45,0.8322
+Delhi,2016,Delhi,4.0,2016,4.694,45,0.8115
+Gujarat,2016,Gujarat,6.1,2016,6.761,45,0.8684
+Haryana,2016,Haryana,5.9,2016,6.852,45,0.8082
+Himachal Pradesh,2016,Himachal Pradesh,6.8,2016,6.654,45,1.0269
+Jammu & Kashmir,2016,Jammu & Kashmir,5.0,2016,4.744,45,1.0721
+Jharkhand,2016,Jharkhand,5.5,2016,5.942,45,0.8942
+Karnataka,2016,Karnataka,6.7,2016,8.293,45,0.761
+Kerala,2016,Kerala,7.6,2016,7.593,45,1.001
+Madhya Pradesh,2016,Madhya Pradesh,7.1,2016,7.853,45,0.8541
+Maharashtra,2016,Maharashtra,5.9,2016,6.691,45,0.8569
+Odisha,2016,Odisha,7.8,2016,7.765,45,1.0061
+Punjab,2016,Punjab,6.0,2016,6.892,45,0.8353
+Rajasthan,2016,Rajasthan,6.1,2016,6.758,45,0.8573
+Tamil Nadu,2016,Tamil Nadu,6.4,2016,8.081,45,0.7543
+Telangana,2016,Telangana,6.1,2016,7.729,45,0.735
+Uttar Pradesh,2016,Uttar Pradesh,6.9,2016,7.822,45,0.8177
+Uttarakhand,2016,Uttarakhand,6.7,2016,7.369,45,0.8838
+West Bengal,2016,West Bengal,5.8,2016,6.562,45,0.8579
+India,2017,India,6.3,2017,7.15,45,0.8431
+Andhra Pradesh,2017,Andhra Pradesh,7.2,2017,8.059,45,0.8695
+Assam,2017,Assam,6.5,2017,6.847,45,0.9253
+Bihar,2017,Bihar,5.8,2017,5.876,45,0.9822
+Chhattisgarh,2017,Chhattisgarh,7.5,2017,8.827,45,0.7892
+Delhi,2017,Delhi,3.7,2017,4.778,45,0.7158
+Gujarat,2017,Gujarat,6.2,2017,6.864,45,0.8726
+Haryana,2017,Haryana,5.8,2017,6.964,45,0.7708
+Himachal Pradesh,2017,Himachal Pradesh,6.6,2017,7.004,45,0.9314
+Jammu & Kashmir,2017,Jammu & Kashmir,4.8,2017,4.895,45,0.9747
+Jharkhand,2017,Jharkhand,5.5,2017,6.123,45,0.8585
+Karnataka,2017,Karnataka,6.5,2017,8.32,45,0.7301
+Kerala,2017,Kerala,6.8,2017,7.982,45,0.8397
+Madhya Pradesh,2017,Madhya Pradesh,6.8,2017,7.667,45,0.83
+Maharashtra,2017,Maharashtra,5.7,2017,6.805,45,0.8059
+Odisha,2017,Odisha,7.4,2017,7.74,45,0.9416
+Punjab,2017,Punjab,7.0,2017,7.275,45,0.9526
+Rajasthan,2017,Rajasthan,6.0,2017,6.775,45,0.8348
+Tamil Nadu,2017,Tamil Nadu,6.7,2017,7.944,45,0.816
+Telangana,2017,Telangana,6.6,2017,7.883,45,0.7958
+Uttar Pradesh,2017,Uttar Pradesh,6.7,2017,7.786,45,0.7867
+Uttarakhand,2017,Uttarakhand,6.7,2017,7.522,45,0.862
+West Bengal,2017,West Bengal,5.8,2017,6.707,45,0.8362
+India,2018,India,6.2,2018,7.195,45,0.8204
+Andhra Pradesh,2018,Andhra Pradesh,6.7,2018,8.163,45,0.783
+Assam,2018,Assam,6.4,2018,6.959,45,0.8873
+Bihar,2018,Bihar,5.8,2018,6.083,45,0.9377
+Chhattisgarh,2018,Chhattisgarh,8.0,2018,8.988,45,0.8496
+Delhi,2018,Delhi,3.3,2018,4.648,45,0.6437
+Gujarat,2018,Gujarat,5.9,2018,6.931,45,0.8062
+Haryana,2018,Haryana,5.9,2018,7.216,45,0.7591
+Himachal Pradesh,2018,Himachal Pradesh,6.9,2018,7.25,45,0.9434
+Jammu & Kashmir,2018,Jammu & Kashmir,4.9,2018,4.951,45,0.987
+Jharkhand,2018,Jharkhand,5.4,2018,6.426,45,0.7872
+Karnataka,2018,Karnataka,6.3,2018,8.342,45,0.7011
+Kerala,2018,Kerala,6.9,2018,8.094,45,0.8404
+Madhya Pradesh,2018,Madhya Pradesh,6.7,2018,7.62,45,0.8214
+Maharashtra,2018,Maharashtra,5.5,2018,6.801,45,0.7729
+Odisha,2018,Odisha,7.3,2018,7.649,45,0.9401
+Punjab,2018,Punjab,6.6,2018,7.757,45,0.8172
+Rajasthan,2018,Rajasthan,5.9,2018,6.816,45,0.8095
+Tamil Nadu,2018,Tamil Nadu,6.5,2018,7.748,45,0.811
+Telangana,2018,Telangana,6.3,2018,8.183,45,0.7186
+Uttar Pradesh,2018,Uttar Pradesh,6.6,2018,7.862,45,0.7587
+Uttarakhand,2018,Uttarakhand,6.2,2018,7.603,45,0.7716
+West Bengal,2018,West Bengal,5.6,2018,6.737,45,0.7977
+India,2019,India,6.0,2019,7.24,45,0.7814
+Andhra Pradesh,2019,Andhra Pradesh,6.4,2019,8.057,45,0.7548
+Assam,2019,Assam,6.3,2019,7.124,45,0.8443
+Bihar,2019,Bihar,5.5,2019,6.224,45,0.8486
+Chhattisgarh,2019,Chhattisgarh,7.3,2019,9.346,45,0.7096
+Delhi,2019,Delhi,3.2,2019,4.785,45,0.6033
+Gujarat,2019,Gujarat,5.6,2019,6.834,45,0.7689
+Haryana,2019,Haryana,5.9,2019,7.531,45,0.7201
+Himachal Pradesh,2019,Himachal Pradesh,6.9,2019,7.546,45,0.9006
+Jammu & Kashmir,2019,Jammu & Kashmir,4.6,2019,5.08,45,0.8833
+Jharkhand,2019,Jharkhand,5.3,2019,6.61,45,0.7403
+Karnataka,2019,Karnataka,6.2,2019,8.452,45,0.6806
+Kerala,2019,Kerala,7.1,2019,8.356,45,0.8364
+Madhya Pradesh,2019,Madhya Pradesh,6.6,2019,7.614,45,0.808
+Maharashtra,2019,Maharashtra,5.4,2019,6.879,45,0.7461
+Odisha,2019,Odisha,7.1,2019,7.664,45,0.9055
+Punjab,2019,Punjab,6.6,2019,8.056,45,0.7831
+Rajasthan,2019,Rajasthan,5.7,2019,6.811,45,0.7743
+Tamil Nadu,2019,Tamil Nadu,6.1,2019,7.494,45,0.7844
+Telangana,2019,Telangana,6.1,2019,8.137,45,0.6965
+Uttar Pradesh,2019,Uttar Pradesh,6.5,2019,7.887,45,0.7434
+Uttarakhand,2019,Uttarakhand,6.0,2019,7.654,45,0.7342
+West Bengal,2019,West Bengal,5.3,2019,6.831,45,0.7361

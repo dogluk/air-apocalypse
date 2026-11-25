@@ -1,0 +1,19 @@
+# A cut in November only: large on the worst month, small on the annual mean.
+name = "November-only cut in Delhi"
+places = ["Delhi"]          # the state (NCT of Delhi)
+start_year = 2027
+duration_years = 10
+p_success = 0.5
+notes = """
+Shows how a November-only cut of 40 µg/m³ moves the annual mean by only 40 × 30/365 = 3.3
+µg/m³, and long-term health with it. The size of the cut, p_success and the cost are
+illustrative placeholders, not estimates. Delhi is the state (NCT of Delhi).
+"""
+
+[change]
+monthly_delta = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -40, 0]
+
+[cost]
+annual = { dist = "lognormal", p5 = 5e7, p95 = 5e8 }
+currency = "INR"
+year = 2025

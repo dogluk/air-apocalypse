@@ -8,3 +8,7 @@ diwali/data/raw/
 diwali/data/fires/
 diwali/data/hourly.parquet
 diwali/data/trends_pull.log
+
+# Health model: IHME files are never committed.
+health/data_local/
+*.egg-info/

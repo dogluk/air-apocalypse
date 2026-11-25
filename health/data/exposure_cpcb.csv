@@ -1,0 +1,269 @@
+city,state,year,pm25,stations,hours_share
+Agartala,Tripura,2021,49.6,1,0.883
+Agartala,Tripura,2022,52.0,2,0.975
+Agartala,Tripura,2023,77.8,2,0.888
+Agartala,Tripura,2024,64.4,1,0.868
+Agartala,Tripura,2025,21.2,1,0.813
+Agra,Uttar Pradesh,2016,124.3,1,0.815
+Agra,Uttar Pradesh,2017,106.5,1,0.803
+Agra,Uttar Pradesh,2018,101.1,1,0.927
+Agra,Uttar Pradesh,2019,73.4,1,0.933
+Agra,Uttar Pradesh,2020,81.3,1,0.922
+Agra,Uttar Pradesh,2021,78.0,6,0.969
+Agra,Uttar Pradesh,2022,40.7,6,1.0
+Agra,Uttar Pradesh,2023,31.7,6,1.0
+Agra,Uttar Pradesh,2024,31.7,6,1.0
+Agra,Uttar Pradesh,2025,37.2,6,1.0
+Ahmedabad,Gujarat,2018,74.8,1,0.929
+Ahmedabad,Gujarat,2019,61.9,1,0.93
+Ahmedabad,Gujarat,2020,46.5,1,0.937
+Ahmedabad,Gujarat,2021,49.3,9,0.98
+Ahmedabad,Gujarat,2022,50.0,9,0.981
+Ahmedabad,Gujarat,2023,48.6,9,1.0
+Ahmedabad,Gujarat,2024,50.8,9,1.0
+Ahmedabad,Gujarat,2025,44.4,9,1.0
+Allahabad,Uttar Pradesh,2022,43.6,3,0.995
+Allahabad,Uttar Pradesh,2023,40.5,3,1.0
+Allahabad,Uttar Pradesh,2024,29.7,3,1.0
+Allahabad,Uttar Pradesh,2025,34.7,3,1.0
+Amritsar,Punjab,2019,51.3,1,0.94
+Amritsar,Punjab,2020,47.1,1,0.909
+Amritsar,Punjab,2021,51.3,1,0.931
+Amritsar,Punjab,2022,51.1,1,0.943
+Amritsar,Punjab,2023,59.9,1,0.939
+Amritsar,Punjab,2024,57.4,1,0.952
+Amritsar,Punjab,2025,45.6,1,0.955
+Asansol-Durgapur,West Bengal,2018,64.0,1,0.778
+Asansol-Durgapur,West Bengal,2019,62.1,1,0.967
+Asansol-Durgapur,West Bengal,2020,55.3,1,0.86
+Asansol-Durgapur,West Bengal,2021,59.3,1,0.882
+Asansol-Durgapur,West Bengal,2022,59.2,1,0.948
+Asansol-Durgapur,West Bengal,2023,63.0,1,0.902
+Asansol-Durgapur,West Bengal,2024,73.6,6,0.997
+Asansol-Durgapur,West Bengal,2025,47.5,7,1.0
+Bengaluru,Karnataka,2016,43.2,3,0.899
+Bengaluru,Karnataka,2017,31.9,3,0.947
+Bengaluru,Karnataka,2018,32.1,8,0.931
+Bengaluru,Karnataka,2019,32.6,8,1.0
+Bengaluru,Karnataka,2020,27.7,8,1.0
+Bengaluru,Karnataka,2021,29.2,8,1.0
+Bengaluru,Karnataka,2022,31.9,9,1.0
+Bengaluru,Karnataka,2023,29.1,11,1.0
+Bengaluru,Karnataka,2024,30.7,11,1.0
+Bengaluru,Karnataka,2025,27.9,12,1.0
+Bhopal,Madhya Pradesh,2020,43.3,1,0.881
+Bhopal,Madhya Pradesh,2021,47.5,1,0.924
+Bhopal,Madhya Pradesh,2022,51.7,2,0.92
+Bhopal,Madhya Pradesh,2023,48.3,3,0.993
+Bhopal,Madhya Pradesh,2024,44.7,3,0.996
+Bhopal,Madhya Pradesh,2025,39.4,3,0.995
+Bhubaneswar,Odisha,2024,46.3,2,0.979
+Bhubaneswar,Odisha,2025,45.0,2,0.984
+Chandigarh,Chandigarh,2018,41.8,1,0.812
+Chandigarh,Chandigarh,2019,49.8,3,0.996
+Chandigarh,Chandigarh,2020,42.3,3,1.0
+Chandigarh,Chandigarh,2021,48.4,4,1.0
+Chandigarh,Chandigarh,2022,53.3,5,1.0
+Chandigarh,Chandigarh,2023,51.8,5,1.0
+Chandigarh,Chandigarh,2024,60.2,5,1.0
+Chandigarh,Chandigarh,2025,48.4,5,0.999
+Chennai,Tamil Nadu,2016,51.9,3,0.916
+Chennai,Tamil Nadu,2017,44.6,3,0.991
+Chennai,Tamil Nadu,2018,48.5,3,0.999
+Chennai,Tamil Nadu,2019,36.4,4,1.0
+Chennai,Tamil Nadu,2020,28.0,8,1.0
+Chennai,Tamil Nadu,2021,25.6,8,1.0
+Chennai,Tamil Nadu,2022,27.1,9,1.0
+Chennai,Tamil Nadu,2023,28.2,8,1.0
+Chennai,Tamil Nadu,2024,24.1,9,1.0
+Chennai,Tamil Nadu,2025,30.7,9,1.0
+Coimbatore,Tamil Nadu,2020,27.4,1,0.763
+Coimbatore,Tamil Nadu,2022,30.0,2,0.784
+Coimbatore,Tamil Nadu,2024,32.0,2,0.822
+Coimbatore,Tamil Nadu,2025,35.8,2,0.968
+Dehradun,Uttarakhand,2023,34.9,1,0.814
+Dehradun,Uttarakhand,2024,46.6,1,0.927
+Dehradun,Uttarakhand,2025,36.9,1,0.832
+Delhi,Delhi,2016,129.8,10,0.997
+Delhi,Delhi,2017,108.1,17,1.0
+Delhi,Delhi,2018,109.7,37,1.0
+Delhi,Delhi,2019,104.7,37,1.0
+Delhi,Delhi,2020,91.3,38,1.0
+Delhi,Delhi,2021,101.1,39,1.0
+Delhi,Delhi,2022,94.9,39,1.0
+Delhi,Delhi,2023,97.5,39,1.0
+Delhi,Delhi,2024,100.7,39,1.0
+Delhi,Delhi,2025,94.3,40,1.0
+Gaya,Bihar,2018,95.5,1,0.858
+Gaya,Bihar,2019,84.9,1,0.909
+Gaya,Bihar,2020,48.2,2,0.855
+Gaya,Bihar,2021,50.2,3,0.98
+Gaya,Bihar,2022,65.1,3,0.999
+Gaya,Bihar,2023,58.2,3,0.999
+Gaya,Bihar,2024,48.2,3,0.993
+Gaya,Bihar,2025,43.0,3,0.997
+Guwahati,Assam,2019,54.6,1,0.83
+Guwahati,Assam,2020,62.2,2,0.939
+Guwahati,Assam,2021,61.7,2,0.995
+Guwahati,Assam,2022,53.4,4,0.993
+Guwahati,Assam,2023,56.9,4,0.996
+Guwahati,Assam,2024,53.7,4,0.999
+Guwahati,Assam,2025,44.7,4,0.999
+Gwalior,Madhya Pradesh,2020,63.2,2,0.876
+Gwalior,Madhya Pradesh,2021,62.1,2,0.938
+Gwalior,Madhya Pradesh,2022,66.6,4,0.907
+Gwalior,Madhya Pradesh,2023,63.7,4,0.985
+Gwalior,Madhya Pradesh,2024,55.2,4,0.997
+Gwalior,Madhya Pradesh,2025,51.3,4,0.997
+Hubli-Dharwad,Karnataka,2021,31.6,1,0.887
+Hubli-Dharwad,Karnataka,2022,33.8,3,0.846
+Hubli-Dharwad,Karnataka,2023,30.6,3,0.987
+Hubli-Dharwad,Karnataka,2024,27.6,3,0.975
+Hubli-Dharwad,Karnataka,2025,24.4,3,0.98
+Hyderabad,Telangana,2016,50.4,3,0.9
+Hyderabad,Telangana,2017,46.7,6,0.992
+Hyderabad,Telangana,2018,42.2,6,1.0
+Hyderabad,Telangana,2019,40.3,6,1.0
+Hyderabad,Telangana,2020,34.9,6,1.0
+Hyderabad,Telangana,2021,38.7,6,1.0
+Hyderabad,Telangana,2022,37.8,14,1.0
+Hyderabad,Telangana,2023,36.1,14,1.0
+Hyderabad,Telangana,2024,29.4,14,1.0
+Hyderabad,Telangana,2025,32.5,14,1.0
+Indore,Madhya Pradesh,2020,40.8,1,0.91
+Indore,Madhya Pradesh,2021,49.3,1,0.919
+Indore,Madhya Pradesh,2022,43.8,1,0.862
+Indore,Madhya Pradesh,2023,43.0,5,0.923
+Indore,Madhya Pradesh,2024,35.9,6,0.999
+Indore,Madhya Pradesh,2025,31.8,6,1.0
+Jaipur,Rajasthan,2018,55.9,3,0.999
+Jaipur,Rajasthan,2019,46.9,3,1.0
+Jaipur,Rajasthan,2020,43.8,3,1.0
+Jaipur,Rajasthan,2021,55.5,3,0.999
+Jaipur,Rajasthan,2022,54.5,3,0.998
+Jaipur,Rajasthan,2023,52.2,6,1.0
+Jaipur,Rajasthan,2024,53.9,6,1.0
+Jaipur,Rajasthan,2025,51.0,6,1.0
+Jodhpur,Rajasthan,2018,108.7,1,0.908
+Jodhpur,Rajasthan,2019,84.2,1,0.957
+Jodhpur,Rajasthan,2020,67.0,1,0.939
+Jodhpur,Rajasthan,2021,75.6,1,0.938
+Jodhpur,Rajasthan,2022,69.8,1,0.931
+Jodhpur,Rajasthan,2023,40.8,5,0.996
+Jodhpur,Rajasthan,2024,36.8,5,1.0
+Jodhpur,Rajasthan,2025,36.6,5,1.0
+Kanpur,Uttar Pradesh,2016,141.7,1,0.83
+Kanpur,Uttar Pradesh,2017,130.9,1,0.842
+Kanpur,Uttar Pradesh,2018,106.1,1,0.932
+Kanpur,Uttar Pradesh,2019,98.4,1,0.914
+Kanpur,Uttar Pradesh,2020,90.1,2,0.962
+Kanpur,Uttar Pradesh,2021,70.3,4,0.998
+Kanpur,Uttar Pradesh,2022,55.7,4,1.0
+Kanpur,Uttar Pradesh,2023,46.1,4,0.999
+Kanpur,Uttar Pradesh,2024,45.2,3,0.999
+Kanpur,Uttar Pradesh,2025,43.0,3,0.998
+Kochi,Kerala,2022,64.6,1,0.822
+Kochi,Kerala,2023,36.1,1,0.851
+Kolkata,West Bengal,2019,68.2,7,1.0
+Kolkata,West Bengal,2020,46.6,7,1.0
+Kolkata,West Bengal,2021,53.3,7,1.0
+Kolkata,West Bengal,2022,48.8,7,1.0
+Kolkata,West Bengal,2023,47.6,7,1.0
+Kolkata,West Bengal,2024,44.4,7,1.0
+Kolkata,West Bengal,2025,43.3,7,1.0
+Kota,Rajasthan,2018,58.8,1,0.867
+Kota,Rajasthan,2019,53.1,1,0.985
+Kota,Rajasthan,2020,42.7,1,0.945
+Kota,Rajasthan,2021,60.2,1,0.946
+Kota,Rajasthan,2022,60.2,1,0.937
+Kota,Rajasthan,2023,57.1,3,0.992
+Kota,Rajasthan,2024,54.0,3,1.0
+Kota,Rajasthan,2025,48.3,3,0.999
+Lucknow,Uttar Pradesh,2016,125.6,3,0.919
+Lucknow,Uttar Pradesh,2017,119.2,4,0.959
+Lucknow,Uttar Pradesh,2018,115.9,4,0.996
+Lucknow,Uttar Pradesh,2019,100.6,4,1.0
+Lucknow,Uttar Pradesh,2020,97.8,3,1.0
+Lucknow,Uttar Pradesh,2021,76.9,5,1.0
+Lucknow,Uttar Pradesh,2022,59.4,6,1.0
+Lucknow,Uttar Pradesh,2023,54.4,6,1.0
+Lucknow,Uttar Pradesh,2024,55.7,6,1.0
+Lucknow,Uttar Pradesh,2025,54.2,6,1.0
+Ludhiana,Punjab,2018,51.0,1,0.928
+Ludhiana,Punjab,2019,50.9,1,0.963
+Ludhiana,Punjab,2020,45.2,1,0.977
+Ludhiana,Punjab,2021,54.8,1,0.958
+Ludhiana,Punjab,2022,59.7,1,0.981
+Ludhiana,Punjab,2023,61.2,1,0.984
+Ludhiana,Punjab,2024,60.8,1,0.979
+Ludhiana,Punjab,2025,52.8,1,0.979
+Mumbai,Maharashtra,2016,38.1,1,0.946
+Mumbai,Maharashtra,2017,42.7,1,0.872
+Mumbai,Maharashtra,2019,34.7,10,0.989
+Mumbai,Maharashtra,2020,36.4,20,1.0
+Mumbai,Maharashtra,2021,44.1,21,1.0
+Mumbai,Maharashtra,2022,43.7,20,1.0
+Mumbai,Maharashtra,2023,42.0,29,1.0
+Mumbai,Maharashtra,2024,32.5,28,1.0
+Mumbai,Maharashtra,2025,33.0,29,1.0
+Nagpur,Maharashtra,2018,44.6,1,0.871
+Nagpur,Maharashtra,2019,41.3,1,0.831
+Nagpur,Maharashtra,2020,27.1,1,0.788
+Nagpur,Maharashtra,2022,45.7,1,0.889
+Nagpur,Maharashtra,2023,51.3,4,0.987
+Nagpur,Maharashtra,2024,46.7,4,1.0
+Nagpur,Maharashtra,2025,45.0,4,1.0
+Nashik,Maharashtra,2018,38.3,1,0.925
+Nashik,Maharashtra,2019,36.1,1,0.844
+Nashik,Maharashtra,2020,32.8,1,0.9
+Nashik,Maharashtra,2021,41.0,1,0.892
+Nashik,Maharashtra,2022,37.9,1,0.831
+Nashik,Maharashtra,2023,36.8,4,0.984
+Nashik,Maharashtra,2024,38.3,4,1.0
+Nashik,Maharashtra,2025,37.6,4,1.0
+Patna,Bihar,2016,133.2,1,0.759
+Patna,Bihar,2018,118.8,1,0.935
+Patna,Bihar,2019,104.7,4,0.942
+Patna,Bihar,2020,63.3,6,0.999
+Patna,Bihar,2021,70.8,6,1.0
+Patna,Bihar,2022,89.2,6,1.0
+Patna,Bihar,2023,84.6,6,1.0
+Patna,Bihar,2024,73.7,6,1.0
+Patna,Bihar,2025,54.8,6,1.0
+Puducherry,Puducherry,2021,21.1,1,0.826
+Puducherry,Puducherry,2022,25.6,1,0.903
+Puducherry,Puducherry,2023,25.4,3,0.977
+Puducherry,Puducherry,2024,25.5,3,0.983
+Puducherry,Puducherry,2025,28.5,3,0.992
+Pune,Maharashtra,2016,58.8,1,0.928
+Pune,Maharashtra,2017,39.7,1,0.86
+Pune,Maharashtra,2019,48.3,1,0.96
+Pune,Maharashtra,2020,40.0,6,0.859
+Pune,Maharashtra,2021,41.6,8,1.0
+Pune,Maharashtra,2023,48.6,9,0.949
+Pune,Maharashtra,2024,34.8,11,1.0
+Pune,Maharashtra,2025,37.4,12,1.0
+Raipur-Durg-Bhilai,Chhattisgarh,2023,27.9,7,0.992
+Raipur-Durg-Bhilai,Chhattisgarh,2024,28.2,7,1.0
+Raipur-Durg-Bhilai,Chhattisgarh,2025,23.2,7,1.0
+Surat,Gujarat,2024,31.2,1,0.784
+Surat,Gujarat,2025,29.2,1,0.806
+Thiruvananthapuram,Kerala,2018,33.4,1,0.866
+Thiruvananthapuram,Kerala,2019,27.8,1,0.79
+Thiruvananthapuram,Kerala,2020,26.0,2,0.962
+Thiruvananthapuram,Kerala,2021,23.2,2,0.982
+Thiruvananthapuram,Kerala,2022,24.6,2,0.94
+Thiruvananthapuram,Kerala,2023,23.1,2,0.967
+Thiruvananthapuram,Kerala,2024,27.2,2,1.0
+Thiruvananthapuram,Kerala,2025,30.5,2,0.987
+Tiruchirappalli,Tamil Nadu,2025,29.3,1,0.771
+Vijayawada,Andhra Pradesh,2024,33.8,4,0.996
+Vijayawada,Andhra Pradesh,2025,38.9,4,0.999
+Visakhapatnam,Andhra Pradesh,2018,50.9,1,0.815
+Visakhapatnam,Andhra Pradesh,2019,48.8,1,0.834
+Visakhapatnam,Andhra Pradesh,2020,40.5,1,0.878
+Visakhapatnam,Andhra Pradesh,2021,44.1,1,0.902
+Visakhapatnam,Andhra Pradesh,2022,45.5,1,0.913
+Visakhapatnam,Andhra Pradesh,2023,53.1,1,0.887
+Visakhapatnam,Andhra Pradesh,2024,45.6,1,0.928
+Visakhapatnam,Andhra Pradesh,2025,52.4,1,0.922

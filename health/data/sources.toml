@@ -1,0 +1,708 @@
+# One table per data file, keyed by filename relative to health/data/.
+# Fields: source, url, locator, retrieved, licence, method (downloaded|transcribed|derived),
+# and script for derived tables.
+
+["lifetables_srs.csv"]
+source = "Office of the Registrar General & Census Commissioner, India. SRS Based Abridged Life Tables 2020-24 (May 2026)."
+url = "https://censusindia.gov.in/nada/index.php/catalog/47148/download/51393/SRS-Abridged_Life_Tables_2020-2024.pdf"
+catalog = "https://censusindia.gov.in/nada/index.php/catalog/47148"
+sha256 = "148629ce39c9956fa6a2444ad606394b9104d40f9ac6efcebb1da7336461f19f"
+locator = "Abridged life tables, report pp. 20-42 (PDF pp. 25-47): India and 22 states/UTs, 'Total' block, persons columns nqx, lx, nLx, ex. Cross-checked against Statement 3 (report p. 6, PDF p. 11)."
+retrieved = "2026-11-10"
+licence = "Government of India publication; no licence stated in the report or on the catalog page. Factual statistics reproduced with attribution."
+method = "transcribed"
+script = "scripts/build_baseline.py"
+notes = """
+Extracted with pdftotext -layout by the script. Checks in the script: l(x+n) = l(x)(1 - q(x)) within 3 for every row;
+e0 in every table equals Statement 3. Spot check by eye against the rendered PDF, 2026-11-10: Kerala rows 0-1, 25-30,
+45-50, 70-75, 85+ and Delhi rows 1-5, 30-35, 60-65, 80-85 (36 cells), all match. State names as printed in the table
+headings ('Telengana' is mapped to 'Telangana', the spelling of Statement 3, in places.csv, read by airhealth.places.canonical_state).
+Andhra Pradesh's nLx column is printed with five decimals; kept as printed.
+"""
+
+["population_age_state.csv"]
+source = "Report of the Technical Group on Population Projections: Population Projections for India and States 2011-2036. National Commission on Population, MoHFW. Cover dated November 2019 (released July 2020)."
+url = "https://nhm.gov.in/New_Updates_2018/Report_Population_Projection_2019.pdf"
+sha256 = "9a9031c9c75d609e03ab94ce0ac6115cb9d8a9ab82d1b18a47b78e90ae01331b"
+locator = "Table 11 (persons as on 1st July, every year 2011-2036, India and every state/UT; PDF pp. 86-98) and Table 18 (persons by age as on 1st March 2011/16/21/26/31/36, India, 21 states and the combined North-East states excluding Assam; PDF pp. 164-260)."
+retrieved = "2026-11-10"
+licence = "Government of India publication; no licence stated in the report. Factual statistics reproduced with attribution."
+method = "derived"
+script = "scripts/build_baseline.py"
+notes = """
+Columns: state (as printed, upper case), year, age_start (0, 1, 5, ..., 75, 80; 80 means 80+), population (persons, 1st July).
+Derivation: band 0 is Table 18's '0-1' row (age under one); band 1 is '0-4' minus '0-1'. Each unit's age shares come from its
+own Table 18, or the combined North-East table for Arunachal, Manipur, Meghalaya, Mizoram, Nagaland, Sikkim and Tripura, or India
+for the other small states and UTs (Goa, Chandigarh, Puducherry, Ladakh, Lakshadweep, Andaman & Nicobar, Daman & Diu, Dadra &
+Nagar Haveli). Shares are interpolated linearly in time between the 1st March tables, held after March 2036, and applied to the
+unit's Table 11 total. The 80+ band is split into 80-84 and 85+ at load time (airhealth.baseline), not here.
+Checks in the script: Table 11 persons = male + female within 2; Table 18 age groups sum to its total; Table 18 totals equal
+Table 17's for the same unit; states and UTs sum to India in Table 11 (to 0.01% in every year).
+Misprint found: the Table 18 for Uttarakhand (report p. 178, PDF p. 182) is headed 'PUNJAB'; the script names units from Table 17 and
+checks totals, so it is read as Uttarakhand.
+Spot check by eye against the rendered PDF, 2026-11-10: Table 18 NCT of Delhi rows 0-1, 0-4, 25-29, 60-64, 80+, Total for all
+six years (36 cells); Table 11 Gujarat, Maharashtra, Andhra Pradesh for 2011, 2022, 2036 (9 cells). All match.
+"""
+
+["cause_share_ncd_lri.csv"]
+source = "Office of the Registrar General & Census Commissioner, India. Sample Registration System: Causes of Death Statistics 2021-2023 (September 2025)."
+url = "https://censusindia.gov.in/nada/index.php/catalog/46176/download/50424/SRS_COD-STATISTICS_2021-2023.pdf"
+catalog = "https://censusindia.gov.in/nada/index.php/catalog/46176"
+sha256 = "1622b1b105ddf5ba4b237c7658a372c2466b340af25316cd1cc593685b42f268"
+locator = "Table 1.3A 'Distribution of Deaths in India: 2021-2023, Person', report p. 9 (PDF p. 16). Rows: the four major cause groups and 'Respiratory infections'; columns 0-4, 05-14, 15-29, 30-44, 45-54, 55-69, 70+ (percent of deaths in the age group)."
+retrieved = "2026-11-10"
+licence = "Government of India publication; no licence stated in the report or on the catalog page. Factual statistics reproduced with attribution."
+method = "transcribed"
+script = "scripts/build_baseline.py"
+notes = """
+All-India, persons; the report gives no state breakdown by age and cause (only EAG/other, rural/urban and six regions).
+'Respiratory infections' (a subgroup of communicable conditions) stands in for lower respiratory infection; the report does not
+split upper from lower. Chronic 'Respiratory diseases' sit inside Non-Communicable diseases.
+Mapping onto the 19 bands (airhealth.baseline): 0-4 -> bands 0, 1; 05-14 -> 5, 10; 15-29 -> 15, 20, 25; 30-44 -> 30, 35, 40;
+45-54 -> 45, 50; 55-69 -> 55, 60, 65; 70+ -> 70, 75, 80, 85. Ill-defined deaths are shared out in proportion to defined causes:
+share = (ncd + respiratory infections) / (100 - ill-defined).
+Check in the script: the four major groups sum to 100 within 0.25 in every age group.
+Spot check by eye against the rendered PDF, 2026-11-10: all 35 cells in the file match.
+"""
+
+["places.csv"]
+source = "Names as printed in the sources of this package: SRS life tables 2020-24, population projections 2011-2036, AQLI Annual Update 2025 (gadm1, gadm2), geoBoundaries gbOpen IND ADM1/ADM2, Pandey et al. 2021 appendix table 3, CPCB station files, Census 2011 table A-04 (I)."
+url = "https://github.com/aqli-epic/aqli-update"
+locator = "States and aliases: the STATES table in scripts/build_places.py. Districts: the (state, unit) pairs of exposure_aqli.csv and exposure_acag_total.csv. Cities: cities.csv."
+retrieved = "2026-11-10"
+licence = "Names are facts; the district lists inherit CC BY 4.0 (AQLI) and ODbL 1.0 (geoBoundaries ADM2, Pathways Data / LGD)."
+method = "derived"
+script = "scripts/build_places.py"
+notes = """
+Columns: name, kind (country, state, district, city), state (parent state; the state itself for a state; empty for India),
+aliases (';'-separated). Canonical state names are those of baseline.states(). Matching in airhealth.places ignores case,
+accents, punctuation and '&' versus 'and', so only spellings that differ beyond that are listed as aliases.
+District names differ between the two satellite maps (GADM in AQLI, LGD 2021 in geoBoundaries: 'Bangalore' in both, but
+'Ahmednagar'/'Ahmadnagar', 'Mumbai City'/'Mumbai'); both spellings are kept as separate districts, each found only in its own map.
+"""
+
+["exposure_aqli.csv"]
+source = "Air Quality Life Index (AQLI), Energy Policy Institute at the University of Chicago. AQLI Annual Update 2025 data (data years 1998-2023), gadm0/gadm1/gadm2 wide CSVs."
+url = "https://github.com/aqli-epic/aqli-update/tree/441f4e2241d9ec92567f080faa99dd3a29f7a90a/AQLI%20Annual%20Update%202025%20data"
+sha256 = "4e330b30c99a66fac3019a5ee15a15407ff4bcb352f16eedb5e6353ec96d97b0"
+locator = "gadm2.zip -> gadm2/gadm2_2023_wide.csv, rows name0 == 'India' (690 districts); columns name1, name, population, pm1998-pm2023, who1998-who2023. sha256 is of gadm2.zip; gadm1.zip d7af89aa509c66f8756442c8730215f76bd7d11bd7bfe439f748bc4ee6edbb22, gadm0.zip 9820a91a82fb0f442c15b760ea32f8e05504cd6ca289ec69b177751de9b706f9."
+retrieved = "2026-11-10"
+licence = "CC BY 4.0 (repository licence)"
+method = "derived"
+script = "scripts/build_exposure_aqli.py"
+population_total = 1398021054
+notes = """
+Columns: state, unit (AQLI district), year, pm25 (µg/m³; satellite PM2.5 with mineral dust and sea salt removed, per the
+release Readme), population (AQLI's, LandScan; one figure, the same in every year), aqli_years_who (AQLI's life-expectancy
+gain if the WHO guideline of 5 µg/m³ were met). population_total is India's population in gadm0_2023_wide.csv.
+Release choice: the repository Readme (2026-11-10) calls the 2025 release the 'latest completed release' and the 2026 folder
+(data to 2024) 'work in progress ... should not be treated as a finalized AQLI release'. The 2026 files recompute the whole
+series: NCT of Delhi pm2023 is 88.35 in the 2025 release and 89.81 in the 2026 files.
+GADM codes Jammu and Kashmir and Ladakh as 'Z01', so India is selected by name0, not iso_alpha3.
+Checks in the script: districts sum to the gadm0 India population exactly; population-weighted district means reproduce
+every gadm1 state value in every year to 0.01 (largest gap 0.005, rounding). Spot check against the raw file, 2026-11-10:
+Lucknow 2010 and 2023, Ernakulam 2023, Jaisalmer 2023 all match; India pm2023 41.0 (gadm0) equals the table's weighted mean.
+One Telangana district is named 'NA' in gadm2 (population 1,547,413); written as 'Unnamed area'.
+Use: airhealth.exposure keeps this file's split of each state among its districts and scales the state to the official
+projection (population_age_state.csv) for the year asked, 2011-2036; other years keep this population.
+"""
+
+["exposure_acag_total.csv"]
+source = "Atmospheric Composition Analysis Group (Washington University in St. Louis), surface PM2.5 V6.GL.02.04 (Shen et al. 2024, ACS ES&T Air, doi:10.1021/acsestair.3c00054), annual mean 2023 at 0.1°; weighted with WorldPop Global2 R2025A India 2023 1 km constrained UN-adjusted population; districts from geoBoundaries gbOpen IND ADM2 and states from ADM1."
+url = "https://satpmdata.s3.us-east-1.amazonaws.com/archive/V6GL0204/CNNPM25c0p10/Annual/AS/V6GL02.04.CNNPM25.0p10.AS.202301-202312.nc"
+worldpop_url = "https://data.worldpop.org/GIS/Population/Global_2015_2030/R2025A/2023/IND/v1/1km_ua/constrained/ind_pop_2023_CN_1km_R2025A_UA_v1.tif"
+boundaries_url = "https://github.com/wmgeolab/geoBoundaries/tree/9469f09/releaseData/gbOpen/IND"
+catalog = "https://sites.wustl.edu/acag/datasets/surface-pm2-5/"
+sha256 = "543de3d4b0a0e97c2b458fc3b737a90b2c7053fc543bcc8646f34bf3c2d574cd"
+locator = "Variable PM25 of the 2023 Asia-crop file. sha256 above is of the .nc; WorldPop tif c2859c04866c24759b66c3e327672832c78ad06772e436b8a1aceaf600b953bc; geoBoundaries-IND-ADM2.geojson 8bef6929fd65432e7dc775e7c44473e84efff064ebddbfd6b834e6291546db40; geoBoundaries-IND-ADM1.geojson 47aa0acb6f69868daee49143276f3ce323f18905ba7d38d0a86816b405028736."
+retrieved = "2026-11-10"
+licence = "ACAG: CC BY 4.0. WorldPop: CC BY 4.0. geoBoundaries IND ADM2: ODbL 1.0 (Pathways Data Pvt. Ltd., lgdirectory.gov.in); ADM1: CC BY 2.5 IN (DataMeet). The derived table is shared under ODbL 1.0."
+method = "derived"
+script = "scripts/build_exposure_acag.py"
+population_total = 1431702948
+notes = """
+Columns: state, unit (geoBoundaries district), year (2023), pm25 (µg/m³, total PM2.5 including dust and sea salt), population
+(WorldPop 2023 persons, summed over the district's pixels). population_total is the sum of the WorldPop India raster.
+Year: 2023 is the last year of V6.GL.02.04 and the last year of the AQLI 2025 release, so the two maps share a year.
+ACAG has since published V6.GL.03 (1998-2024) in the same bucket; not used here, the build pins V6.GL.02.04.
+Method (script docstring): each WorldPop pixel takes the 0.1° cell and the district containing its centre; 4,752 populated
+pixels (1,056,060 people, 0.074%) fall outside every district polygon and go to the nearest district (at most 16 pixels away).
+No populated pixel falls in an empty ACAG cell. Corrections to geoBoundaries: Yanam put in Puducherry (the ADM1 outline
+leaves it in Andhra Pradesh; by area overlap it is the only misplaced district); 'Hydrabad' spelled Hyderabad; a Ladakh unit
+named 'DATA NOT AVAILABLE' (4,507 people) written as 'Unnamed area'; trailing spaces stripped ('North ').
+Cross-check: India population-weighted mean 49.8 here against 47.1 in ACAG's own region summary
+(archive/V6GL0204/RegionSummaries/GlobalPM25-V6GL0203-Annual-1998-2023-wThresFrac.csv, labelled V6GL0203 and weighted by
+ACAG's population); states differ from ACAG's state summary by -7 to +9 µg/m³, most within ±5 (largest: Assam +9.0,
+Lakshadweep -6.8). Running the same
+script on the 0.01° file gives 50.2, so resolution is not the gap; the label suggests the summary is the earlier
+V6.GL.02.03 data, which V6.GL.02.04 revised for 'abnormally low values'.
+WorldPop R2025A puts fewer people in the densest cores than the census does (Mumbai island ~0.9 million) and more in some
+surrounding districts; this moves district weights within a state, not the cities' populations (cities.csv).
+Use: airhealth.exposure keeps this file's split of each state among its districts and scales the state to the official
+projection (population_age_state.csv) for the year asked.
+"""
+
+["exposure_gbd2019.csv"]
+source = "India State-Level Disease Burden Initiative Air Pollution Collaborators (Pandey A, Brauer M, Cropper ML, et al.). Health and economic impact of air pollution in the states of India: the Global Burden of Disease Study 2019. Lancet Planet Health 2021; 5: e25-38. Appendix (mmc1.pdf)."
+url = "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7805008/supplementaryFiles"
+catalog = "https://pmc.ncbi.nlm.nih.gov/articles/PMC7805008/"
+sha256 = "1382e04dae7490e41835dda93461c4eaef35c3f1761151140a155269d619da72"
+locator = "Appendix table 3 'PM2.5 concentration, use of solid fuels, and ozone concentration in the states of India, 2019', report p. 18 (PDF p. 19), column 'Population-weighted mean ambient PM2.5 µg/m³ (95% UI)'. sha256 is of mmc1.pdf."
+retrieved = "2026-11-10"
+licence = "CC BY 4.0 (article and appendix, as stated on the article)"
+method = "transcribed"
+script = "scripts/build_exposure_gbd2019.py"
+notes = """
+Columns: state, gbd_region (the row as printed), year (2019), pm25, pm25_lower, pm25_upper (95% UI).
+Extracted with pdftotext -layout by the script. The paper groups 'Jammu & Kashmir and Ladakh' and 'Other small union
+territories' (Andaman and Nicobar Islands, Chandigarh, Dadra and Nagar Haveli, Daman and Diu, Lakshadweep, Puducherry,
+as listed in the main text, Methods); each member state carries its group's value. The India row is kept (state 'India').
+Population for weighting is not in the table: airhealth.exposure takes each state's 2019 total from the official
+projections (baseline), so the weighted India mean (90.9) differs from the printed 91.7.
+Checks in the script: India 91.7 (69.6-113.9), Kerala 15.8 (13.0-18.7), Delhi 217.6 (117.9-297.3) equal the main text.
+Spot check by eye against the rendered page, 2026-11-10: Bihar, Uttar Pradesh, Manipur, Rajasthan, Haryana, Sikkim, Goa,
+Other small union territories (24 cells), all match.
+"""
+
+["exposure_cpcb.csv"]
+source = "Central Pollution Control Board continuous ambient air quality monitoring stations (CAAQMS), 15-minute data compiled by Vonter/india-cpcb-aqi (parquet releases 2016-2025), as downloaded by diwali/download.sh."
+url = "https://github.com/Vonter/india-cpcb-aqi/releases"
+locator = "diwali/data/raw/cpcb-air-quality-YYYY.parquet (git-ignored), columns City, State, Station ID, Timestamp, 'PM2.5 (µg/m³)', 'PM10 (µg/m³)'; cities and their CPCB city names from the CITIES table in scripts/build_exposure_cpcb.py (cities.csv, column cpcb_cities)."
+retrieved = "2026-11-09"
+licence = "ODbL 1.0 (the compilation); the derived table is shared under ODbL 1.0."
+method = "derived"
+script = "scripts/build_exposure_cpcb.py"
+notes = """
+Columns: city, state, year, pm25 (mean over the year's hours of the median across the city's stations of station-hour
+means, µg/m³), stations (stations with any valid hour that year), hours_share (share of the year's hours with a city value).
+The raw files hold whole calendar years (1 Jan 00:00 to 31 Dec 23:45, IST wall-clock, every year 2016-2025; checked in the
+script). QC is the Diwali track's (diwali/extract.py), applied to the whole year.
+City-years with under 75% of hours are dropped: Ahmedabad 2016 (45%), Kolkata 2016 (0%), Ahmedabad 2017 (40%), Jaipur 2017
+(37%), Mumbai 2018 (59%), Pune 2018 (50%), Kolkata 2018 (56%), Surat 2022 (14%), Pune 2022 (64%), Surat 2023 (74%).
+Not in the files at all: Jaipur 2016, Kolkata 2017, Surat 2016-2021. Surat has a single station in every year kept.
+Fifty cities (2026-11-12): the 11 original cities are built exactly as before (one CPCB city name each; Kolkata and Pune
+do not add Howrah or Pimpri-Chinchwad, Ahmedabad not Gandhinagar). A new city's hourly value is the median over the
+stations of all its cpcb_cities (Chandigarh: Chandigarh, Patiala, Ambala; Raipur-Durg-Bhilai: Raipur, Bhilai;
+Puducherry: Puducherry, Cuddalore; Asansol-Durgapur, Hubli-Dharwad likewise). The city's state in this file is the state
+in cities.csv. No rows (no CPCB station in any year 2016-2025 under that name in the city's state) for Aurangabad (CPCB's
+Aurangabad is the one in Bihar), Jamshedpur, Panaji, Rajkot, Shimla, Vadodara and Ranchi (all names scanned across every year's file;
+Srinagar appears in 2025 only, with under 75% of hours, so it has a cpcb_cities entry but no rows). Dhanbad-Bokaro is
+Dhanbad's stations only (Bokaro has none). Many new city-years fall under the 75% cut and are dropped; the script prints them.
+"""
+
+["monthly_cpcb.csv"]
+source = "Central Pollution Control Board continuous ambient air quality monitoring stations (CAAQMS), 15-minute data compiled by Vonter/india-cpcb-aqi (parquet releases 2016-2025), as downloaded by diwali/download.sh."
+url = "https://github.com/Vonter/india-cpcb-aqi/releases"
+locator = "diwali/data/raw/cpcb-air-quality-YYYY.parquet (git-ignored), columns City, State, Station ID, Timestamp, 'PM2.5 (µg/m³)', 'PM10 (µg/m³)'; cities and their CPCB city names from the CITIES table in scripts/build_exposure_cpcb.py (cities.csv, column cpcb_cities)."
+retrieved = "2026-11-12"
+licence = "ODbL 1.0 (the compilation); the derived table is shared under ODbL 1.0."
+method = "derived"
+script = "scripts/build_exposure_cpcb.py"
+notes = """
+Columns: city, year, month (1-12), pm25 (mean over the month's hours of the median across the city's stations of
+station-hour means, µg/m³), hours_share (share of the month's hours with a city value). Built in the same pass as
+exposure_cpcb.csv: same QC (the Diwali track's, applied to the whole year), same hourly city medians, same cities and
+CPCB names, timestamps IST wall-clock. Hours in a month are the calendar's (February has 29 days in 2016, 2020, 2024).
+A month-year is kept only if at least 75% of its hours have a value, the annual table's rule applied per month.
+Years 2016-2025, every city with a monitor. Because the rule is per month, a city can have some months of a year the annual
+table drops (and the reverse: a city-year kept annually may miss a monsoon month).
+City-months present in the data but dropped for coverage, per city (counting months of city-years the annual table also
+drops; months of years absent from the files are not counted): Agartala 8, Agra 4, Ahmedabad 4, Amritsar 11,
+Asansol-Durgapur 7, Bengaluru 3, Bhopal 3, Bhubaneswar 1, Chandigarh 2, Chennai 2, Coimbatore 27, Dehradun 10,
+Dhanbad-Bokaro 22, Gaya 15, Guwahati 1, Gwalior 1, Hubli-Dharwad 20, Indore 4, Jaipur 3, Jodhpur 11, Kanpur 5, Kochi 23,
+Kolkata 4, Kota 3, Lucknow 2, Ludhiana 6, Madurai 1, Mumbai 2, Nagpur 24, Nashik 15, Patna 15, Puducherry 2, Pune 11,
+Raipur-Durg-Bhilai 11, Srinagar 7, Surat 14, Thiruvananthapuram 9, Tiruchirappalli 9, Vijayawada 24, Visakhapatnam 11.
+Delhi has none.
+"""
+
+["monthly_cpcb_state.csv"]
+source = "Central Pollution Control Board continuous ambient air quality monitoring stations (CAAQMS), 15-minute data compiled by Vonter/india-cpcb-aqi (parquet releases 2016-2025), as downloaded by diwali/download.sh."
+url = "https://github.com/Vonter/india-cpcb-aqi/releases"
+locator = "diwali/data/raw/cpcb-air-quality-YYYY.parquet (git-ignored), columns State, Station ID, Timestamp, 'PM2.5 (µg/m³)', 'PM10 (µg/m³)'; every station, grouped by the State column."
+retrieved = "2026-11-12"
+licence = "ODbL 1.0 (the compilation); the derived table is shared under ODbL 1.0."
+method = "derived"
+script = "scripts/build_exposure_cpcb.py"
+notes = """
+Columns: state (canonical name, airhealth.places.canonical_state, of the parquet's State), year, month (1-12), pm25
+(mean over the month's hours of the median across ALL the state's CPCB stations of station-hour means, µg/m³), stations
+(stations of the state with any valid hour that year), hours_share. Same QC as monthly_cpcb.csv (the Diwali track's,
+whole-year; its saturation rule uses the state's hourly median in place of the city's), same hourly-median-across-stations
+method, same 75% month coverage rule, built in the same pass. Used by airhealth.months for a state or city with no
+complete profile among the 50 cities (Claude's call: a state's monitors, wherever in the state, stand in for the shape;
+Haryana's are mostly Gurugram, Faridabad and the rest of the NCR). Every monitor is used, not only those of the 50 cities.
+"""
+
+["cities.csv"]
+source = "Office of the Registrar General & Census Commissioner, India. Census of India 2011, table A-04 (I): Towns and urban agglomerations classified by population size class in 2011 with variation between 1901 and 2011 - Class I. Airshed names: APnA 50 airsheds (apna_source_apportionment.csv), UrbanEmissions.info, CC BY 4.0."
+url = "https://censusindia.gov.in/nada/index.php/catalog/42876/download/46544"
+catalog = "https://censusindia.gov.in/nada/index.php/catalog/42876"
+sha256 = "8ab1bafd6e49aec4a6b2709398dbdeaab2b53bc369a53e62eacac601647a58dd"
+locator = "Sheet 'CLASS I', the entries named in the census_name column of each row (';'-separated, as printed there: urban agglomerations 'U.A.', or the town itself where the census lists no UA, e.g. Jaipur, Kota, Ludhiana, Tenali, Cuddalore, Visakhapatnam, Agartala, Hubli-Dharwad); row 'Census year 2011' (printed '2011', or '!!2011' for Guwahati), column 'Persons', taken from the entry's own block (not its sub-entries). The satellite-map units (aqli_units, acag_units) and the cpcb_cities are in the script's CITIES table."
+retrieved = "2026-11-12"
+licence = "Government of India publication; no licence stated on the catalog page. Factual statistics reproduced with attribution. apna_airshed names: CC BY 4.0."
+method = "derived"
+script = "scripts/build_exposure_cpcb.py"
+notes = """
+Fifty cities: Delhi plus every airshed of the APnA table (49; Varanasi is missing there). Columns: city, state, population
+(Census 2011 persons), census_name, aqli_units and acag_units (';'-separated districts holding the city in each satellite
+map; chosen by hand, checked by the script to exist in the map's table in the city's state), apna_airshed (the APnA 'City'
+string, empty for Delhi), cpcb_cities (';'-separated CPCB city names; empty where CPCB has no station). These are final
+2011 figures, not the provisional ones. The original 11 rows (Delhi to Lucknow) are unchanged.
+Claude's call (not in any source): an airshed's population is the SUM of the Class I entries for the towns its APnA name
+lists. A town inside another listed entry's U.A. is not added again (Howrah in Kolkata U.A.; Pimpri-Chinchwad in Pune U.A.;
+Gandhinagar in Ahmadabad U.A.; Vasco da Gama taken to be in Mormugao U.A.). A listed town that is not a Class I entry is
+left out: Tarn Taran (Amritsar) and Phillaur (Ludhiana). Dispur is part of Guwahati U.A.
+City names: the 11 original names stay; a new city takes the first town of its APnA name, or the usual twin-city name
+(Hubli-Dharwad for 'Dharwad-Hubli', Asansol-Durgapur, Dhanbad-Bokaro, Raipur-Durg-Bhilai for 'Raipur-Durg-Bhillai',
+Panaji for 'Panjim-Vasco-Margao', Tiruchirappalli for 'Tiruchirapalli'). Allahabad keeps APnA's spelling (Prayagraj is an
+alias in places.csv). Chandigarh and Puducherry are also state names, so the bare name resolves to the state, as Delhi does.
+Entries used: Panaji = Panaji U.A + Mormugao U.A. + Margao U.A.; Puducherry = Puducherry U.A. + Cuddalore (Tamil Nadu);
+Chandigarh = Chandigarh U.A. + Patiala U.A. + Ambala U.A. (205,418: Ambala Sadar, Ambala Cantt., Babiyal, Kardhan) +
+Ambala (entry 239, Ambala City, M.Cl., 195,153; it is a separate entry, not inside the Ambala U.A.; checked in the workbook
+2026-11-12), 1,817,419 in all;
+Vijayawada = Vijayawada U.A. + Guntur U.A. + Tenali; Dhanbad-Bokaro = Dhanbad U.A. + Bokaro Steel City U.A.;
+Raipur-Durg-Bhilai = Raipur U.A. + Durg-Bhilainagar U.A.; Asansol-Durgapur = Asansol U.A. + Durgapur U.A.
+Units: the satellite maps need all units in the city's state, so the two airsheds across a state line (Chandigarh: Patiala
+in Punjab, Ambala in Haryana; Puducherry: Cuddalore in Tamil Nadu) list only the home state's unit, though their population
+and CPCB stations cover the whole airshed. A city's units are the districts of the towns counted in its population. Units are whole districts, so a city's satellite value is its district's (for
+Ludhiana-Phillaur and Amritsar-Tarn Taran, only the districts of the towns counted in the population: Ludhiana and Amritsar; Phillaur's Jalandhar and Tarn Taran are not Class I, so their districts are not used). Asansol-Durgapur:
+AQLI Barddhaman, ACAG Paschim Barddhaman (the district after the 2017 split). Guwahati: Kamrup Metropolitan in both. Allahabad:
+AQLI 'Prayagraj', ACAG 'Allahabad'.
+"""
+
+["curves_loglinear.csv"]
+source = "Three published studies, one row each, with each row's citation, url and locator in the file: Jaganathan et al. 2024 (Lancet Planet Health 8: e987-96), Brown et al. 2022 (Environ Health Perspect 130: 097004), Vodonos et al. 2018 (Environ Res 166: 677-89)."
+url = "https://pmc.ncbi.nlm.nih.gov/articles/PMC11790315/"
+urls = ["https://pmc.ncbi.nlm.nih.gov/articles/PMC11790315/", "https://pmc.ncbi.nlm.nih.gov/articles/PMC9472672/", "https://doi.org/10.1016/j.envres.2018.06.021"]
+locator = "Per row, in the locator column. Jaganathan: Summary and Results (final difference-in-differences model). Brown: Results and Figure 2 (spatially adjusted, nonaccidental, ages 15-69). Vodonos: Section 3 Results and Table 2 (all-cause, all ages, slope at a study mean of 30 µg/m³)."
+retrieved = "2026-11-10"
+licence = "Published estimates re-typed with citation. Jaganathan: NIH author manuscript in PMC; Brown: open access in EHP; Vodonos: Elsevier article. Facts reproduced with attribution."
+method = "transcribed"
+notes = """
+Columns: name, label, scale ('percent' = % change in mortality, 'rr' = relative risk), per_ugm3 (the increment the estimate is
+per), estimate, lower, upper (95% interval as printed), floor (µg/m³), min_age (the youngest age band the curve applies
+to; younger bands get a relative risk of 1), source, url, locator.
+airhealth.curves converts each row to % per 10 µg/m³ by compounding on the log scale, pct10 = ((1 + pct/100)^(10/per) - 1) x 100
+(an RR is first written as pct = (RR - 1) x 100), and takes se = (pct10(upper) - pct10(lower)) / (2 x 1.959964).
+Read at source, 2026-11-10: Jaganathan and Brown from the PMC full text (Europe PMC fullTextXML of PMC11790315 and PMC9472672);
+volume and pages from the same XML. Vodonos from a copy of the published PDF (Environmental Research 166 (2018) 677-689, publisher
+header and pagination intact) at http://www.scientificintegrityinstitute.org/ERMAPM25JS080118.pdf; the publisher's copy is
+paywalled. That text prints the 30 µg/m³ interval as '(95%CI-0.52-1.12)'; read as 0.52-1.12, which is symmetric about 0.82 as
+the other intervals in that sentence nearly are.
+Vodonos: the paper's slope falls with the study's mean concentration (inverse transform: beta per µg/m³ = 0.006 + 0.071 / mean,
+Table 2), 1.29% at 10, 1.03% at 15.7, 0.82% at 30. One slope is a simplification, said so in the row's label. The paper's
+studies have means up to 43.7 µg/m³ (Asia), so nothing in it speaks to Indian concentrations above that.
+Brown: the paper reports the estimate at ages 15-69 and does not compute attributable deaths; min_age 15, so the curve is applied
+from 15 upward, which extrapolates it past 69 (said so in the label). Its floor of 2 is the paper's modelling assumption (no effect at 0-2).
+Jaganathan: estimated on all-age, all-cause district deaths; min_age 0, so it applies at every age.
+Vodonos: min_age 25, the adult start used for GEMM (a project choice, not a figure from the paper).
+"""
+
+["curves_gemm_ncd_lri.csv"]
+source = "Burnett R, Chen H, Szyszkowicz M, et al. Global estimates of mortality associated with long-term exposure to outdoor fine particulate matter. PNAS 2018; 115(38): 9592-97. doi:10.1073/pnas.1803222115. Parameters as deposited by the authors in the paper's data repository (DataGEMM)."
+url = "https://github.com/mszyszkowicz/DataGEMM/blob/c0640d86a852e2e3565392ba014964bd43edb8ff/GEMM%20Calculator%20(PNAS)_ab.zip"
+catalog = "https://pmc.ncbi.nlm.nih.gov/articles/PMC6156628/"
+sha256 = "fb8073c703b3ce77a17ab7134f7120999d1ecff466e6d890c980e086c5c03e7e"
+locator = "GEMM Calculator (PNAS)_ab.zip -> 'GEMM Calculator (PNAS)_ab.xlsx' (sha256 d33564165209dd0dc9208f40c37993fb3c45d98c181a71682bd1f0c1ce60961f), sheet 'GEMM fit parameters', block 'All-regions, INcluding China', 'Non-accidental function (Non-Communicable + LRI deaths)', rows 12-23 (age groups 25-29 to 80+), columns C-G. sha256 above is of the zip."
+retrieved = "2026-11-10"
+licence = "The repository has no licence. Published parameters re-typed with citation; no code copied. The PNAS article is CC BY-NC-ND 4.0."
+method = "transcribed"
+notes = """
+Columns: age_start, age_group (as printed; '30-35' is the sheet's label for 30-34), theta, se_theta, alpha, mu, nu.
+Column meaning read from the workbook's own formulas (sheet 'Burden_YesCN_NCD+LRI', e.g. cell C91):
+HR = EXP(LN(1 + z/E) / (1 + EXP((F - z)/G)) * C), z = MAX(0, PM2.5 - 2.4), so C = theta, E = alpha, F = mu, G = nu; D is 'se'.
+The workbook's 95% bounds use theta -/+ 2 se for every age at once.
+The PNAS supplementary appendix (pnas.1803222115.sapp.pdf) could not be read: PMC and Europe PMC serve a browser check
+(reCAPTCHA / Cloudflare) and pnas.org returns 403. The parameters are therefore from the authors' deposit that the paper names
+under Data deposition, not from the SI table itself. Tie to the paper: the workbook's India total (sheet 'Burden_YesCN_NCD+LRI',
+AN91, 2,219,057 deaths, age-specific functions, PM2.5 74.0) equals PNAS Table 1, India, GEMM NCD+LRI, 100% rollback, 2,219
+thousand. The all-age '25+' row (0.143, 0.01807) and the 'EXcluding China' block are not used.
+Check against the workbook, 2026-11-10: all 60 parameter cells and 12 age labels compared by script (openpyxl, values only), no mismatch.
+"""
+
+["curves_gemm_5cod.csv"]
+source = "Burnett R, Chen H, Szyszkowicz M, et al. Global estimates of mortality associated with long-term exposure to outdoor fine particulate matter. PNAS 2018; 115(38): 9592-97. doi:10.1073/pnas.1803222115. Cause-specific parameters as deposited by the authors in the paper's data repository (DataGEMM)."
+url = "https://github.com/mszyszkowicz/DataGEMM/blob/c0640d86a852e2e3565392ba014964bd43edb8ff/GEMM%20Calculator%20(PNAS)_ab.zip"
+catalog = "https://pmc.ncbi.nlm.nih.gov/articles/PMC6156628/"
+sha256 = "fb8073c703b3ce77a17ab7134f7120999d1ecff466e6d890c980e086c5c03e7e"
+locator = "GEMM Calculator (PNAS)_ab.zip -> 'GEMM Calculator (PNAS)_ab.xlsx' (sha256 d33564165209dd0dc9208f40c37993fb3c45d98c181a71682bd1f0c1ce60961f), sheet 'GEMM fit parameters', blocks 'All-regions, INcluding China' (row 5): 'Ischaemic Heart Disease' I12:N23, 'Strokes' P12:U23, 'Chronic Obstructive Pulomonary Disease' W12:AB23, 'Lung Cancer' AD12:AI23, 'Lower Respiratory Infections' AK12:AP23 (age groups 25-29 to 80+)."
+retrieved = "2026-11-11"
+licence = "The repository has no licence. Published parameters re-typed with citation; no code copied. The PNAS article is CC BY-NC-ND 4.0."
+method = "transcribed"
+notes = """
+Columns: cause (ihd, stroke, copd, lung_cancer, lri), age_start, age_group (as printed; '30-35' is the sheet's label for 30-34),
+theta, se_theta, alpha, mu, nu. Read cell by cell with openpyxl (values only) from the zip whose sha256 is above, the same deposit
+as curves_gemm_ncd_lri.csv. Column meaning read from the workbook's own formulas, e.g. sheet 'Burden_YesCN_IHD' cell C21:
+(1-1/EXP(LN(1+MAX(0,PM-2.4)/L12)/(1+EXP((M12-MAX(0,PM-2.4))/N12))*J12)) × baseline, so for IHD J = theta, K = se, L = alpha,
+M = mu, N = nu; the other causes' blocks have the same layout (Q-U, X-AB, AE-AI, AL-AP). COPD, lung cancer and LRI have one
+parameter set repeated on every age row (equal to their '25+' row 11); IHD and stroke are age-specific. 80+ covers 85+.
+Tie to the paper: the workbook's India burdens with age-specific functions (sheets Burden_YesCN_IHD, _CeVD, _COPD, _LC, _LRI, cell
+AN91: 834,644; 313,477; 442,032; 39,503; 237,686 deaths, PM2.5 74.0) sum to 1,867,342, PNAS Table 1, India, GEMM 5-COD, 100%
+rollback: 1,867 thousand. The workbook's GBD 2015 baselines that produce those figures are IHME's and are not copied here.
+The 'EXcluding China' blocks and the all-age '25+' rows are not used. Used by the gemm_5cod curve (airhealth/ihme_curves.py),
+which also needs IHME's deaths by cause (local tier).
+"""
+
+["fx_inr_usd.csv"]
+source = "World Bank, World Development Indicators: PA.NUS.FCRF 'Official exchange rate (LCU per US$, period average)', India (World Bank API, source id 2, last updated 2026-10-08)."
+url = "https://api.worldbank.org/v2/country/IND/indicator/PA.NUS.FCRF?format=json&per_page=100&date=2000:2026"
+page = "https://data.worldbank.org/indicator/PA.NUS.FCRF?locations=IN"
+sha256 = "5ca38878420f23c601ae39a25781e47fe21b02fafa224dda527522bdc5af1468"
+locator = "API JSON, second element: one record per year, fields date and value; India, 2000-2025 (2026 has no value yet)."
+retrieved = "2026-11-10"
+licence = "CC BY 4.0 (World Bank Open Data terms of use)"
+method = "downloaded"
+script = "scripts/build_fx.py"
+notes = """
+Columns: year, inr_per_usd (rupees per US dollar, annual average of the official rate), written as the API gives them. The
+World Bank takes this series from the IMF's International Financial Statistics. Used by airhealth.simulate to turn an
+intervention's rupee costs into dollars at the rate of its cost.year; a cost.year outside 2000-2025 is rejected. No
+inflation (price-level) adjustment is made: costs stay in the prices of their cost.year. Not cross-checked against the
+RBI reference rate.
+"""
+
+["srs_crude_death_rate.csv"]
+source = "Office of the Registrar General & Census Commissioner, India. Sample Registration System Statistical Report, 2011 to 2024 (fourteen annual reports)."
+url = "https://censusindia.gov.in/nada/index.php/catalog/46172/download/50420/SRS_STAT_2023.pdf"
+catalog = "https://censusindia.gov.in/nada/index.php/catalog/46172"
+urls = """
+2011: https://censusindia.gov.in/nada/index.php/catalog/34790/download/38478/SRS_STAT_2011.pdf  sha256 2e4d78579db6609a2f81149918983878fefb58f0062a314f9f5fead6225d9b28
+2012: https://censusindia.gov.in/nada/index.php/catalog/34791/download/38479/SRS_STAT_2012.pdf  sha256 36321777bb932b5172538fa6a94a27852bd12b10dca792ffd96c7095f4af4e02
+2013: https://censusindia.gov.in/nada/index.php/catalog/34788/download/38476/SRS_STAT_2013.pdf  sha256 6c85083e4ad8dfcf7ec804b9d15bb788da145983cf05db6fb95141b4dc6538ab
+2014: https://censusindia.gov.in/nada/index.php/catalog/34787/download/38475/SRS_STAT_2014.pdf  sha256 5b8aa01e28cf8f3a0579ff0e3803a29677b3d57effb375aac7428e49837d6892
+2015: https://censusindia.gov.in/nada/index.php/catalog/44371/download/48038/SRS_STAT_2015.pdf  sha256 fe54178bf00788a07ab5520df5b13d24388e5353428b35c343215f3367851bfa
+2016: https://censusindia.gov.in/nada/index.php/catalog/44372/download/48040/SRS_STAT_2016.pdf  sha256 7da0cdf41ec5c32e84664e110b0b146c1c3551425f9f7515d77ba3e8c5fefbf3
+2017: https://censusindia.gov.in/nada/index.php/catalog/44373/download/48042/SRS_STAT_2017.pdf  sha256 a82bf4df15f910ca769441349972303e5213a8160c5fc00d511a2f308330e5f4
+2018: https://censusindia.gov.in/nada/index.php/catalog/44374/download/48044/SRS_STAT_2018.pdf  sha256 672ccb7eb04b6547438fb1ffda91638d590a1d5cb9978817eba60b40e3333eef
+2019: https://censusindia.gov.in/nada/index.php/catalog/44375/download/48046/SRS_STAT_2019.pdf  sha256 50efe7a9f00db7df697f4f71ee8db0c4991a4a80f35f6a02d204689809f79ac9
+2020: https://censusindia.gov.in/nada/index.php/catalog/44376/download/48048/SRS_STAT_2020.pdf  sha256 aae760b4f2b4d16bfa275a6f0690c19bc203bdd7ef7f82bfd66fe3304373e56a
+2021: https://censusindia.gov.in/nada/index.php/catalog/45556/download/49753/SRS_STAT_2021.pdf  sha256 1587399e3a1bbe49e3c5f1ded842b204dc771652583dbffeff366294ef800d55
+2022: https://censusindia.gov.in/nada/index.php/catalog/45570/download/49767/SRS_STAT_2022.pdf  sha256 8c1789a0a7089f6ae716909c7d403fb1c16940eca943c4fa9a6471523d0a66c9
+2023: https://censusindia.gov.in/nada/index.php/catalog/46172/download/50420/SRS_STAT_2023.pdf  sha256 11a396d4def5361eb541d0aa5173ff9e850f05b5794a5c9415de83e22699865d
+2024: https://censusindia.gov.in/nada/index.php/catalog/47152/download/51396/SRS_STAT_2024.pdf  sha256 f922a4a817e612c78a7827e4f526f69dc433d68c4af287b76d418337637c946a
+"""
+locator = "Statement 40, 'CDR (Crude Death Rate) by Residence, India and States/UTs', column 'Total': report p. 118 (PDF p. 145) in 2020; p. 128 (PDF p. 155) in 2021, 2022 and 2023; p. 128 (PDF p. 156) in 2024. India, 22 bigger states/UTs, 8 smaller states and 6 union territories: 37 rows a year. Before 2020 the statement is 'CDR (Crude Death Rates) by residence, India and bigger States[/UTs]' and has India and the bigger states only: Statement 41, report p. 68, in 2011 (PDF p. 91), 2012 (PDF p. 91) and 2013 (PDF p. 89), 21 rows; Statement 40, report p. 68 (PDF p. 91) in 2014, 23 rows; Statement 40, report p. 122, in 2015 (PDF p. 146), 2016 (PDF p. 146), 2017 (PDF p. 154), 2018 (PDF p. 152) and 2019 (PDF p. 148), 23 rows."
+retrieved = "2026-11-11"
+licence = "Government of India publication; no licence stated in the reports or on the catalog pages. Factual statistics reproduced with attribution."
+method = "transcribed"
+script = "scripts/build_srs_death_rates.py"
+notes = """
+Columns: state (as printed), year, cdr_per_1000 (deaths per 1,000 population, persons, rural and urban combined).
+Extracted with pdftotext -layout by the script. Check in the script: for India and the bigger states/UTs the figure equals
+the 'All ages (Crude death rate)' row of the same report's Detailed Table 8, in every year; before 2020 the statement, Table 8
+and Table 1 cover the same units.
+Which units, by year. 2020-2024: all 37. 2014-2019: India and 22 bigger states/UTs (Telangana first printed in the 2014
+report). 2011-2013: India and 20 bigger states; no Uttarakhand, and 'Andhra Pradesh' is the undivided state (Telangana
+included), so its 2011-2013 rows are not comparable with Andhra Pradesh from 2014. The reports before 2020 print no crude death
+rate for the smaller states or union territories anywhere (only their sample sizes), so those have no row before 2020; the SRS
+Bulletins (same catalog) do print them and were not read. Jammu & Kashmir includes Ladakh before 2020, and the 2020-2024 rows
+for Jammu & Kashmir exclude it.
+'Dadra and Nagar Haveli and Daman and Diu' is one union territory in these reports and has one rate; airhealth uses it for both
+of its former parts. In the 2020 report the text layer runs that name into the next row ('Ladakh and Diu', then 'Daman 5.0');
+read against the rendered page (PDF p. 145): the merged union territory 3.7, Ladakh 5.0, Puducherry 5.4, Lakshadweep 6.5.
+Spot check by eye against the rendered PDF, 2026-11-11: the whole of Statement 40 for 2020 (37 rows); for 2021-2024 the text
+layer was read row by row against the script's output for India, Delhi, Kerala and the six union territories. For 2011-2019
+the rendered statement page of each report was read for India (7.1, 7.0, 7.0, 6.7, 6.5, 6.4, 6.3, 6.2, 6.0) and the whole
+statement agreed with the text layer the script reads. India 6.7 in 2014 is the 2014 report's own figure; the 2015 report's
+Table 13 gives the same. Cross-check, 2026-11-11, not in the script: every 'Total' figure in Table 13 ('Annual estimates of
+Death rate by sex', the six years to the report's own) of the 2011-2020 reports equals this table's row for that unit and year
+where both exist (978 pairs, no difference).
+The two corrigenda on the catalog pages (2015-2020 reports: Tables 13 and 17; 2023: the title of Table 2) do not touch
+Statement 40, Table 1 or Table 8. The 2011-2014 catalog pages carry no corrigendum.
+"""
+
+["srs_age_specific_death_rates.csv"]
+source = "Office of the Registrar General & Census Commissioner, India. Sample Registration System Statistical Report, 2011 to 2024 (fourteen annual reports)."
+url = "https://censusindia.gov.in/nada/index.php/catalog/46172/download/50420/SRS_STAT_2023.pdf"
+catalog = "https://censusindia.gov.in/nada/index.php/catalog/46172"
+locator = "Detailed Table 8, 'Age-Specific Death Rate by Sex and Residence', first column ('Total', persons): PDF pp. 191-212 in 2011, 182-202 in 2012 and 185-205 in 2013 (report pp. 166-186 in each year's contents; these pages print no page number); report pp. 174-196 (PDF pp. 195-217) in 2014; pp. 268-290 in 2015 (PDF pp. 290-312), 2016 (PDF pp. 290-312), 2017 (PDF pp. 299-321), 2018 (PDF pp. 297-319) and 2019 (PDF pp. 293-315); pp. 261-283 (PDF pp. 288-310) in 2020; pp. 272-294 (PDF pp. 300-322) in 2021, 2022 and 2023; pp. 272-294 (PDF pp. 301-323) in 2024. One page each for India and the bigger states/UTs (22 from 2014, 20 in 2011-2013). The fourteen URLs and checksums are under srs_crude_death_rate.csv."
+retrieved = "2026-11-11"
+licence = "Government of India publication; no licence stated in the reports or on the catalog pages. Factual statistics reproduced with attribution."
+method = "transcribed"
+script = "scripts/build_srs_death_rates.py"
+notes = """
+Columns: state (as printed; 'Telengana' in some years), year, age_start (0 = 'Below 1', 1 = '1-4', 5 = '5-9', ..., 85 = '85+'),
+rate_per_1000 (deaths per 1,000 population of that age, persons, rural and urban combined). The printed '0-4' row is not kept.
+Units: India and 22 bigger states/UTs from 2014, India and 20 bigger states in 2011-2013 (Andhra Pradesh undivided, no
+Uttarakhand); see srs_crude_death_rate.csv. Every report 2011-2024 prints the same bands, 'Below 1', '1-4', '0-4', '5-9', ...,
+'80-84', '85+', so no year is reshaped.
+Checks in the script: the unit count a year; 'All ages' equals the CDR statement; the crude rate rebuilt from the printed '0-4'
+rate, these rates from 5-9 up and Table 1's age shares is within 0.25 per 1,000 of the printed one (largest gap 0.21,
+Chhattisgarh 2024; an earlier version of the check split 0-4 between 'Below 1' and '1-4' at 1:4 and allowed 0.35, which Assam
+2015 failed at 0.43).
+The 2020 Telangana page is headed 'Table 9' by misprint; its title and layout are Table 8's. In 2011 the West Bengal page ends
+at the 85+ row and its 'All ages' row opens the next page (PDF p. 212).
+Spot check by eye against the rendered PDF, 2026-11-11: Delhi 2023 (PDF p. 305), all 19 rates and the all-ages rate; India 2020,
+2022 and 2023 and Delhi 2020 read in the text layer against the output. Uttar Pradesh 2011 (PDF p. 210) and Kerala 2017
+(PDF p. 311, report p. 280), all 19 rates and the all-ages rate each.
+These are the rates the SRS life tables are built from: the mean of the five years 2020-2024 equals the life table's m = d/L within 2%
+at ages 30 to 79 and within 4% at 80-84, for India and every state (checked 2026-11-11). Below 30 the rates are small numbers
+printed to one decimal, so the match is to that rounding (within 8%). The open band differs, as the life table closes it by model.
+"""
+
+["srs_population_age_pct.csv"]
+source = "Office of the Registrar General & Census Commissioner, India. Sample Registration System Statistical Report, 2011 to 2024 (fourteen annual reports)."
+url = "https://censusindia.gov.in/nada/index.php/catalog/46172/download/50420/SRS_STAT_2023.pdf"
+catalog = "https://censusindia.gov.in/nada/index.php/catalog/46172"
+locator = "Detailed Table 1, 'Percent Distribution of Estimated population by Age-group, Sex and Residence', first column ('Total', persons): PDF pp. 114-122 in 2011 and 2012 and 112-122 in 2013 (report pp. 93-103 in each year's contents; these pages print no page number); report pp. 93-104 (PDF pp. 114-125) in 2014; pp. 187-198 in 2015 (PDF pp. 209-220), 2016 (PDF pp. 209-220), 2017 (PDF pp. 218-229), 2018 (PDF pp. 216-227) and 2019 (PDF pp. 212-223); pp. 180-191 (PDF pp. 207-218) in 2020; pp. 193-204 (PDF pp. 221-232) in 2021, 2022 and 2023; pp. 193-204 (PDF pp. 222-233) in 2024. India and the bigger states/UTs (22 from 2014, 20 in 2011-2013). The fourteen URLs and checksums are under srs_crude_death_rate.csv."
+retrieved = "2026-11-11"
+licence = "Government of India publication; no licence stated in the reports or on the catalog pages. Factual statistics reproduced with attribution."
+method = "transcribed"
+script = "scripts/build_srs_death_rates.py"
+notes = """
+Columns: state (as printed), year, age_start (0 = '0-4', 5, ..., 85 = '85+'), pct (percent of the SRS's estimated population,
+persons, rural and urban combined; printed to one decimal, so the oldest bands are coarse).
+Checks in the script: the unit count a year (23 from 2014, 21 in 2011-2013); each sums to 100 within 0.6. Same bands in every
+report 2011-2024. In 2011-2013 only the first page of the table carries its title and a unit's rows can run over a page break;
+the script reads on until Table 2.
+Spot check by eye against the rendered PDF, 2026-11-11: Delhi 2022 (PDF p. 224), all 18 rows; India 2023 in the text layer;
+Kerala 2017 (PDF p. 224, report p. 193), all 18 rows.
+Not used in any result; it is the evidence for where modelled deaths exceed the SRS's (README, 'How many deaths a year').
+"""
+
+["death_reconciliation.csv"]
+source = "Derived from srs_crude_death_rate.csv (SRS Statistical Reports 2020-2024, Statement 40), lifetables_srs.csv (SRS Abridged Life Tables 2020-24) and population_age_state.csv (Population Projections for India and States 2011-2036)."
+url = "https://censusindia.gov.in/nada/index.php/catalog/46172"
+locator = "Each input's own entry in this file gives its pages and tables."
+retrieved = "2026-11-11"
+licence = "Derived from Government of India publications; factual statistics reproduced with attribution."
+method = "derived"
+script = "scripts/build_death_reconciliation.py"
+notes = """
+Columns: state (canonical), period (2020-24), srs_unit (the SRS row the rate is from, as printed), srs_cdr_per_1000 (mean of the
+five annual SRS crude death rates 2020-2024), reference_year (2022), modelled_cdr_per_1000 (projected population of 1 July 2022 ×
+life-table death rates, per 1,000, before any scaling), from_age and factor (the factor on modelled deaths at ages from_age and
+over that makes the total equal srs_cdr_per_1000 × population at the reference year).
+from_age is 45 for India and the 22 states with their own SRS life table: the life-table rates are the SRS's age-specific rates
+(srs_age_specific_death_rates.csv), and modelled deaths exceed the SRS's because the projection has more people aged 45 and over
+than the SRS's own population distribution (srs_population_age_pct.csv); under 45 the two agree within 0.1 per 1,000 in every
+state. from_age is 0 for the 15 states and union territories that borrow all-India death rates: their factor brings the borrowed
+rates to the state's own SRS crude death rate at every age. Every state and union territory has its own SRS rate; Dadra & Nagar
+Haveli and Daman & Diu share the rate of their merged union territory.
+Checked by tests/test_baseline.py: the table is recomputed from its inputs, and deaths implied by it equal the SRS rate in every
+state at the reference year. The factor is used in the period and in every year after it (a projection); for 2011-19 see
+death_reconciliation_by_year.csv.
+"""
+
+["death_reconciliation_by_year.csv"]
+source = "Derived from srs_crude_death_rate.csv and srs_age_specific_death_rates.csv (SRS Statistical Reports 2011-2024), lifetables_srs.csv (SRS Abridged Life Tables 2020-24) and population_age_state.csv (Population Projections for India and States 2011-2036)."
+url = "https://censusindia.gov.in/nada/index.php/catalog/44371"
+locator = "Each input's own entry in this file gives its pages and tables."
+retrieved = "2026-11-11"
+licence = "Derived from Government of India publications; factual statistics reproduced with attribution."
+method = "derived"
+script = "scripts/build_death_reconciliation.py"
+notes = """
+The same columns as death_reconciliation.csv, one row per early year (2011-19) and every unit the SRS printed a crude death rate
+for that year: India and the bigger states (20 in 2011-13, 22 from 2014; Telangana and Uttarakhand appear in 2014). period and
+reference_year are the year; srs_cdr_per_1000 is that year's rate, not a mean; modelled_cdr_per_1000 uses that year's projected
+population and that year's death rates by age (airhealth.baseline: the 2020-24 life table moved band by band by the SRS's rates by
+age for the year and a year either side over their 2020-24 mean). from_age is 45 throughout. India's factor runs from 1.02 in 2011
+to 0.78 in 2019: once the rates by age are the year's own, what remains is the projection's age structure drifting from the SRS's
+as it moves away from the 2011 Census. States without a row keep the period factor (death_reconciliation.csv) in that year.
+Checked by tests/test_baseline.py: deaths implied equal the year's SRS rate in every unit and year.
+"""
+
+["unwpp_population_age.csv"]
+source = "United Nations, Department of Economic and Social Affairs, Population Division (2024). World Population Prospects 2024, Online Edition. Standard Projections, CSV format: 'Population on 01 July, by single age', 1950-2023 (estimates) and 2024-2100 (Medium variant)."
+url = "https://population.un.org/wpp/assets/Excel%20Files/1_Indicator%20(Standard)/CSV_FILES/WPP2024_PopulationBySingleAgeSex_Medium_1950-2023.csv.gz"
+catalog = "https://population.un.org/wpp/downloads?folder=Standard%20Projections&group=CSV%20format"
+sha256 = "f84c75789ccbd385122ad19bac70026d6306878442afbaa24e8e50a23b4bee2f"
+urls = """
+https://population.un.org/wpp/assets/Excel%20Files/1_Indicator%20(Standard)/CSV_FILES/WPP2024_PopulationBySingleAgeSex_Medium_1950-2023.csv.gz  sha256 f84c75789ccbd385122ad19bac70026d6306878442afbaa24e8e50a23b4bee2f
+https://population.un.org/wpp/assets/Excel%20Files/1_Indicator%20(Standard)/CSV_FILES/WPP2024_PopulationBySingleAgeSex_Medium_2024-2100.csv.gz  sha256 31804a296b663716236cd26c46415271cc9386fb3b2be56aff6467ad32283dc8
+https://population.un.org/wpp/assets/Excel%20Files/1_Indicator%20(Standard)/CSV_FILES/WPP2024_Demographic_Indicators_Medium.csv.gz  sha256 286ac36bb1415e2e1ade03acfef0a29f0e4c087e2f78e38c48f50c5df89082bc  (checks only)
+"""
+locator = "Rows ISO3_code 'IND' (LocID 356, Location 'India'), Variant 'Medium', Time 2011-2036; column PopTotal (thousands, both sexes) by AgeGrpStart 0..99 and '100+'. Checked against TPopulation1July and TPopulation1Jan of WPP2024_Demographic_Indicators_Medium.csv.gz."
+retrieved = "2026-11-11"
+licence = "CC BY 3.0 IGO (footer of the WPP 2024 downloads page, CSV format section, 2026-11-11: 'Copyright © 2024 by United Nations, made available under a Creative Commons license CC BY 3.0 IGO')"
+method = "derived"
+script = "scripts/build_unwpp.py"
+notes = """
+Columns: year (2011-2036), age_start (the 19 bands of airhealth.ages: 0, 1, 5, ..., 80, 85; 85 = 85+), population (persons,
+both sexes, on 1 July). India only: WPP has no Indian states. Years up to 2023 are WPP estimates; 2024 on is the Medium variant
+projection. The file is WPP's 1 July series (the files without '1January' in the name; the downloads page describes them as
+'Population on 01 July'), the same date as the government projections in population_age_state.csv. Single ages are summed
+into bands (85+ = ages 85-99 and 100+); WPP's thousands carry three decimals, so persons are whole numbers.
+Checks in the script: every year has single ages 0..100 once; the bands sum to TPopulation1July within 10 persons (largest gap 7,
+rounding) and are more than a million away from TPopulation1Jan, so the series is 1 July, not 1 January.
+WPP 2024 has an interim update (WPP2024_CSV_files_update.zip) that revises Togo only ('Results for all other locations are
+unchanged', downloads page); not used.
+Comparison, not in the script: WPP's India is larger and younger than the government projection (population_age_state.csv):
+1,261.2 M against 1,216.1 M in 2011 and 1,425.4 M against 1,377.9 M in 2022; aged 60 or over 7.73% against 8.44% in 2011 and
+10.24% against 10.48% in 2022.
+"""
+
+["unwpp_deaths_age.csv"]
+source = "United Nations, Department of Economic and Social Affairs, Population Division (2024). World Population Prospects 2024, Online Edition. Standard Projections, CSV format: 'Deaths, by single age', 1950-2023 (estimates) and 2024-2100 (Medium variant)."
+url = "https://population.un.org/wpp/assets/Excel%20Files/1_Indicator%20(Standard)/CSV_FILES/WPP2024_DeathsBySingleAgeSex_Medium_1950-2023.csv.gz"
+catalog = "https://population.un.org/wpp/downloads?folder=Standard%20Projections&group=CSV%20format"
+sha256 = "3b397a01439b7e985be4b7ce285d57e4f648dcc641b351e780e53f7aa35e13fa"
+urls = """
+https://population.un.org/wpp/assets/Excel%20Files/1_Indicator%20(Standard)/CSV_FILES/WPP2024_DeathsBySingleAgeSex_Medium_1950-2023.csv.gz  sha256 3b397a01439b7e985be4b7ce285d57e4f648dcc641b351e780e53f7aa35e13fa
+https://population.un.org/wpp/assets/Excel%20Files/1_Indicator%20(Standard)/CSV_FILES/WPP2024_DeathsBySingleAgeSex_Medium_2024-2100.csv.gz  sha256 c66a441c5688f168511f9b776b8f6ea8e6092bbb0999203d96e34d93e8eb0efe
+https://population.un.org/wpp/assets/Excel%20Files/1_Indicator%20(Standard)/CSV_FILES/WPP2024_Demographic_Indicators_Medium.csv.gz  sha256 286ac36bb1415e2e1ade03acfef0a29f0e4c087e2f78e38c48f50c5df89082bc  (checks and crude death rate)
+"""
+locator = "Rows ISO3_code 'IND' (LocID 356), Variant 'Medium', Time 2011-2036; column DeathTotal (thousands, both sexes) by AgeGrpStart 0..99 and '100+'. Checked against Deaths and CDR of WPP2024_Demographic_Indicators_Medium.csv.gz."
+retrieved = "2026-11-11"
+licence = "CC BY 3.0 IGO (footer of the WPP 2024 downloads page, CSV format section, 2026-11-11)"
+method = "derived"
+script = "scripts/build_unwpp.py"
+notes = """
+Columns: year (2011-2036), age_start (the 19 bands; 85 = 85+), deaths (persons, both sexes, in the calendar year, 1 January to
+31 December; age is age at death). Estimates to 2023, Medium variant projection from 2024. India only.
+Checks in the script: single ages 0..100 once a year; the bands sum to the Demographic Indicators' Deaths within 10 persons
+(largest gap 6).
+Crude death rate per 1,000, India: these deaths over the 1 July population (unwpp_population_age.csv), printed by the script,
+against WPP's own CDR column (which agrees to its three decimals) and the SRS crude death rate (srs_crude_death_rate.csv):
+  year  WPP    SRS   WPP/SRS
+  2011  7.05   7.1   0.993
+  2012  6.94   7.0   0.992
+  2013  6.86   7.0   0.980
+  2014  6.77   6.7   1.010
+  2015  6.73   6.5   1.035
+  2016  6.70   6.4   1.047
+  2017  6.67   6.3   1.059
+  2018  6.67   6.2   1.076
+  2019  6.67   6.0   1.112
+  2020  7.21   6.0   1.202
+  2021  9.26   7.5   1.235
+  2022  6.58   6.8   0.967
+  2023  6.61   6.4   1.033
+  2024  6.59   6.4   1.029  (WPP projection)
+WPP projection, no SRS: 2025 6.64, 2026 6.70, 2027 6.75, 2028 6.82, 2029 6.88, 2030 6.95, 2031 7.02, 2032 7.09, 2033 7.17,
+2034 7.24, 2035 7.33, 2036 7.41.
+The two agree within 3.5% in 2011-2014 and 2022-2024; WPP runs 4-11% above the SRS in 2015-2019 (WPP flat at 6.7, the SRS
+falling to 6.0) and 20-24% above in the pandemic years 2020-2021 (WPP 7.21 and 9.26; SRS 6.0 and 7.5). Mean ratio 2020-2024:
+1.093; 2011-2024: 1.055 (unrounded rates). The SRS rate is printed to one decimal, so each ratio carries about ±0.8%.
+"""
+
+["unwpp_lifetable.csv"]
+source = "United Nations, Department of Economic and Social Affairs, Population Division (2024). World Population Prospects 2024, Online Edition. Standard Projections, CSV format: 'Abridged life tables up to age 100 by sex and both sexes combined', 1950-2023 (estimates) and 2024-2100 (Medium variant)."
+url = "https://population.un.org/wpp/assets/Excel%20Files/1_Indicator%20(Standard)/CSV_FILES/WPP2024_Life_Table_Abridged_Medium_1950-2023.csv.gz"
+catalog = "https://population.un.org/wpp/downloads?folder=Standard%20Projections&group=CSV%20format"
+sha256 = "3d6e82f23023b5f20e1c190752758f637599974fdcac02d38b94c80c4081f982"
+urls = """
+https://population.un.org/wpp/assets/Excel%20Files/1_Indicator%20(Standard)/CSV_FILES/WPP2024_Life_Table_Abridged_Medium_1950-2023.csv.gz  sha256 3d6e82f23023b5f20e1c190752758f637599974fdcac02d38b94c80c4081f982
+https://population.un.org/wpp/assets/Excel%20Files/1_Indicator%20(Standard)/CSV_FILES/WPP2024_Life_Table_Abridged_Medium_2024-2100.csv.gz  sha256 3aa9b324ba654ae61e292889be0677d30d97061a30c2c05a0ecc86cc2c5c8159
+https://population.un.org/wpp/assets/Excel%20Files/1_Indicator%20(Standard)/CSV_FILES/WPP2024_Demographic_Indicators_Medium.csv.gz  sha256 286ac36bb1415e2e1ade03acfef0a29f0e4c087e2f78e38c48f50c5df89082bc  (checks only)
+"""
+locator = "Rows ISO3_code 'IND' (LocID 356), Variant 'Medium', Sex 'Total' (SexID 3), Time 2011-2036; columns AgeGrpStart, mx, lx, dx, Lx, Tx, ex for AgeGrp 0, 1-4, 5-9, ..., 95-99, 100+."
+retrieved = "2026-11-11"
+licence = "CC BY 3.0 IGO (footer of the WPP 2024 downloads page, CSV format section, 2026-11-11)"
+method = "derived"
+script = "scripts/build_unwpp.py"
+notes = """
+Columns: year (2011-2036), age_start (the 19 bands; 85 = 85+), mx (central death rate, deaths per person-year), lx (survivors
+to age_start, radix 100,000), Lx (person-years lived in the band, same radix). Both sexes. A period life table for the
+calendar year. Estimates to 2023, Medium variant projection from 2024. India only.
+WPP's abridged bands are 0, 1-4, 5-9, ..., 95-99, 100+; bands 0 to 80-84 are ours exactly and are copied as printed. 85+ is
+closed from the printed columns, not by averaging rates: lx = l(85); Lx = the sum of nLx over 85-89, 90-94, 95-99 and 100+
+(= T(85)); mx = the sum of ndx over the same bands / that Lx. The sum of ndx equals l(85) (checked), so mx(85+) = l(85)/T(85),
+and a life table closing 85+ with L = l/m (airhealth.lifetable) gets back T(85) exactly.
+Checks in the script: the age groups are the 22 above in every year; the printed mx equals dx/Lx in every band (relative 0.2%);
+sum of dx over 85+ = l(85) and sum of Lx = T(85); WPP's ex at age 0 equals the Demographic Indicators' LEx; and
+airhealth.lifetable.e0 of the written mx is within 0.3 years of WPP's e0 in 2011, 2019 and 2023. It is within 0.04 in every
+year: 2011 67.59 against WPP 67.62, 2019 70.71 against 70.75, 2023 71.97 against 72.00 (all -0.03; -0.04 from 2024). The
+small gap is the separation factors: airhealth uses half the band width and the SRS infant rule, WPP its own ax column.
+For comparison, the SRS 2020-24 life table closes 85+ at 153 per 1,000 (README); WPP 2022 is 174 (0.1736).
+"""
+
+["districts.geojson"]
+source = "geoBoundaries gbOpen IND ADM2 (districts, LGD 2021) and ADM1 (states, DataMeet), release commit 9469f09: Runfola D. et al. (2020) geoBoundaries: A global database of political administrative boundaries. PLoS ONE 15(4): e0231866."
+url = "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/IND/ADM2/geoBoundaries-IND-ADM2.geojson"
+urls = """
+ADM2: https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/IND/ADM2/geoBoundaries-IND-ADM2.geojson  sha256 8bef6929fd65432e7dc775e7c44473e84efff064ebddbfd6b834e6291546db40
+ADM1: https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/IND/ADM1/geoBoundaries-IND-ADM1.geojson  sha256 47aa0acb6f69868daee49143276f3ce323f18905ba7d38d0a86816b405028736
+"""
+locator = "Whole files; the same two used by scripts/build_exposure_acag.py."
+retrieved = "2026-11-11"
+licence = "ADM2: ODbL 1.0 (attribution, share-alike for the derived database). ADM1: CC BY 2.5 IN (DataMeet). Attribution: geoBoundaries (wmgeolab), DataMeet."
+method = "derived"
+script = "scripts/build_district_shapes.py"
+notes = """
+For drawing only (the dashboard map); no number is computed from these outlines. 735 districts simplified together with
+shapely.coverage_simplify (tolerance 0.02°), coordinates rounded to 0.001°, plus 37 state outlines (union of their districts).
+Each district carries the state and unit names exposure_acag_total.csv uses, and aqli_unit: the AQLI (GADM, older boundaries)
+district it takes its value from, matched by name within the state (exact, then closest spelling, then hand-checked ALIASES in
+the script), or null. 673 of 735 districts have one; they cover AQLI units holding 94.8% of AQLI's population (2023).
+"""
+
+["apna_source_apportionment.csv"]
+source = "UrbanEmissions.info (Guttikunda SK, Nishadh KA, Jawahar P). Air pollution knowledge assessments (APnA) - PM2.5 Source Apportionment Results for 50 Indian Cities. Zenodo record 6919069, published 2022-03-01, CAMx output, shares by source category."
+url = "https://zenodo.org/api/records/6919069/files/APnA_50airsheds_PM25_Source_Apportionment_CAMxOutputs.csv/content"
+catalog = "https://zenodo.org/records/6919069"
+page = "https://www.urbanemissions.info/india-apna"
+sha256 = "c3222ffb4c41f1c31d8a6da55c0ea800af3e7fdd7088f8059c17a86717381dcf"
+locator = "Whole file, APnA_50airsheds_PM25_Source_Apportionment_CAMxOutputs.csv (Zenodo record 6919069; the record lists it with md5 aff5953f4cdc31724fb842e4fc186e58, 3,682 bytes). Columns: Airshed, City, A to I (share of city PM2.5 from each source, printed as percent strings), study_uear (2017 or 2019)."
+retrieved = "2026-11-12"
+licence = "CC BY 4.0 (the Zenodo record's licence). Attribute UrbanEmissions.info and the record."
+method = "downloaded"
+notes = """
+Kept byte for byte as published, including the misspelt column name study_uear. 49 airsheds: Varanasi is not in the file. Categories
+(record description): A all transport (road, rail, aviation, shipping); B residential; C industries (without brick kilns); D all dust
+(construction and resuspension); E open waste burning; F diesel generator sets; G brick manufacturing; H sea salt (where applicable);
+I outside/regional contribution. H is blank for airsheds without sea salt. Shares are printed as strings with a % sign; parse them
+where they are used, not here.
+study_uear is the only year field in the file: 2017 for 19 airsheds, 2019 for 30. It is the report batch, not the model year; the
+record page does not state base years. They are read in the batch reports (see causes.csv): 2015 for the 2017 batch (program booklet,
+Nov 2017, PDF p. 2 and p. 6) and 2018 for the 2019 batch (summary report, July 2019, PDF p. 9 and Table 3 on p. 15).
+The record says the results are explained and discussed in journal articles; it lists two (APnA for 20 Indian cities, and NCAP
+review), which are not read here.
+"""
+
+["causes.csv"]
+source = "Causes of PM2.5 by city, every study side by side (schema in airhealth/causes.py), built by scripts/build_causes.py from three inputs: (1) APnA, UrbanEmissions.Info (Guttikunda SK, Nishadh KA, Jawahar P), Zenodo record 6919069, CAMx shares of annual PM2.5 by source for 49 airsheds; (2) McDuffie et al. 2021, Nature Communications 12:3594, Supplementary Data 1, GEOS-Chem shares for 9 of the 50 cities (the xlsx has its own entry below); (3) causes_transcribed.csv, 316 rows from 23 study ids (city, NCAP and journal studies read by hand; own entry below). 896 rows, 26 study ids, 50 cities."
+url = "https://zenodo.org/records/6919069"
+page = "https://www.urbanemissions.info/india-apna"
+locator = "One row per city x study x season x size fraction x source; each row's own `locator` column gives the file, column, table or figure and report page it was read from. Columns: city, study, institution, year_sampled, season, months, size_fraction, method, metric, boundary (receptor area only), origin (inside | all_origins | region: what a sector share counts, see airhealth/causes.py), covers, source_raw, source_harmonised, share_pct, n_sites, n_days, url, locator, evidence_key. APnA 2015 base year (2017 batch): program booklet, Nov 2017, PDF p. 2 and the table on p. 6 headed 'in 2015' (https://urbanemissions.info/wp-content/uploads/apna/docs/apna_program_summary_booklet.pdf). APnA 2018 base year (2019 batch): summary report, July 2019, PDF p. 9 and Table 3 on p. 15 (https://urbanemissions.info/wp-content/uploads/apna/docs/2019-07-APnA30city_summary_report.pdf). Methods paper: doi:10.1016/j.uclim.2018.11.005."
+retrieved = "2026-11-12"
+licence = "APnA: CC BY 4.0 (attribute UrbanEmissions.info and the Zenodo record). McDuffie 2021 supplementary data: CC BY 4.0 (open-access article). City, NCAP and journal studies: copyright with their authors and commissioners; the reports are not redistributed, only the figures, with citation, are tabulated (facts)."
+method = "derived"
+script = "scripts/build_causes.py"
+notes = """
+Evidence rule: only evidence_key O (read at source by whoever wrote the row) is allowed; causes.validate refuses S (press) and R (memory).
+Press-only numbers (Delhi DSS 2020-24 stubble shares via a Lok Sabha answer, Nagar and Sharma 2022) are listed in MISSING.md as leads to confirm.
+origin: APnA sector rows inside (emissions inside the airshed), APnA `outside` row region; CMAQ, GEOS-Chem and WRF-Chem sector splits, receptor
+(CMB, PMF) shares and partial stubble estimates all_origins; geographic splits (city vs rest of district/state/India, local_all + outside) region.
+APnA: A transport, B residential, C industry, D dust, E waste_burning, F dg_sets, G brick_kilns, H natural (sea salt; blank H = no row), I outside.
+Annual, CAMx, airshed box, covers = all; study id apna_<base year>. The CSV's study_uear is the report batch (2017, 2019), not the model year:
+base year 2015 for the 2017 batch and 2018 for the 2019 batch, read in the batch reports (locator). 49 cities (Varanasi is not in the APnA
+file; Delhi has no airshed). The 2017 booklet's printed table differs from the Zenodo CSV by 0.1 point in places (Chennai transport 24.6 vs
+24.5); the CSV is used. McDuffie: annual 2017, one row per McDuffie sector, boundary grid_cell (a 2 x 2.5 degree model cell downscaled to the
+Atlas of Urban Expansion T3 urban extent), origin all_origins; sector map and reasons in scripts/build_causes.py; the 20 shares sum to 100 +/- 0.2.
+The build checks the McDuffie xlsx sha256 against its entry below. Emission shares and concentration shares never share a group (metric column).
+A cause a group does not list is not reported, not zero (causes.shares returns NaN).
+"""
+
+["causes_transcribed.csv"]
+source = "City, NCAP and journal source-apportionment studies transcribed by hand from their reports, one row per source, same columns as causes.csv (schema in airhealth/causes.py; origin included). 316 rows, 23 study ids, 11 cities' reports and papers: ARAI/TERI Delhi 2018, Govardhan et al. 2024 (GMD), Biswal et al. 2025 and Kulkarni et al. 2020 (Delhi stubble), TERI Kolkata 2025, Lucknow 2022, Patna 2021, Surat 2021, IIT Kanpur Kanpur 2022, Agra 2021, Hyderabad 2023, NEERI/IITB Mumbai 2023 and Pune 2024, CSTEP Bengaluru 2022. Read by scripts/build_causes.py."
+url = "per row: each row's own `url` column (the report PDF or journal page the row was read from); there is no single URL"
+locator = "Each row's own `locator` column: the table or figure, the page where the shares are printed, and where the sampling months are stated."
+retrieved = "2026-11-12"
+licence = "The reports and papers keep their own copyright and licences (state and NCAP reports, journal articles); none is redistributed and no PDF is in the repo. Only the figures are tabulated, with citation (facts), per row."
+method = "transcribed"
+notes = """
+Every row is evidence O (read in the report or the paper). No press-only or from-memory number is in the file; those leads are in MISSING.md.
+Sectors and `origin` follow the study type: CMAQ/WRF-Chem sector tables and CMB/PMF receptor shares are all_origins, geographic splits are region
+(local_all = the city's own sources, all sectors). A group with covers = all sums to 100 +/- 2; partial groups (stubble-only, Lucknow monsoon)
+do not. Derived values are marked DERIVED in their locator (Kolkata summer HMC slice = 60 - 12 - 46). Mapping calls (coal and fly ash -> other,
+Kolkata cooking -> residential, transport including DG sets) are stated in the locators; source_raw keeps each report's own words.
+"""
+
+["mcduffie2021_supp_data_1.xlsx"]
+source = "McDuffie EE, Martin RV, Spadaro JV, Burnett R, Smith SJ, et al. Source sector and fuel contributions to ambient PM2.5 and attributable mortality across multiple spatial scales. Nature Communications 12:3594 (2021). Supplementary Data 1 (MOESM4): PM2.5 exposure estimates and sectoral source contributions for 21 regions, 204 countries and 200 sub-national areas, 2017."
+url = "https://static-content.springer.com/esm/art%3A10.1038%2Fs41467-021-23853-y/MediaObjects/41467_2021_23853_MOESM4_ESM.xlsx"
+page = "https://www.nature.com/articles/s41467-021-23853-y"
+locator = "One sheet; header row 'Country Name'; India's sub-national areas sit between the 'India' and 'Nepal' rows; column B population-weighted annual mean PM2.5, columns C-V the 20 sector shares (%)."
+retrieved = "2026-11-12"
+sha256 = "81a563fe2662bb81931efa0bcab204c7818410a80cd3c41f3e65c3b5ab7aed13"
+licence = "CC BY 4.0 (open-access article). Not committed to the repo: scripts/build_causes.py downloads it to a folder outside the repo."
+method = "downloaded"
+script = "scripts/build_causes.py"
+notes = """
+MOESM5 is Data File 2 (fuel-type contributions) and MOESM6 Data File 3 (2019 exposure); only MOESM4 is used. 17 India areas: 9 are
+among the 50 cities (Jaipur, Ahmedabad, Kanpur, Kolkata, Mumbai, Pune, Hyderabad, Vijayawada, Coimbatore); dropped and counted by the
+build: Belgaum, Hindupur, Jalna, Kozhikode, Malegaon, Parbhani, Singrauli, Sitapur. Delhi is not in the file as a sub-national area.
+"""

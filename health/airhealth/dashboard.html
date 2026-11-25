@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>airhealth</title>
+<link rel="icon" href="data:,">
+<style>
+:root {
+  color-scheme: light;
+  --page: #f4f3f0; --surface: #fcfcfb; --line: #e3e1db; --grid: #ebe9e4;
+  --ink: #0b0b0b; --ink2: #52514e; --ink3: #85837c;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
+  --band: rgba(208, 59, 59, .07); --mark: #0b0b0b;
+  --q1: #cde2fb; --q2: #9ec5f4; --q3: #6da7ec; --q4: #3987e5; --q5: #256abf; --q6: #184f95; --q7: #0d366b;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --page: #111110; --surface: #1a1a19; --line: #33322f; --grid: #2a2a27;
+    --ink: #f0efec; --ink2: #c3c2b7; --ink3: #8e8d85;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+    --band: rgba(230, 103, 103, .10); --mark: #f0efec;
+    --q1: #0d366b; --q2: #184f95; --q3: #256abf; --q4: #3987e5; --q5: #6da7ec; --q6: #9ec5f4; --q7: #cde2fb;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink);
+  font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+main { max-width: 1180px; margin: 0 auto; padding: 24px 16px 64px; }
+h1 { font-size: 22px; margin: 0 0 4px; }
+h2 { font-size: 15px; margin: 0 0 2px; }
+p.sub { margin: 0 0 12px; color: var(--ink2); max-width: 78ch; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+.grid { display: grid; gap: 16px; margin-top: 16px; }
+.two { grid-template-columns: repeat(auto-fit, minmax(440px, 1fr)); }
+.controls { display: flex; flex-wrap: wrap; gap: 14px 20px; align-items: end; position: sticky; top: 0; z-index: 5; }
+.controls label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--ink2); }
+select, input[type=number], button { font: inherit; color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px; }
+button { cursor: pointer; }
+input[type=number] { width: 76px; }
+input[type=range] { width: 170px; accent-color: var(--s1); }
+.pair { display: flex; gap: 8px; align-items: center; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.seg button { border: 0; border-radius: 0; padding: 5px 10px; background: transparent; color: var(--ink2); }
+.seg button[aria-pressed=true] { background: var(--ink); color: var(--surface); }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px; margin-top: 16px; }
+.tile .k { font-size: 12px; color: var(--ink2); }
+.tile .v { font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.tile .n { font-size: 12px; color: var(--ink3); }
+svg { display: block; width: 100%; height: auto; overflow: visible; }
+svg text { fill: var(--ink2); font-size: 12px; font-variant-numeric: tabular-nums; }
+svg text.strong { fill: var(--ink); }
+svg text.dim { fill: var(--ink3); font-size: 11px; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12px; color: var(--ink2); margin: 6px 0 4px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th:first-child, td:first-child { text-align: left; }
+th { font-size: 12px; color: var(--ink2); font-weight: 500; }
+td.l, th.l { text-align: left; }
+.foot { color: var(--ink2); font-size: 12px; margin-top: 10px; max-width: 110ch; }
+.warn { color: var(--ink); font-size: 12px; margin-top: 8px; border-left: 3px solid var(--s2); padding-left: 8px; }
+#tip { position: fixed; pointer-events: none; background: var(--ink); color: var(--surface);
+  padding: 6px 9px; border-radius: 6px; font-size: 12px; line-height: 1.4; display: none; z-index: 20; max-width: 300px; }
+.scroll { overflow-x: auto; }
+.err { color: var(--s2); }
+.controls-inline { display: contents; }
+.mapwrap svg { width: 100%; max-width: 760px; height: auto; display: block; margin: 0 auto; }
+.mapwrap path.d { stroke: var(--surface); stroke-width: .35; }
+.mapwrap path.d:hover { stroke: var(--ink); stroke-width: 1; }
+.mapwrap path.s { fill: none; stroke: var(--ink3); stroke-width: .6; pointer-events: none; }
+.mapwrap path.sel { fill: none; stroke: var(--ink); stroke-width: 2; pointer-events: none; }
+.sw { display: inline-block; width: 14px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>airhealth</h1>
+  <p class="sub">What a change in PM2.5 does to deaths and life expectancy in an Indian place, on every risk
+  curve the tool can run. Every number comes from the same functions as the command line. Local page; nothing is sent anywhere.</p>
+
+  <div class="card controls" id="controls">
+    <label>Place <select id="place"></select></label>
+    <label>Exposure map <select id="map"></select></label>
+    <label>Year <select id="year"></select></label>
+    <span id="sources" class="controls-inline"></span>
+    <label>From, µg/m³
+      <span class="pair"><input type="number" id="fromN" min="0" max="250" step="1">
+      <input type="range" id="fromR" min="0" max="250" step="1">
+      <button id="useMap" title="Start from the level the map gives this place">Map level</button></span></label>
+    <label>To, µg/m³
+      <span class="pair"><input type="number" id="toN" min="0" max="250" step="1">
+      <input type="range" id="toR" min="0" max="250" step="1"></span></label>
+  </div>
+
+  <div class="tiles" id="tiles"></div>
+  <div id="error" class="err"></div>
+
+  <div class="grid two">
+    <div class="card">
+      <h2 id="cmpTitle">What the change buys, by risk curve</h2>
+      <p class="sub">Once the change has fully taken effect. Bars share one colour because the curve is named on the axis.</p>
+      <span class="seg" id="metric">
+        <button data-v="deaths_averted" aria-pressed="true">Deaths a year</button>
+        <button data-v="share_of_deaths_averted" aria-pressed="false">Share of deaths</button>
+        <button data-v="life_expectancy_gain" aria-pressed="false">Life expectancy</button>
+        <button data-v="life_years_averted" aria-pressed="false">Life-years a year</button>
+      </span>
+      <div id="cmpChart"></div>
+    </div>
+    <div class="card">
+      <h2>Deaths blamed on PM2.5 at today's level</h2>
+      <p class="sub">The place's level on the chosen map against each curve's own safe floor. This is the "burden" figure
+      that papers quote; it does not move with the From and To settings.</p>
+      <div id="burChart"></div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2 id="mapTitle">PM2.5 by district</h2>
+      <p class="sub" id="mapSub"></p>
+      <div class="legend" id="mapLegend"></div>
+      <div id="mapChart" class="mapwrap"></div>
+    </div>
+  </div>
+
+  <div class="grid two">
+    <div class="card">
+      <h2>The risk curves</h2>
+      <p class="sub" id="shapeSub"></p>
+      <div class="legend" id="shapeLegend"></div>
+      <div id="shapeChart"></div>
+    </div>
+    <div class="card">
+      <h2>The exposure maps disagree</h2>
+      <p class="sub">Population-weighted PM2.5, µg/m³, for each state on three maps, latest year of each. Sorted by AQLI. The selected place is in bold.</p>
+      <div class="legend" id="expLegend"></div>
+      <div id="expChart"></div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2 id="tableTitle">Table</h2>
+      <div class="scroll"><table id="table"></table></div>
+      <div class="foot" id="footer"></div>
+      <div class="warn" id="notRun"></div>
+    </div>
+    <div class="card">
+      <h2>What the result depends on, and what can be switched today</h2>
+      <p class="sub">Each row is an input. "Switch" is the command-line flag that changes its source; "none" means the
+      source is fixed in code for now.</p>
+      <div class="scroll"><table id="inputs"></table></div>
+    </div>
+  </div>
+</main>
+<div id="tip"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const SERIES = ["var(--s1)", "var(--s2)", "var(--s3)", "var(--s4)"];
+const NS = "http://www.w3.org/2000/svg";
+let META, RES, metric = "deaths_averted", fromSet = null, timer;
+const SOURCE_SHORT = { projection: "Government projection", srs: "Government survey (SRS)", model: "Unscaled", unwpp: "UN (WPP 2024)" };
+
+const fmt = {
+  int: v => Math.round(v).toLocaleString("en-US"),
+  sig: v => Math.abs(v) >= 1000 ? Number(v.toPrecision(3)).toLocaleString("en-US") : Number(v.toPrecision(3)).toString(),
+  pct: v => (100 * v).toFixed(1) + "%",
+  yrs: v => (v >= 0 ? "+" : "") + v.toFixed(2) + " yr",
+  pm: v => v.toFixed(1),
+};
+const METRICS = {
+  deaths_averted: { name: "Deaths averted a year", f: fmt.int },
+  share_of_deaths_averted: { name: "Share of all deaths averted", f: fmt.pct },
+  life_expectancy_gain: { name: "Life expectancy gained", f: fmt.yrs },
+  life_years_averted: { name: "Life-years gained a year", f: fmt.int },
+};
+const short = name => (META.curves.find(c => c.name === name) || {}).short || name;
+
+function el(tag, attrs = {}, text) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+function tip(html, ev) {
+  const t = $("tip");
+  if (!html) { t.style.display = "none"; return; }
+  t.innerHTML = html; t.style.display = "block";
+  const w = t.offsetWidth, x = Math.min(ev.clientX + 14, innerWidth - w - 8);
+  t.style.left = x + "px"; t.style.top = (ev.clientY + 14) + "px";
+}
+function ticks(max, n = 4) {
+  if (max <= 0) return [0];
+  const raw = max / n, p = Math.pow(10, Math.floor(Math.log10(raw)));
+  const step = [1, 2, 2.5, 5, 10].map(m => m * p).find(s => s >= raw);
+  const out = []; for (let v = 0; v <= max * 1.0001; v += step) out.push(v);
+  return out;
+}
+
+// ---- horizontal bars, one row per curve -------------------------------------------------
+function bars(host, rows, key, f, tipFn) {
+  host.innerHTML = "";
+  const W = 540, left = 150, right = 78, rowH = 34, top = 8, H = top + rows.length * rowH + 26;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img" });
+  const vals = rows.map(r => r[key]);
+  const lo = Math.min(0, ...vals), hi = Math.max(0, ...vals);
+  const span = (hi - lo) || 1, x = v => left + (v - lo) / span * (W - left - right);
+  const tk = lo < 0 ? [lo, 0, hi] : ticks(hi);
+  tk.forEach(v => {
+    svg.append(el("line", { x1: x(v), x2: x(v), y1: top, y2: H - 24, stroke: "var(--grid)" }));
+    svg.append(el("text", { x: x(v), y: H - 8, "text-anchor": "middle", class: "dim" }, f(v).replace("+", "")));
+  });
+  rows.forEach((r, i) => {
+    const y = top + i * rowH, v = r[key], x0 = x(Math.min(0, v)), w = Math.max(1, Math.abs(x(v) - x(0)));
+    svg.append(el("text", { x: left - 10, y: y + 20, "text-anchor": "end", class: "strong" }, short(r.curve)));
+    const g = el("g");
+    g.append(el("rect", { x: left, y, width: W - left, height: rowH, fill: "transparent" }));
+    g.append(el("rect", { x: x0, y: y + 7, width: w, height: 18, rx: 4, fill: "var(--s1)" }));
+    g.append(el("text", { x: x(Math.max(0, v)) + 6, y: y + 20, class: "strong" }, f(v)));
+    g.addEventListener("mousemove", ev => tip(tipFn(r), ev));
+    g.addEventListener("mouseleave", () => tip(null));
+    svg.append(g);
+  });
+  svg.append(el("line", { x1: x(0), x2: x(0), y1: top, y2: H - 24, stroke: "var(--ink3)" }));
+  host.append(svg);
+}
+const rowTip = r => `<b>${short(r.curve)}</b><br>${fmt.pm(r.pm25_before)} → ${fmt.pm(r.pm25_after)} µg/m³` +
+  `<br>Deaths a year: ${fmt.int(r.deaths_averted)}<br>Share of deaths: ${fmt.pct(r.share_of_deaths_averted)}` +
+  `<br>Life expectancy: ${fmt.yrs(r.life_expectancy_gain)}<br>Life-years a year: ${fmt.int(r.life_years_averted)}` +
+  (r.deaths_derived ? "<br><i>Deaths derived from the years figure</i>" : "") +
+  (r.below_floor ? "<br><i>Level is at or below this curve's floor</i>" : "");
+
+// ---- risk curve shapes ------------------------------------------------------------------
+function shapes() {
+  const host = $("shapeChart"); host.innerHTML = "";
+  const S = META.shapes, names = Object.keys(S.rr);
+  const W = 540, H = 440, m = { l: 44, r: 16, t: 10, b: 34 };
+  const xmax = 250, ymax = Math.ceil(Math.max(...names.map(n => Math.max(...S.rr[n]))));
+  const x = v => m.l + v / xmax * (W - m.l - m.r), y = v => H - m.b - (v - 1) / (ymax - 1) * (H - m.t - m.b);
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img" });
+  svg.append(el("rect", { x: x(META.max_cohort), y: m.t, width: x(xmax) - x(META.max_cohort), height: H - m.t - m.b, fill: "var(--band)" }));
+  svg.append(el("text", { x: x(META.max_cohort) + 6, y: m.t + 14, class: "dim" }, `above ${META.max_cohort} µg/m³: no long-term cohort study`));
+  for (let v = 1; v <= ymax; v++) {
+    svg.append(el("line", { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), stroke: "var(--grid)" }));
+    svg.append(el("text", { x: m.l - 8, y: y(v) + 4, "text-anchor": "end", class: "dim" }, v + "×"));
+  }
+  for (let v = 0; v <= xmax; v += 50) svg.append(el("text", { x: x(v), y: H - 14, "text-anchor": "middle", class: "dim" }, v));
+  svg.append(el("text", { x: W - m.r, y: H - 1, "text-anchor": "end", class: "dim" }, "PM2.5, µg/m³"));
+  names.forEach((n, i) => {
+    const d = S.conc.map((c, j) => (j ? "L" : "M") + x(c).toFixed(1) + " " + y(S.rr[n][j]).toFixed(1)).join("");
+    svg.append(el("path", { d, fill: "none", stroke: SERIES[i], "stroke-width": 2, "stroke-linejoin": "round" }));
+  });
+  if (RES) [["from", RES.origin], ["to", RES.to]].forEach(([lab, v]) => {
+    if (v > xmax) return;
+    svg.append(el("line", { x1: x(v), x2: x(v), y1: m.t, y2: H - m.b, stroke: "var(--mark)", "stroke-dasharray": lab === "to" ? "2 3" : "5 3" }));
+    svg.append(el("text", { x: x(v) + (lab === "to" ? -5 : 5), y: H - m.b - 6, "text-anchor": lab === "to" ? "end" : "start", class: "strong" }, `${lab} ${fmt.pm(v)}`));
+  });
+  const cross = el("line", { y1: m.t, y2: H - m.b, stroke: "var(--ink3)", visibility: "hidden" });
+  const hit = el("rect", { x: m.l, y: m.t, width: W - m.l - m.r, height: H - m.t - m.b, fill: "transparent" });
+  hit.addEventListener("mousemove", ev => {
+    const b = svg.getBoundingClientRect(), px = (ev.clientX - b.left) / b.width * W;
+    const j = Math.max(0, Math.min(S.conc.length - 1, Math.round((px - m.l) / (W - m.l - m.r) * xmax / 2.5)));
+    cross.setAttribute("x1", x(S.conc[j])); cross.setAttribute("x2", x(S.conc[j])); cross.setAttribute("visibility", "visible");
+    tip(`<b>${S.conc[j]} µg/m³</b><br>` + names.map(n => `${short(n)}: ${S.rr[n][j].toFixed(2)}×`).join("<br>"), ev);
+  });
+  hit.addEventListener("mouseleave", () => { cross.setAttribute("visibility", "hidden"); tip(null); });
+  svg.append(cross, hit);
+  host.append(svg);
+  $("shapeLegend").innerHTML = names.map((n, i) => `<span><i style="background:${SERIES[i]}"></i>${short(n)}</span>`).join("");
+  $("shapeSub").textContent = `Death rate at age ${S.age} at each PM2.5 level, as a multiple of the rate at the curve's safe floor. ` +
+    `Jaganathan and Vodonos nearly coincide. AQLI is not drawn: it gives years of life (0.98 per 10 µg/m³), not a risk ratio. ` +
+    `Dashed lines mark the From and To settings.`;
+}
+
+// ---- exposure dot plot ------------------------------------------------------------------
+function exposureChart() {
+  const host = $("expChart"); host.innerHTML = "";
+  const keys = ["aqli", "acag_total", "gbd2019", "gbd2023"].filter(k => META.exposure.some(r => r[k] != null));
+  const rows = META.exposure.filter(r => r.aqli != null).sort((a, b) => (a.kind === "country" ? -1 : b.kind === "country" ? 1 : b.aqli - a.aqli));
+  const W = 540, left = 172, right = 20, rowH = 17, top = 22, H = top + rows.length * rowH + 8;
+  const xmax = 225, x = v => left + v / xmax * (W - left - right);
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img" });
+  for (let v = 0; v <= xmax; v += 50) {
+    svg.append(el("line", { x1: x(v), x2: x(v), y1: top - 4, y2: H - 6, stroke: "var(--grid)" }));
+    svg.append(el("text", { x: x(v), y: 12, "text-anchor": "middle", class: "dim" }, v));
+  }
+  const sel = $("place").value.split("|")[1];
+  const selState = (META.places.find(p => p.name === sel && p.kind === "city") || {}).state || sel;
+  rows.forEach((r, i) => {
+    const y = top + i * rowH + rowH / 2, vals = keys.map(k => r[k]).filter(v => v != null);
+    const g = el("g");
+    g.append(el("rect", { x: 0, y: y - rowH / 2, width: W, height: rowH, fill: "transparent" }));
+    g.append(el("text", { x: left - 10, y: y + 4, "text-anchor": "end", class: r.place === selState ? "strong" : "",
+      "font-weight": r.place === selState ? 700 : 400 }, r.place));
+    g.append(el("line", { x1: x(Math.min(...vals)), x2: x(Math.max(...vals)), y1: y, y2: y, stroke: "var(--line)", "stroke-width": 2 }));
+    keys.forEach((k, j) => { if (r[k] != null) g.append(el("circle", { cx: x(Math.min(r[k], xmax)), cy: y, r: 4.5, fill: SERIES[j], stroke: "var(--surface)", "stroke-width": 2 })); });
+    g.addEventListener("mousemove", ev => tip(`<b>${r.place}</b><br>` + keys.map(k => `${mapShort(k)}: ${r[k] == null ? "no value" : fmt.pm(r[k]) + " µg/m³"}`).join("<br>"), ev));
+    g.addEventListener("mouseleave", () => tip(null));
+    svg.append(g);
+  });
+  host.append(svg);
+  $("expLegend").innerHTML = keys.map((k, j) => `<span><i style="background:${SERIES[j]};border-radius:50%"></i>${mapShort(k)}</span>`).join("");
+}
+const mapShort = k => (META.maps.find(m => m.name === k) || {}).short || k;
+
+// ---- table, tiles -----------------------------------------------------------------------
+function table() {
+  const c = RES.compare.rows, b = Object.fromEntries(RES.burden.rows.map(r => [r.curve, r]));
+  $("tableTitle").textContent = RES.compare.heading;
+  $("table").innerHTML = `<tr><th>Risk curve</th><th>Deaths averted a year</th><th>Share of deaths</th><th>Life expectancy</th>
+    <th>Life-years a year</th><th>Safe floor, µg/m³</th><th>Applies from age</th><th>Burden at map level, deaths a year</th><th>Burden, share</th></tr>` +
+    c.map(r => { const k = META.curves.find(x => x.name === r.curve); return `<tr><td title="${r.label.replace(/"/g, "&quot;")}">${short(r.curve)}</td>
+      <td>${fmt.int(r.deaths_averted)}${r.deaths_derived ? "*" : ""}</td><td>${fmt.pct(r.share_of_deaths_averted)}</td><td>${fmt.yrs(r.life_expectancy_gain)}</td>
+      <td>${fmt.int(r.life_years_averted)}</td><td>${r.floor}</td><td>${k.min_age}</td>
+      <td>${fmt.int(b[r.curve].deaths_averted)}</td><td>${fmt.pct(b[r.curve].share_of_deaths_averted)}</td></tr>`; }).join("");
+  $("footer").textContent = (c.some(r => r.deaths_derived) ? "* Deaths derived from the curve's years-of-life figure. " : "") + RES.compare.footer;
+  $("notRun").innerHTML = META.unavailable.length ? "<b>Curves not run:</b> " + META.unavailable.map(u => `${u.short} (${u.why})`).join("; ") : "";
+}
+function tiles() {
+  const c = RES.compare, v = c.rows.map(r => r.deaths_averted), le = c.rows.map(r => r.life_expectancy_gain);
+  const rate = 1000 * c.deaths_baseline / c.population;
+  const t = [
+    ["Population", fmt.sig(c.population), `${c.place.name} (${c.place.kind}), ${c.population_year}`],
+    ["Deaths a year, all causes", fmt.sig(c.deaths_baseline), `${rate.toFixed(1)} per 1,000 · ${c.deaths_basis === "model" ? "unscaled" : (c.deaths_basis === "srs" ? "survey-scaled" : "scaled to the UN") + "; unscaled " + fmt.sig(c.deaths_unscaled)}`],
+    ["Level on this map", fmt.pm(RES.map_level) + " µg/m³", mapShort(RES.map)],
+    ["Deaths averted a year", `${fmt.sig(Math.min(...v))} to ${fmt.sig(Math.max(...v))}`, `${fmt.pm(RES.origin)} → ${fmt.pm(RES.to)} µg/m³, lowest to highest curve`],
+    ["Life expectancy gained", `${Math.min(...le).toFixed(2)} to ${Math.max(...le).toFixed(2)} yr`, "lowest to highest curve"],
+  ];
+  $("tiles").innerHTML = t.map(([k, val, n]) => `<div class="card tile"><div class="k">${k}</div><div class="v">${val}</div><div class="n">${n}</div></div>`).join("");
+}
+function draw() {
+  tiles();
+  bars($("cmpChart"), RES.compare.rows, metric, METRICS[metric].f, rowTip);
+  $("cmpTitle").textContent = `${METRICS[metric].name}: ${fmt.pm(RES.origin)} → ${fmt.pm(RES.to)} µg/m³`;
+  bars($("burChart"), RES.burden.rows, "deaths_averted", fmt.int, rowTip);
+  shapes(); exposureChart(); table(); drawMap();
+}
+
+// ---- district map -----------------------------------------------------------------------
+const BINS = [15, 25, 35, 50, 70, 100];          // µg/m³; fixed so the maps compare by eye
+const binOf = v => BINS.findIndex(b => v < b) === -1 ? BINS.length : BINS.findIndex(b => v < b);
+const MAP_WHAT = {
+  aqli: "Each district takes the value of the AQLI district with the same name. AQLI uses older boundaries, so districts created since (and a few renamed beyond recognition) have no value.",
+  acag_total: "Each district's own population-weighted mean.",
+  gbd2019: "GBD 2019 is a state-level map: every district takes its state's value.",
+  gbd2023: "GBD 2023 is a state-level map: every district takes its state's value (Ladakh takes Jammu & Kashmir and Ladakh's; six small union territories share one pooled value).",
+  cpcb: "Ground monitors in ten cities only: each city's districts take its annual mean; everything else has no value.",
+};
+let GEO = null, PATHS = null;
+function project(geo) {
+  const k = Math.cos(22 * Math.PI / 180), xs = [], ys = [];
+  const walk = (c, f) => typeof c[0] === "number" ? f(c) : c.forEach(x => walk(x, f));
+  geo.features.forEach(f => walk(f.geometry.coordinates, ([x, y]) => { xs.push(x * k); ys.push(-y); }));
+  const x0 = Math.min(...xs), y0 = Math.min(...ys), w = Math.max(...xs) - x0, h = Math.max(...ys) - y0;
+  const W = 760, s = W / w, H = h * s;
+  const pt = ([x, y]) => `${((x * k - x0) * s).toFixed(1)},${((-y - y0) * s).toFixed(1)}`;
+  const ring = r => "M" + r.map(pt).join("L") + "Z";
+  const d = g => (g.type === "Polygon" ? [g.coordinates] : g.coordinates).map(p => p.map(ring).join("")).join("");
+  return { W, H, d: geo.features.map(f => ({ p: f.properties, d: d(f.geometry) })) };
+}
+async function drawMap() {
+  if (!GEO) { GEO = await (await fetch("/api/shapes")).json(); PATHS = project(GEO); }
+  const host = $("mapChart"); host.innerHTML = "";
+  const vals = RES.districts, sel = new Set(RES.selected);
+  const svg = el("svg", { viewBox: `0 0 ${PATHS.W} ${PATHS.H.toFixed(0)}`, role: "img",
+    "aria-label": `PM2.5 by district, ${mapShort(RES.map)} ${RES.year}` });
+  const defs = el("defs"), pat = el("pattern", { id: "nodata", width: 4, height: 4, patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" });
+  pat.append(el("rect", { width: 4, height: 4, fill: "var(--grid)" }), el("line", { x1: 0, y1: 0, x2: 0, y2: 4, stroke: "var(--line)", "stroke-width": 1.5 }));
+  defs.append(pat); svg.append(defs);
+  const districts = PATHS.d.filter(x => x.p.layer === "district"), states = PATHS.d.filter(x => x.p.layer === "state");
+  districts.forEach(x => {
+    const key = x.p.state + "|" + x.p.unit, v = vals[key];
+    const path = el("path", { d: x.d, class: "d", fill: v == null ? "url(#nodata)" : `var(--q${binOf(v) + 1})` });
+    path.addEventListener("mousemove", ev => tip(`<b>${x.p.unit}</b>, ${x.p.state}<br>` + (v == null ? "no value on this map"
+      : `${fmt.pm(v)} µg/m³` + (RES.map === "aqli" && x.p.aqli_unit !== x.p.unit ? ` (AQLI district: ${x.p.aqli_unit})` : "")), ev));
+    path.addEventListener("mouseleave", () => tip(null));
+    svg.append(path);
+  });
+  states.forEach(x => svg.append(el("path", { d: x.d, class: "s" })));
+  const [kind, name] = $("place").value.split("|");
+  if (kind === "state") states.filter(x => x.p.state === name).forEach(x => svg.append(el("path", { d: x.d, class: "sel" })));
+  else districts.filter(x => sel.has(x.p.state + "|" + x.p.unit)).forEach(x => svg.append(el("path", { d: x.d, class: "sel" })));
+  host.append(svg);
+  const outlined = [...svg.querySelectorAll("path.sel")].map(p => p.getBBox());
+  if (outlined.length) {            // a small place (a city, Delhi) also gets a ring to find it by
+    const x0 = Math.min(...outlined.map(b => b.x)), x1 = Math.max(...outlined.map(b => b.x + b.width));
+    const y0 = Math.min(...outlined.map(b => b.y)), y1 = Math.max(...outlined.map(b => b.y + b.height));
+    if (Math.max(x1 - x0, y1 - y0) < 24)
+      svg.append(el("circle", { cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, r: 16, fill: "none", stroke: "var(--ink)", "stroke-width": 1.5, "pointer-events": "none" }));
+  }
+  const labels = ["under " + BINS[0], ...BINS.slice(1).map((b, i) => `${BINS[i]}-${b}`), BINS[BINS.length - 1] + "+"];
+  $("mapLegend").innerHTML = labels.map((l, i) => `<span><i class="sw" style="background:var(--q${i + 1})"></i>${l}</span>`).join("") +
+    `<span><i class="sw" style="background:var(--grid);outline:1px solid var(--line)"></i>no value</span><span>µg/m³ · WHO guideline 5</span>`;
+  $("mapTitle").textContent = `PM2.5 by district: ${mapShort(RES.map)}, ${RES.year}`;
+  $("mapSub").textContent = MAP_WHAT[RES.map] + (sel.size ? " The selected place is outlined." : "");
+}
+
+// ---- controls ---------------------------------------------------------------------------
+async function load() {
+  const [kind, name] = $("place").value.split("|");
+  const q = new URLSearchParams({ place: name, kind, map: $("map").value, year: $("year").value, to: $("toN").value });
+  META.inputs.filter(i => i.demographic).forEach(i => q.set(i.name, $("src_" + i.name).value));
+  if (fromSet !== null) q.set("from", fromSet);
+  const r = await fetch("/api/result?" + q), j = await r.json();
+  if (!r.ok) { $("error").textContent = j.error; return; }
+  $("error").textContent = ""; RES = j;
+  if (fromSet === null) { $("fromN").value = j.map_level.toFixed(1); $("fromR").value = Math.round(j.map_level); }
+  draw();
+}
+const later = () => { clearTimeout(timer); timer = setTimeout(load, 120); };
+function mapsFor(kind) {
+  const prev = $("map").value;
+  const ok = META.maps.filter(m => kind === "city" ? m.name === "cpcb" || m.name === "aqli" || m.name === "acag_total" : m.name !== "cpcb");
+  $("map").innerHTML = ok.map(m => `<option value="${m.name}" title="${m.label}">${m.short}</option>`).join("");
+  $("map").value = ok.some(m => m.name === prev) ? prev : (kind === "city" ? "cpcb" : "aqli");
+  yearsFor();
+}
+function yearsFor() {
+  const prev = +$("year").value, ys = META.maps.find(m => m.name === $("map").value).years;
+  $("year").innerHTML = ys.slice().reverse().map(y => `<option value="${y}">${y}</option>`).join("");
+  $("year").value = ys.includes(prev) ? prev : ys[ys.length - 1];
+}
+function seg(id, set) {
+  $(id).addEventListener("click", ev => {
+    const b = ev.target.closest("button"); if (!b) return;
+    [...$(id).children].forEach(x => x.setAttribute("aria-pressed", x === b));
+    set(b.dataset.v);
+  });
+}
+async function init() {
+  META = await (await fetch("/api/meta")).json();
+  const groups = { country: "Country", state: "States and territories", city: "Cities" };
+  $("place").innerHTML = Object.keys(groups).map(k => `<optgroup label="${groups[k]}">` +
+    META.places.filter(p => p.kind === k).map(p => `<option value="${p.kind}|${p.name}">${p.name}${k === "city" ? " (city)" : ""}</option>`).join("") + "</optgroup>").join("");
+  $("place").value = "state|Delhi";
+  mapsFor("state");
+  $("inputs").innerHTML = `<tr><th>Input</th><th class="l">Sources that work today</th><th class="l">Switch</th><th class="l">Not yet wired</th></tr>` +
+    META.inputs.map(r => `<tr><td>${r.label}</td><td class="l">${r.sources.length ? r.sources.map(s => `<b>${s.name}</b>${s.name === r.default ? " (default)" : ""}: ${s.label}`).join("<br>") : r.default}</td><td class="l">${r.switch}</td><td class="l">${r.pending}</td></tr>`).join("");
+  $("sources").innerHTML = META.inputs.filter(i => i.demographic).map(i =>
+    `<label>${i.label} <select id="src_${i.name}">` + i.sources.map(s =>
+      `<option value="${s.name}" title="${s.label}"${s.name === i.default ? " selected" : ""}>${SOURCE_SHORT[s.name] || s.name}</option>`).join("") + `</select></label>`).join("");
+  META.inputs.filter(i => i.demographic).forEach(i => $("src_" + i.name).addEventListener("change", load));
+  fromSet = 100; $("fromN").value = 100; $("fromR").value = 100; $("toN").value = 80; $("toR").value = 80;
+  $("place").addEventListener("change", () => { mapsFor($("place").value.split("|")[0]); fromSet = null; load(); });
+  $("map").addEventListener("change", () => { yearsFor(); fromSet = null; load(); });
+  $("year").addEventListener("change", () => { fromSet = null; load(); });
+  $("useMap").addEventListener("click", () => { fromSet = null; load(); });
+  [["fromN", "fromR"], ["fromR", "fromN"]].forEach(([a, b]) => $(a).addEventListener("input", () => { $(b).value = $(a).value; fromSet = $(a).value; later(); }));
+  [["toN", "toR"], ["toR", "toN"]].forEach(([a, b]) => $(a).addEventListener("input", () => { $(b).value = $(a).value; later(); }));
+  seg("metric", v => { metric = v; if (RES) draw(); });
+  load();
+}
+init();
+</script>
+</body>
+</html>
