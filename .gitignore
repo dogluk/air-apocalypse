@@ -11,4 +11,7 @@ diwali/data/trends_pull.log
 
 # Health model: IHME files are never committed.
 health/data_local/
+
+# Working notes kept off the public repo (status, build plans).
+docs/private/
 *.egg-info/

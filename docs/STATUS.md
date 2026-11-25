@@ -1,78 +1,72 @@
 # Where this stands
 
-Last updated 2026-11-24. Read this first when picking the project up. Arriving cold (a model,
-or a person new to it)? Read [`../AGENTS.md`](../AGENTS.md) before this.
+Last updated 2026-11-25. New to the repo? Read [`../AGENTS.md`](../AGENTS.md) first.
 
-## In plain words (rewritten at the end of every session)
+## In short
 
-**What we are building.** A calculator: "if PM2.5 in place X goes from A to B, how many deaths
+**What is being built.** A calculator: "if PM2.5 in place X goes from A to B, how many deaths
 a year are avoided and how many years of life are gained?" It answers on several published
-risk curves side by side, never one, because they disagree by several times. Now being
-extended to rank measures by expected life-years per rupee across ~50 Indian cities, long
-shots included. Akash's role: direction and taste; Claude makes the technical calls and
-writes them down. Audience for the first ranking: researchers who can check it (CREA, Sarath
-Guttikunda) and smart friends.
+risk curves side by side, never one, because they disagree by several times. Next it is
+being extended to rank measures by expected life-years per rupee across ~50 Indian cities,
+long shots included. The first ranking is meant for researchers who can check it.
 
 **Where it is.** India, every state and **50 cities** (APnA's 49 airsheds plus Delhi), from the
-command line and a local dashboard. Eight curves, five exposure maps, eight benchmarks within
-band. Every place now has a **month-by-month PM2.5 pattern** from CPCB monitors (Delhi:
-November 2.4× its annual mean, July 0.3×); places without their own monitors borrow from their
-state's cities, then all the state's monitors, then India, and say so. A percent cut in
-chosen months is now weighted by how dirty those months are (it used to treat every month
-as average, understating a Delhi winter cut ~2.4×).
+command line and a local dashboard. Eight curves (three need IHME files that cannot be
+shared), five exposure maps, eight benchmarks within band. Every place has a
+**month-by-month PM2.5 pattern** from CPCB monitors (Delhi: November 2.4× its annual mean,
+July 0.3×); places without their own monitors borrow from their state's cities, then all the
+state's monitors, then India, and say so. A percent cut in chosen months is weighted by how
+dirty those months are.
 
-**Done 2026-11-12 (committed locally, nothing pushed).**
-1. Ranking design agreed: `docs/specs/2026-11-12-intervention-ranking-design.md` (Akash:
-   thin and wide; exposure measures in; all-India table as the headline plus one per city;
-   the funder's rupees).
-2. Plan A built and reviewed (`docs/plans/2026-11-12-cities-and-months.md`): 50 cities, monthly
-   tables, `airhealth/months.py`, the monthly_pct fix.
-3. Plan B built and reviewed (`docs/plans/2026-11-12-causes-by-city.md`): `data/causes.csv`, what
-   causes PM2.5 in each city by every study read at source, side by side: APnA for 49 cities,
-   McDuffie 2021 for 9, government and research studies for 11 (Delhi, Kolkata, Lucknow, Kanpur,
-   Patna, Agra, Mumbai, Pune, Bengaluru, Hyderabad, Surat), stubble shares for Delhi. Every row
-   says where its pollution comes from (`origin`: inside the city, from anywhere, or a
-   geographic split). `airhealth causes Kanpur` shows them side by side. A reviewer re-read ~230
-   rows at source and found no wrong number. 328 tests pass.
-4. X searched (credits back): thin; leads in `lit/open-work-and-people.md`.
+**Causes by city.** `health/data/causes.csv` holds what causes PM2.5 in each city according to
+every study read at source, side by side: APnA for 49 cities, McDuffie 2021 for 9, government
+and research studies for 11 (Delhi, Kolkata, Lucknow, Kanpur, Patna, Agra, Mumbai, Pune,
+Bengaluru, Hyderabad, Surat), stubble shares for Delhi. Every row says where its pollution
+comes from (`origin`: inside the city, from anywhere, or a geographic split).
+`airhealth causes Kanpur` shows them side by side. A second pass re-read ~230 rows at source
+and found no wrong number.
 
-**Done 2026-11-24 (branch `agent-ready`, committed locally, nothing pushed): made ready for a
-first push.**
-1. Plan B's leftovers are cleared. Govardhan 2024's "Delhi other sectors" rows are `other`, not
-   `local_all` (they leave out Delhi transport), and `validate()` now refuses any row but
-   `outside` beside a `local_all`. `sources.toml` says 11 transcribed cities (it said 16). Ten
-   locators that ran two sentences together are fixed. No share changed.
-2. [`AGENTS.md`](../AGENTS.md) at the repo root: how to get running, the rules (first: no
-   number unless read at its source), what is not solid, and open work sized for one sitting.
-3. The gap to GBD's own India count (969,726 against this tool's 1.61 million) is stated near
-   the top of `health/README.md`, not only in the IHME section.
-4. The example outputs in `health/README.md` match what a fresh clone prints (they had drifted
-   in the last digits), and a local folder path is out of the chart example.
+## Next, in order
 
-**Next session: plan C, the library and the engine.** Power plants sit inside `industry`
-everywhere, so FGD measures need
-`source_raw` or a new cause. Then: measure files (kind, scope, targets, exposure, cost drivers),
-2025 rupees, a common horizon with 3% discounting, covered-population runs, regional measures,
-the first ~25 measures. Then plan D (ranking, benchmarks, dashboard tab).
+1. **The measure library and engine.** Measure files (kind, scope, targets, exposure, cost
+   drivers), 2025 rupees, a common horizon with 3% discounting, runs over the covered
+   population only, regional measures, the first ~25 measures. Power plants sit inside
+   `industry` everywhere, so flue-gas desulphurisation measures need `source_raw` or a new
+   cause. Design: [`specs/2026-11-12-intervention-ranking-design.md`](specs/2026-11-12-intervention-ranking-design.md).
+2. **The ranking itself**: an all-India table, one table per city, benchmarks against
+   published cost rankings, a dashboard tab.
+3. **Reproduce GBD's own India burden** (969,726 outdoor-PM2.5 deaths in 2023; this tool gives
+   1.61 million on the same curve, map and year). Needs GBD 2023's household air pollution
+   file (GHDx record 594794, no login) and GBD's split between outdoor air and cooking smoke.
+   Then a benchmark for `gbd2023`, and one for `gbd2019` against Pandey et al. 2021.
+4. **A GBD all-cause death source** (`--deaths gbd`), from one more IHME Results-tool query.
+5. Later: a cohort run to 2050, valuation presets, the Surat emissions-trading case, an
+   emissions-to-concentration layer, a public web page.
 
-**Gaps a person could close in minutes** (`health/data/MISSING.md`): open Fig. 3 of Biswal et
-al. 2025 (RSC blocks automated downloads) to place Ludhiana, Amritsar and Chandigarh in its
-stubble regions; find the Lok Sabha written answer of 10 March 2025 (DSS stubble shares for
-Delhi 2020-24, now only in press reports); Nagar & Sharma 2022's own numbers (Urban Climate
-41:101084). Chennai (interim report, no shares) and Ahmedabad (PM, not PM2.5) have no city study.
+## Gaps a person could close in minutes
 
-**Waiting on Akash.** (1) When to push. X search done 2026-11-12: thin,
-see `lit/open-work-and-people.md`.
+From [`health/data/MISSING.md`](../health/data/MISSING.md): open Fig. 3 of Biswal et al. 2025
+(the publisher blocks scripted downloads) to place Ludhiana, Amritsar and Chandigarh in its
+stubble regions; find the Lok Sabha written answer of 10 March 2025 (stubble shares for Delhi
+2020-24, now only in press reports); read Nagar & Sharma 2022's own numbers (Urban Climate
+41:101084). Chennai (interim report, no shares) and Ahmedabad (PM, not PM2.5) have no city
+study.
+
+## Other open work
+
+- **An evidence review** (`lit/evidence.md`: interventions observed to work, and the three
+  things most worth doing). Not written.
+- **G1** in `lit/gaps.md`: did firecracker bans work? The data is already in `diwali/`.
+- **G7** has a first answer: GBD 2023's India exposure is 54, not 91. See the note there.
 
 ## What exists
 
 - `diwali/`: finished 10-city, 10-year PM2.5 analysis.
-- `lit/`: `landscape.md` (who is doing what in Indian air quality), `gaps.md` (G1-G7).
+- `lit/`: `landscape.md` (who is doing what in Indian air quality), `gaps.md` (G1-G7),
+  `open-work-and-people.md`, `prior-rankings.md`.
 - `bets/`: interventions sorted by the physics.
-- `health/`: `airhealth`, a Python library and command line that scores a PM2.5 change in an
-  Indian place on five risk curves. Start with [`health/README.md`](../health/README.md).
-  Design: [`specs/2026-11-10-health-model-design.md`](specs/2026-11-10-health-model-design.md).
-  Plan that was built (stages 1-2): [`plans/2026-11-10-health-model-core.md`](plans/2026-11-10-health-model-core.md).
+- `health/`: `airhealth`, the Python library and command line. Start with
+  [`health/README.md`](../health/README.md). Design notes in [`specs/`](specs/).
 
 ## How to look at it
 
@@ -85,57 +79,7 @@ cd health
 ../.venv/bin/python -m pytest -q                       # all pass; 18 skip without IHME files
 ```
 
-## Git
-
-Local commits on `main` only. **Nothing from the health work has been pushed**, and it is not
-to be pushed until Akash says so. IHME files live in `health/data_local/` (git-ignored) and
-are never committed.
-
-## Waiting on Akash
-
-1. **IHME:** Part A and Part B are downloaded and in use. Next sign-in, two small extras: the
-   GBD 2023 risk-curve information sheet and an "All causes" deaths query (see Next builds).
-2. **Death-count default.** Deferred on purpose. SRS-scaled stays the default; see the
-   source-switches note below.
-3. **When to push.**
-
-## Next builds, in order
-
-Done 2026-11-11 (evening, not yet committed when written): design stage 3, the IHME tier.
-A fifth map, `gbd2023` (IHME's state values, read from `data_local/` at run time), and three
-curves, `gbd2023`, `gbd2019`, `gemm_5cod`, on IHME's deaths by cause, state and age
-(`health/airhealth/ihme.py`, `ihme_curves.py`; `tests/test_ihme.py`; two new benchmarks,
-both within band). The two-scales question is settled (the 2025-dated files are ln RR), the
-TMREL is GBD's 2.4-5.9 midpoint. See the status section of `health/IHME_DOWNLOADS.md`.
-
-1. **Reproduce GBD's own India burden** (969,726 ambient-PM deaths in 2023; this tool gives
-   1.61 million on the same curve, map and year). Needs GBD 2023's household air pollution
-   file (GHDx record 594794, 13.9 MB, no login) and GBD's proportional ambient/household
-   split. Then a benchmark for `gbd2023`, and one for `gbd2019` against Pandey et al. 2021.
-2. **A GBD all-cause death source** (`--deaths gbd`): one more Results-tool query, "All
-   causes" deaths by state and age. Also the GBD 2023 information sheet for the risk curves
-   (login), to confirm the log scale in IHME's own words.
-3. **The intervention ranking**: plans A and B done; C and D next (see "Next session" above).
-4. Cohort run to 2050 (stage 4), valuation presets (stage 5), the Surat 25× case (stage 6).
-5. Air-response layer (emissions to concentration), the dome effect, a public web page.
-
-## Other open work
-
-- **The evidence review** (`lit/evidence.md`: interventions observed to work, and the three
-  things most worth doing) was asked for at the start and set aside for the health model.
-  Not written.
-- **G1** in `lit/gaps.md`: did firecracker bans work? The data is already in `diwali/`.
-- **G7** has a first answer: GBD 2023's India exposure is 54, not 91. See the note there.
-
-## Done 2026-11-11
-
-Years before 2020 now use that year's own SRS figures: the nine Statistical Reports 2011-19
-are transcribed (crude death rates, rates by age, age shares; `health/data/sources.toml`),
-death rates by age are moved band by band to each year's, and counts are scaled to each
-year's crude death rate (`health/data/death_reconciliation_by_year.csv`). Before, a 2014 run
-had 5.7 deaths per 1,000 against the SRS's 6.7; now it matches. Two benchmarks' expected
-ratios moved with it (Jaganathan deaths 1.185 → 1.392, Burnett at 74 µg/m³ 0.754 → 0.816);
-both write-ups had predicted the direction. Years after 2024 still carry a footer warning.
+IHME files live in `health/data_local/` (git-ignored) and are never committed.
 
 ## Small known issues in `health/`
 
@@ -144,7 +88,7 @@ the all-India life table. City populations are Census 2011. Cooking smoke is exc
 ACAG India mean (49.8) is above ACAG's own summary (47.1), unexplained. Full list:
 "Known limitations" in `health/README.md`.
 
-## Calls Claude made during the build that Akash has not reviewed
+## Modelling calls not yet reviewed by a specialist
 
 Positive AQLI numbers mean years gained. Each curve applies from its own starting age
 (Jaganathan all ages, Brown 15, GEMM and Vodonos 25; Vodonos's source says all-age). Map

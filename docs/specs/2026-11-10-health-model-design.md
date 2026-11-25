@@ -1,17 +1,17 @@
 # Health model, first version — design
 
-Status: draft for Akash's approval. Nothing is built yet.
+Status: the design the first version was built from (see `health/README.md` for what exists).
 Date: 2026-11-10.
 
 ## Why this exists
 
-Akash wants an intuition for how large India's air-pollution health problem is, and a way
-to ask "if this intervention worked, how much health would it buy?" He found he could not
-answer that himself. Research done before this design (three literature sweeps, summarised
+The aim is an intuition for how large India's air-pollution health problem is, and a way
+to ask "if this intervention worked, how much health would it buy?" No public tool
+answers that. Research done before this design (three literature sweeps, summarised
 under "What the research found") showed why: the published answers differ several-fold, and
 the differences come from four assumptions that no public tool exposes together.
 
-The audience is Akash first, then smart people looking for something to build. The longer
+The audience is people looking for something to build. The longer
 aim is a public tool that makes air pollution look tractable to builders. This first version
 is the health half of that tool.
 
@@ -70,13 +70,13 @@ source before it enters code or data (see "Provenance rule").
 - **Numbers from memory.** Any parameter that was not read at its source.
 - **Publishing IHME data.** See "Data and licences".
 
-## How it is made (decided with Akash)
+## How it is made (decided)
 
 - A Python library in this repo, run from the terminal, producing numbers and charts.
 - A page on dogl.uk later, reading the same intervention files.
 - IHME's licence problem is acknowledged and deferred: use the data locally for now.
 
-Everything below this line is my proposal (Claude's call) unless marked otherwise.
+Everything below this line is a modelling call, not yet reviewed by a specialist, unless marked otherwise.
 
 ## Shape of the thing
 
@@ -267,15 +267,14 @@ Two tiers.
 - **Local tier, never committed:** IHME files — GBD risk curves, state deaths by cause. Kept
   in a git-ignored folder. There is no fetch script: IHME delivers by web query behind a
   login. The builder writes an exact download list (which tool, which selections, which
-  filenames) and a loader that checks the folder; Akash downloads the files by hand. With
+  filenames) and a loader that checks the folder; a person downloads the files by hand. With
   this tier the GBD and GEMM five-cause curves work.
 
-**What derived from IHME data may be committed** (Claude's call; Akash has said to defer the
-licence question): charts that draw a GBD curve, result tables, and benchmark write-ups may
+**What derived from IHME data may be committed** (modelling call; the licence question is
+deferred): charts that draw a GBD curve, result tables, and benchmark write-ups may
 be committed. Tabulated curve values, state cause-of-death tables, and test fixtures that
 embed either may not; tests that need them skip when the local tier is absent. Precomputed
-results for the web page are decided when the page is built. Nothing is pushed to the public
-remote without Akash saying so.
+results for the web page are decided when the page is built.
 
 The tool must run with the open tier alone and say clearly which curves are unavailable.
 Do not copy IHME-derived files from `creahia` or `PM2.5-attr-mort`; both carry the same

@@ -1,7 +1,7 @@
 # Ranking interventions, city by city: design
 
-Status: **for Akash's approval, 2026-11-12** (reviewed by a builder; two questions answered by Akash). Decisions marked *(Akash)* are his; *(Claude's call)*
-marks a technical choice made so he can wave it through or overrule it. Nothing here is built.
+Status: **agreed 2026-11-12**, not yet built. Decisions marked *(decided)* are settled;
+*(modelling call)* marks a technical choice not yet reviewed by a specialist.
 
 ## What it is for
 
@@ -11,25 +11,25 @@ measures buy the most life-years per rupee, in which city, and how sure are we?*
 about 50 Indian cities, it ranks a library of measures (long shots included) by expected
 life-years per rupee, on every curve, and shows where the curves disagree on the order.
 
-It is part of the model, not a report *(Akash: "we're integrating this into our model")*: new
+It is part of the model, not a report: new
 data in `health/data/`, a library of intervention files, a `rank` command, a dashboard tab and
 benchmarks in the existing suite. Everything the ranking needs flows through the existing
 `intervention.load` → `simulate.run` path.
 
-**Who reads it first** *(Akash)*: researchers who can check it (CREA; Sarath Guttikunda, whose
+**Who reads it first** *(decided)*: researchers who can check it (CREA; Sarath Guttikunda, whose
 APnA dataset is the backbone of the causes layer, so he will be checking his own numbers as we
-used them) and smart friends. So every number must trace to a source in one click, and the top
+used them) and interested non-specialists. So every number must trace to a source in one click, and the top
 layer must make sense in a minute.
 
 ## Goals
 
-1. **Thin and wide** *(Akash)*: ~50 cities (APnA's 49 airsheds), not one airshed in depth.
+1. **Thin and wide** *(decided)*: ~50 cities (APnA's 49 airsheds), not one airshed in depth.
 2. **Causes by city**, every study side by side, never one winner, with the share that blows in
    from outside the city as its own column.
-3. **A library of measures**, ~25 in the first pass *(Claude's call)*, each stating what it cuts,
+3. **A library of measures**, ~25 in the first pass *(modelling call)*, each stating what it cuts,
    in which months, by how much (a range), what it costs (a range, scaling with city size), the
-   odds it works, and citations. Includes measures that cut exposure rather than the air
-   *(Akash: "yeah bc reducing exposure reduces deaths")* and long shots with low odds.
+   odds it works, and citations. Includes measures that cut exposure rather than the air (reducing exposure
+   reduces deaths too) and long shots with low odds.
 4. **Month by month throughout** (stubble is Oct-Nov, heating is winter, dust is pre-monsoon).
    Winter-only measures are scored by what they do to the annual mean, using each city's own
    monthly profile.
@@ -44,7 +44,7 @@ layer must make sense in a minute.
   the dome effect is ignored. Said on every result. (The air-response layer is a later stage.)
 - No co-benefits (climate, crop yields, time saved). Health only, and the README says so.
 - No political-feasibility model beyond the odds number.
-- No public page, and nothing pushed until Akash says.
+- No public page yet.
 - No valuation in money (VSL); the metric is life-years and deaths per rupee.
 
 ## Anti-goals (would make it a failure even if it runs)
@@ -63,8 +63,7 @@ layer must make sense in a minute.
 - IHME data is never committed; the IHME curves run only where `data_local/` exists, as today.
 - Licences: APnA is CC BY 4.0 (attribute). NCAP reports: facts may be tabulated with citation,
   PDFs not rehosted. GBD MAPS India (HEI): copyrighted; keep any transcription in `data_local/`
-  until the licence is checked *(Claude's call)*.
-- Commit locally on `main`; no push.
+  until the licence is checked *(modelling call)*.
 
 ## The parts
 
@@ -79,8 +78,8 @@ layer must make sense in a minute.
 - The profile is a *shape* (each month ÷ the annual mean). The annual level still comes from the
   chosen exposure map. Places that are not cities (states, rural districts, which regional
   measures reach) take the population-weighted shape of the monitored cities in their state,
-  or the nearest state's, flagged *(Claude's call)*.
-- **Ranking map: `acag_total` by default** *(Claude's call)*. APnA's shares are shares of
+  or the nearest state's, flagged *(modelling call)*.
+- **Ranking map: `acag_total` by default** *(modelling call)*. APnA's shares are shares of
   *total* PM2.5, including dust and sea salt; AQLI removes both, so AQLI × APnA would understate
   every dust measure. Other maps stay available as a switch, with a note that they mismatch.
 - **Fixes a known bug**: `monthly_pct` today assumes every month is as dirty as the average
@@ -96,7 +95,7 @@ n_days, url, evidence_key`.
 
 - **First pass:** APnA for all 49 (the spine); McDuffie 2021 Supplementary Data 1 (17 cities);
   the NCAP/TERI/CSTEP reports already read for the big cities in `lit/city-sources.md`.
-- **Harmonised causes** *(Claude's call)*: transport, residential (cooking and heating), industry
+- **Harmonised causes** *(modelling call)*: transport, residential (cooking and heating), industry
   (incl. power), road and construction dust, waste burning, diesel generators, brick kilns,
   agricultural burning, natural (sea salt, desert dust), secondary-unassigned, outside.
 - **Only concentration shares are used** to rank. Emissions shares are kept with
@@ -121,7 +120,7 @@ ranking turns it into one intervention per city.
   named states, e.g. Punjab stubble or IGP power plants). A city measure can only cut the
   inside-city share. **A regional measure's benefit counts everyone who breathes the result,
   downwind included** (stubble in Punjab reaches Delhi, Haryana, UP, Bihar), urban and rural
-  *(Claude's call)*. The PM2.5 change by district comes from a published source-receptor result
+  *(modelling call)*. The PM2.5 change by district comes from a published source-receptor result
   where one exists (stubble: Lan et al. 2022, district-level, adjoint model; coal plants: the
   plant-level work behind Cropper et al. / DCP3), else from McDuffie 2021's gridded sector
   fractions clipped to districts (CC BY; fetch only the needed sector files, not all ~126 GB).
@@ -130,7 +129,7 @@ ranking turns it into one intervention per city.
 - **`[targets]`** (air): which harmonised causes, cut by what fraction (Dist), in which months,
   in which cities (all, a list, or every city where the cause's share exceeds a threshold).
 - **`[exposure]`** (exposure): share of people covered, share of hours it works, cut in what
-  they breathe during those hours (Dists). **Applied to the covered people only** *(Claude's
+  they breathe during those hours (Dists). **Applied to the covered people only** *(modelling
   call)*: the population is split into covered and not covered, and the covered group's
   exposure falls by hours × cut. Averaging over everyone (coverage × hours × cut) would be wrong
   on curves that flatten at high levels. This needs a small extension to `simulate.run` (a
@@ -138,12 +137,12 @@ ranking turns it into one intervention per city.
   levels with indoor time already baked in, so the cut is relative to that normal mix.
 - **Cost** scales with a stated driver (per person covered, per household, per acre, per stack,
   per city), so the same measure costs more in a bigger city. **All costs are brought to 2025
-  rupees** with India's GDP deflator (World Bank) *(Claude's call)*; the tool's no-inflation rule
+  rupees** with India's GDP deflator (World Bank) *(modelling call)*; the tool's no-inflation rule
   was fine for one file but would make a 2009-priced scrubber look ~2× cheap against a 2025
   purifier. Whose rupees count: see "Decided after review".
 - **`p_success`** as today. Exposure measures get lower odds by default than cuts to outdoor air,
   because no trial shows purifiers or masks cut deaths (they show lower indoor PM2.5 and blood
-  pressure) *(Claude's call)*.
+  pressure) *(modelling call)*.
 - **`who_reaches`**: free text, shown in the output, e.g. "households that can run a purifier".
 - **First ~25 measures**, drawn from `bets/README.md` and `lit/prior-rankings.md`. Indicative:
   stubble payments with part upfront; Happy Seeder subsidy; buying Punjab out of rice; FGD
@@ -165,7 +164,7 @@ normal intervention, which already gives deaths and life-years on every curve wi
 odds, the cessation lag and cost. Life-years per rupee = life-years ÷ cost, expected (× odds)
 and if it works.
 
-**Time and discounting** *(Claude's call)*. Every measure is scored on the same footing: all
+**Time and discounting** *(modelling call)*. Every measure is scored on the same footing: all
 life-years it causes count, including those that arrive after it ends (under the EPA 20-year
 lag, a one-winter mask handout delivers most of its benefit in later years; today's tool drops
 them, which would understate short measures several times). The horizon is the measure's
@@ -201,10 +200,10 @@ are both just costs in the year they fall.
 
 ## Decided after review (2026-11-12)
 
-1. **An all-India table is the headline, plus one table per city** *(Akash)*. Within a city most
+1. **An all-India table is the headline, plus one table per city** *(decided)*. Within a city most
    curves agree on the order; across places they disagree (curves that flatten at high levels
    favour cleaner cities), so curve flips are defined on the all-India table.
-2. **The funder's rupees** *(Akash)*: what a government or philanthropist would have to spend.
+2. **The funder's rupees** *(decided)*: what a government or philanthropist would have to spend.
    Society's net cost is a second column where a source gives it. Measures that save money
    overall (TERI puts zig-zag kilns and LPG below zero) are listed separately as "pays for
    itself", not ranked by a ratio.

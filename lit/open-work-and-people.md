@@ -292,7 +292,7 @@ What nobody has open-sourced, as far as these searches reach:
 9. **Farm-level stubble economics as code.** The cost numbers (₹800–2,500/acre payments,
    ₹1,500–1,800/t to bale and move straw, Happy Seeder savings) live in papers and PDFs, not
    models.
-10. **The X conversation itself.** Searched 2026-11-12 (credits back; see below). Thin.
+10. **The X conversation itself.** Searched 2026-11-12 (see below). Thin.
 
 
 ## X search, 2026-11-12
@@ -317,4 +317,3 @@ Grok replies. What was worth keeping [R unless marked]:
 - **1.24 lakh deaths a year** attributed to exempting coal plants from FGD (May 2026, via a post;
   likely a CREA figure). Check the source before use.
 
-Raw results: session scratchpad only, not committed.

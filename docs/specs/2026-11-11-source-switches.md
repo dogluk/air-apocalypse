@@ -1,6 +1,6 @@
 # A switch for every input: design note
 
-Status: **agreed 2026-11-11** (Akash: "go ahead", taking Claude's defaults on the three open
+Status: **agreed 2026-11-11**, taking the proposed defaults on the three open
 questions: mixing allowed with a note; switches before the IHME curves; UN WPP 2024 first).
 The build is described under "As built" at the end.
 
@@ -8,7 +8,7 @@ The build is described under "As built" at the end.
 
 "We probably need the ability to take each variable we depend on and have a knob/switch for
 using different sources." The trigger was the death count: the government survey (SRS) and
-the UN disagree by about a tenth, and Akash does not want to pick one now. The same is true
+the UN disagree by about a tenth, and neither is picked as right for now. The same is true
 of most inputs, so the answer is a general one: the tool should not hard-code a winner
 anywhere a credible source disagrees with another.
 
@@ -29,7 +29,7 @@ anywhere a credible source disagrees with another.
 The same table is shown at the bottom of `airhealth dashboard` (`INPUTS` in
 `health/airhealth/dashboard.py`); keep the two in step until the registry below replaces both.
 
-## Proposal (Claude's, unreviewed)
+## Proposal
 
 1. **One registry of inputs.** Each input gets a name and a set of named sources, the way
    `curves` and `exposure.MAPS` already work. A source is a loader plus its `sources.toml`
@@ -47,17 +47,17 @@ The same table is shown at the bottom of `airhealth dashboard` (`INPUTS` in
    the same body; a GBD curve and GBD deaths by cause). Mixing is allowed, and the footer
    says when a combination mixes bodies.
 
-## Open questions for Akash
+## Open questions (since settled; see Status)
 
 - Should mixing sources across bodies (SRS life table with UN death count) be allowed
   freely, warned about, or refused?
 - Is "spread across sources" worth building before the IHME curves, or after?
 - Which second source matters most to add first: UN WPP (deaths, population, life tables in
-  one download, openly licensed) is Claude's suggestion.
+  one download, openly licensed) was the suggestion.
 
 ## Not decided here
 
-Which death count is the default. It stays SRS-scaled until Akash chooses; `--deaths model`
+Which death count is the default. It stays SRS-scaled until one is chosen; `--deaths model`
 gives the other.
 
 ## As built (2026-11-11)
