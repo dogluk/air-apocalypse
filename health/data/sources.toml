@@ -233,6 +233,49 @@ complete profile among the 50 cities (modelling call: a state's monitors, wherev
 Haryana's are mostly Gurugram, Faridabad and the rest of the NCR). Every monitor is used, not only those of the 50 cities.
 """
 
+["cpcb_city_month_hour.csv"]
+source = "Central Pollution Control Board continuous ambient air quality monitoring stations (CAAQMS), 15-minute data compiled by Vonter/india-cpcb-aqi (parquet releases 2016-2025), as downloaded by diwali/download.sh."
+url = "https://github.com/Vonter/india-cpcb-aqi/releases"
+locator = "diwali/data/raw/cpcb-air-quality-YYYY.parquet (git-ignored), columns City, Station ID, Timestamp, 'PM2.5 (µg/m³)', 'PM10 (µg/m³)', 'NO2 (µg/m³)', 'SO2 (µg/m³)', 'CO (mg/m³)', 'Ozone (µg/m³)'; units as the compilation's data dictionary (DATA.md) states them; CPCB city names from cities.csv, column cpcb_cities."
+retrieved = "2026-11-27"
+licence = "ODbL 1.0 (the compilation); the derived table is shared under ODbL 1.0."
+method = "derived"
+script = "scripts/build_cpcb_city_detail.py"
+notes = """
+Columns: city, year, month (1-12), hour (0-23, IST wall-clock), then for each of pm25, pm10, no2, so2, co, o3 a value X
+and n_X. X = mean over the days of that month of the city's value for that clock hour; the city's value for an hour is
+the median across its stations of station-hour means (the method of exposure_cpcb.csv). n_X = number of days that hour
+had a city value; X is empty where n_X is 0. Units as CPCB publishes them: µg/m³, except co in mg/m³. Weighting X by n_X
+over the 24 hours reproduces monthly_cpcb.csv (tests/test_cpcb_detail.py checks this and exposure_cpcb.csv).
+PM2.5 has exactly the annual table's QC (QC_SQL of scripts/build_exposure_cpcb.py is imported, not copied). PM10, NO2,
+SO2, CO and ozone get light cleaning only (modelling call, not yet reviewed; decided for this table): values <= 0 are
+dropped; runs of >= 8 identical consecutive 15-minute values at one station and pollutant are dropped (the PM2.5
+stuck-sensor rule); PM10 > 2000 is dropped (the existing PM10 rule). No cross-checks between pollutants and no upper
+limit on the gases, so a fault that is neither stuck nor <= 0 stays in: read the gas columns as the monitors report them.
+Unlike monthly_cpcb.csv there is no 75% coverage rule here: every city-month with any value has its 24 rows, and n_X
+shows how many days stand behind each value. Cities in the file: Bengaluru only (the 2016-2025 files; the script takes
+--city for others and then replaces the file with the cities named).
+"""
+
+["cpcb_station_month.csv"]
+source = "Central Pollution Control Board continuous ambient air quality monitoring stations (CAAQMS), 15-minute data compiled by Vonter/india-cpcb-aqi (parquet releases 2016-2025), as downloaded by diwali/download.sh."
+url = "https://github.com/Vonter/india-cpcb-aqi/releases"
+locator = "diwali/data/raw/cpcb-air-quality-YYYY.parquet (git-ignored), columns City, Station ID, Station Name, Timestamp, 'PM2.5 (µg/m³)', 'PM10 (µg/m³)', 'NO2 (µg/m³)', 'SO2 (µg/m³)', 'CO (mg/m³)', 'Ozone (µg/m³)'; CPCB city names from cities.csv, column cpcb_cities."
+retrieved = "2026-11-27"
+licence = "ODbL 1.0 (the compilation); the derived table is shared under ODbL 1.0."
+method = "derived"
+script = "scripts/build_cpcb_city_detail.py"
+notes = """
+Columns: city, station_id (the compilation's Station ID), station (its Station Name), year, month (1-12), pm25 (the
+station's mean over its valid PM2.5 station-hours that month, µg/m³; empty if none), share_pm25, share_pm10, share_no2,
+share_so2, share_co, share_o3 (share of the month's calendar hours with a valid station-hour of that pollutant, 0-1, 3
+decimals; 0 where the station never reports it). One row per station-month with a reading of any pollutant. Same QC as
+cpcb_city_month_hour.csv (PM2.5: the annual table's; other pollutants: values <= 0, runs of >= 8 identical 15-minute
+values and PM10 > 2000 dropped; modelling call, not yet reviewed). A station-hour is valid if any of its four 15-minute
+readings survives QC. Stations of a city with any share_pm25 > 0 in a year number the `stations` of exposure_cpcb.csv
+(tested). Cities in the file: Bengaluru only.
+"""
+
 ["cities.csv"]
 source = "Office of the Registrar General & Census Commissioner, India. Census of India 2011, table A-04 (I): Towns and urban agglomerations classified by population size class in 2011 with variation between 1901 and 2011 - Class I. Airshed names: APnA 50 airsheds (apna_source_apportionment.csv), UrbanEmissions.info, CC BY 4.0."
 url = "https://censusindia.gov.in/nada/index.php/catalog/42876/download/46544"

@@ -1,0 +1,1150 @@
+city,station_id,station,year,month,pm25,share_pm25,share_pm10,share_no2,share_so2,share_co,share_o3
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2018,6,24.09,0.042,0.046,0.047,0.047,0.047,0.046
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2018,7,22.01,0.836,0.884,0.917,0.914,0.844,0.901
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2018,8,26.39,0.938,0.952,1.0,0.987,0.758,0.965
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2018,9,31.68,0.949,0.993,0.958,1.0,1.0,0.978
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2018,10,45.15,0.964,0.956,0.999,0.999,0.954,0.991
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2018,11,48.67,0.95,0.967,0.999,0.996,0.999,0.989
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2018,12,60.23,0.965,0.969,1.0,1.0,0.817,0.976
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2019,1,59.16,0.961,0.985,0.816,0.993,0.856,0.973
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2019,2,49.17,0.932,0.946,0.973,0.966,0.888,0.952
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2019,3,46.79,0.913,0.965,0.817,0.978,0.88,0.978
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2019,4,42.06,0.853,0.84,0.899,0.846,0.703,0.904
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2019,5,45.33,0.882,0.892,0.915,0.87,0.915,0.918
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2019,6,35.38,0.697,0.714,0.767,0.664,0.767,0.767
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2019,7,28.24,0.917,0.899,0.964,0.792,0.96,0.966
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2019,8,20.93,0.901,0.907,1.0,0.905,0.996,0.981
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2019,9,21.38,0.874,0.917,0.957,0.261,0.956,0.917
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2019,10,30.02,0.897,0.956,0.993,0.41,0.991,0.98
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2019,11,46.61,0.789,0.825,0.817,0.79,0.831,0.797
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2019,12,34.13,0.905,0.909,0.989,0.978,0.987,0.974
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2020,1,36.68,0.581,0.622,0.633,0.626,0.63,0.614
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2020,2,34.81,0.636,0.657,0.655,0.647,0.626,0.649
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2020,3,32.27,0.556,0.552,0.552,0.552,0.519,0.55
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2020,4,24.32,0.429,0.753,0.789,0.789,0.76,0.789
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2020,5,20.71,0.798,0.946,0.949,0.976,0.934,0.984
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2020,6,19.26,0.853,0.921,0.972,0.979,0.971,0.981
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2020,7,15.84,0.856,0.937,1.0,1.0,1.0,0.983
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2020,8,26.02,0.866,0.94,1.0,1.0,0.999,1.0
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2020,9,32.95,0.865,0.918,0.954,0.953,0.954,0.957
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2020,10,45.95,0.852,0.88,0.918,0.918,0.909,0.919
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2020,11,42.59,0.932,0.946,0.811,0.978,0.96,0.972
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2020,12,50.35,0.931,0.945,0.977,0.992,0.981,0.978
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2021,1,50.1,0.891,0.935,0.915,0.915,0.832,0.875
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2021,2,55.12,0.92,0.921,0.923,0.946,0.991,0.997
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2021,3,50.28,0.895,0.938,0.946,0.901,0.956,0.968
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2021,4,51.3,0.943,0.947,1.0,0.986,1.0,1.0
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2021,5,21.21,0.837,0.852,0.958,0.934,0.97,0.97
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2021,6,18.92,0.871,0.907,0.992,0.992,0.985,0.99
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2021,7,27.82,0.617,0.636,0.696,0.696,0.691,0.605
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2021,8,34.57,0.624,0.684,0.687,0.68,0.692,0.69
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2021,9,31.52,0.912,0.931,0.972,0.89,0.972,0.965
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2021,10,41.76,0.867,0.961,0.999,0.989,0.996,0.981
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2021,11,44.74,0.919,0.928,0.961,0.956,0.961,0.961
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2021,12,70.2,0.419,0.413,0.423,0.48,0.481,0.484
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2022,1,54.13,0.825,0.848,0.868,0.999,0.988,1.0
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2022,2,59.89,0.927,0.914,1.0,1.0,1.0,0.999
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2022,3,58.79,0.77,0.789,0.805,0.804,0.804,0.8
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2022,4,48.41,0.794,0.817,0.857,0.851,0.719,0.862
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2022,5,28.9,0.867,0.911,0.964,0.962,0.964,0.966
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2022,6,20.24,0.836,0.874,0.918,0.918,0.919,0.921
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2022,7,30.45,0.891,0.923,0.989,0.999,0.997,0.999
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2022,8,30.41,0.888,0.95,1.0,1.0,1.0,1.0
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2022,9,31.75,0.788,0.819,0.9,0.897,0.9,0.901
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2022,10,67.77,0.953,0.981,1.0,1.0,1.0,0.964
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2022,11,79.02,0.857,0.824,0.91,0.936,0.932,0.936
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2022,12,52.55,0.879,0.898,0.407,0.978,0.981,0.966
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2023,1,52.78,0.866,0.883,0.257,0.922,0.925,0.926
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2023,2,50.67,0.96,0.978,0.728,0.991,0.993,0.993
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2023,3,62.56,0.727,0.727,0.757,0.91,0.789,0.759
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2023,4,23.26,0.874,0.915,0.992,0.986,0.985,0.978
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2023,5,16.74,0.848,0.901,0.996,0.989,0.978,0.993
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2023,6,14.37,0.742,0.781,0.851,0.843,0.828,0.84
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2023,7,12.47,0.907,0.961,0.996,0.993,0.891,0.996
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2023,8,35.19,0.39,0.372,0.965,0.956,0.867,0.964
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2023,9,14.52,0.804,0.828,0.865,0.864,0.79,0.865
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2023,10,56.27,0.819,0.965,0.997,0.995,0.997,0.997
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2023,11,47.3,0.921,0.964,1.0,0.996,1.0,1.0
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2023,12,53.68,0.956,0.97,1.0,0.996,1.0,1.0
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2024,1,56.03,0.878,0.941,0.989,0.988,0.96,0.988
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2024,2,56.42,0.848,0.889,0.999,0.999,0.999,0.94
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2024,3,62.24,0.815,0.827,0.746,0.735,0.735,0.7
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2024,4,51.67,0.95,0.94,0.982,0.996,0.996,0.982
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2024,5,39.14,0.849,0.891,0.996,0.992,0.991,0.996
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2024,6,16.7,0.888,0.929,0.976,0.967,0.742,0.976
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2024,7,14.27,0.921,0.968,1.0,0.997,0.997,0.983
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2024,8,31.95,0.824,0.867,1.0,0.997,1.0,1.0
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2024,9,31.06,0.883,0.957,0.997,0.992,0.994,0.997
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2024,10,38.36,0.917,0.953,1.0,1.0,1.0,1.0
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2024,11,42.97,0.925,0.962,1.0,1.0,1.0,1.0
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2024,12,38.06,0.933,0.973,1.0,1.0,1.0,1.0
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2025,1,41.42,0.923,0.97,0.996,0.999,0.999,0.997
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2025,2,43.64,0.807,0.926,0.982,1.0,1.0,1.0
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2025,3,37.0,0.925,0.968,0.995,0.999,1.0,0.972
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2025,4,31.87,0.817,0.853,0.91,0.906,0.91,0.875
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2025,5,22.46,0.891,0.96,1.0,0.966,0.882,0.996
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2025,6,22.31,0.875,0.956,0.999,0.997,0.8,1.0
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2025,7,18.36,0.862,0.941,0.997,0.997,0.762,1.0
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2025,8,17.85,0.856,0.935,0.999,1.0,0.957,0.761
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2025,9,24.12,0.842,0.897,1.0,1.0,1.0,0.925
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2025,10,34.51,0.917,0.956,1.0,1.0,0.999,0.925
+Bengaluru,site_1553,"Bapuji Nagar, Bengaluru - KSPCB",2025,11,42.53,0.221,0.228,0.269,0.269,0.269,0.249
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2018,6,9.0,0.003,0.003,0.003,0.003,0.003,0.003
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2018,7,13.48,0.769,0.833,0.867,0.862,0.845,0.87
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2018,8,11.73,0.867,0.921,0.997,0.903,0.887,0.972
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2018,9,19.19,0.889,0.911,0.951,0.857,0.69,0.925
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2018,10,32.81,0.444,0.454,0.461,0.458,0.441,0.437
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2018,11,44.88,0.517,0.515,0.531,0.546,0.55,0.533
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2018,12,57.24,0.327,0.324,0.339,0.309,0.34,0.341
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2019,1,59.84,0.961,0.973,0.999,0.973,0.999,0.996
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2019,2,47.9,0.81,0.83,0.862,0.841,0.859,0.862
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2019,3,42.96,0.871,0.957,1.0,0.946,0.995,0.993
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2019,4,39.25,0.897,0.912,0.971,0.924,0.949,0.968
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2019,5,32.73,0.815,0.851,0.894,0.821,0.884,0.895
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2019,6,16.12,0.819,0.868,0.796,0.91,0.892,0.806
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2019,7,12.64,0.823,0.879,0.925,0.95,0.966,0.949
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2019,8,10.04,0.788,0.866,0.946,0.874,0.894,0.891
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2019,9,15.21,0.786,0.847,0.91,0.872,0.899,0.829
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2019,10,23.81,0.845,0.926,0.961,0.987,0.96,0.983
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2019,11,40.4,0.924,0.926,0.962,0.958,0.929,0.974
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2019,12,40.95,0.862,0.887,0.952,0.933,0.946,0.973
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2020,1,42.15,0.964,0.97,1.0,0.966,1.0,0.992
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2020,2,34.83,0.889,0.885,0.838,0.915,0.888,0.937
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2020,3,31.9,0.946,0.964,0.966,0.992,0.983,0.999
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2020,4,24.42,0.772,0.721,0.846,0.864,0.862,0.333
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2020,5,17.49,0.911,0.942,0.983,0.988,0.98,0.515
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2020,6,18.42,0.765,0.85,0.969,0.969,0.929,0.969
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2020,7,16.57,0.87,0.902,0.965,0.964,0.956,0.956
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2020,8,15.06,0.874,0.952,1.0,1.0,0.981,0.981
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2020,9,15.36,0.886,0.912,0.989,0.99,0.972,0.971
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2020,10,31.78,0.898,0.927,0.883,0.995,0.997,0.996
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2020,11,36.54,0.911,0.94,0.99,0.769,0.976,0.992
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2020,12,43.36,0.867,0.915,0.937,0.866,0.794,0.921
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2021,1,37.12,0.895,0.919,0.944,0.915,0.879,0.95
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2021,2,42.31,0.701,0.701,0.725,0.655,0.69,0.76
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2021,3,38.55,0.851,0.886,0.918,0.906,0.812,0.919
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2021,4,37.43,0.907,0.882,0.974,0.953,0.862,0.974
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2021,5,13.13,0.825,0.906,0.999,0.999,0.974,0.999
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2021,6,16.25,0.789,0.819,0.978,0.974,0.383,0.981
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2021,7,11.74,0.78,0.918,1.0,0.992,0.918,1.0
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2021,8,17.05,0.848,0.848,0.853,0.983,0.93,0.983
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2021,9,15.49,0.868,0.908,0.993,0.986,0.846,0.993
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2021,10,26.77,0.866,0.915,0.973,0.966,0.954,0.974
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2021,11,28.88,0.924,0.892,0.942,0.964,0.907,0.992
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2021,12,48.37,0.749,0.765,0.614,0.769,0.741,0.801
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2022,1,30.44,0.91,0.751,0.038,0.97,0.977,0.997
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2022,2,40.56,0.673,0.643,0.412,0.71,0.696,0.717
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2022,3,47.68,0.739,0.79,0.816,0.813,0.8,0.82
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2022,4,34.86,0.939,0.965,0.968,0.986,0.982,0.99
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2022,5,18.36,0.892,0.917,0.747,0.987,0.984,0.991
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2022,6,12.84,0.856,0.931,0.893,0.926,0.914,0.936
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2022,7,17.53,0.75,0.831,0.316,0.808,0.851,0.852
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2022,8,16.09,0.821,0.864,0.027,0.917,0.925,0.923
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2022,9,18.13,0.814,0.826,0.092,0.717,0.722,0.721
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2022,10,41.65,0.517,0.516,0.219,0.536,0.54,0.534
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2022,11,43.69,0.635,0.654,0.66,0.664,0.675,0.682
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2022,12,31.4,0.819,0.902,0.722,0.898,0.917,0.922
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2023,1,26.08,0.829,0.915,0.987,0.902,0.983,0.976
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2023,2,38.84,0.775,0.832,1.0,0.972,0.993,0.997
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2023,3,39.93,0.81,0.899,0.938,0.93,0.94,0.941
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2023,4,38.76,0.839,0.831,0.91,0.925,0.935,0.942
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2023,5,24.76,0.38,0.407,0.595,0.56,0.583,0.598
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2023,6,15.14,0.604,0.649,0.706,0.706,0.0,0.711
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2023,7,9.25,0.758,0.794,0.886,0.879,0.0,0.892
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2023,8,13.05,0.684,0.715,0.774,0.762,0.257,0.777
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2023,9,7.16,0.392,0.411,0.421,0.457,0.232,0.457
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2023,10,40.78,0.872,0.891,0.017,0.964,0.95,0.976
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2023,11,33.67,0.919,0.924,0.011,0.962,0.447,0.965
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2023,12,42.65,0.868,0.941,0.353,0.988,0.999,0.999
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2024,1,51.76,0.922,0.933,0.929,0.961,0.962,0.966
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2024,2,40.97,0.8,0.796,0.727,0.878,0.767,0.892
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2024,3,45.12,0.892,0.892,0.0,0.894,0.891,0.953
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2024,4,33.7,0.933,0.958,0.022,0.989,0.985,0.99
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2024,5,25.53,0.875,0.907,0.871,0.974,0.974,0.976
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2024,6,8.78,0.807,0.89,0.969,0.971,0.969,0.938
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2024,7,13.93,0.737,0.745,0.883,0.882,0.878,0.825
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2024,8,18.96,0.741,0.747,0.927,0.925,0.918,0.923
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2024,9,19.57,0.907,0.9,1.0,0.996,0.99,1.0
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2024,10,38.21,0.905,0.892,1.0,0.974,0.54,1.0
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2024,11,43.4,0.774,0.783,0.825,0.825,0.008,0.685
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2024,12,34.39,0.913,0.919,0.969,0.966,0.0,0.077
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2025,1,46.75,0.935,0.915,1.0,0.996,0.429,0.474
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2025,2,40.99,0.949,0.957,0.996,0.99,0.997,0.996
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2025,3,36.5,0.905,0.946,0.907,0.995,0.995,0.996
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2025,4,31.42,0.904,0.91,0.535,0.95,0.965,0.965
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2025,5,14.32,0.833,0.898,1.0,1.0,0.999,1.0
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2025,6,7.62,0.767,0.879,1.0,1.0,0.999,1.0
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2025,7,5.38,0.733,0.918,1.0,1.0,0.992,1.0
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2025,8,6.65,0.75,0.888,0.997,1.0,0.991,1.0
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2025,9,8.02,0.736,0.836,0.994,0.985,0.589,0.994
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2025,10,15.92,0.833,0.931,1.0,0.891,0.0,1.0
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2025,11,40.7,0.875,0.903,0.794,0.743,0.242,0.95
+Bengaluru,site_1554,"Hebbal, Bengaluru - KSPCB",2025,12,53.89,0.945,0.859,0.501,0.991,0.969,0.993
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2018,7,13.32,0.809,0.773,0.879,0.809,0.897,0.831
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2018,8,11.92,0.883,0.952,0.984,0.91,0.978,0.996
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2018,9,19.39,0.881,0.917,0.954,0.932,0.942,0.954
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2018,10,32.7,0.825,0.844,0.841,0.88,0.755,0.906
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2018,11,38.92,0.785,0.871,0.99,0.943,0.796,0.972
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2018,12,48.87,0.868,0.902,0.917,0.874,0.747,0.925
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2019,1,49.69,0.613,0.638,0.657,0.629,0.57,0.659
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2019,2,40.81,0.933,0.96,0.991,0.946,0.818,0.994
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2019,3,41.82,0.914,0.962,0.993,0.978,0.805,0.993
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2019,4,34.7,0.918,0.958,0.994,0.935,0.846,0.983
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2019,5,31.17,0.892,0.927,0.965,0.871,0.875,0.965
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2019,6,15.75,0.853,0.951,1.0,0.931,0.671,1.0
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2019,7,12.18,0.839,0.935,1.0,0.985,0.987,1.0
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2019,8,9.81,0.356,0.388,0.401,0.401,0.399,0.401
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2019,9,10.38,0.778,0.867,0.933,0.929,0.929,0.931
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2019,10,10.9,0.415,0.433,0.52,0.519,0.474,0.532
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2019,11,35.44,0.942,0.953,1.0,1.0,0.985,1.0
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2019,12,31.37,0.884,0.902,1.0,1.0,1.0,1.0
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2020,1,36.69,0.938,0.973,1.0,1.0,1.0,1.0
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2020,2,38.2,0.935,0.948,1.0,1.0,1.0,1.0
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2020,3,35.98,0.871,0.919,1.0,0.999,1.0,0.999
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2020,4,26.46,0.386,0.412,0.399,0.429,0.429,0.431
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2020,5,19.53,0.878,0.903,0.95,0.95,0.949,0.952
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2020,6,14.78,0.808,0.912,1.0,1.0,0.983,1.0
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2020,7,14.11,0.782,0.823,0.945,0.944,0.944,0.945
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2020,8,16.8,0.856,0.913,0.991,0.991,0.845,0.983
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2020,9,18.6,0.85,0.931,0.999,0.996,0.962,0.989
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2020,10,36.07,0.93,0.934,1.0,1.0,1.0,0.972
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2020,11,38.83,0.903,0.932,1.0,1.0,1.0,1.0
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2020,12,26.58,0.759,0.813,0.915,0.918,0.918,0.918
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2021,1,28.78,0.798,0.937,0.995,0.995,0.995,0.987
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2021,2,33.83,0.845,0.854,0.884,0.885,0.921,0.888
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2021,3,31.7,0.909,0.952,1.0,1.0,0.999,0.974
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2021,4,37.16,0.885,0.953,0.999,1.0,0.997,1.0
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2021,5,10.38,0.613,0.78,0.863,0.864,0.851,0.864
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2021,6,16.75,0.8,0.917,1.0,1.0,0.96,0.997
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2021,7,16.85,0.691,0.794,0.867,0.868,0.864,0.871
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2021,8,20.75,0.806,0.919,1.0,1.0,0.836,0.996
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2021,9,19.41,0.729,0.915,1.0,1.0,0.999,0.978
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2021,10,22.86,0.766,0.918,1.0,0.997,1.0,0.953
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2021,11,21.11,0.839,0.936,1.0,1.0,0.997,0.996
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2021,12,37.24,0.888,0.96,1.0,1.0,0.987,0.836
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2022,1,36.16,0.918,0.965,1.0,1.0,0.954,0.644
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2022,2,41.78,0.896,0.952,0.991,0.991,0.987,0.99
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2022,3,42.35,0.894,0.964,1.0,1.0,1.0,1.0
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2022,4,35.92,0.864,0.917,0.901,0.997,0.928,0.997
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2022,5,26.95,0.677,0.728,0.696,0.792,0.859,0.87
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2022,6,11.18,0.8,0.912,0.99,0.988,0.792,0.992
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2022,7,10.01,0.77,0.897,0.996,0.996,0.993,0.996
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2022,8,11.63,0.64,0.747,0.823,0.823,0.753,0.823
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2022,9,16.85,0.719,0.818,0.975,0.976,0.832,0.978
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2022,10,24.95,0.833,0.911,0.989,0.991,0.981,0.991
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2022,11,29.02,0.844,0.921,0.994,0.994,0.99,0.994
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2022,12,25.33,0.867,0.942,1.0,1.0,0.98,1.0
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2023,1,33.08,0.909,0.946,1.0,1.0,0.965,1.0
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2023,2,39.92,0.868,0.905,0.933,0.933,0.884,0.933
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2023,3,32.24,0.894,0.95,1.0,1.0,0.995,1.0
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2023,4,30.55,0.856,0.922,0.942,0.944,0.903,0.944
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2023,5,18.57,0.724,0.8,0.883,0.87,0.859,0.914
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2023,6,14.36,0.706,0.814,0.907,0.901,0.907,0.892
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2023,7,9.72,0.556,0.625,0.695,0.656,0.606,0.696
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2023,8,15.2,0.794,0.894,0.985,0.977,0.839,0.965
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2023,9,8.73,0.685,0.776,0.867,0.861,0.867,0.864
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2023,10,34.89,0.863,0.931,0.832,0.98,0.965,0.96
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2023,11,32.39,0.878,0.911,0.712,0.996,0.999,0.971
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2023,12,25.85,0.841,0.925,0.616,1.0,0.992,0.98
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2024,1,32.06,0.886,0.945,0.972,0.973,0.987,0.992
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2024,2,30.81,0.892,0.943,0.986,0.984,0.974,0.994
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2024,3,46.8,0.933,0.942,0.956,0.996,0.988,1.0
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2024,4,29.19,0.865,0.914,1.0,0.999,0.983,0.796
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2024,5,20.91,0.805,0.89,0.946,0.999,0.999,0.984
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2024,6,9.32,0.779,0.906,1.0,1.0,1.0,1.0
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2024,7,8.32,0.79,0.902,1.0,0.999,0.999,1.0
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2024,8,11.05,0.786,0.902,1.0,0.995,0.999,0.997
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2024,9,14.42,0.799,0.904,1.0,1.0,0.999,1.0
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2024,10,26.5,0.867,0.901,0.921,0.965,0.957,0.964
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2024,11,25.41,0.828,0.912,0.976,0.828,0.975,0.976
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2024,12,32.36,0.888,0.921,1.0,1.0,1.0,0.999
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2025,1,44.27,0.895,0.929,0.964,0.996,0.996,0.996
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2025,2,25.45,0.878,0.92,0.996,0.999,0.999,0.999
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2025,3,27.91,0.878,0.929,0.993,0.999,0.997,0.989
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2025,4,20.63,0.84,0.89,0.969,0.969,0.969,0.933
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2025,5,9.6,0.738,0.886,0.972,0.972,0.97,0.969
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2025,6,8.79,0.7,0.851,0.989,0.989,0.986,0.989
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2025,7,10.85,0.675,0.848,0.992,0.992,0.992,0.992
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2025,8,7.94,0.694,0.792,0.935,0.935,0.935,0.919
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2025,9,11.35,0.76,0.853,0.939,0.938,0.938,0.924
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2025,10,13.86,0.821,0.915,0.996,0.996,0.995,0.965
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2025,11,27.53,0.824,0.915,0.978,0.978,0.978,0.972
+Bengaluru,site_1555,"Hombegowda Nagar, Bengaluru - KSPCB",2025,12,29.88,0.852,0.923,1.0,1.0,0.999,0.995
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2018,6,14.0,0.003,0.003,0.003,0.003,0.0,0.003
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2018,7,15.64,0.837,0.918,0.817,0.867,0.878,0.934
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2018,8,13.64,0.698,0.718,0.765,0.719,0.763,0.755
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2018,9,21.77,0.743,0.772,0.794,0.743,0.793,0.75
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2018,10,62.75,0.351,0.371,0.409,0.387,0.341,0.415
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2018,11,52.96,0.69,0.735,0.772,0.71,0.775,0.792
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2018,12,69.51,0.755,0.792,0.718,0.796,0.804,0.788
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2019,1,58.85,0.879,0.894,0.823,0.918,0.918,0.917
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2019,2,45.4,0.807,0.829,0.85,0.842,0.859,0.857
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2019,3,42.19,0.823,0.853,0.87,0.855,0.866,0.867
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2019,4,34.82,0.668,0.7,0.706,0.671,0.657,0.706
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2019,5,30.61,0.519,0.54,0.554,0.55,0.513,0.555
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2019,6,15.78,0.853,0.907,0.95,0.944,0.858,0.95
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2019,7,10.06,0.876,0.952,0.991,0.988,0.97,0.985
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2019,8,10.13,0.762,0.836,0.883,0.867,0.87,0.883
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2019,9,17.55,0.893,0.931,0.969,0.974,0.94,0.982
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2019,10,28.08,0.906,0.941,0.981,0.978,0.914,0.981
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2019,11,46.62,0.812,0.86,0.893,0.896,0.874,0.883
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2019,12,38.02,0.882,0.926,0.956,0.956,0.937,0.954
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2020,1,38.72,0.911,0.958,0.984,0.114,0.98,0.984
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2020,2,42.52,0.871,0.879,0.885,0.0,0.823,0.878
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2020,3,38.18,0.898,0.911,0.905,0.0,0.793,0.898
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2020,4,25.49,0.696,0.693,0.772,0.089,0.583,0.767
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2020,5,23.92,0.536,0.559,0.583,0.066,0.402,0.595
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2020,6,18.47,0.86,0.919,0.972,0.939,0.962,0.974
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2020,7,17.06,0.845,0.844,0.962,0.961,0.958,0.964
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2020,8,20.63,0.827,0.848,0.856,0.91,0.901,0.911
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2020,9,21.2,0.897,0.922,0.924,0.917,0.925,0.929
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2020,10,34.79,0.96,0.978,0.656,0.941,0.945,0.96
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2020,11,39.79,0.95,0.939,0.953,0.889,0.907,0.925
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2020,12,52.5,0.926,0.917,0.897,0.839,0.935,0.931
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2021,1,52.38,0.941,0.946,0.961,0.919,0.953,0.958
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2021,2,50.57,0.932,0.891,0.908,0.872,0.939,0.94
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2021,3,43.99,0.906,0.905,0.913,0.872,0.913,0.907
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2021,4,42.57,0.876,0.882,0.893,0.847,0.893,0.885
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2021,5,15.57,0.874,0.887,0.897,0.868,0.878,0.905
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2021,6,17.34,0.701,0.732,0.679,0.731,0.646,0.756
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2021,7,13.54,0.899,0.884,0.933,0.902,0.927,0.948
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2021,8,19.35,0.878,0.892,0.949,0.871,0.948,0.956
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2021,9,16.12,0.932,0.933,0.982,0.972,0.981,0.985
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2021,10,25.93,0.823,0.839,0.872,0.868,0.872,0.874
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2021,11,36.76,0.903,0.9,0.926,0.924,0.926,0.918
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2021,12,53.05,0.894,0.891,0.898,0.897,0.894,0.903
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2022,1,38.38,0.926,0.953,0.965,0.964,0.96,0.938
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2022,2,46.5,0.882,0.908,0.93,0.924,0.93,0.912
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2022,3,46.8,0.841,0.891,0.917,0.676,0.915,0.915
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2022,4,41.26,0.568,0.574,0.59,0.379,0.588,0.581
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2022,5,29.16,0.364,0.37,0.394,0.384,0.391,0.366
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2022,6,15.25,0.793,0.862,0.892,0.764,0.882,0.803
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2022,7,17.2,0.77,0.817,0.86,0.813,0.883,0.747
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2022,8,15.25,0.601,0.618,0.644,0.644,0.655,0.602
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2022,9,18.34,0.693,0.736,0.721,0.754,0.749,0.731
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2022,10,37.65,0.907,0.917,0.957,0.957,0.949,0.925
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2022,11,42.74,0.904,0.943,0.846,0.968,0.971,0.971
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2022,12,38.35,0.925,0.919,0.823,0.985,0.985,0.985
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2023,1,47.25,0.887,0.946,0.773,0.97,0.974,0.973
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2023,2,51.46,0.833,0.872,1.0,1.0,1.0,1.0
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2023,3,41.6,0.86,0.89,0.691,0.918,0.917,0.919
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2023,4,40.54,0.901,0.925,0.794,0.956,0.956,0.956
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2023,5,24.22,0.66,0.7,0.704,0.703,0.703,0.712
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2023,6,17.32,0.753,0.789,0.874,0.901,0.893,0.903
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2023,7,15.0,0.647,0.673,0.685,0.722,0.72,0.733
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2023,8,23.54,0.918,0.95,0.675,0.983,0.96,0.989
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2023,9,18.6,0.665,0.718,0.457,0.747,0.719,0.751
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2023,10,47.94,0.872,0.919,0.219,0.945,0.933,0.949
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2023,11,45.12,0.861,0.926,0.975,0.974,0.929,0.947
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2023,12,52.32,0.898,0.922,0.875,0.96,0.965,0.711
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2024,1,62.13,0.891,0.915,0.941,0.938,0.929,0.829
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2024,2,53.64,0.931,0.944,1.0,0.999,0.892,1.0
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2024,3,53.56,0.96,0.974,0.999,1.0,0.926,1.0
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2024,4,41.15,0.828,0.851,0.567,0.883,0.556,0.886
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2024,5,30.14,0.901,0.919,0.806,0.964,0.758,0.968
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2024,6,13.27,0.753,0.785,0.865,0.869,0.856,0.874
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2024,7,13.34,0.871,0.879,0.995,0.995,0.949,0.995
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2024,8,15.78,0.882,0.926,1.0,1.0,0.995,1.0
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2024,9,16.56,0.888,0.908,0.996,0.996,0.994,1.0
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2024,10,29.76,0.856,0.91,0.996,0.987,0.997,1.0
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2024,11,47.97,0.936,0.976,0.993,0.993,0.996,1.0
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2024,12,38.97,0.88,0.89,0.944,0.945,0.952,0.953
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2025,1,50.2,0.948,0.961,0.978,0.997,0.988,0.996
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2025,2,41.52,0.885,0.921,0.948,0.975,0.969,0.978
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2025,3,39.58,0.923,0.969,0.931,0.999,0.907,0.94
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2025,4,27.97,0.897,0.915,0.997,1.0,0.849,0.886
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2025,5,27.95,0.837,0.927,0.867,0.972,0.879,0.977
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2025,6,16.02,0.886,0.879,0.281,0.975,0.9,0.978
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2025,7,14.68,0.845,0.907,0.238,0.984,0.956,0.988
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2025,8,13.41,0.681,0.718,0.724,0.745,0.69,0.792
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2025,9,15.62,0.697,0.724,0.788,0.765,0.778,0.796
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2025,10,21.17,0.802,0.827,0.895,0.484,0.892,0.902
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2025,11,43.66,0.833,0.847,0.892,0.761,0.886,0.882
+Bengaluru,site_1556,"Jayanagar 5th Block, Bengaluru - KSPCB",2025,12,50.78,0.909,0.968,0.977,0.977,0.999,1.0
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2018,6,29.34,0.042,0.043,0.043,0.043,0.0,0.043
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2018,7,26.94,0.823,0.863,0.71,0.871,0.827,0.878
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2018,8,30.12,0.866,0.897,0.923,0.832,0.91,0.94
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2018,9,36.76,0.849,0.878,0.885,0.888,0.886,0.886
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2018,10,35.54,0.777,0.79,0.808,0.806,0.804,0.809
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2018,11,42.66,0.793,0.829,0.865,0.865,0.861,0.875
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2018,12,52.36,0.925,0.95,1.0,0.987,0.981,0.987
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2019,1,50.65,0.905,0.905,0.937,0.934,0.918,0.935
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2019,2,43.64,0.909,0.933,0.935,0.967,0.975,0.924
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2019,3,42.14,0.843,0.882,0.91,0.906,0.906,0.909
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2019,4,38.71,0.865,0.893,0.907,0.933,0.918,0.938
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2019,5,39.57,0.872,0.915,0.926,0.942,0.938,0.946
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2019,6,22.6,0.925,0.944,0.983,0.979,0.967,0.982
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2019,7,20.72,0.714,0.728,0.751,0.749,0.751,0.742
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2019,8,20.0,0.793,0.797,0.824,0.73,0.828,0.763
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2019,9,19.98,0.878,0.893,0.95,0.826,0.919,0.885
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2019,10,21.86,0.863,0.926,0.965,0.851,0.946,0.901
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2019,11,34.88,0.835,0.844,0.879,0.808,0.883,0.828
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2019,12,31.55,0.849,0.871,0.919,0.845,0.921,0.897
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2020,1,41.72,0.665,0.664,0.672,0.586,0.653,0.633
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2020,2,42.09,0.864,0.866,0.856,0.759,0.818,0.815
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2020,3,33.66,0.888,0.898,0.882,0.812,0.824,0.886
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2020,4,22.18,0.9,0.915,0.969,0.964,0.96,0.968
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2020,5,19.98,0.888,0.942,0.973,0.972,0.942,0.969
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2020,6,12.07,0.744,0.797,0.832,0.606,0.797,0.851
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2020,7,13.71,0.798,0.918,0.991,0.0,0.965,0.991
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2020,8,22.64,0.871,0.938,0.973,0.0,0.966,0.972
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2020,9,22.41,0.953,0.961,0.961,0.582,0.936,0.954
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2020,10,30.18,0.983,0.98,0.983,0.949,0.968,0.976
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2020,11,29.58,0.957,0.957,0.956,0.908,0.954,0.957
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2020,12,44.62,0.909,0.915,0.935,0.909,0.949,0.949
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2021,1,42.87,0.958,0.956,0.96,0.93,0.952,0.949
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2021,2,40.18,0.732,0.696,0.685,0.717,0.76,0.743
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2021,3,38.87,0.937,0.937,0.929,0.913,0.917,0.931
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2021,4,36.59,0.688,0.693,0.693,0.681,0.662,0.697
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2021,5,16.44,0.755,0.769,0.711,0.759,0.766,0.77
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2021,6,14.89,0.878,0.903,0.926,0.933,0.938,0.946
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2021,7,12.65,0.958,0.972,0.895,0.952,0.933,0.964
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2021,8,14.53,0.845,0.837,0.78,0.824,0.823,0.841
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2021,9,15.16,0.928,0.933,0.885,0.915,0.933,0.935
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2021,10,22.64,0.859,0.863,0.711,0.856,0.858,0.86
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2021,11,22.18,0.708,0.708,0.674,0.699,0.703,0.711
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2021,12,40.23,0.969,0.973,0.922,0.961,0.925,0.978
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2022,1,35.6,0.952,0.976,0.989,0.985,0.957,0.984
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2022,2,41.11,0.815,0.838,0.86,0.86,0.857,0.86
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2022,3,48.11,0.859,0.868,0.87,0.931,0.926,0.931
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2022,4,47.54,0.592,0.588,0.64,0.643,0.633,0.654
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2022,5,42.19,0.43,0.452,0.399,0.524,0.526,0.527
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2022,6,18.09,0.785,0.81,0.714,0.849,0.804,0.868
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2022,7,18.94,0.855,0.919,0.781,0.95,0.953,0.953
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2022,8,19.63,0.812,0.851,0.825,0.876,0.88,0.884
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2022,9,21.84,0.676,0.719,0.712,0.743,0.743,0.743
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2022,10,39.07,0.73,0.737,0.698,0.762,0.765,0.77
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2022,11,42.13,0.886,0.893,0.883,0.971,0.968,0.972
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2022,12,42.32,0.772,0.772,0.761,0.801,0.801,0.804
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2023,1,45.53,0.851,0.851,0.855,0.906,0.898,0.909
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2023,2,52.05,0.784,0.784,0.79,0.802,0.808,0.818
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2023,3,41.58,0.801,0.801,0.812,0.841,0.845,0.843
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2023,4,41.02,0.888,0.888,0.874,0.94,0.935,0.94
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2023,5,31.38,0.823,0.823,0.847,0.898,0.903,0.898
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2023,6,21.55,0.854,0.875,0.743,0.908,0.864,0.936
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2023,7,16.3,0.862,0.915,0.927,0.944,0.915,0.952
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2023,8,32.8,0.901,0.946,0.945,0.966,0.969,0.968
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2023,9,39.84,0.714,0.732,0.782,0.785,0.785,0.785
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2023,10,43.19,0.944,0.98,0.997,0.991,0.976,0.987
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2023,11,52.12,0.904,0.942,0.958,0.961,0.958,0.796
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2023,12,48.96,0.934,0.958,0.996,0.997,0.997,0.962
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2024,1,40.7,0.884,0.935,0.983,0.999,0.976,0.923
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2024,2,35.2,0.871,0.934,0.726,0.905,0.94,0.954
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2024,3,41.62,0.88,0.898,0.852,0.923,0.96,0.964
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2024,4,35.07,0.862,0.876,0.683,0.857,0.926,0.629
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2024,5,36.72,0.871,0.914,0.468,0.815,0.915,0.0
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2024,6,14.16,0.749,0.84,0.743,0.797,0.815,0.258
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2024,7,11.3,0.847,0.944,0.983,0.983,0.983,0.909
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2024,8,15.09,0.868,0.923,0.895,0.935,0.927,0.899
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2024,9,16.94,0.785,0.84,0.517,0.824,0.801,0.818
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2024,10,28.91,0.875,0.927,0.145,0.966,0.95,0.962
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2024,11,37.44,0.851,0.933,0.954,0.96,0.94,0.933
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2024,12,32.68,0.84,0.882,0.913,0.914,0.903,0.766
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2025,1,41.25,0.832,0.891,0.81,0.892,0.843,0.892
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2025,2,34.74,0.872,0.933,0.933,0.94,0.896,0.94
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2025,3,32.45,0.738,0.773,0.796,0.804,0.755,0.792
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2025,4,30.84,0.806,0.836,0.814,0.843,0.794,0.826
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2025,5,21.11,0.801,0.828,0.845,0.841,0.789,0.824
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2025,6,25.19,0.804,0.867,0.861,0.867,0.79,0.853
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2025,7,19.55,0.862,0.922,0.946,0.946,0.772,0.919
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2025,8,17.7,0.706,0.776,0.78,0.786,0.782,0.79
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2025,9,18.96,0.849,0.914,0.919,0.949,0.942,0.949
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2025,10,20.09,0.7,0.759,0.767,0.793,0.668,0.793
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2025,11,42.63,0.914,0.858,1.0,1.0,0.617,1.0
+Bengaluru,site_1558,"Silk Board, Bengaluru - KSPCB",2025,12,53.19,0.907,0.934,0.797,0.956,0.536,0.958
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2016,1,68.17,0.948,0.0,0.949,0.953,0.941,0.948
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2016,2,66.92,0.994,0.0,0.994,0.993,0.99,0.994
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2016,3,62.66,1.0,0.0,0.987,1.0,0.934,1.0
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2016,4,54.39,0.999,0.0,1.0,1.0,0.958,0.931
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2016,5,48.13,0.965,0.0,0.969,0.969,0.961,0.969
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2016,6,21.92,0.307,0.0,0.375,0.372,0.101,0.368
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2016,7,17.21,0.461,0.0,0.683,0.583,0.672,0.734
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2016,8,12.39,0.185,0.0,0.789,0.786,0.786,0.788
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2016,9,15.71,0.797,0.0,0.915,0.825,0.915,0.915
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2016,10,33.53,0.879,0.0,0.906,0.892,0.902,0.906
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2016,11,25.28,0.062,0.0,0.062,0.061,0.058,0.062
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2016,12,25.66,0.007,0.0,0.005,0.007,0.0,0.005
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2017,1,25.99,0.005,0.0,0.007,0.005,0.0,0.007
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2017,2,28.56,0.006,0.0,0.006,0.006,0.0,0.006
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2017,3,28.52,0.005,0.0,0.005,0.005,0.0,0.005
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2017,4,46.29,0.006,0.0,0.006,0.006,0.0,0.006
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2017,5,20.81,0.005,0.0,0.005,0.004,0.005,0.005
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2017,6,10.95,0.004,0.0,0.004,0.003,0.004,0.004
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2017,7,14.88,0.005,0.0,0.005,0.004,0.005,0.005
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2017,8,20.41,0.004,0.0,0.004,0.001,0.005,0.004
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2017,9,23.59,0.062,0.0,0.062,0.06,0.038,0.004
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2017,10,33.16,0.187,0.0,0.172,0.168,0.211,0.108
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2017,11,31.5,0.481,0.0,0.0,0.0,0.0,0.482
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2018,1,44.59,0.726,0.0,0.727,0.72,0.724,0.724
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2018,2,28.18,1.0,0.0,1.0,0.996,0.976,0.967
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2018,3,34.04,0.777,0.0,0.777,0.774,0.774,0.776
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2018,4,55.15,0.215,0.0,0.217,0.215,0.217,0.225
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2018,5,46.17,0.945,0.0,0.983,0.976,0.95,0.983
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2018,6,37.3,0.715,0.0,0.838,0.811,0.832,0.84
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2018,7,17.77,0.88,0.0,0.503,0.919,0.958,0.977
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2018,8,15.23,0.772,0.0,0.905,0.892,0.898,0.909
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2018,9,20.78,0.793,0.0,0.918,0.989,0.996,0.996
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2018,10,20.77,0.983,0.0,0.988,0.966,0.989,0.992
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2018,11,61.66,0.983,0.0,0.993,0.994,0.994,0.996
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2018,12,75.85,0.961,0.0,0.993,0.837,0.993,0.993
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2019,1,70.55,0.981,0.0,0.985,0.958,0.98,0.985
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2019,2,52.15,0.973,0.0,0.973,0.964,0.969,0.975
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2019,3,56.31,0.86,0.0,0.88,0.813,0.874,0.88
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2019,4,69.75,0.95,0.0,0.954,0.9,0.946,0.953
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2019,5,49.66,0.892,0.0,0.93,0.852,0.923,0.931
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2019,6,26.08,0.961,0.0,0.962,0.958,0.96,0.965
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2019,7,29.56,0.997,0.0,0.997,0.977,0.996,0.993
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2019,8,20.99,0.934,0.0,0.965,0.941,0.965,0.968
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2019,9,24.23,0.975,0.0,0.985,0.976,0.986,0.983
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2019,10,26.68,0.477,0.0,0.491,0.491,0.491,0.491
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2019,11,47.92,0.986,0.0,0.996,0.99,0.996,0.986
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2019,12,27.9,0.921,0.0,0.944,0.806,0.837,0.926
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2020,1,24.7,0.995,0.0,0.89,0.988,0.995,0.993
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2020,2,31.47,0.961,0.0,0.968,0.955,0.968,0.968
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2020,3,29.87,0.917,0.0,0.983,0.961,0.962,0.929
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2020,4,28.72,0.972,0.0,0.988,0.961,0.988,0.903
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2020,5,25.63,0.97,0.0,0.983,0.657,0.984,0.864
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2020,6,13.1,0.983,0.0,0.989,0.993,0.993,0.96
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2020,7,7.26,0.938,0.0,0.988,0.995,0.995,0.988
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2020,8,21.02,0.645,0.0,0.566,0.767,0.767,0.715
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2020,9,21.98,0.9,0.0,0.711,0.9,0.9,0.896
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2020,10,22.76,0.921,0.0,0.938,0.968,0.968,0.964
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2020,11,21.06,0.91,0.0,0.999,0.999,0.999,0.996
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2020,12,23.06,0.829,0.066,0.929,0.988,0.984,0.981
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2021,1,20.17,0.609,0.573,0.695,0.922,0.895,0.948
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2021,2,32.09,0.824,0.049,0.635,0.926,0.961,0.963
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2021,3,30.59,0.981,0.175,0.891,0.981,0.992,0.996
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2021,4,25.39,0.957,0.986,0.846,0.997,0.979,1.0
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2021,5,21.1,0.974,1.0,0.954,1.0,0.983,1.0
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2021,6,37.79,0.696,0.828,0.761,0.876,0.94,0.969
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2021,7,23.42,0.952,0.988,0.848,0.997,0.988,0.991
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2021,8,29.35,0.964,0.965,0.297,0.991,0.983,0.983
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2021,9,27.15,0.733,0.733,0.085,0.756,0.746,0.519
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2021,10,44.26,0.227,0.227,0.262,0.371,0.368,0.227
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2021,11,28.92,0.779,0.779,0.707,0.803,0.794,0.796
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2021,12,58.1,0.942,0.942,0.812,0.989,0.222,0.988
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2022,1,24.21,0.685,0.707,0.704,0.707,0.335,0.707
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2022,2,29.1,0.811,0.93,0.786,0.999,0.988,0.994
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2022,3,36.58,0.96,0.997,0.925,0.997,0.058,0.992
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2022,4,47.23,0.993,0.993,0.701,0.992,0.017,0.993
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2022,5,47.13,0.976,0.976,0.57,0.976,0.472,0.976
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2022,6,50.45,0.975,0.975,0.614,0.996,0.832,0.997
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2022,7,43.13,1.0,1.0,0.935,1.0,0.934,1.0
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2022,8,21.62,0.8,0.797,0.743,0.863,0.743,0.863
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2022,9,22.09,0.965,0.961,0.993,0.993,0.783,0.993
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2022,10,30.65,0.919,0.909,0.95,0.942,0.837,0.95
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2022,11,52.01,0.893,0.894,0.91,0.906,0.91,0.91
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2022,12,47.99,0.929,0.933,0.965,0.953,0.965,0.964
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2023,1,32.09,0.823,0.824,0.988,0.969,0.988,0.987
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2023,2,41.93,0.955,0.991,0.991,0.981,0.991,0.99
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2023,3,31.18,0.988,0.988,0.999,0.989,0.999,0.999
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2023,4,22.03,0.992,0.992,0.992,0.94,0.992,0.992
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2023,5,19.09,0.972,0.972,0.973,0.954,0.973,0.966
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2023,6,13.51,0.986,0.986,0.988,0.988,0.988,0.985
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2023,7,14.61,0.8,0.827,0.993,0.993,0.993,0.991
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2023,8,22.77,0.871,0.871,0.965,0.965,0.965,0.965
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2023,9,20.32,0.671,0.672,0.975,0.975,0.975,0.975
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2023,10,31.08,0.922,0.923,0.849,0.954,0.952,0.952
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2023,11,23.65,0.894,0.862,0.912,0.911,0.912,0.912
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2023,12,20.69,0.999,0.999,1.0,1.0,1.0,1.0
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2024,1,17.68,0.884,0.974,0.985,0.989,0.969,0.989
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2024,2,25.35,0.99,0.989,0.825,0.991,0.82,0.989
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2024,3,30.23,1.0,1.0,0.892,1.0,1.0,1.0
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2024,4,21.55,0.972,0.972,0.814,0.982,0.986,0.981
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2024,5,21.84,0.242,0.254,0.241,0.207,0.269,0.258
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2024,6,,0.0,0.0,0.35,0.339,0.339,0.339
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2024,7,10.99,0.797,0.802,0.81,0.927,0.176,0.927
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2024,8,15.53,0.974,0.977,0.96,0.983,0.746,0.983
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2024,9,19.54,0.965,0.964,0.988,0.988,0.867,0.988
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2024,10,23.08,0.976,0.98,0.933,0.937,0.991,0.996
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2024,11,33.07,0.988,0.978,0.975,0.882,0.993,0.993
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2024,12,28.84,0.995,0.977,0.93,0.562,0.999,0.999
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2025,1,29.45,0.973,0.964,0.941,0.914,0.991,0.989
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2025,2,23.79,0.787,0.777,0.741,0.783,0.812,0.824
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2025,3,26.78,0.969,0.915,0.906,0.946,0.984,0.984
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2025,4,24.47,0.971,0.911,0.935,0.826,0.99,0.99
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2025,5,16.8,0.934,0.938,0.776,0.95,0.983,0.96
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2025,6,18.68,0.889,0.882,0.797,0.89,0.89,0.892
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2025,7,18.31,0.985,0.981,0.989,0.989,0.985,0.989
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2025,8,17.84,0.987,0.663,0.8,0.989,0.985,0.989
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2025,9,16.7,0.989,0.989,0.758,0.989,0.985,0.989
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2025,10,21.73,0.999,0.999,0.772,0.999,0.999,0.999
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2025,11,31.68,0.993,0.993,0.994,0.994,0.968,0.994
+Bengaluru,site_162,"BTM Layout, Bengaluru - CPCB",2025,12,54.59,0.992,0.993,0.82,0.993,0.948,0.993
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2016,1,80.33,0.802,0.0,0.93,0.921,0.028,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2016,2,93.0,0.901,0.0,0.925,0.892,0.059,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2016,3,91.12,0.831,0.0,0.987,0.97,0.048,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2016,4,37.82,0.821,0.0,0.965,0.942,0.05,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2016,5,32.51,0.637,0.0,0.864,0.992,0.074,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2016,6,28.07,0.372,0.0,0.379,0.375,0.331,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2016,7,27.06,0.34,0.0,0.616,0.606,0.325,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2016,8,31.01,0.616,0.0,0.642,0.622,0.007,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2016,9,43.61,0.478,0.0,0.464,0.51,0.01,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2016,10,72.82,0.543,0.0,0.71,0.702,0.015,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2016,11,53.12,0.769,0.0,0.772,0.761,0.039,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2016,12,49.44,0.831,0.0,0.847,0.843,0.056,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2017,1,43.8,0.668,0.0,0.667,0.661,0.0,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2017,2,44.19,0.942,0.0,0.976,0.964,0.003,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2017,3,49.7,0.957,0.0,0.949,0.948,0.004,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2017,4,49.09,0.626,0.0,0.699,0.699,0.004,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2017,5,42.63,0.657,0.0,0.656,0.651,0.007,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2017,6,30.2,0.95,0.0,0.95,0.935,0.014,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2017,7,36.13,0.785,0.0,0.8,0.757,0.09,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2017,8,30.57,0.868,0.0,0.883,0.88,0.106,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2017,9,27.66,0.794,0.0,0.851,0.849,0.004,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2017,10,42.86,1.0,0.0,0.999,0.995,0.044,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2017,11,56.52,0.754,0.01,0.772,0.772,0.004,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2017,12,81.08,0.614,0.0,0.0,0.0,0.0,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2018,1,52.0,0.651,0.0,0.685,0.683,0.001,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2018,2,42.32,0.966,0.0,0.326,0.292,0.643,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2018,3,45.22,0.048,0.0,0.0,0.013,0.884,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2018,4,,0.0,0.0,0.0,0.019,0.99,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2018,5,28.96,0.043,0.0,0.0,0.015,0.954,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2018,6,25.32,0.919,0.0,0.506,0.421,0.982,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2018,7,26.25,0.909,0.0,1.0,1.0,1.0,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2018,8,25.58,0.974,0.0,0.964,0.98,1.0,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2018,9,32.3,0.997,0.0,0.997,0.997,0.996,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2018,10,41.93,0.985,0.0,0.988,0.997,0.997,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2018,11,34.78,0.967,0.0,0.971,0.976,0.982,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2018,12,46.1,0.996,0.0,0.937,0.989,1.0,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2019,1,47.08,0.931,0.0,0.933,0.887,0.937,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2019,2,43.47,0.958,0.0,0.957,0.866,0.958,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2019,3,65.38,1.0,0.0,1.0,0.997,0.999,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2019,4,62.36,0.946,0.0,0.997,0.992,0.997,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2019,5,38.03,0.863,0.0,0.918,0.907,0.907,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2019,6,30.6,0.783,0.0,0.892,0.869,0.829,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2019,7,28.27,0.835,0.0,0.841,0.841,0.836,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2019,8,20.72,0.828,0.0,0.843,0.837,0.808,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2019,9,21.09,0.594,0.0,0.622,0.561,0.622,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2019,10,22.31,0.93,0.0,0.999,0.997,0.999,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2019,11,26.57,0.997,0.0,1.0,1.0,1.0,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2019,12,38.74,1.0,0.0,1.0,0.997,1.0,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2020,1,44.77,0.997,0.0,0.999,0.992,0.999,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2020,2,45.04,0.963,0.0,0.964,0.96,0.964,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2020,3,43.49,1.0,0.0,1.0,0.993,1.0,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2020,4,36.63,0.976,0.0,0.99,0.981,0.99,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2020,5,32.39,0.71,0.0,0.724,0.719,0.724,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2020,6,27.23,0.994,0.0,1.0,0.988,1.0,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2020,7,21.4,1.0,0.0,1.0,0.999,1.0,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2020,8,26.81,0.976,0.0,0.995,0.999,1.0,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2020,9,25.64,0.899,0.0,0.938,0.933,0.938,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2020,10,31.87,1.0,0.0,1.0,1.0,1.0,0.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2020,11,29.87,0.978,0.003,1.0,0.929,0.949,0.011
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2020,12,38.31,0.989,0.496,1.0,0.812,1.0,0.919
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2021,1,43.63,0.769,0.73,0.988,0.746,0.988,0.97
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2021,2,42.69,0.972,0.952,0.963,0.408,0.999,0.999
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2021,3,46.38,0.934,0.956,0.999,0.985,0.992,0.999
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2021,4,45.75,0.843,0.924,0.956,0.951,0.953,0.953
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2021,5,24.99,0.929,0.93,0.965,0.962,0.93,0.965
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2021,6,22.64,0.925,0.99,1.0,0.993,1.0,0.757
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2021,7,23.81,0.755,0.831,0.909,0.883,0.56,0.368
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2021,8,31.22,0.762,0.801,0.874,0.835,0.145,0.831
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2021,9,26.63,0.785,0.954,0.974,0.935,0.856,0.974
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2021,10,36.88,0.7,0.169,0.651,0.763,0.741,0.786
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2021,11,34.91,0.757,0.1,0.999,0.954,0.988,0.999
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2021,12,38.85,0.284,0.04,1.0,0.93,1.0,0.728
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2022,1,36.35,1.0,1.0,1.0,0.985,1.0,1.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2022,2,41.95,0.994,1.0,1.0,0.973,1.0,0.963
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2022,3,38.64,0.911,0.911,0.911,0.879,0.911,0.835
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2022,4,36.98,0.954,0.954,0.956,0.926,0.956,0.514
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2022,5,40.11,0.991,0.991,0.991,0.96,0.991,0.968
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2022,6,32.5,0.868,0.871,0.89,0.871,0.89,0.871
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2022,7,,0.0,0.71,0.003,0.003,0.003,0.388
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2022,8,,0.0,0.286,0.308,0.294,0.305,0.405
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2022,9,,0.0,0.244,0.953,0.906,0.688,0.46
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2022,10,38.16,0.634,0.603,1.0,0.685,0.852,0.656
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2022,11,30.31,0.232,0.221,0.601,0.268,0.578,0.222
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2022,12,54.84,0.724,0.379,1.0,0.445,0.977,0.402
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2023,1,31.22,0.823,0.824,0.992,0.849,0.987,1.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2023,2,34.71,0.823,0.787,1.0,0.961,0.981,1.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2023,3,41.33,0.906,0.906,1.0,0.973,1.0,0.81
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2023,4,38.95,0.938,0.938,0.918,0.872,0.933,0.7
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2023,5,26.02,0.922,0.922,0.983,0.957,0.976,0.898
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2023,6,16.88,0.831,0.831,0.978,0.961,0.978,0.978
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2023,7,14.61,0.165,0.171,0.171,0.128,0.171,0.171
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2023,8,18.03,0.243,0.261,0.261,0.257,0.261,0.261
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2023,9,15.67,0.492,0.56,0.565,0.565,0.565,0.565
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2023,10,28.89,0.946,0.985,0.987,0.984,0.987,0.923
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2023,11,27.26,0.893,0.957,0.833,0.932,0.993,0.969
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2023,12,26.94,0.978,0.987,0.999,0.997,0.999,0.999
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2024,1,34.45,0.984,0.987,0.976,1.0,0.983,1.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2024,2,39.16,0.898,0.917,0.999,0.997,0.989,0.999
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2024,3,31.47,0.797,0.797,0.82,0.841,0.847,0.735
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2024,4,31.3,0.66,0.66,0.842,0.86,0.872,0.833
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2024,5,25.0,0.87,0.87,0.878,0.852,0.875,0.583
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2024,6,24.21,0.967,0.967,0.89,0.962,0.967,0.532
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2024,7,21.41,0.57,0.759,0.77,0.808,0.78,0.558
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2024,8,28.64,0.87,0.876,0.876,0.875,0.875,0.844
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2024,9,29.71,0.961,0.961,0.964,0.733,0.964,0.964
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2024,10,34.28,0.973,0.972,0.973,0.628,0.937,0.952
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2024,11,41.76,0.907,0.907,0.835,0.908,0.911,0.908
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2024,12,38.36,0.969,0.969,0.97,0.968,0.84,0.918
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2025,1,44.06,0.991,0.988,0.989,0.833,0.987,0.552
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2025,2,43.49,0.704,0.698,0.741,0.677,0.717,0.323
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2025,3,36.66,0.918,0.922,0.962,0.421,0.958,0.942
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2025,4,25.87,0.968,0.994,0.974,0.907,0.974,0.925
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2025,5,25.63,0.817,0.97,0.974,0.972,0.941,0.974
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2025,6,23.16,0.938,0.961,0.964,0.96,0.675,0.964
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2025,7,17.08,0.844,0.853,0.853,0.847,0.853,0.853
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2025,8,18.25,0.973,0.706,0.999,0.996,0.353,0.999
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2025,9,18.64,0.976,0.475,1.0,0.996,0.622,1.0
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2025,10,20.83,0.892,0.566,0.966,0.964,0.965,0.966
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2025,11,19.76,0.938,0.951,0.958,0.933,0.957,0.958
+Bengaluru,site_163,"Peenya, Bengaluru - CPCB",2025,12,20.3,0.946,0.992,1.0,0.995,1.0,1.0
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2016,1,60.05,0.966,0.0,0.845,0.966,0.03,0.965
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2016,2,49.3,0.971,0.0,0.631,0.973,0.006,0.973
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2016,3,31.51,0.898,0.0,0.903,0.905,0.042,0.905
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2016,4,43.6,0.931,0.0,0.929,0.938,0.108,0.938
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2016,5,38.64,0.66,0.0,0.68,0.685,0.022,0.685
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2016,6,17.15,0.301,0.0,0.303,0.301,0.139,0.303
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2016,7,21.99,0.106,0.0,0.137,0.133,0.089,0.137
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2016,8,79.59,0.082,0.0,0.761,0.64,0.207,0.804
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2016,9,22.25,0.311,0.0,0.889,0.908,0.007,0.925
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2016,10,34.52,0.7,0.0,0.696,0.698,0.019,0.624
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2016,11,42.5,0.953,0.0,0.95,0.957,0.014,0.96
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2016,12,21.26,0.789,0.0,0.815,0.805,0.001,0.815
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2017,1,26.32,0.708,0.0,0.703,0.715,0.202,0.715
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2017,2,27.7,0.609,0.0,0.597,0.604,0.219,0.609
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2017,3,23.96,0.954,0.0,0.952,0.948,0.004,0.954
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2017,4,26.28,0.911,0.0,0.912,0.807,0.003,0.904
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2017,5,20.4,0.887,0.0,0.901,0.892,0.007,0.829
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2017,6,12.91,0.726,0.0,0.956,0.799,0.006,0.956
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2017,7,11.3,0.563,0.0,0.969,0.894,0.009,0.966
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2017,8,6.61,0.848,0.0,0.953,0.875,0.035,0.956
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2017,9,14.06,0.949,0.0,0.949,0.856,0.096,0.958
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2017,10,27.74,0.941,0.0,0.977,0.875,0.25,0.983
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2017,11,14.4,0.938,0.0,0.979,0.851,0.088,0.979
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2017,12,17.43,0.218,0.0,0.237,0.258,0.008,0.243
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2018,1,28.49,0.953,0.0,0.97,0.894,0.004,0.969
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2018,2,19.45,0.932,0.0,0.412,0.369,0.573,0.981
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2018,3,34.96,0.77,0.0,0.0,0.0,0.675,0.663
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2018,4,36.02,0.442,0.0,0.0,0.0,0.443,0.0
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2018,5,35.69,0.699,0.0,0.0,0.0,0.7,0.098
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2018,6,18.72,0.946,0.0,0.636,0.572,0.989,0.989
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2018,7,21.0,0.914,0.0,0.934,0.931,0.935,0.934
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2018,8,19.34,0.974,0.0,0.989,0.977,0.991,0.991
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2018,9,21.54,0.803,0.0,0.918,0.883,0.914,0.918
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2018,10,31.26,0.888,0.0,0.983,0.984,0.98,0.992
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2018,11,36.61,0.931,0.0,0.992,0.988,0.992,0.99
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2018,12,42.79,0.966,0.0,0.996,0.981,0.996,0.995
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2019,1,37.17,0.93,0.0,0.972,0.969,0.972,0.97
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2019,2,49.45,0.298,0.0,0.318,0.317,0.318,0.318
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2019,3,57.23,0.957,0.0,0.997,0.995,0.999,0.999
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2019,4,74.13,0.747,0.0,0.543,0.772,0.797,0.799
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2019,5,51.38,0.929,0.0,0.841,0.886,0.95,0.956
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2019,6,28.41,0.803,0.0,0.744,0.799,0.832,0.832
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2019,7,31.99,0.945,0.0,0.921,0.946,0.938,0.163
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2019,8,27.96,0.56,0.0,0.687,0.68,0.688,0.0
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2019,9,34.89,0.808,0.0,0.967,0.947,0.967,0.0
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2019,10,43.27,0.824,0.0,0.866,0.849,0.831,0.571
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2019,11,48.49,0.954,0.0,0.96,0.947,0.96,0.675
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2019,12,42.25,0.95,0.0,0.95,0.926,0.948,0.875
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2020,1,53.86,0.849,0.0,0.862,0.829,0.863,0.862
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2020,2,62.6,0.905,0.0,0.92,0.902,0.918,0.918
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2020,3,57.58,0.864,0.0,0.867,0.835,0.867,0.866
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2020,4,10.35,0.917,0.0,0.972,0.932,0.972,0.969
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2020,5,11.35,0.825,0.0,0.981,0.177,0.981,0.981
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2020,6,49.33,0.144,0.0,0.976,0.971,0.978,0.978
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2020,7,27.08,0.539,0.0,0.655,0.566,0.633,0.548
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2020,8,24.6,0.331,0.0,0.735,0.642,0.726,0.0
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2020,9,20.1,0.836,0.0,0.854,0.689,0.853,0.854
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2020,10,27.82,0.828,0.0,0.832,0.815,0.825,0.831
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2020,11,31.15,0.935,0.0,0.958,0.929,0.961,0.965
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2020,12,37.01,0.888,0.464,0.735,0.862,0.887,0.886
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2021,1,35.98,0.852,0.835,0.938,0.989,0.97,0.993
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2021,2,49.93,0.96,0.905,0.494,0.923,0.969,0.972
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2021,3,42.89,0.98,0.978,0.685,0.962,0.984,0.977
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2021,4,49.17,0.882,0.929,0.549,0.942,0.949,0.954
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2021,5,23.43,0.567,0.569,0.382,0.55,0.605,0.606
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2021,6,23.73,0.751,0.949,0.956,0.881,0.971,0.965
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2021,7,25.35,0.843,0.856,0.965,0.52,0.261,0.969
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2021,8,23.14,0.996,0.996,0.476,0.806,0.52,0.993
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2021,9,22.71,0.835,0.835,0.25,0.494,0.835,0.835
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2021,10,25.82,0.868,0.868,0.867,0.793,0.868,0.868
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2021,11,22.78,0.86,0.86,0.858,0.811,0.86,0.858
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2021,12,50.66,0.96,0.958,0.741,0.921,0.96,0.96
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2022,1,22.87,0.999,1.0,1.0,0.974,1.0,1.0
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2022,2,27.51,1.0,1.0,1.0,0.933,1.0,0.997
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2022,3,37.81,0.944,0.944,0.941,0.868,0.945,0.945
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2022,4,36.65,0.981,0.981,1.0,0.36,0.389,0.872
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2022,5,36.68,0.812,0.813,0.673,0.47,0.017,0.927
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2022,6,31.82,0.549,0.549,0.485,0.549,0.338,0.549
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2022,7,33.52,0.72,0.723,0.716,0.723,0.599,0.723
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2022,8,9.32,0.321,0.337,0.313,0.331,0.059,0.341
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2025,10,31.3,0.38,0.367,0.434,0.059,0.431,0.437
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2025,11,39.51,0.731,0.543,0.892,0.658,0.876,0.892
+Bengaluru,site_164,"BWSSB Kadabesanahalli, Bengaluru - CPCB",2025,12,69.01,0.798,0.906,0.937,1.0,0.956,1.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2016,1,,0.0,0.68,0.685,0.681,0.685,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2016,2,,0.0,0.838,0.842,0.803,0.841,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2016,3,,0.0,0.72,0.452,0.694,0.723,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2016,4,,0.0,0.632,0.585,0.615,0.653,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2016,6,,0.0,0.243,0.244,0.24,0.247,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2016,7,,0.0,0.423,0.422,0.409,0.427,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2016,8,,0.0,0.575,0.578,0.563,0.578,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2016,9,,0.0,0.904,0.907,0.889,0.906,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2016,10,,0.0,0.769,0.777,0.759,0.575,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2016,11,,0.0,0.701,0.701,0.572,0.696,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2016,12,,0.0,0.743,0.745,0.741,0.742,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2017,1,,0.0,0.833,0.833,0.829,0.825,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2017,2,,0.0,0.805,0.798,0.795,0.793,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2017,3,,0.0,0.679,0.679,0.617,0.688,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2017,4,,0.0,0.826,0.828,0.825,0.821,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2017,5,,0.0,0.888,0.894,0.903,0.899,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2017,6,,0.0,0.878,0.906,0.915,0.915,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2017,7,,0.0,0.954,0.954,0.954,0.954,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2017,8,,0.0,0.931,0.888,0.926,0.926,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2017,9,,0.0,0.942,0.943,0.943,0.94,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2017,10,,0.0,0.957,0.968,0.965,0.964,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2017,11,,0.0,0.828,0.836,0.832,0.822,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2017,12,,0.0,0.774,0.0,0.0,0.784,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2018,1,,0.0,0.981,0.953,0.956,0.981,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2018,2,,0.0,0.421,0.423,0.421,0.909,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2018,3,,0.0,0.0,0.0,0.0,0.763,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2018,4,,0.0,0.0,0.0,0.0,0.699,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2018,5,,0.0,0.0,0.343,0.0,0.719,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2018,6,,0.0,0.272,0.847,0.217,0.967,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2018,7,,0.0,0.43,0.36,0.294,0.73,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2018,8,,0.0,0.793,0.558,0.786,0.812,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2018,9,,0.0,0.935,0.938,0.889,0.938,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2018,10,,0.0,0.84,0.858,0.841,0.856,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2018,11,,0.0,0.778,0.81,0.789,0.81,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2018,12,,0.0,0.603,0.773,0.773,0.773,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2019,1,,0.0,0.656,0.656,0.655,0.653,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2019,2,,0.0,0.457,0.488,0.485,0.488,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2019,3,,0.0,0.578,0.581,0.495,0.581,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2019,4,,0.0,0.794,0.794,0.794,0.794,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2019,5,,0.0,0.671,0.782,0.782,0.782,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2019,6,,0.0,0.408,0.799,0.797,0.799,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2019,7,,0.0,0.723,0.723,0.723,0.723,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2019,8,,0.0,0.586,0.62,0.62,0.621,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2019,9,,0.0,0.794,0.732,0.794,0.794,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2019,10,,0.0,0.421,0.422,0.421,0.422,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2019,11,,0.0,0.804,0.657,0.806,0.807,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2019,12,,0.0,0.805,0.696,0.805,0.805,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2020,1,,0.0,0.906,0.812,0.891,0.892,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2020,2,,0.0,0.705,0.711,0.711,0.711,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2020,3,,0.0,0.649,0.645,0.649,0.648,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2020,4,,0.0,0.299,0.317,0.317,0.317,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2020,5,,0.0,0.816,0.831,0.831,0.831,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2020,6,,0.0,0.606,0.394,0.606,0.607,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2020,7,,0.0,0.698,0.577,0.702,0.702,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2020,8,,0.0,0.845,0.845,0.905,0.8,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2020,9,,0.0,0.65,0.783,0.653,0.754,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2020,10,,0.0,0.598,0.62,0.015,0.606,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2020,11,,0.0,0.906,0.915,0.107,0.774,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2020,12,,0.0,0.665,0.878,0.926,0.238,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2021,1,,0.0,0.792,0.97,0.853,0.237,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2021,2,,0.0,0.549,0.841,0.829,0.146,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2021,3,,0.0,0.298,0.505,0.503,0.181,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2021,4,,0.0,0.504,0.469,0.5,0.217,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2021,5,,0.0,0.858,0.863,0.7,0.863,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2021,6,,0.0,0.951,0.879,0.864,0.907,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2021,7,,0.0,0.886,0.571,0.931,0.843,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2021,8,,0.0,0.583,0.321,0.777,0.731,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2021,9,,0.0,0.614,0.626,0.621,0.544,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2021,10,,0.0,0.711,0.714,0.708,0.699,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2021,11,,0.0,0.856,0.869,0.864,0.789,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2021,12,,0.0,0.801,0.801,0.79,0.802,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2022,1,,0.0,0.965,0.964,0.964,0.965,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2022,2,,0.0,0.906,0.906,0.902,0.906,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2022,3,,0.0,0.512,0.579,0.583,0.581,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2022,4,,0.0,0.76,0.758,0.756,0.76,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2022,5,,0.0,0.819,0.819,0.817,0.819,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2022,6,,0.0,0.931,0.928,0.935,0.889,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2022,7,,0.0,0.918,0.919,0.934,0.903,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2022,8,,0.0,0.62,0.7,0.723,0.638,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2022,9,,0.0,0.6,0.607,0.61,0.601,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2022,10,,0.0,0.773,0.851,0.851,0.824,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2022,11,,0.0,0.556,0.557,0.557,0.522,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2022,12,,0.0,0.75,0.767,0.767,0.727,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2023,1,,0.0,0.753,0.806,0.806,0.805,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2023,2,,0.0,0.884,0.83,0.885,0.885,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2023,3,,0.0,0.992,0.993,0.993,0.985,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2023,4,,0.0,0.954,0.956,0.956,0.921,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2023,5,,0.0,0.927,0.856,0.927,0.927,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2023,6,,0.0,0.768,0.799,0.799,0.793,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2023,7,,0.0,0.758,0.77,0.77,0.77,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2023,8,,0.0,0.774,0.77,0.774,0.772,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2023,9,,0.0,0.742,0.75,0.749,0.615,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2023,10,,0.0,0.882,0.894,0.894,0.895,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2023,11,,0.0,0.9,0.925,0.924,0.925,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2023,12,,0.0,0.731,0.77,0.773,0.77,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2024,1,,0.0,0.71,0.739,0.739,0.739,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2024,2,,0.0,0.876,0.904,0.909,0.909,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2024,3,,0.0,0.129,0.122,0.129,0.129,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2024,6,,0.0,0.533,0.592,0.604,0.592,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2024,7,,0.0,0.915,0.972,0.972,0.972,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2024,8,,0.0,0.825,0.902,0.902,0.902,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2024,9,,0.0,0.828,0.846,0.846,0.743,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2024,10,,0.0,0.891,0.96,0.757,0.96,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2024,11,,0.0,0.89,0.949,0.949,0.949,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2024,12,,0.0,0.651,0.839,0.836,0.839,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2025,1,,0.0,0.774,0.798,0.798,0.798,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2025,2,,0.0,0.83,0.833,0.833,0.833,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2025,3,,0.0,0.911,0.938,0.942,0.942,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2025,4,,0.0,0.943,0.943,0.943,0.943,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2025,5,,0.0,0.974,0.972,0.956,0.974,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2025,6,,0.0,0.931,0.931,0.921,0.9,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2025,7,,0.0,0.79,0.821,0.821,0.796,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2025,8,,0.0,0.573,0.573,0.573,0.573,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2025,9,,0.0,0.728,0.728,0.728,0.728,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2025,10,,0.0,0.714,0.714,0.714,0.714,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2025,11,,0.0,0.793,0.793,0.781,0.793,0.0
+Bengaluru,site_165,"City Railway Station, Bengaluru - KSPCB",2025,12,,0.0,0.751,0.751,0.731,0.751,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2016,1,,0.0,0.676,0.676,0.562,0.669,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2016,2,,0.0,0.793,0.797,0.72,0.728,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2016,3,,0.0,0.848,0.821,0.84,0.8,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2016,4,,0.0,0.925,0.921,0.906,0.912,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2016,5,,0.0,0.892,0.793,0.887,0.853,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2016,6,,0.0,0.794,0.833,0.826,0.789,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2016,7,,0.0,0.487,0.504,0.382,0.496,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2016,8,,0.0,0.032,0.03,0.028,0.03,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2016,9,,0.0,0.003,0.003,0.004,0.003,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2016,10,,0.0,0.004,0.004,0.004,0.004,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2016,11,,0.0,0.011,0.011,0.011,0.01,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2016,12,,0.0,0.001,0.001,0.001,0.001,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2017,1,,0.0,0.685,0.694,0.691,0.642,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2017,2,,0.0,0.004,0.004,0.004,0.003,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2017,3,,0.0,0.728,0.001,0.656,0.001,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2017,4,,0.0,0.001,0.001,0.001,0.001,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2017,5,,0.0,0.001,0.003,0.001,0.001,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2017,6,,0.0,0.003,0.003,0.003,0.004,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2017,7,,0.0,0.003,0.003,0.003,0.003,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2017,8,,0.0,0.004,0.004,0.004,0.003,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2017,9,,0.0,0.192,0.192,0.154,0.19,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2017,10,,0.0,0.16,0.161,0.16,0.159,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2017,11,,0.0,1.0,1.0,1.0,1.0,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2017,12,,0.0,0.0,0.0,0.0,0.938,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2018,1,,0.0,0.989,0.989,0.989,0.987,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2018,2,,0.0,0.952,0.952,0.951,0.951,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2018,3,,0.0,0.844,0.844,0.843,0.843,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2018,4,,0.0,0.704,0.706,0.706,0.706,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2018,5,,0.0,0.384,0.384,0.382,0.384,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2018,6,,0.0,0.904,0.925,0.893,0.925,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2018,7,,0.0,0.891,0.894,0.891,0.892,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2018,8,,0.0,0.909,0.879,0.913,0.911,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2018,9,,0.0,0.667,0.731,0.732,0.733,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2018,10,,0.0,0.977,0.995,0.989,0.991,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2018,11,,0.0,0.956,1.0,0.999,0.999,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2018,12,,0.0,0.874,0.941,0.933,0.94,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2019,1,,0.0,0.813,0.958,0.961,0.96,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2019,2,,0.0,0.942,0.942,0.94,0.938,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2019,3,,0.0,0.401,0.719,0.71,0.712,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2019,4,,0.0,0.451,0.486,0.471,0.482,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2019,5,,0.0,0.965,0.966,0.917,0.964,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2019,6,,0.0,0.462,0.861,0.726,0.861,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2019,7,,0.0,0.743,0.977,0.769,0.977,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2019,8,,0.0,0.845,0.94,0.913,0.938,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2019,9,,0.0,0.803,0.8,0.79,0.803,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2019,10,,0.0,0.894,0.907,0.899,0.905,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2019,11,,0.0,0.886,0.833,0.832,0.882,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2019,12,,0.0,0.97,0.968,0.922,0.948,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2020,1,,0.0,0.938,0.934,0.903,0.926,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2020,2,,0.0,0.937,0.967,0.963,0.966,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2020,3,,0.0,0.991,0.991,0.989,0.988,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2020,4,,0.0,0.988,0.99,0.949,0.99,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2020,5,,0.0,0.691,0.691,0.667,0.691,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2020,6,,0.0,0.589,0.643,0.638,0.672,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2020,7,,0.0,0.79,0.801,0.767,0.8,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2020,8,,0.0,0.888,0.879,0.875,0.884,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2020,9,,0.0,0.468,0.151,0.444,0.467,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2020,10,,0.0,0.536,0.488,0.536,0.538,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2020,11,,0.0,0.66,0.669,0.664,0.667,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2020,12,,0.0,0.747,0.696,0.715,0.755,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2021,1,,0.0,0.712,0.719,0.681,0.718,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2021,2,,0.0,0.763,0.768,0.749,0.804,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2021,3,,0.0,0.691,0.691,0.622,0.691,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2021,4,,0.0,0.457,0.504,0.458,0.503,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2021,5,,0.0,0.383,0.429,0.429,0.429,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2021,6,,0.0,0.828,0.808,0.81,0.826,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2021,7,,0.0,0.608,0.608,0.608,0.606,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2021,8,,0.0,0.706,0.708,0.708,0.708,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2021,9,,0.0,0.757,0.757,0.746,0.757,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2021,10,,0.0,0.597,0.618,0.645,0.661,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2021,11,,0.0,0.557,0.589,0.589,0.589,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2021,12,,0.0,0.574,0.577,0.575,0.562,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2022,1,,0.0,0.738,0.733,0.738,0.737,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2022,2,,0.0,0.692,0.685,0.688,0.683,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2022,3,,0.0,0.543,0.516,0.543,0.542,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2022,4,,0.0,0.582,0.564,0.51,0.582,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2022,5,,0.0,0.699,0.698,0.669,0.698,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2022,6,,0.0,0.643,0.643,0.643,0.643,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2022,7,,0.0,0.614,0.313,0.48,0.524,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2022,8,,0.0,0.394,0.0,0.384,0.401,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2022,9,,0.0,0.086,0.081,0.035,0.085,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2022,10,,0.0,0.685,0.985,0.876,0.984,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2022,11,,0.0,0.992,1.0,0.812,1.0,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2022,12,,0.0,0.242,0.242,0.181,0.242,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2023,2,,0.0,0.516,0.516,0.321,0.516,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2023,3,,0.0,0.88,0.887,0.698,0.887,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2023,4,,0.0,0.653,0.688,0.662,0.682,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2023,5,,0.0,0.991,0.897,0.773,0.985,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2023,6,,0.0,0.961,0.994,0.318,0.956,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2023,7,,0.0,0.997,1.0,1.0,0.991,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2023,8,,0.0,0.984,1.0,1.0,0.993,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2023,9,,0.0,0.988,0.993,0.993,0.956,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2023,10,,0.0,0.977,1.0,1.0,0.995,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2023,11,,0.0,0.974,0.947,0.946,0.94,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2023,12,,0.0,0.985,0.985,0.836,0.98,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2024,1,,0.0,0.539,0.542,0.542,0.54,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2024,2,,0.0,0.937,0.937,0.898,0.934,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2024,3,,0.0,0.876,0.728,0.852,0.872,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2024,4,,0.0,1.0,1.0,0.997,0.996,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2024,5,,0.0,0.952,0.965,0.956,0.958,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2024,6,,0.0,0.985,0.985,0.979,0.983,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2024,7,,0.0,0.926,0.995,0.966,0.97,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2024,8,,0.0,0.981,0.981,0.974,0.973,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2024,9,,0.0,0.953,1.0,0.999,0.971,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2024,10,,0.0,0.996,0.995,0.993,0.993,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2024,11,,0.0,0.936,0.997,0.996,0.994,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2024,12,,0.0,0.836,0.98,0.972,0.978,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2025,1,,0.0,0.769,0.95,0.949,0.948,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2025,2,,0.0,1.0,1.0,0.957,1.0,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2025,3,,0.0,0.876,0.989,0.878,0.984,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2025,4,,0.0,0.806,1.0,0.944,0.994,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2025,5,,0.0,0.746,0.988,0.978,0.984,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2025,6,,0.0,0.606,0.947,0.947,0.947,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2025,7,,0.0,0.886,0.915,0.911,0.914,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2025,8,,0.0,0.864,0.898,0.892,0.891,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2025,9,,0.0,0.964,0.99,0.983,0.988,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2025,10,,0.0,0.985,0.966,0.997,0.992,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2025,11,,0.0,0.94,0.968,0.968,0.968,0.0
+Bengaluru,site_166,"Sanegurava Halli, Bengaluru - KSPCB",2025,12,,0.0,0.966,0.984,0.984,0.983,0.0
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2022,12,48.06,0.54,0.54,0.516,0.517,0.543,0.543
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2023,1,60.14,0.782,0.719,0.913,0.921,0.922,0.922
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2023,2,38.23,0.754,0.789,0.771,0.978,0.973,0.979
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2023,3,52.43,0.726,0.772,0.784,0.782,0.782,0.784
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2023,4,48.96,0.921,0.922,0.939,0.935,0.935,0.939
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2023,5,42.69,0.978,0.98,1.0,0.724,0.763,1.0
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2023,6,42.28,0.649,0.682,0.693,0.719,0.528,0.582
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2023,7,47.24,0.522,0.703,0.247,0.812,0.329,0.335
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2023,8,108.52,0.496,0.528,0.0,0.618,0.546,0.544
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2023,9,40.49,0.657,0.865,0.629,0.919,0.906,0.424
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2023,10,22.99,0.449,0.52,0.515,0.522,0.522,0.005
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2023,11,32.6,0.917,0.947,0.942,1.0,1.0,0.658
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2023,12,41.63,0.996,0.995,0.996,0.996,0.996,0.024
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2024,1,48.83,0.984,0.985,0.989,0.989,0.973,0.176
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2024,2,44.7,0.391,0.407,0.414,0.411,0.407,0.293
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2024,3,92.64,0.798,0.726,0.973,0.972,0.958,0.398
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2024,4,52.64,0.89,0.818,0.91,0.882,0.84,0.758
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2024,5,26.77,0.957,0.543,0.997,0.991,0.923,0.997
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2024,6,20.46,0.743,0.243,0.935,0.931,0.853,0.935
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2024,7,33.22,0.901,0.766,0.901,0.899,0.901,0.901
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2024,8,35.22,0.844,0.762,0.957,0.774,0.863,0.957
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2024,9,36.68,0.844,0.812,0.585,0.681,0.85,0.289
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2024,10,78.39,0.511,0.485,0.446,0.953,0.866,0.77
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2024,11,45.78,0.939,0.615,0.546,0.96,0.908,0.954
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2024,12,51.73,0.741,0.625,0.651,0.958,0.902,0.832
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2025,1,37.1,0.884,0.906,0.997,0.995,0.993,0.997
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2025,2,34.53,0.99,0.912,0.415,0.993,0.999,1.0
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2025,3,33.69,0.911,0.465,0.815,0.53,0.989,0.995
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2025,4,55.53,0.965,0.635,0.971,0.304,0.719,0.972
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2025,5,44.27,0.633,0.621,0.915,0.913,0.906,0.915
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2025,6,35.39,0.675,0.664,0.851,0.914,0.74,0.271
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2025,7,34.2,0.872,0.445,0.913,0.898,0.911,0.251
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2025,8,33.33,0.707,0.239,0.929,0.917,0.925,0.929
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2025,9,33.01,0.014,0.804,0.807,0.778,0.8,0.807
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2025,10,33.29,0.059,0.524,0.964,0.901,0.946,0.962
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2025,11,24.67,0.819,0.783,0.933,0.849,0.785,0.157
+Bengaluru,site_5678,"RVCE-Mailasandra, Bengaluru - KSPCB",2025,12,53.65,0.821,0.684,0.868,0.862,0.719,0.161
+Bengaluru,site_5681,"Kasturi Nagar, Bengaluru - KSPCB",2023,4,39.28,0.344,0.344,0.228,0.021,0.253,0.344
+Bengaluru,site_5681,"Kasturi Nagar, Bengaluru - KSPCB",2023,5,35.98,0.969,0.969,0.734,0.011,0.664,0.969
+Bengaluru,site_5681,"Kasturi Nagar, Bengaluru - KSPCB",2023,6,32.9,0.958,0.958,0.74,0.554,0.625,0.958
+Bengaluru,site_5681,"Kasturi Nagar, Bengaluru - KSPCB",2023,7,21.78,1.0,1.0,0.801,1.0,0.723,1.0
+Bengaluru,site_5681,"Kasturi Nagar, Bengaluru - KSPCB",2023,8,26.74,1.0,1.0,0.762,1.0,0.633,1.0
+Bengaluru,site_5681,"Kasturi Nagar, Bengaluru - KSPCB",2023,9,23.28,0.883,0.882,0.732,1.0,0.706,1.0
+Bengaluru,site_5681,"Kasturi Nagar, Bengaluru - KSPCB",2023,10,51.79,0.987,0.977,0.772,1.0,0.668,1.0
+Bengaluru,site_5681,"Kasturi Nagar, Bengaluru - KSPCB",2023,11,28.44,0.971,0.968,1.0,1.0,0.817,0.985
+Bengaluru,site_5681,"Kasturi Nagar, Bengaluru - KSPCB",2023,12,40.68,0.978,0.977,0.997,0.997,0.769,0.997
+Bengaluru,site_5681,"Kasturi Nagar, Bengaluru - KSPCB",2024,1,56.56,0.989,0.989,0.995,0.995,0.73,0.995
+Bengaluru,site_5681,"Kasturi Nagar, Bengaluru - KSPCB",2024,2,56.9,0.991,0.99,1.0,1.0,0.836,1.0
+Bengaluru,site_5681,"Kasturi Nagar, Bengaluru - KSPCB",2024,3,64.4,0.999,0.999,1.0,1.0,0.948,1.0
+Bengaluru,site_5681,"Kasturi Nagar, Bengaluru - KSPCB",2024,4,62.42,1.0,1.0,1.0,1.0,0.707,1.0
+Bengaluru,site_5681,"Kasturi Nagar, Bengaluru - KSPCB",2024,5,25.0,0.648,0.652,1.0,1.0,0.411,1.0
+Bengaluru,site_5681,"Kasturi Nagar, Bengaluru - KSPCB",2024,6,22.06,0.994,0.993,1.0,1.0,0.396,0.249
+Bengaluru,site_5681,"Kasturi Nagar, Bengaluru - KSPCB",2024,7,22.11,0.991,0.991,1.0,1.0,0.281,0.102
+Bengaluru,site_5681,"Kasturi Nagar, Bengaluru - KSPCB",2024,8,26.15,1.0,1.0,1.0,1.0,0.403,0.789
+Bengaluru,site_5681,"Kasturi Nagar, Bengaluru - KSPCB",2024,9,36.81,0.733,0.943,0.461,0.96,0.433,0.242
+Bengaluru,site_5681,"Kasturi Nagar, Bengaluru - KSPCB",2024,10,35.24,0.535,0.538,0.685,0.819,0.272,0.095
+Bengaluru,site_5681,"Kasturi Nagar, Bengaluru - KSPCB",2024,11,34.58,0.718,0.801,0.326,0.931,0.326,0.032
+Bengaluru,site_5681,"Kasturi Nagar, Bengaluru - KSPCB",2024,12,28.51,0.753,0.749,0.61,0.999,0.606,0.485
+Bengaluru,site_5681,"Kasturi Nagar, Bengaluru - KSPCB",2025,1,30.48,0.661,0.661,0.608,0.766,0.769,0.767
+Bengaluru,site_5681,"Kasturi Nagar, Bengaluru - KSPCB",2025,2,28.45,0.871,0.869,0.885,0.948,0.954,0.954
+Bengaluru,site_5681,"Kasturi Nagar, Bengaluru - KSPCB",2025,3,26.31,0.704,0.793,0.523,0.868,0.874,0.875
+Bengaluru,site_5681,"Kasturi Nagar, Bengaluru - KSPCB",2025,4,23.23,0.751,0.862,0.929,0.925,0.929,0.929
+Bengaluru,site_5681,"Kasturi Nagar, Bengaluru - KSPCB",2025,5,24.75,0.652,0.786,0.833,0.825,0.831,0.833
+Bengaluru,site_5681,"Kasturi Nagar, Bengaluru - KSPCB",2025,6,33.73,0.993,0.993,0.993,0.993,0.993,0.993
+Bengaluru,site_5681,"Kasturi Nagar, Bengaluru - KSPCB",2025,7,31.28,0.996,0.996,0.996,0.996,0.996,0.996
+Bengaluru,site_5681,"Kasturi Nagar, Bengaluru - KSPCB",2025,8,31.53,0.987,0.987,0.987,0.512,0.987,0.987
+Bengaluru,site_5681,"Kasturi Nagar, Bengaluru - KSPCB",2025,9,31.14,0.864,0.864,0.864,0.862,0.864,0.864
+Bengaluru,site_5681,"Kasturi Nagar, Bengaluru - KSPCB",2025,10,34.33,0.903,0.903,0.903,0.902,0.903,0.903
+Bengaluru,site_5681,"Kasturi Nagar, Bengaluru - KSPCB",2025,11,33.92,0.84,0.84,0.84,0.84,0.84,0.84
+Bengaluru,site_5681,"Kasturi Nagar, Bengaluru - KSPCB",2025,12,41.2,0.988,0.987,0.988,0.987,0.988,0.988
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2023,2,39.98,0.885,0.885,0.885,0.885,0.885,0.876
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2023,3,30.48,0.777,0.777,0.777,0.776,0.777,0.735
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2023,4,27.88,0.94,0.946,0.946,0.947,0.947,0.929
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2023,5,15.57,0.915,0.923,0.911,0.911,0.926,0.832
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2023,6,20.65,0.806,0.822,0.839,0.839,0.831,0.801
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2023,7,20.07,0.41,0.41,0.422,0.423,0.419,0.423
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2023,8,22.98,0.995,0.995,0.995,1.0,0.999,1.0
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2023,9,21.78,0.975,0.971,0.036,0.993,0.992,0.994
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2023,10,43.25,0.81,0.812,0.746,0.86,0.856,0.863
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2023,11,33.0,0.885,0.885,0.885,0.885,0.885,0.885
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2023,12,27.81,0.962,0.964,0.997,0.997,0.984,0.997
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2024,1,25.4,0.616,0.694,0.712,0.712,0.712,0.712
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2024,2,35.85,0.931,0.928,1.0,1.0,1.0,1.0
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2024,3,36.17,0.93,0.931,1.0,0.996,1.0,1.0
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2024,4,25.04,0.885,0.889,1.0,0.931,0.957,1.0
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2024,5,25.97,0.922,0.927,1.0,0.991,0.995,1.0
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2024,6,24.09,0.989,0.989,0.989,0.989,0.989,0.989
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2024,7,21.85,0.855,0.855,0.855,0.855,0.853,0.855
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2024,8,23.25,0.949,0.949,0.949,0.8,0.917,0.949
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2024,9,27.84,0.999,1.0,1.0,1.0,1.0,1.0
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2024,10,34.92,0.96,0.96,0.96,0.96,0.957,0.96
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2024,11,32.07,0.964,1.0,1.0,1.0,1.0,1.0
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2024,12,28.27,0.949,0.949,0.961,0.961,0.96,0.961
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2025,1,33.15,0.887,0.867,0.819,0.923,0.923,0.922
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2025,2,38.78,0.692,0.616,0.378,0.693,0.701,0.701
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2025,3,38.58,0.827,0.375,0.824,0.405,0.382,0.833
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2025,4,25.24,0.55,0.56,0.942,0.883,0.942,0.942
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2025,5,22.75,0.793,0.617,0.676,0.716,0.855,0.858
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2025,6,35.05,0.964,0.972,0.49,0.949,0.974,0.974
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2025,7,33.42,0.685,0.719,0.728,0.684,0.724,0.728
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2025,8,30.28,0.723,0.723,0.724,0.719,0.711,0.724
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2025,9,35.51,0.381,0.906,0.896,0.874,0.896,0.906
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2025,10,42.43,0.585,0.823,0.995,0.985,0.948,0.995
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2025,11,52.31,0.818,0.825,0.84,0.751,0.419,0.84
+Bengaluru,site_5686,"Shivapura_Peenya, Bengaluru - KSPCB",2025,12,60.61,0.836,0.825,0.726,0.847,0.594,0.851
+Bengaluru,site_5729,"Jigani, Bengaluru - KSPCB",2023,4,37.13,0.564,0.564,0.565,0.515,0.562,0.565
+Bengaluru,site_5729,"Jigani, Bengaluru - KSPCB",2023,5,22.49,0.949,0.949,0.964,0.906,0.944,0.958
+Bengaluru,site_5729,"Jigani, Bengaluru - KSPCB",2023,6,16.8,0.942,0.992,0.999,0.946,0.999,0.846
+Bengaluru,site_5729,"Jigani, Bengaluru - KSPCB",2023,7,16.42,0.985,0.933,0.993,0.837,0.993,0.993
+Bengaluru,site_5729,"Jigani, Bengaluru - KSPCB",2023,8,22.17,0.983,0.983,0.984,0.97,0.945,0.973
+Bengaluru,site_5729,"Jigani, Bengaluru - KSPCB",2023,9,17.92,0.994,0.994,0.997,0.924,0.988,0.997
+Bengaluru,site_5729,"Jigani, Bengaluru - KSPCB",2023,10,46.01,0.743,0.781,0.805,0.774,0.78,0.805
+Bengaluru,site_5729,"Jigani, Bengaluru - KSPCB",2023,11,33.25,0.969,0.96,0.992,0.94,0.988,0.992
+Bengaluru,site_5729,"Jigani, Bengaluru - KSPCB",2023,12,37.5,0.953,0.942,0.969,0.969,0.964,0.969
+Bengaluru,site_5729,"Jigani, Bengaluru - KSPCB",2024,1,39.98,0.981,0.989,0.999,0.999,0.999,0.999
+Bengaluru,site_5729,"Jigani, Bengaluru - KSPCB",2024,2,41.64,0.67,0.421,0.999,0.999,0.99,0.983
+Bengaluru,site_5729,"Jigani, Bengaluru - KSPCB",2024,3,52.86,0.784,0.788,0.992,0.992,0.39,0.992
+Bengaluru,site_5729,"Jigani, Bengaluru - KSPCB",2024,4,26.53,0.26,0.267,0.267,0.267,0.038,0.267
+Bengaluru,site_5729,"Jigani, Bengaluru - KSPCB",2024,5,24.14,0.034,0.034,0.051,0.039,0.051,0.051
+Bengaluru,site_5729,"Jigani, Bengaluru - KSPCB",2024,6,22.99,0.904,0.867,0.969,0.903,0.947,0.833
+Bengaluru,site_5729,"Jigani, Bengaluru - KSPCB",2024,7,24.57,0.906,0.903,0.996,0.996,0.974,0.934
+Bengaluru,site_5729,"Jigani, Bengaluru - KSPCB",2024,8,27.79,0.891,0.915,0.926,0.837,0.919,0.844
+Bengaluru,site_5729,"Jigani, Bengaluru - KSPCB",2024,9,20.46,0.944,0.964,0.989,0.989,0.933,0.989
+Bengaluru,site_5729,"Jigani, Bengaluru - KSPCB",2024,10,30.76,0.945,0.929,0.981,0.79,0.833,0.901
+Bengaluru,site_5729,"Jigani, Bengaluru - KSPCB",2024,11,52.0,0.932,0.931,0.994,0.938,0.994,0.91
+Bengaluru,site_5729,"Jigani, Bengaluru - KSPCB",2024,12,35.32,0.599,0.882,0.942,0.923,0.858,0.942
+Bengaluru,site_5729,"Jigani, Bengaluru - KSPCB",2025,1,56.48,1.0,1.0,1.0,0.977,1.0,1.0
+Bengaluru,site_5729,"Jigani, Bengaluru - KSPCB",2025,2,56.45,0.97,0.97,0.548,0.65,0.969,0.972
+Bengaluru,site_5729,"Jigani, Bengaluru - KSPCB",2025,3,58.1,0.984,0.987,1.0,0.722,0.802,1.0
+Bengaluru,site_5729,"Jigani, Bengaluru - KSPCB",2025,4,19.5,0.738,0.825,1.0,1.0,0.912,1.0
+Bengaluru,site_5729,"Jigani, Bengaluru - KSPCB",2025,5,39.53,0.901,0.902,0.984,0.983,0.953,0.984
+Bengaluru,site_5729,"Jigani, Bengaluru - KSPCB",2025,6,33.85,0.94,0.94,0.975,0.946,0.962,0.978
+Bengaluru,site_5729,"Jigani, Bengaluru - KSPCB",2025,7,24.89,0.813,0.961,0.996,0.996,0.996,0.996
+Bengaluru,site_5729,"Jigani, Bengaluru - KSPCB",2025,8,22.8,0.897,0.953,1.0,0.863,1.0,1.0
+Bengaluru,site_5729,"Jigani, Bengaluru - KSPCB",2025,9,21.26,0.976,0.978,0.983,0.967,0.983,0.983
+Bengaluru,site_5729,"Jigani, Bengaluru - KSPCB",2025,10,31.35,0.863,0.859,0.999,0.972,0.997,0.999
+Bengaluru,site_5729,"Jigani, Bengaluru - KSPCB",2025,11,47.96,0.711,0.689,0.999,0.996,0.999,0.999
+Bengaluru,site_5729,"Jigani, Bengaluru - KSPCB",2025,12,42.48,0.902,0.897,0.997,0.992,0.997,0.997
