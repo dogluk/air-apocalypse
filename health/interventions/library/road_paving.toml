@@ -28,6 +28,8 @@ repair, 80% of the length paved, a strip 1.5 m wide on sub-arterial and 2.5 m on
 applied to the 1,688 km of arterial and sub-arterial roads the Greater Bengaluru Authority counts
 for its sweeping contract. Repair is taken as yearly (TERI does not say how often). Prices are
 TERI's Delhi rates of 2021.
+
+city-specific: the cut is TERI's NCR effect times the road-dust part of Bengaluru's dust (0.691, CSTEP), and the length paved is Bengaluru's 1,688 km of main roads; TERI's prices per square metre would transfer.
 """
 
 [[targets]]
