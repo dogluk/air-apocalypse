@@ -42,6 +42,7 @@ driver = "city"
 annual = { dist = "uniform", p5 = 1000000, p95 = 10000000 }
 currency = "INR"
 year = 2021
+partial = "The cost is CSTEP's estimate of the city government's spending to enforce the ban (under Rs 1 crore); it leaves out the cost of making door-to-door collection reach every household and of any missing treatment capacity, which has not been found at its source (data/MISSING.md)."
 
 [[evidence]]
 fields = ["targets.waste_burning.cut"]

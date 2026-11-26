@@ -49,7 +49,7 @@ TARGET_KEYS = ("cause", "cut", "months")
 EXPOSURE_KEYS = ("covered", "hours", "cut", "months")
 REGION_KEYS = ("receptor", "cut")
 COST_KEYS = ("driver", "once", "annual", "units", "unit", "society_net_once",
-             "society_net_annual", "currency", "year", "share_only_on_success")
+             "society_net_annual", "currency", "year", "share_only_on_success", "partial")
 EVIDENCE_FIELDS = ("fields", "source", "url", "locator", "key", "retrieved", "derivation")
 ALL_MONTHS = tuple(range(1, 13))
 
@@ -87,6 +87,7 @@ class Cost:
     currency: str
     year: int
     share_only_on_success: float
+    partial: str = ""           # what the cost leaves out, one plain sentence ("" = nothing said)
 
 
 @dataclass(frozen=True)
@@ -277,8 +278,9 @@ def _cost(value) -> Cost:
     share = _number(t.get("share_only_on_success", 0.0), "cost.share_only_on_success")
     if not 0 <= share <= 1:
         raise Invalid(f"cost.share_only_on_success: must be between 0 and 1, got {share:g}")
+    partial = _text(t["partial"], "cost.partial") if "partial" in t else ""
     return Cost(driver, once, annual, units, unit, net["society_net_once"],
-                net["society_net_annual"], currency, year, share)
+                net["society_net_annual"], currency, year, share, partial)
 
 
 def _evidence(value) -> tuple[Evidence, ...]:

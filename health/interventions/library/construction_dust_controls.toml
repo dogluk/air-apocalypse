@@ -41,6 +41,7 @@ driver = "city"
 annual = { dist = "uniform", p5 = 1000000, p95 = 10000000 }
 currency = "INR"
 year = 2021
+partial = "The cost is CSTEP's estimate of the city government's spending to enforce existing dust rules (under Rs 1 crore); it leaves out what builders spend on barriers, water and fogging machines, which has not been found for Bengaluru (data/MISSING.md)."
 
 [[evidence]]
 fields = ["targets.dust.cut"]

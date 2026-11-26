@@ -365,8 +365,11 @@ is not a ranking): status, life-years if it works (median, 5-95%), expected life
 the odds), cost in 2025 rupees (crore, median), life-years per crore if it works and expected,
 the odds, and flag codes (PH placeholder, ES/ER evidence seen or recalled, OJ odds are a
 judgement, LS long shot, NR cause not reported, AF whole-year share used for part-year cut, BS
-borrowed month shape, CO covered people only, RG regional, UB upper bound). A table of PM2.5
-change follows; for an exposure measure it is what the covered people breathe. Statuses:
+borrowed month shape, CO covered people only, RG regional, UB upper bound, PC the cost
+leaves out part of what the measure costs). A table of PM2.5 change follows; for an exposure
+measure it is what the covered people breathe. A measure whose source prices only part of it
+(say, the government's enforcement but not what builders spend) says what is left out in
+`cost.partial`; that sentence is printed under the table and carried as flag `partial_cost`. Statuses:
 `scored`, `no_cost` (no cost given; shown, not ranked), `pays_for_itself` (society saves money
 overall; shown apart, no ratios), `not_applicable` (wrong city, or its cause is too small a
 share), `not_scored` (no usable study, or a regional measure). `--json` prints exactly what

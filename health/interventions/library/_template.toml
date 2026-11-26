@@ -138,6 +138,11 @@ currency = "INR"         # required; "INR" or "USD"
 year = 2025              # required; the price year the costs are in (2000-2025)
 share_only_on_success = 0.0   # optional, 0 to 1; share of the cost spent only if it works
                               # (default 0: the full cost is spent either way)
+# partial = "It counts only the government's enforcement, not what builders spend to comply."
+#                          # optional: one plain sentence saying what the cost leaves out, when
+#                          # the source prices only part of the measure. Every result then
+#                          # carries it as a flag (partial_cost), so a cheap-looking ratio is
+#                          # read with that in mind. Not a number: the evidence rule ignores it.
 
 # ---- [[evidence]]: one table per source ----
 # fields:     the numbers it backs, by dotted name (each number in exactly one entry)

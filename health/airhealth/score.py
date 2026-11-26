@@ -76,7 +76,7 @@ UPPER_BOUND_TEXT = ("This study's shares include air blown in from outside the c
 class Flag:
     """A caveat printed with a result. code is stable, one of: "placeholder", "evidence_S",
     "evidence_R", "odds_judgement", "long_shot", "not_reported", "annual_share_flat",
-    "borrowed_shape", "covered_only", "regional", "upper_bound_all_origins"."""
+    "borrowed_shape", "covered_only", "regional", "upper_bound_all_origins", "partial_cost"."""
     code: str
     text: str     # one plain sentence
 
@@ -133,6 +133,8 @@ def _fixed_flags(m: Measure, place: places.Place) -> list[Flag]:
     elif m.kind == "exposure":
         out.append(Flag("covered_only", "Only the people it reaches breathe less; the outdoor "
                                         "air and everyone else are unchanged."))
+    if m.cost is not None and m.cost.partial:
+        out.append(Flag("partial_cost", m.cost.partial))
     shape = months.shape(place)
     if shape.borrowed:
         out.append(Flag("borrowed_shape", f"{place.name} has no month-by-month PM2.5 record of "

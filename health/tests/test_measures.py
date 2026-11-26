@@ -137,6 +137,7 @@ COST = {"driver": "city", "annual": 1, "currency": "INR", "year": 2025}
     ("air_city", {"cost": {**COST, "year": 1990}}, "cost.year"),
     ("air_city", {"cost": {**COST, "currency": "EUR"}}, "cost.currency"),
     ("air_city", {"cost": {**COST, "rupees": 1}}, "cost.rupees"),
+    ("air_city", {"cost": {**COST, "partial": " "}}, "cost.partial"),
     ("air_city", {"p_success": 1.2}, "p_success"),
     ("air_city", {"p_success_basis": ""}, "p_success_basis"),
     ("air_city", {"p_success_basis": None}, "p_success_basis"),
@@ -159,6 +160,14 @@ def test_number_without_evidence_or_placeholder_is_refused(tmp_path):
     t = edited("air_city", {"placeholders": ["targets.dust.cut", "cost.annual"]})
     with pytest.raises(measures.Invalid, match=r"^targets\.waste_burning\.cut: no \[\[evidence\]\]"):
         measures.load(write(tmp_path, t))
+
+
+def test_cost_partial_is_read_and_optional(tmp_path):
+    t = edited("air_city", {"cost": {**COST, "partial": "It leaves out what builders spend."}})
+    t["placeholders"] = ["targets.dust.cut", "targets.waste_burning.cut", "cost.annual"]
+    assert measures.load(write(tmp_path, t)).cost.partial == "It leaves out what builders spend."
+    t["cost"] = dict(COST)
+    assert measures.load(write(tmp_path, t, "n")).cost.partial == ""
 
 
 def test_absent_or_zero_once_needs_nothing(tmp_path):
