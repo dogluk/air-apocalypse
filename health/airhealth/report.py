@@ -899,3 +899,127 @@ def rank_table(r) -> str:
                  if used else "Flags: none.")
     lines.append(f"Evidence keys: {EVIDENCE_LEGEND}.")
     return "\n".join(lines)
+
+
+# --- sensitivity: what reorders the ranking --------------------------------------------------
+
+def _nan(x) -> bool:
+    return x is None or (isinstance(x, float) and math.isnan(x))
+
+
+def _names(xs) -> str:
+    return ", ".join(xs) if xs else DASH
+
+
+def _research_block(s, comparable: bool) -> list[str]:
+    res = s.research(comparable)
+    n_curves = len(s._curves())
+    head = ("research unit", f"curves where the top {s.top} changes", "on curves", "enter", "leave",
+            "largest move", "within noise only", "drops out of the top")
+    rows, quiet = [], []
+    for x in res.itertuples():
+        if x.unit != "seed" and not (x.curves_top_changed or x.within_noise or x.drops_out):
+            quiet.append(x.unit)
+            continue
+        unit = x.unit + (" (noise floor)" if x.unit == "seed" else "")
+        rows.append((unit, f"{x.curves_top_changed} of {n_curves}", _names(x.curves),
+                     _names(x.enter), _names(x.leave),
+                     DASH if _nan(x.max_abs_delta) else f"{x.max_abs_delta:g}",
+                     str(x.within_noise) if x.within_noise else "", _names(x.drops_out)))
+    out = _columns(head, rows) if rows else ["  No setting changes the top."]
+    if quiet:
+        out.append(f"  No change to the top {s.top} on any curve: {', '.join(sorted(quiet))}.")
+    return out
+
+
+def _spread_block(s, comparable: bool) -> list[str]:
+    st = s.stability(comparable)
+    curves_ = s._curves()
+    cells: dict = {}
+    first: dict = {}
+    for x in st.itertuples():
+        base = DASH if _nan(x.base_rank) else str(int(x.base_rank))
+        cell = f"{base} ({x.best}-{x.worst})"
+        if x.drops_out:
+            cell += f" out{x.drops_out}"
+        cells.setdefault(x.measure, {})[x.curve] = cell
+        if not _nan(x.base_rank):
+            first[x.measure] = min(first.get(x.measure, 10 ** 6), x.base_rank)
+    order = sorted(cells, key=lambda m: (first.get(m, 10 ** 6), m))
+    rows = [(m, *(cells[m].get(c, DASH) for c in curves_)) for m in order]
+    return _columns(("measure", *curves_), rows) if rows else ["  No measure is ranked."]
+
+
+def _movers_block(s, comparable: bool) -> list[str]:
+    mv = s.movers(comparable)
+    curves_ = s._curves()
+    cells: dict = {}
+    for x in mv.itertuples():
+        if x.unit is None:
+            text = "none"
+        else:
+            text = f"{x.unit} {x.delta:+g}"
+            if x.within_noise:
+                text = f"({text})"
+        got = cells.setdefault(x.measure, {})
+        got[x.curve] = text if x.curve not in got else got[x.curve] + " | " + text
+    rows = [(m, *(cells[m].get(c, DASH) for c in curves_)) for m in cells]
+    return _columns(("measure", *curves_), rows) if rows else ["  No measure is ranked."]
+
+
+def _odds_block(s, comparable: bool) -> list[str]:
+    be = s.break_even_odds(comparable)
+    curves_ = list(s.base.tables)
+    cells: dict = {}
+    odds: dict = {}
+    for x in be.itertuples():
+        cells.setdefault(x.measure, {})[x.curve] = (f"{x.pass_above or DASH} / "
+                                                    f"{x.fall_below or DASH}")
+        odds[x.measure] = x.p_success
+    rows = [(m, f"{100 * odds[m]:g}%", *(cells[m].get(c, DASH) for c in curves_)) for m in cells]
+    return (_columns(("measure", "odds now", *curves_), rows) if rows
+            else ["  No measure is ranked."])
+
+
+def sensitivity_table(s) -> str:
+    """The sensitivity as text: (1) what would reorder the top K, the research list, first;
+    (2) each measure's default rank on each curve and its range across all settings; (3) the
+    biggest mover per measure per curve, within-noise moves in brackets; (4) break-even odds;
+    (5) the settings, defaults and notes. Blocks 1-4 among all measures, then among comparable
+    ones."""
+    from .sensitivity import CANNOT, notes
+    ctx = s.base.context
+    lines = [f"What reorders the ranking: {s.place}. {len(s.settings)} settings, each moving one "
+             f"input from the defaults; the top of the table is the first {s.top} (a display "
+             "choice). Ranks are never averaged."]
+    alls = (False, True)
+
+    def among(comparable):
+        return ("among comparable measures (costs that leave part out, PC, set aside)"
+                if comparable else "among all ranked measures")
+    for c in alls:
+        lines += ["", f"1. What would reorder the top {s.top}, {among(c)}: the research list. A "
+                  "unit is one input, one measure's effect or cost range, or one city's study; a "
+                  "curve counts when one of its settings changes which measures make the top by "
+                  "more than another random seed does.", *_research_block(s, c)]
+    for c in alls:
+        lines += ["", f"2. Rank on each curve by default, {among(c)}, and (best-worst) across every "
+                  f"setting; outN: not ranked under N settings; {DASH} first: not ranked by default.",
+                  *_spread_block(s, c)]
+    for c in alls:
+        lines += ["", f"3. The input that moves each measure most on each curve, {among(c)} "
+                  "(+ down the table, - up; in brackets: no larger than another seed's move, "
+                  "within noise).", *_movers_block(s, c)]
+    for c in alls:
+        lines += ["", f"4. Break-even odds, {among(c)}: the odds that it works at which it would "
+                  "pass the measure above it / fall below the one below it, on the default "
+                  f"ranking ({DASH} at the ends; '{CANNOT}' as it says).", *_odds_block(s, c)]
+    lines += ["", "Settings:", *(f"  {x.id}: {x.label}" for x in s.settings)]
+    if s.skipped:
+        lines += ["", "Settings that could not be run:",
+                  *(f"  {k}: {v}" for k, v in s.skipped.items())]
+    lines += ["", f"Defaults: map {ctx.get('map')}; study {ctx.get('study') or 'none'}; deaths "
+              f"{ctx.get('deaths') or 'SRS'}; discount {100 * ctx.get('discount', 0):g}% a year; "
+              f"{ctx.get('n'):,} draws, seed {ctx.get('seed')}.",
+              *("Note: " + t for t in notes(s))]
+    return "\n".join(lines)

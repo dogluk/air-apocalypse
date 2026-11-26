@@ -464,17 +464,20 @@ def _society_net(m: Measure, iv: Intervention, count: float, discount: float) ->
 def city(city: str, measures: Sequence[str] | None = None, *, study: str | None = None,
          map_name: str = "acag_total", curves: list[str] | None = None, n: int = 2000,
          seed: int = 0, discount: float = simulate.DISCOUNT, deaths=None,
-         folder: Path = measures.LIBRARY, monthly_curves: bool = False) -> list[Score]:
+         folder: Path = measures.LIBRARY, monthly_curves: bool = False,
+         library: dict | None = None) -> list[Score]:
     """One Score per library measure in `folder` (or per id asked for), in library order (file
     name). study=None scores air measures on the city's APnA study; a city without one gets
     not_scored for them. Callers that want every study call once per study.
 
     monthly_curves: the month-by-month sensitivity (simulate.run); it applies to percent changes,
     so a regional measure's part in a city (a delta) is run on the annual mean as before.
+    library: the measures by id to use instead of reading `folder` (sensitivity.py passes a copy
+    with one measure's ranges pinned); receptor files are still looked for beside `folder`.
     Timed 2026-11-27 on the maintainer's laptop (a test suite running beside it): Bengaluru,
     n=500, the real library (22 measures, 17 run): 4.7 s annual, 30.1 s with monthly_curves=True."""
     from . import measures as library_
-    lib = library_.library(folder)
+    lib = library_.library(folder) if library is None else library
     ids = list(lib) if measures is None else [i for i in lib if i in set(measures)]
     unknown = sorted(set(measures or ()) - set(lib))
     if unknown:
@@ -521,7 +524,8 @@ def city(city: str, measures: Sequence[str] | None = None, *, study: str | None 
 
 def region(measure: str, *, map_name: str = "acag_total", curves: list[str] | None = None,
            n: int = 2000, seed: int = 0, discount: float = simulate.DISCOUNT, deaths=None,
-           folder: Path = measures.LIBRARY, monthly_curves: bool = False) -> Score:
+           folder: Path = measures.LIBRARY, monthly_curves: bool = False,
+           library: dict | None = None) -> Score:
     """A regional measure scored over its whole reach: every district of its receptor table whose
     full change is not 0, each changed by region.cut x its own full change (one "delta" run,
     scale per district), with the measure's whole cost (driver "unit", "city" as one total for
@@ -535,9 +539,9 @@ def region(measure: str, *, map_name: str = "acag_total", curves: list[str] | No
     decide; no district is dropped to make it faster.
 
     monthly_curves: a regional change is a delta, and month by month applies to percent changes
-    only, so the Score is not_scored and nothing is run."""
+    only, so the Score is not_scored and nothing is run. library: as in city()."""
     from . import measures as library_
-    lib = library_.library(folder)
+    lib = library_.library(folder) if library is None else library
     if measure not in lib:
         raise KeyError(f"no measure {measure!r} in {folder}")
     m = lib[measure]

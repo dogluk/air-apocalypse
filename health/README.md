@@ -501,6 +501,7 @@ the id to a list in `tests/test_library.py` and run `airhealth score CITY --meas
 ```
 airhealth rank [PLACE] [--study ID] [--map M] [--curves a,b] [--n N] [--seed S] [--discount PCT]
                [--use input=source] [--json] [--csv PATH] [--write [DIR]]
+airhealth rank [PLACE] --sensitivity [--inputs a,b] [--top K] [--jobs J] ...
 ```
 
 `airhealth rank` orders the library by **expected life-years per crore** of the funder's rupees
@@ -528,6 +529,25 @@ curves, studies or maps.
   sources on each row (`evidence`: source | locator | url | key); `--write [DIR]` (default
   `health/out/rank/`, git-ignored) writes `rank_india.json/.csv` and a pair for every city from the
   same run (`rank_<city>.json/.csv`); for a city, only its pair.
+- **What reorders the ranking: `--sensitivity`.** `airhealth rank Bengaluru --sensitivity
+  [--inputs map,study,...] [--top K] [--jobs J]` answers the funder's question (which research
+  would change what to fund?) instead of printing the ranking. Each input is moved from the
+  defaults one at a time (`sensitivity.INPUTS`: every other map; each of the city's other causes
+  studies with a full split, or for India each such city and study; SRS deaths against the model's
+  and the UN's; no discounting; curves month by month; each measure's effect and cost ranges at
+  their 5th and 95th percentiles; every measure as if certain to work; another random seed) and the
+  library is re-ranked. Printed first, the **research list**: for each input (or one measure's
+  effect or cost, or one city's study), on how many curves it changes which measures make the top
+  K (default 5), and which enter and leave; then each measure's default rank on every curve with
+  its best-worst across settings; the input that moves it most on each curve; and **break-even
+  odds**, the odds that it works at which it would pass the measure above it or fall below the one
+  below. Every block is shown among all measures and again among measures whose cost is whole (the
+  partial-cost ones set aside). A move no larger than the seed's own is "within noise"; a measure
+  that cannot be scored under a setting (regional measures under month-by-month curves) drops out
+  and moves nobody. Ranks are never averaged, and this is a swing, not a value-of-information
+  figure. `--n` defaults to 500 here; the whole-reach runs of the regional measures dominate the
+  time and run in `--jobs` processes (default: every CPU). `--write` adds
+  `sensitivity_<place>.json/.csv`.
 
 ## Writing an intervention file
 

@@ -12,6 +12,7 @@
   airhealth score --region ID [--map M] [--curves a,b] [--n N] ...   a regional measure, whole reach
   airhealth rank [PLACE] [--study ID] [--map M] [--curves a,b] [--n N] [--seed S] [--discount PCT]
                  [--use input=source] [--monthly-curves] [--csv PATH] [--write [DIR]]   the library ranked, India or a city
+  airhealth rank [PLACE] --sensitivity [--inputs a,b] [--top K] [--jobs J] ...   what reorders the ranking
   airhealth measures                               the library: id, name, kind, scope, odds, evidence
   airhealth dashboard [--port 8765] [--no-open]     a local page over the same functions
 
@@ -31,7 +32,7 @@ import numpy as np
 
 from pathlib import Path
 
-from . import baseline, causes, curves, exposure, intervention, measures, paths, places, provenance, rank, report, score, simulate
+from . import baseline, causes, curves, exposure, intervention, measures, paths, places, provenance, rank, report, score, sensitivity, simulate
 from .impact import Change, steady_state
 from .inputs import DEMOGRAPHIC, REGISTRY, Choice
 from .places import KINDS
@@ -422,6 +423,55 @@ def _write_ranking(folder: Path, ranking) -> list[Path]:
     return out
 
 
+def _sensitivity_csv(path: Path, swing) -> None:
+    import csv
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=sensitivity.CSV_COLUMNS)
+        w.writeheader()
+        w.writerows(sensitivity.csv_rows(swing))
+
+
+def _write_sensitivity(folder: Path, swing) -> list[Path]:
+    """sensitivity_<slug>.json and .csv."""
+    slug = "india" if swing.place == rank.INDIA else _slug(swing.place)
+    folder.mkdir(parents=True, exist_ok=True)
+    j, c = folder / f"sensitivity_{slug}.json", folder / f"sensitivity_{slug}.csv"
+    j.write_text(json.dumps(sensitivity.to_json(swing), indent=2, ensure_ascii=False,
+                            allow_nan=False))
+    _sensitivity_csv(c, swing)
+    return [j, c]
+
+
+def _cmd_sensitivity(args, india: bool, city, settings: dict) -> None:
+    inputs = sensitivity.INPUTS
+    if args.inputs:
+        inputs = tuple(x.strip() for x in args.inputs.split(",") if x.strip())
+        bad = [x for x in inputs if x not in sensitivity.INPUTS]
+        if bad:
+            raise ValueError(f"unknown input {bad[0]!r}; inputs are {', '.join(sensitivity.INPUTS)}")
+    if settings.pop("monthly_curves"):
+        raise ValueError("--monthly-curves is one of the sensitivity's own settings "
+                         "(--inputs monthly_curves); leave it out with --sensitivity")
+    import os
+    jobs = args.jobs if args.jobs is not None else (os.cpu_count() or 1)
+
+    def progress(text):
+        print(f"airhealth: {text}", file=sys.stderr)
+    swing = sensitivity.run("India" if india else city, inputs=inputs, top=args.top,
+                            study=args.study, jobs=jobs, progress=progress, **settings)
+    if args.json:
+        print(json.dumps(sensitivity.to_json(swing), indent=2, ensure_ascii=False, allow_nan=False))
+    else:
+        print(report.sensitivity_table(swing))
+    if args.csv:
+        _sensitivity_csv(Path(args.csv), swing)
+        print(f"airhealth: wrote {args.csv}", file=sys.stderr)
+    if args.write is not None:
+        for path in _write_sensitivity(Path(args.write), swing):
+            print(f"airhealth: wrote {path}", file=sys.stderr)
+
+
 def cmd_rank(args) -> None:
     folder = Path(args.library) if args.library else measures.LIBRARY
     india = args.place is None or args.place.strip().lower() in ("india", "all india")
@@ -437,9 +487,15 @@ def cmd_rank(args) -> None:
     combos = _choice(args).combinations()
     if len(combos) > 1:
         raise ValueError("rank takes one source per input; give --use input=source once")
-    settings = dict(map_name=args.map or "acag_total", curves=names, n=args.n, seed=args.seed,
+    if not args.sensitivity and (args.inputs or args.top is not None or args.jobs is not None):
+        raise ValueError("--inputs, --top and --jobs go with --sensitivity")
+    n = args.n if args.n is not None else (500 if args.sensitivity else 2000)
+    settings = dict(map_name=args.map or "acag_total", curves=names, n=n, seed=args.seed,
                     discount=args.discount / 100, deaths=combos[0], folder=folder,
                     monthly_curves=args.monthly_curves)
+    if args.sensitivity:
+        args.top = sensitivity.TOP if args.top is None else args.top
+        return _cmd_sensitivity(args, india, city, settings)
     if india:
         known = sorted(causes.known_cities())
         done = []
@@ -602,7 +658,8 @@ def _parser() -> argparse.ArgumentParser:
     rk.add_argument("--study", help="a city only: score air measures on this causes study")
     rk.add_argument("--map", choices=exposure.MAPS, help="exposure map (default: acag_total)")
     rk.add_argument("--curves", help="comma-separated curve names (default: every curve)")
-    rk.add_argument("--n", type=int, default=2000, help="Monte Carlo draws (default 2000)")
+    rk.add_argument("--n", type=int, default=None,
+                    help="Monte Carlo draws (default 2000; 500 with --sensitivity)")
     rk.add_argument("--seed", type=int, default=0, help="random seed (default 0)")
     rk.add_argument("--discount", type=float, default=simulate.DISCOUNT * 100, metavar="PCT",
                     help="discount rate in percent a year (default 3)")
@@ -610,7 +667,19 @@ def _parser() -> argparse.ArgumentParser:
     rk.add_argument("--csv", metavar="PATH", help="also write the rows, with their sources, as CSV")
     rk.add_argument("--write", nargs="?", const=str(paths.HEALTH / "out" / "rank"), default=None,
                     metavar="DIR", help="write rank_india.json/.csv and one pair per city "
-                    "(default health/out/rank/; not committed)")
+                    "(default health/out/rank/; not committed); with --sensitivity, "
+                    "sensitivity_<place>.json/.csv")
+    rk.add_argument("--sensitivity", action="store_true",
+                    help="instead of the ranking: what reorders it. Each input moved from the "
+                    "defaults one at a time; the research list (what would change the top), "
+                    "each measure's spread of ranks, its biggest mover and break-even odds")
+    rk.add_argument("--inputs", metavar="a,b", help="with --sensitivity: which inputs to move "
+                    f"(default all: {','.join(sensitivity.INPUTS)})")
+    rk.add_argument("--top", type=int, default=None, metavar="K",
+                    help=f"with --sensitivity: size of the top of the table (default {sensitivity.TOP})")
+    rk.add_argument("--jobs", type=int, default=None, metavar="J",
+                    help="with --sensitivity: processes for the whole-reach runs of regional "
+                    "measures (default: the number of CPUs)")
     rk.add_argument("--library", help=argparse.SUPPRESS)
     deaths_flag(rk)
     rk.set_defaults(func=cmd_rank)
