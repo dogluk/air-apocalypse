@@ -221,3 +221,51 @@ flagged "sector from every origin, not only the named states".
   Today, Indian Express, 28-30 Oct 2025), so every number in `winter_cloud_seeding` is key S: the 6-10% fall in PM2.5 the institute
   claimed (which the Indian Express found began before the seeding), clouds one day in ten, and Rs 20-30 crore for a winter. Would
   settle it: the trial report submitted to the Delhi Environment Department, or the parliamentary answers on its cost.
+
+## Measures kept to one city: the per-city source that would widen each (plan D Task 5, 2026-11-27)
+
+A measure goes beyond its one city only when none of its numbers is that city's: the cut a fraction of a cause's share (or an
+exposure's hours and cut) read from a source not about the city alone, the cost per person, household or unit at a price not tied
+to the city's contract or budget, and no count or ratio for the city or its state. Widened: `home_purifiers` and
+`old_vehicle_retirement` (cities = "all"). General variant: `school_purifiers_india` (India's UDISE+ figures, for the 49 cities
+other than Bengaluru). Every other city measure stays in its city, with a `city-specific:` line in its notes naming the number
+that blocks it. What would widen each (leads, not checked):
+
+- **`dg_set_replacement` (Bengaluru): installed diesel generator capacity (kVA) per city.** The cut (CPCB's 70% device standard)
+  and the price per kVA (Haryana's 2026 benchmark) transfer; only the 2,801,180 kVA is Bengaluru's (CSTEP 2022). Would widen it:
+  each city's DG-set capacity from a city emission inventory or the state board's consent register, one file per city
+  (`dg_set_replacement_<city>.toml`).
+- **`zigzag_kilns` (Patna): brick kilns per city airshed.** The cut (70-75%) and the cost and saving per kiln transfer; only the
+  300 kilns are Patna's (APnA 2017). Would widen it: kiln counts in the other APnA city reports, or a satellite kiln count, one
+  file per city; and how many are already zig-zag (lead above).
+- **`emissions_market` (Surat): solid-fuel industrial plants per city.** The cost per plant (US$5,000 a year for monitors)
+  transfers; the 906 plants are Surat's (GPCB consent records). Would widen it: each state board's consent records of solid-fuel
+  plants per city. The 20-30% cut would then be borrowed from the Surat trial everywhere else.
+- **`industrial_fuel_switch` (Amritsar): a cost of switching each city's industry to gas.** UNDP's INR 248.6 million is one total
+  for Amritsar. Would widen it: a cost per plant (or per tonne of fuel) of the switch, times each city's count of solid- and
+  liquid-fuel plants; TERI 2021 Table 26 gives NCR's totals only.
+- **`electric_buses` (Bengaluru): each city's bus fleet, the bus share of its transport PM2.5, and a price per bus not from
+  CSTEP's Bengaluru plan.** The NCR effect per share of buses electrified (TERI 2021) could transfer; 2,000 of BMTC's 6,400 buses
+  is Bengaluru's. Would widen it: fleet counts of each city's bus undertaking and a national e-bus price (central tenders).
+- **`electric_two_three_wheelers` (Bengaluru): the two- and three-wheeler share of each city's transport PM, and each city's
+  fleet.** The PM E-DRIVE subsidy per vehicle transfers. Would widen it: a vehicle-type split of each city's transport emissions
+  (city inventories) and registrations per city (VAHAN).
+- **`road_paving`, `road_vacuum_sweeping`, `construction_dust_controls` (Bengaluru): the split of each city's dust into road dust
+  and construction, and each city's main-road length or contract.** The causes table has one `dust` share; each cut is TERI's NCR
+  effect on one part of it, split with CSTEP's Bengaluru inventory. Would widen them: a city inventory that splits dust, plus each
+  city's arterial road length (paving; TERI's prices per square metre transfer), sweeping contract, or enforcement budget.
+- **`lpg_refill_subsidy`, `waste_collection_burning_ban` (Bengaluru): a cut and cost not from CSTEP's Bengaluru scenarios.** Both
+  rest on CSTEP's reduction scenarios and BBMP or Karnataka budgets. Would widen them: an evaluation of LPG refill subsidies'
+  effect on wood burning with a cost per household, and wood-cooking households per city (Census 2011 houselisting tables, fuel
+  used for cooking); for waste burning, a per-household or per-tonne cost of full collection and an effect not tied to one plan.
+- **`n95_winter` (Bengaluru): each city's work participation and dirtiest months.** The share covered is urban Bangalore
+  district's work participation (Census 2011), and the months are Bengaluru's four dirtiest; cut, hours and mask price transfer.
+  Would widen it: each district's urban work participation (Census 2011 Primary Census Abstract) and each city's own monthly
+  shape (airhealth.months), one file per city.
+- **`smog_tower` (Bengaluru): population density around the site.** Covered and the cost per person are both computed from the
+  people within 500 m at urban Bangalore's 2011 density (life-years per crore hardly depends on it). Would widen it: each city's
+  urban density (Census 2011 district handbooks), one file per city.
+- **`school_purifiers` (Bengaluru) and `school_purifiers_india`: each city's own share of children in school and pupil-teacher
+  ratio.** The general variant uses India's (70.4%; 25). UDISE+ 2023-24 Tables 2.2 and 5.1 give both per state, and the UDISE+
+  district files per district; a city file with its own figures would replace the general one for that city.
+- **`winter_cloud_seeding` (Delhi):** nothing in it was measured outside Delhi's October 2025 trials; it stays in Delhi.

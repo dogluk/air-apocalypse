@@ -407,8 +407,14 @@ plus the lag tail, discounted at 3% a year; cost is the funder's rupees in 2025 
 
 ### What the library holds
 
-Twenty-one measures. Thirteen are Bengaluru's (the city page's chapter 4 scores them), four are
-regional, and four are written for the one city where their evidence sits. Odds are the
+Twenty-two measures. Thirteen were written for Bengaluru (the city page's chapter 4 scores
+them), four are regional, and four are written for the one city where their evidence sits. A
+measure runs in every city only where none of its numbers is one city's (its cut, cost per
+person or household, and coverage): two do (`home_purifiers`, `old_vehicle_retirement`), and
+`school_purifiers_india` is Bengaluru's school purifiers with India's school figures in place of
+Karnataka's, for the other 49 cities. Every measure kept to one city names the number that keeps
+it there in a `city-specific:` line in its notes, and data/MISSING.md says what source per city
+would widen it. Odds are the
 probability it works at all, each a judgement with its reason in the file. Evidence: O every
 number read at its source, S some seen only in a press account or summary. "Partial" means the
 cost leaves something out (flag `partial_cost`).
@@ -420,12 +426,13 @@ cost leaves something out (flag `partial_cost`).
 | `road_paving` | air | city | Bengaluru | 0.6 | | | O |
 | `waste_collection_burning_ban` | air | city | Bengaluru | 0.35 | | partial | O |
 | `electric_buses` | air | city | Bengaluru | 0.75 | | | O |
-| `old_vehicle_retirement` | air | city | Bengaluru | 0.3 | | | O |
+| `old_vehicle_retirement` | air | city | every city | 0.3 | | | O |
 | `electric_two_three_wheelers` | air | city | Bengaluru | 0.6 | | | O |
 | `dg_set_replacement` | air | city | Bengaluru | 0.4 | | | O |
 | `lpg_refill_subsidy` | air | city | Bengaluru | 0.5 | | | O |
-| `home_purifiers` | exposure | city | Bengaluru | 0.3 | | partial | O |
+| `home_purifiers` | exposure | city | every city | 0.3 | | partial | O |
 | `school_purifiers` | exposure | city | Bengaluru | 0.35 | | partial | O |
+| `school_purifiers_india` | exposure | city | the other 49 | 0.35 | | partial | O |
 | `n95_winter` | exposure | city | Bengaluru | 0.2 | | partial | O |
 | `smog_tower` | exposure | city | Bengaluru | 0.1 | long shot | partial | O, S |
 | `stubble_pes_upfront` | air | region | stubble table | 0.5 | | partial | O |

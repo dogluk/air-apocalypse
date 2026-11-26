@@ -79,10 +79,12 @@ Not solid, and you should say so when you use a result:
 - **Every curve is stretched past its evidence.** No study has followed people who breathe
   air like Delhi's for years.
 - **The measures are scored and ranked.** `airhealth rank [CITY]` ranks them (all India, or one city) by
-  expected life-years per crore, one table per curve; most measures are city-specific and only
-  Bengaluru has them until the library grows (plan D Task 5), and ranks on different curves must be read
-  side by side (the grid prints first), never averaged. A library of 21 measures (13 for Bengaluru,
-  4 regional, 4 elsewhere) sits in `health/interventions/library/`, every number sourced or
+  expected life-years per crore, one table per curve; most measures are city-specific (a
+  `city-specific:` line in each one's notes names the number that keeps it there); three run in every
+  city (`home_purifiers`, `old_vehicle_retirement`, and `school_purifiers_india` in the 49 besides
+  Bengaluru), and ranks on different curves must be read side by side (the grid prints first), never
+  averaged. A library of 22 measures (13 written for Bengaluru, 1 general variant, 4 regional, 4
+  elsewhere) sits in `health/interventions/library/`, every number sourced or
   flagged. `airhealth measures` lists them; `airhealth score CITY [--study S]` and
   `airhealth score --region ID` score them on every curve, in life-years per crore of 2025
   rupees. Read the flags: `partial_cost` (the cost leaves part out), `upper_bound_all_origins`,
