@@ -50,6 +50,8 @@ Cost per child: one Xiaomi Smart Air Purifier 4 (particle clean-air rate 400 m³
 by 27 children (Karnataka's pupil-teacher ratio, with the RTE rule of at least one classroom per
 teacher) to 50 (the average KV class in Delhi). 2026 prices are used as 2025 rupees. The KV trial
 used larger machines (600 m³/h, rooms up to 60 m²); bigger classrooms may need two.
+
+city-specific: the share of children in school (78.7%) and the pupil-teacher ratio (27) are Karnataka's (UDISE+); the other 49 cities get school_purifiers_india.toml, the same measure with India's figures.
 """
 
 [exposure]

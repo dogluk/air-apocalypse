@@ -1,0 +1,115 @@
+# Every city but Bengaluru: a HEPA purifier running in every classroom during school hours,
+# with all-India school figures in place of Karnataka's (Bengaluru keeps its own file,
+# school_purifiers.toml).
+name = "HEPA purifiers in classrooms (all-India school figures)"
+kind = "exposure"
+scope = "city"
+who_reaches = "schoolchildren in the city, during school hours only"
+cities = ["Delhi", "Mumbai", "Kolkata", "Chennai", "Hyderabad", "Ahmedabad", "Pune", "Surat",
+          "Jaipur", "Lucknow", "Agartala", "Allahabad", "Asansol-Durgapur", "Aurangabad",
+          "Hubli-Dharwad", "Dhanbad-Bokaro", "Gaya", "Guwahati", "Gwalior", "Jamshedpur",
+          "Jodhpur", "Kota", "Madurai", "Nashik", "Panaji", "Puducherry", "Rajkot", "Shimla",
+          "Srinagar", "Thiruvananthapuram", "Tiruchirappalli", "Vadodara", "Vijayawada",
+          "Visakhapatnam", "Agra", "Amritsar", "Bhopal", "Bhubaneswar", "Chandigarh",
+          "Coimbatore", "Dehradun", "Indore", "Kanpur", "Kochi", "Ludhiana", "Nagpur", "Patna",
+          "Raipur-Durg-Bhilai", "Ranchi"]
+
+start_year = 2027
+ramp_years = 0
+duration_years = 5
+lag = "epa20"
+
+p_success = 0.35
+p_success_basis = "judgement: the same as Bengaluru's school purifiers (school_purifiers.toml). Below the air measures' middle value (0.5), but above home purifiers, because use is decided by the school, not each household: in the Delhi Kendriya Vidyalaya trial teachers ran the purifiers in class and indoor PM2.5 fell as intended. Against it: no trial shows fewer deaths, children in purifier classrooms protected themselves less outside school (the same trial's policy brief, 2026), and sustained use needs filters bought and machines kept running in government schools for years"
+
+placeholders = []
+
+notes = """
+The general variant of school_purifiers (Bengaluru), for the other 49 cities (plan D, 2026-11-27).
+The measure is the same: every classroom gets a HEPA purifier, run by the teacher during lessons
+with doors and windows shut, for five years (a design choice). Only children in class breathe
+less, and only during school hours.
+
+What changed from Bengaluru's file, and why. Two of its numbers were Karnataka's: the share of
+5-19-year-olds in school (Karnataka's UDISE+ enrolment over Karnataka's population aged 5-19)
+and the pupil-teacher ratio used for the most children per classroom (27). Here both are
+India's, from the same UDISE+ 2023-24 report: 248,045,828 enrolled over India's projected
+352,250,759 people aged 5-19 in 2023 gives 70.4%; India's pupil-teacher ratio is 25. Each
+city's own share in school differs (a migrant-heavy city probably has fewer children in
+school; a state like Kerala more); a city file with its state's or district's UDISE+ figures
+would replace this (data/MISSING.md). Hubli-Dharwad is in Karnataka too but gets India's
+figures here, like every city without its own file.
+
+Unchanged, and not about any one city: the cut, from 49% (the field-study mean, Ebrahimifakhar
+et al. 2024) to 76% (the Delhi Kendriya Vidyalaya pilot); the hours, the Right to Education
+Act's 800-1,000 instructional hours a year; the prices (Xiaomi's all-India retail price); and
+the fewest children per classroom, 50 (Delhi KV classes). The evidence for the cut is borrowed
+from Delhi (and field studies worldwide) in every other city.
+
+Who: children aged 5-19 (ages = [5, 19]), counted with their own death rates. On curves that
+start at age 25 (gemm_ncd_lri, loglinear_vodonos) children get nothing: those curves have no
+evidence on children, which is not the same as evidence of no effect.
+
+Cost per child: one Xiaomi Smart Air Purifier 4 at Rs 18,999 per classroom, and its filter at
+Rs 3,499 every 6-12 months, shared by 25 (India's pupil-teacher ratio, with the RTE rule of at
+least one classroom per teacher) to 50 children. 2026 prices are used as 2025 rupees.
+"""
+
+[exposure]
+covered = 0.7042
+hours = { dist = "uniform", p5 = 0.0913, p95 = 0.1142 }
+cut = { dist = "uniform", p5 = 0.49, p95 = 0.76 }
+ages = [5, 19]
+
+[cost]
+driver = "person"
+once = { dist = "uniform", p5 = 380, p95 = 760 }
+annual = { dist = "uniform", p5 = 70, p95 = 280 }
+currency = "INR"
+year = 2025
+partial = "It leaves out electricity, installation, the staff time to keep machines running and filters changed, and a second machine where a classroom is larger than one unit covers."
+
+[[evidence]]
+fields = ["exposure.cut"]
+source = "Ruiz-Tagle JC, Sangwan N, Jaime MM, Salazar C, Kacker K, Kumar P (2024), Behavioral and Technological Strategies to Mitigate Effects of Air Pollution on Children: Empirical Evidence from an RCT in Delhi's Schools, Journal of Development Economics registered report (stage 1), manuscript DEVEC-D-24-00902R1"
+url = "https://afosterri.org/jdepreresults/wp-content/uploads/2024/11/ruiz-tagle-sangwan-jaime-salazar-kacker-kumar-behavioral-air-pol-9f0c421651eae910c6a5e0ab49e547dd.pdf"
+locator = "Power analysis, 'Particle Pollution (PM2.5) inside classrooms', manuscript lines 501-507, printed pp. 18-19 (PDF pp. 37-38): pilot with seven purifiers, Aug-Dec 2022, 'The average PM2.5 pollution inside the classrooms is 133.16 μg/m3' and 'the average reduction in PM2.5 pollution inside classrooms that we observed in our pilot is 101.2 μg/m3'"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "As in school_purifiers.toml: p95 = 101.2 / 133.16 = 0.76. p5 = 0.49, the mean reduction across 83 field studies, Ebrahimifakhar et al. (2024), Sci Total Environ 912: 168786 (https://pubmed.ncbi.nlm.nih.gov/38008326/), abstract."
+
+[[evidence]]
+fields = ["exposure.hours"]
+source = "The Right of Children to Free and Compulsory Education Act, 2009 (Act 35 of 2009), the Schedule"
+url = "https://www.indiacode.nic.in/bitstream/123456789/19014/1/the_right_of_children_to_free_and_compulsory_education_act_2009.pdf"
+locator = "The Schedule, item 3 'Minimum number of working days/instructional hours in an academic year': '(iii) eight hundred instructional hours per academic year for first class to fifth class; (iv) one thousand instructional hours per academic year for sixth class to eighth class'"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "p5 = 800 / 8760 = 0.0913; p95 = 1000 / 8760 = 0.1142 (share of all the hours in a year)."
+
+[[evidence]]
+fields = ["exposure.covered"]
+source = "Ministry of Education (2024), Report on Unified District Information System for Education Plus (UDISE+) 2023-24"
+url = "https://www.dsel-education.gov.in/static/uploads/2025/09/57501621802afd72e8beca744b1bc7c0.pdf"
+locator = "Table 5.1 'Enrolment of students by school management and level of school education, 2023-24: All Management', p. 74: India total 248045828 (also Table 2.2, p. 30, Enrolments, India)"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "248,045,828 / 352,250,759 = 0.7042, the share of India's 5-19-year-olds enrolled (exposure.ages = [5, 19]). 352,250,759 = India's projected population aged 5-9 (114,153,251), 10-14 (116,740,777) and 15-19 (121,356,731) on 1 July 2023, read from data/population_age_state.csv (rows INDIA, 2023, age_start 5, 10, 15), the Report of the Technical Group on Population Projections (MoHFW, July 2020; see data/sources.toml). Enrolment includes pre-primary children aged 3-5, so the share is rough. An all-India ratio used for every city."
+
+[[evidence]]
+fields = ["cost.once"]
+source = "Xiaomi India store, Xiaomi Smart Air Purifier 4"
+url = "https://www.mi.com/in/product/xiaomi-smart-air-purifier-4/buy/"
+locator = "Product page: 'Current Price ₹18999'; specifications page (https://www.mi.com/in/product/xiaomi-smart-air-purifier-4/): 'Particle CADR of up to 400m3/h', 'Effective coverage area of 301sq.ft - 516sq.ft.'"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "per child = 18,999 / students per classroom: p5 = 18,999 / 50 = 380, p95 = 18,999 / 25 = 760. 50 = 'each class has an average of 50 students' (Ruiz-Tagle et al. 2024, manuscript lines 464-465, PDF p. 35, Delhi KV schools); 25 = India's pupil-teacher ratio, UDISE+ 2023-24 (https://www.dsel-education.gov.in/static/uploads/2025/09/57501621802afd72e8beca744b1bc7c0.pdf) Table 2.2 'State wise highlights', p. 30, India row, column 5 'Pupil Teacher Ratio' = 25 (read 2026-11-27), with the RTE Schedule item 2 'at least one class-room for every teacher'. 2026 price taken as 2025 rupees."
+
+[[evidence]]
+fields = ["cost.annual"]
+source = "Xiaomi India store listing, Xiaomi Smart Air Purifier 4 Filter"
+url = "https://store.mi.com/in/products/453-0-8-1-0-1"
+locator = "Listing 'TV & Smart Home': 'Xiaomi Smart Air Purifier 4 Filter ₹3,499'; replacement interval from the filter's page (https://www.mi.com/in/product/xiaomi-smart-air-purifier-4-filter/): 'It is recommended to replace the filter every 6–12 months.'"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "one to two filters a year per classroom, per child: p5 = 3,499 / 50 = 70, p95 = 2 x 3,499 / 25 = 280 (India's pupil-teacher ratio, UDISE+ 2023-24 Table 2.2, p. 30). 2026 price taken as 2025 rupees."
