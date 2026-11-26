@@ -1,4 +1,4 @@
-.venv/
+.venv
 __pycache__/
 .DS_Store
 
@@ -10,7 +10,7 @@ diwali/data/hourly.parquet
 diwali/data/trends_pull.log
 
 # Health model: IHME files are never committed.
-health/data_local/
+health/data_local
 
 # Working notes kept off the public repo (status, build plans).
 docs/private/
