@@ -326,10 +326,12 @@ def change_text(iv) -> str:
     return f"{iv.change_kind} {_dist_text(iv.change, unit)}"
 
 
-def _timing(iv, shares) -> str:
+def _timing(iv, run) -> str:
     ramp = f"ramp {iv.ramp_years} years" if iv.ramp_years else "no ramp"
+    rate = f"discounted at {100 * run.discount:g}% a year" if run.discount else "not discounted"
     return (f"{iv.start_year}-{iv.start_year + iv.duration_years - 1}: {iv.duration_years} years, "
-            f"{ramp}, lag {iv.lag}; these deliver {shares.sum():.1f} years of the full effect")
+            f"{ramp}, lag {iv.lag}, counted over {run.horizon_years} years, {rate}; "
+            f"these deliver {run.shares.sum():.1f} years of the full effect, undiscounted")
 
 
 def _cost_text(run: Run, cost: dict) -> str:
@@ -387,7 +389,7 @@ def _run_heading(run: Run) -> list[str]:
              "population only" if iv.from_level is not None else "population-weighted")
     return [
         iv.name,
-        f"{where}. {_timing(iv, run.shares)}. Probability it works: {100 * iv.p_success:g}%.",
+        f"{where}. {_timing(iv, run)}. Probability it works: {100 * iv.p_success:g}%.",
         f"Change: {change_text(iv)}; annual-mean change {after - run.pm25_before:+.2f} µg/m³ "
         f"(PM2.5 {run.pm25_before:.1f} → {after:.1f}, {start}; median draw).",
         f"Population {run.population / 1e6:,.1f} M; "
@@ -398,7 +400,8 @@ def _run_heading(run: Run) -> list[str]:
 def run_footer(run: Run) -> str:
     notes = ["Life-years = deaths postponed by age × remaining life expectancy at the age of "
              "death, at the map year's population and age structure, summed over the "
-             "intervention's years",
+             f"{run.horizon_years}-year horizon (the intervention's years and the tail of the lag), "
+             + (f"discounted at {100 * run.discount:g}% a year" if run.discount else "not discounted"),
              ihme_note([c.curve for c in run.per_curve.values()], run.year),
              population_note(run.population_year, run.year, run.census_places),
              deaths_note(run.reconciliations, run.deaths_baseline, run.deaths_model,
@@ -479,6 +482,7 @@ def run_json(run: Run) -> dict:
         population_year=run.population_year,
         start_year=iv.start_year, duration_years=iv.duration_years, ramp_years=iv.ramp_years,
         lag=iv.lag, realised_share_by_year=[float(x) for x in run.shares],
+        discount=run.discount, horizon_years=run.horizon_years,
         cost_currency=iv.cost_currency, cost_year=iv.cost_year, usd_per_unit=run.usd_per_unit,
         cost_share_only_on_success=iv.cost_share_only_on_success,
         rows=run_rows(run), across_curve_spread=across_curve_spread(run),

@@ -3,8 +3,8 @@ import dataclasses
 import numpy as np
 import pytest
 
-from airhealth import (charts, cli, curves, impact, intervention, lifetable, paths, prices, report,
-                       simulate)
+from airhealth import (charts, cli, curves, impact, intervention, lag, lifetable, paths, prices,
+                       report, simulate)
 from airhealth.intervention import Dist, Invalid
 from airhealth.places import resolve
 
@@ -61,12 +61,12 @@ def test_expected_is_probability_times_conditional():
 
 
 def test_cost_per_life_year_two_ways():
-    run = simulate.run(nov(p_success=0.4, cost_share_only_on_success=0.0), n=N)
+    run = simulate.run(nov(p_success=0.4, cost_share_only_on_success=0.0), n=N, discount=0, tail=False)
     for r in run.per_curve.values():
         s = r.summary()
         assert s["expected_cost_per_expected_life_year"] == pytest.approx(
             s["cost_per_life_year_if_works"] / 0.4)
-    run = simulate.run(nov(p_success=0.4, cost_share_only_on_success=1.0), n=N)
+    run = simulate.run(nov(p_success=0.4, cost_share_only_on_success=1.0), n=N, discount=0, tail=False)
     for r in run.per_curve.values():
         s = r.summary()
         assert s["expected_cost_per_expected_life_year"] == pytest.approx(
@@ -75,8 +75,8 @@ def test_cost_per_life_year_two_ways():
 
 def test_november_only_buys_about_a_twelfth():
     curve = ["loglinear_jaganathan"]
-    november = simulate.run(load("november_only_delhi"), curves=curve, n=N)
-    year_round = simulate.run(fixed(-40), curves=curve, n=N)
+    november = simulate.run(load("november_only_delhi"), curves=curve, n=N, discount=0, tail=False)
+    year_round = simulate.run(fixed(-40), curves=curve, n=N, discount=0, tail=False)
     ratio = (november.per_curve[curve[0]].life_years.mean()
              / year_round.per_curve[curve[0]].life_years.mean())
     assert ratio == pytest.approx(1 / 12, rel=0.25)
@@ -100,9 +100,10 @@ def test_harmful_intervention_reports_negative_life_years(capsys):
 
 def test_ramp_and_lag_reduce_early_years():
     curve = ["loglinear_jaganathan"]
-    immediate = simulate.run(fixed(-20, lag="immediate"), curves=curve, n=N)
-    epa = simulate.run(fixed(-20, lag="epa20"), curves=curve, n=N)
-    ramped = simulate.run(fixed(-20, lag="epa20", ramp_years=3), curves=curve, n=N)
+    kw = dict(curves=curve, n=N, discount=0, tail=False)
+    immediate = simulate.run(fixed(-20, lag="immediate"), **kw)
+    epa = simulate.run(fixed(-20, lag="epa20"), **kw)
+    ramped = simulate.run(fixed(-20, lag="epa20", ramp_years=3), **kw)
     a, b, c = (r.per_curve[curve[0]].life_years.mean() for r in (immediate, epa, ramped))
     assert a > b > c > 0
     # With an immediate lag and no ramp, ten years are ten full-effect years.
@@ -134,7 +135,7 @@ def test_across_curve_spread_exceeds_within_curve_for_delhi():
 
 def test_life_years_are_steady_state_times_realised_years():
     iv = fixed(-20, lag="epa20", ramp_years=2)
-    run = simulate.run(iv, curves=["loglinear_jaganathan"], n=50)
+    run = simulate.run(iv, curves=["loglinear_jaganathan"], n=50, discount=0, tail=False)
     ref = impact.steady_state(resolve("Delhi"), curves.get("loglinear_jaganathan"), "aqli",
                               impact.Change(delta=-20))
     r = run.per_curve["loglinear_jaganathan"]
@@ -148,7 +149,7 @@ def test_life_years_are_steady_state_times_realised_years():
 def test_cost_is_in_2025_rupees_and_dollars_at_the_2025_rate():
     iv = fixed(-10, cost_once=Dist.fixed(0), cost_annual=Dist.fixed(1e8), cost_year=2024,
                duration_years=10)
-    run = simulate.run(iv, curves=["loglinear_jaganathan"], n=10)
+    run = simulate.run(iv, curves=["loglinear_jaganathan"], n=10, discount=0)
     r = run.per_curve["loglinear_jaganathan"]
     d = prices.deflator()
     assert r.cost_inr == pytest.approx(np.full(10, 1e9 * d[2025] / d[2024]))
@@ -395,3 +396,76 @@ def test_monthly_pct_prints_its_shape(tmp_path):
     assert "PM2.5 shape" in foot and "Delhi: 1 monitored city" in foot and "borrowed" in foot
     assert "as polluted" not in foot
     assert "monthly_pct" not in report.run_footer(simulate.run(nov(), n=50, curves=["gemm_ncd_lri"]))
+
+
+# --- the common horizon, the tail and discounting ---------------------------------------------
+
+def test_without_tail_or_discount_nothing_moves():
+    iv = load("punjab_haryana_10pct")                    # ramp 3, duration 15, epa20
+    old = simulate.yearly_shares(iv, tail=False)
+    ramp = np.minimum(np.arange(1, 16) / 3, 1.0)
+    before = np.convolve(np.diff(ramp, prepend=0.0), lag.profile("epa20", 15))[:15]
+    assert len(old) == 15 and np.allclose(old, before)
+    a = simulate.run(iv, curves=["gemm_ncd_lri"], n=200, discount=0, tail=False)
+    assert a.horizon_years == 15 and a.discount == 0
+    assert np.allclose(a.shares, before)
+    r = a.per_curve["gemm_ncd_lri"]
+    assert r.life_years.mean() > 0 and np.allclose(r.deaths_postponed.sum() > 0, True)
+
+
+def test_one_year_measure_keeps_its_tail():
+    iv = dataclasses.replace(load("delhi_100_to_80"), duration_years=1, lag="epa20")
+    s = simulate.yearly_shares(iv)
+    assert len(s) == 21 and s.sum() == pytest.approx(1.0)
+    assert simulate.yearly_shares(iv, tail=False).sum() == pytest.approx(0.30)
+
+
+def test_immediate_lag_has_no_tail():
+    iv = dataclasses.replace(load("delhi_100_to_80"), duration_years=4, lag="immediate", ramp_years=0)
+    assert np.allclose(simulate.yearly_shares(iv), np.ones(4))
+
+
+def test_tail_total_equals_years_on():
+    iv = load("punjab_haryana_10pct")
+    on_years = sum(min(k / 3, 1) for k in range(1, 16))     # 14
+    s = simulate.yearly_shares(iv)
+    assert len(s) == 35 and s.sum() == pytest.approx(on_years)
+    assert s[-1] == pytest.approx(0.0, abs=1e-12)
+
+
+def test_discounting_lowers_life_years_and_costs():
+    iv = fixed(-20, cost_once=Dist.fixed(1e8), cost_annual=Dist.fixed(1e7))
+    a = simulate.run(iv, curves=["gemm_ncd_lri"], n=200, discount=0)
+    b = simulate.run(iv, curves=["gemm_ncd_lri"], n=200)
+    ra, rb = a.per_curve["gemm_ncd_lri"], b.per_curve["gemm_ncd_lri"]
+    assert b.discount == simulate.DISCOUNT == 0.03
+    assert rb.life_years.mean() < ra.life_years.mean()
+    assert rb.cost_inr.mean() < ra.cost_inr.mean()
+    assert np.array_equal(ra.deaths_postponed, rb.deaths_postponed)
+
+
+def test_cost_once_is_not_discounted_and_annual_is():
+    iv = fixed(-10, cost_once=Dist.fixed(1e8), cost_annual=Dist.fixed(0), cost_year=2025)
+    r = simulate.run(iv, curves=["gemm_ncd_lri"], n=5).per_curve["gemm_ncd_lri"]
+    assert r.cost_inr == pytest.approx(np.full(5, 1e8))
+    iv = dataclasses.replace(iv, cost_once=Dist.fixed(0), cost_annual=Dist.fixed(1e7), duration_years=3)
+    r = simulate.run(iv, curves=["gemm_ncd_lri"], n=5, discount=0.03).per_curve["gemm_ncd_lri"]
+    assert r.cost_inr == pytest.approx(np.full(5, 1e7 * (1 + 1 / 1.03 + 1 / 1.03 ** 2)))
+
+
+def test_discount_factors():
+    assert np.allclose(simulate.discount_factors(3, 0.03), [1, 1 / 1.03, 1 / 1.03 ** 2])
+
+
+def test_report_timing_names_horizon_and_rate():
+    text = report.run_table(simulate.run(load("november_only_delhi"), n=50))
+    assert "counted over 30 years, discounted at 3% a year" in text
+    zero = report.run_table(simulate.run(load("november_only_delhi"), n=50, discount=0))
+    assert "not discounted" in zero
+
+
+def test_discount_rate_is_a_listed_constant():
+    from airhealth import provenance
+    c = {x["name"]: x for x in provenance.constants()}
+    d = c["Discount rate a year, for costs and life-years"]
+    assert d["value"] == 0.03 and "WHO" in d["source"] and "http" in d["source"]

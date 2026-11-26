@@ -333,3 +333,12 @@ def test_causes_unknown_city_is_one_line(capsys):
 def test_list_inputs_shows_causes(capsys):
     _, out, _ = run(capsys, "list", "inputs")
     assert "causes: Causes of PM2.5 by city" in out
+
+
+def test_run_discount_flag(capsys):
+    iv = str(paths.HEALTH / "interventions" / "delhi_100_to_80.toml")
+    code, out, _ = run(capsys, "run", iv, "--n", "100", "--discount", "0", "--json")
+    zero = json.loads(out)
+    assert code == 0 and zero["discount"] == 0 and zero["horizon_years"] == 30
+    default = json.loads(run(capsys, "run", iv, "--n", "100", "--json")[1])
+    assert default["discount"] == pytest.approx(0.03)

@@ -229,27 +229,27 @@ curve and which map are never drawn: each curve is its own row, and a run uses o
 ```
 $ airhealth run interventions/november_only_delhi.toml
 November-only cut in Delhi
-Delhi (state). 2027-2036: 10 years, no ramp, lag epa20; these deliver 7.0 years of the full effect. Probability it works: 50%.
+Delhi (state). 2027-2036: 10 years, no ramp, lag epa20, counted over 30 years, discounted at 3% a year; these deliver 10.0 years of the full effect, undiscounted. Probability it works: 50%.
 Change: monthly delta: Nov -40 µg/m³; other months 0; annual-mean change -3.29 µg/m³ (PM2.5 88.3 → 85.1, population-weighted; median draw).
 Population 21.5 M; all-cause deaths 99,440 a year (4.6 per 1,000). 5,000 draws, seed 0.
 
 If it works, totals over the run (median, 5-95% range):
 curve                                      life-years                deaths postponed  life exp. at full effect, yrs
 --------------------  -------------------------------  ------------------------------  -----------------------------
-loglinear_jaganathan     383,000 (308,000 to 459,000)       18,500 (14,900 to 22,200)         +0.36 (+0.29 to +0.44)
-loglinear_brown             37,800 (-9,340 to 84,400)           2,120 (-524 to 4,730)         +0.04 (-0.01 to +0.09)
-loglinear_vodonos        281,000 (195,000 to 363,000)       16,900 (11,700 to 21,800)         +0.32 (+0.22 to +0.41)
-gemm_ncd_lri                82,000 (69,600 to 94,600)          4,920 (4,180 to 5,670)         +0.09 (+0.08 to +0.11)
-aqli *                339,000 (no published interval)  16,400 (no published interval)  +0.32 (no published interval)
+loglinear_jaganathan     439,000 (353,000 to 525,000)       26,600 (21,400 to 31,900)         +0.36 (+0.29 to +0.44)
+loglinear_brown            43,300 (-10,700 to 96,600)           3,050 (-754 to 6,810)         +0.04 (-0.01 to +0.09)
+loglinear_vodonos        321,000 (224,000 to 416,000)       24,300 (16,900 to 31,400)         +0.32 (+0.22 to +0.41)
+gemm_ncd_lri               93,900 (79,800 to 108,000)          7,070 (6,010 to 8,160)         +0.09 (+0.08 to +0.11)
+aqli *                389,000 (no published interval)  23,600 (no published interval)  +0.32 (no published interval)
 
-Expected = mean if it works × probability it works (0.5). Cost if it works: $18.2 M ($5.78 M to $61.6 M), in 2025 rupees, ₹87.16 per $ (World Bank 2025 average); all of it spent whether or not it works.
+Expected = mean if it works × probability it works (0.5). Cost if it works: $16 M ($5.08 M to $54.1 M), in 2025 rupees, ₹87.16 per $ (World Bank 2025 average); all of it spent whether or not it works.
 curve                 expected life-years  cost per life-year if it works  expected cost per expected life-year
 --------------------  -------------------  ------------------------------  ------------------------------------
-loglinear_jaganathan              192,000                           $61.7                                  $123
-loglinear_brown                    18,900                            $624                                $1,250
-loglinear_vodonos                 140,000                           $84.5                                  $169
-gemm_ncd_lri                       41,000                            $288                                  $577
-aqli *                            170,000                           $69.7                                  $139
+loglinear_jaganathan              219,000                           $47.4                                 $94.7
+loglinear_brown                    21,700                            $479                                  $958
+loglinear_vodonos                 160,000                           $64.8                                  $130
+gemm_ncd_lri                       47,000                            $221                                  $442
+aqli *                            194,000                           $53.4                                  $107
   (costs per life-year are ratios of means over the draws)
 
 What drives the spread in life-years within each curve (share of variance, each part sampled alone):
@@ -269,7 +269,7 @@ Across curves, the largest median life-years is 10.1× the smallest.
   aqli: AQLI linear, 0.98 years of life expectancy per 10 µg/m³
   * deaths derived from the life-expectancy change, not a relative risk
 
-Map: aqli 2023 (AQLI 2025 release, districts, satellite PM2.5 with dust and sea salt removed). Life-years = deaths postponed by age × remaining life expectancy at the age of death, at the map year's population and age structure, summed over the intervention's years. Deaths at ages 45 and over scaled by ×0.72 to the SRS crude death rate for Delhi, 2020-24 (4.5 per 1,000); life expectancy is from the unscaled life table. Sources: population by age, projection (default); death rates by age, srs (default); death count, srs (default). Not run: gbd2019, gbd2023, gemm_5cod: need IHME files in health/data_local/ (see health/IHME_DOWNLOADS.md).
+Map: aqli 2023 (AQLI 2025 release, districts, satellite PM2.5 with dust and sea salt removed). Life-years = deaths postponed by age × remaining life expectancy at the age of death, at the map year's population and age structure, summed over the 30-year horizon (the intervention's years and the tail of the lag), discounted at 3% a year. Deaths at ages 45 and over scaled by ×0.72 to the SRS crude death rate for Delhi, 2020-24 (4.5 per 1,000); life expectancy is from the unscaled life table. Sources: population by age, projection (default); death rates by age, srs (default); death count, srs (default). Not run: gbd2019, gbd2023, gemm_5cod: need IHME files in health/data_local/ (see health/IHME_DOWNLOADS.md).
 ```
 
 How to read it:
@@ -313,7 +313,7 @@ How to read it:
 
 Other flags: `--map M` (default: cpcb when every place is a city with ground monitors,
 otherwise aqli), `--curves a,b`, `--n N` draws, `--seed S` (the same seed gives the same
-answer), `--use input=source` (see "Sources" above).
+answer), `--discount PCT` (default 3; 0 for none), `--use input=source` (see "Sources" above).
 
 **How time is counted in this version.** The steady-state effect is computed once per
 draw. Each year of the intervention then realises a share of it. The **ramp** brings the
@@ -321,8 +321,20 @@ change in over `ramp_years` in equal steps. The **cessation lag** is how slowly 
 rate follows the air down: by default the US EPA's 20-year lag (30% of the fall in risk in
 the first year, 50% spread over years 2-5, 20% over years 6-20); `immediate` puts it all in
 year one. Each step of the ramp starts its own lag clock. Deaths postponed and life-years
-are the steady-state figures times the sum of those yearly shares. Years after the
-intervention ends count for nothing, and nothing is discounted. Life-years are deaths
+are the steady-state figures times the sum of those yearly shares.
+
+**The horizon and the tail.** Every measure is counted over the same kind of horizon: its
+duration plus the length of its lag (20 years for `epa20`, nothing extra for `immediate`).
+When the intervention ends the air goes back, which is one more step (minus the full
+level), and that step starts its own lag too, so the benefit still arriving when a measure
+stops keeps arriving. A one-year measure under `epa20` delivers all of one year's effect,
+spread over 21 years; the old accounting stopped at the last year and dropped the rest.
+
+**Discounting.** Life-years and costs are both discounted at 3% a year (the WHO-CHOICE
+base case; the source is in `provenance.constants()`): a life-year in year t counts
+1.03^-t, the one-off cost falls at t = 0 and the annual cost in each year of the
+duration. Deaths postponed are not discounted. `--discount PCT` changes the rate (`--discount 0` for none).
+Life-years are deaths
 postponed × remaining life expectancy at the age of death. People who die in a five-year
 age band die on average half-way through it, so each death is credited with the life
 expectancy of a person alive at that point (in infancy, at the life table's own average age
@@ -629,7 +641,7 @@ The two IHME-tier cases skip where the IHME files are absent.
   people at those levels. The tool shows how far apart the curves land; it does not resolve
   it.
 - **Life-years are deaths postponed × remaining life expectancy at the age of death**, at the map year's
-  population and age structure, within the intervention's years, undiscounted. A cohort run
+  population and age structure, over the horizon (the intervention's years and the lag's tail), discounted at 3% a year. A cohort run
   to 2050 replaces this; when it comes, the population after 2036 (the end of the official
   projections) will be a crude extension.
 - **The uncertainty is partial.** Ranges cover the PM2.5 change, the curve's own published

@@ -181,7 +181,7 @@ def cmd_run(args) -> None:
     names = [n.strip() for n in args.curves.split(",") if n.strip()] if args.curves else None
     combos = _choice(args).combinations(base=iv.sources)
     runs = [simulate.run(iv, map_name=map_name, curves=names, n=args.n, seed=args.seed,
-                         deaths=src) for src in combos]
+                         deaths=src, discount=args.discount / 100) for src in combos]
     if len(runs) > 1:
         return _emit_runs(args, runs)
     result = runs[0]
@@ -382,6 +382,9 @@ def _parser() -> argparse.ArgumentParser:
     r.add_argument("--curves", help="comma-separated curve names (default: every curve)")
     r.add_argument("--n", type=int, default=5000, help="Monte Carlo draws (default 5000)")
     r.add_argument("--seed", type=int, default=0, help="random seed (default 0)")
+    r.add_argument("--discount", type=float, default=simulate.DISCOUNT * 100, metavar="PCT",
+                   help="discount rate a year for life-years and costs, in percent "
+                   "(default 3; 0 for none)")
     r.add_argument("--charts", metavar="DIR", help="also draw the results and spread charts here")
     deaths_flag(r)
     r.set_defaults(func=cmd_run)

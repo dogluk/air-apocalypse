@@ -15,11 +15,21 @@ population and age structure. Each year of the intervention realises a share of 
 ramp brings the change in over ramp_years in equal steps, and each step starts its own
 cessation lag (lag.profile), so the share in year k is the sum over steps of the step's
 size times the lag's cumulative share k - j years after step j. With no ramp this is the
-lag profile itself. Deaths postponed and life-years over the run are the steady-state
-figures times the sum of those shares. Years after duration_years count for nothing, in
-either direction; nothing is discounted.
+lag profile itself.
 
-Cost if it works = (once + annual × duration_years), in 2025 rupees (prices.to_base_inr: the
+The horizon is common to every measure: duration_years plus the length of its lag (20 for
+epa20, nothing for immediate). When the intervention ends the air goes back, which is one
+more step, of minus the full level, in year duration_years, and that step starts its own lag
+too: the benefit that is still arriving when the measure stops keeps arriving (the tail), and
+the rest of the effect fades out as the lag runs the other way. A one-year measure under epa20
+therefore delivers all of one year's effect, spread over 21 years; today's accounting
+(tail=False) stops at duration_years and drops the rest. Deaths postponed are the
+steady-state figures times the sum of the yearly shares, undiscounted. Life-years are
+the same sum with each year's share times (1 + DISCOUNT) ** -t, t = 0 for the first year
+(DISCOUNT_SOURCE); discount=0 is the switch for no discounting. Costs are discounted the
+same way: the one-off cost falls at t = 0, the annual cost in each year of duration_years.
+
+Cost if it works = (once + annual × duration_years, discounted), in 2025 rupees (prices.to_base_inr: the
 GDP deflator, and for dollar costs the rate of the cost year); dollars shown are those rupees at
 the 2025 rate.
 Expected cost = that × (1 − s + s × p_success), s = cost_share_only_on_success. The two
@@ -48,6 +58,22 @@ from .intervention import Intervention, Invalid
 from .places import Place
 
 GROUPS = ("pm25_change", "curve_parameters")
+
+DISCOUNT = 0.03   # a year, for costs and life-years alike
+DISCOUNT_SOURCE = (
+    "Tan-Torres Edejer T, Baltussen R, Adam T, Hutubessy R, Acharya A, Evans DB, Murray CJL "
+    "(eds). Making choices in health: WHO guide to cost-effectiveness analysis. Geneva: World "
+    "Health Organization, 2003. Section 3.3.1 'Choice of discount rate' (printed p. 45): "
+    "'WHO-CHOICE uses a discount rate of 3% for the base case, as suggested in a number of "
+    "guidelines. A discount rate of 6% is also explored using sensitivity analysis.' Section "
+    "4.1.5 'Discounting' (p. 54): future healthy years gained 'are discounted at a 3% rate to "
+    "their present values for the base case analysis in WHO-CHOICE'. Summary of "
+    "recommendations (p. 71): '1. Costs and effects should be discounted at 3% in the base-case "
+    "analysis. 2. In the sensitivity analysis ... we recommend testing the sensitivity of the "
+    "results to a 0% discount rate for health effects and a 6% discount rate for costs.' "
+    "https://iris.who.int/handle/10665/42699 "
+    "(sha256 71c495bc26791acd5b262cd1248199de96513df5ce1a74666f3a20de498eb04b), read 2026-11-27."
+)
 
 
 @dataclass(frozen=True)
@@ -105,6 +131,8 @@ class Run:
     deaths_baseline: float          # all-cause deaths a year in the places
     pm25_before: float              # population-weighted, µg/m³
     shares: np.ndarray              # share of the full effect realised in each year
+    discount: float                 # a year, for life-years and costs
+    horizon_years: int              # years counted: the duration, plus the lag's tail
     usd_per_unit: float             # dollars per 2025 rupee
     fallback_states: list[str]
     unavailable: dict[str, str]     # curves asked for that could not run, with why
@@ -118,13 +146,26 @@ class Run:
     shapes: dict = field(default_factory=dict)   # months.Shape by Place.label; monthly_pct runs only
 
 
-def realised_shares(iv: Intervention) -> np.ndarray:
-    """Share of the steady-state effect realised in each year of the intervention."""
-    years = iv.duration_years
-    k = np.arange(1, years + 1)
-    ramp = np.minimum(k / iv.ramp_years, 1.0) if iv.ramp_years else np.ones(years)
-    steps = np.diff(ramp, prepend=0.0)
-    return np.convolve(steps, lags.profile(iv.lag, years))[:years]
+def yearly_shares(iv: Intervention, tail: bool = True) -> np.ndarray:
+    """Share of the steady-state effect realised in each year t = 0..H-1 of the horizon.
+
+    H = duration_years + the lag's length (20 for epa20, 0 for immediate) when tail, else
+    duration_years. The ramp's steps switch the air on; at the end of the duration the whole
+    level switches off (a step of minus one), and every step starts its own lag."""
+    d = iv.duration_years
+    horizon = d + (len(lags._EPA20) if tail and iv.lag == "epa20" else 0)
+    k = np.arange(1, d + 1)
+    ramp = np.minimum(k / iv.ramp_years, 1.0) if iv.ramp_years else np.ones(d)
+    on = np.zeros(horizon + 1)
+    on[:d] = np.diff(ramp, prepend=0.0)
+    on[d] = -ramp[-1]
+    increments = np.diff(lags.profile(iv.lag, horizon), prepend=0.0)
+    return np.cumsum(np.convolve(on, increments)[:horizon])
+
+
+def discount_factors(years: int, rate: float) -> np.ndarray:
+    """(1 + rate) ** -t for t = 0..years-1."""
+    return (1.0 + rate) ** -np.arange(years)
 
 
 def _overlap(a: Place, b: Place, map_name: str) -> bool:
@@ -200,8 +241,11 @@ def _width(x: np.ndarray) -> float:
 
 
 def run(iv: Intervention, map_name: str = "aqli", curves: list[str] | None = None,
-        n: int = 5000, seed: int = 0, deaths: "str | Sources | None" = None) -> Run:
+        n: int = 5000, seed: int = 0, deaths: "str | Sources | None" = None,
+        discount: float = DISCOUNT, tail: bool = True) -> Run:
     """Run the intervention on every curve asked for (default: every curve that can run).
+    discount: a year, for life-years and costs (0 for none); tail: count the years after the
+    intervention ends in which its effect is still arriving (see the module docstring).
     deaths: an inputs.Sources or a deaths basis ("srs", "model", "unwpp"); None takes the
     intervention file's [sources] table, else the defaults."""
     deaths = Sources.of(iv.sources if deaths is None else deaths)
@@ -218,12 +262,14 @@ def run(iv: Intervention, map_name: str = "aqli", curves: list[str] | None = Non
     median_q = np.full(n, 0.5)
     usd = prices.usd_per_base_inr()
     cost_rng = _rng(seed, 1)
-    cost_inr = prices.to_base_inr(
-        iv.cost_once.sample(cost_rng, n) + iv.cost_annual.sample(cost_rng, n) * iv.duration_years,
-        iv.cost_currency, iv.cost_year)
+    once = iv.cost_once.sample(cost_rng, n)
+    annual = iv.cost_annual.sample(cost_rng, n)
+    paid = discount_factors(iv.duration_years, discount).sum()    # annual cost, in present value
+    cost_inr = prices.to_base_inr(once + annual * paid, iv.cost_currency, iv.cost_year)
     cost_usd = cost_inr * usd
-    shares = realised_shares(iv)
-    years = shares.sum()
+    shares = yearly_shares(iv, tail)
+    deaths_years = shares.sum()
+    years = float(shares @ discount_factors(len(shares), discount))
 
     per_curve, first = {}, None
     for curve in chosen:
@@ -237,7 +283,7 @@ def run(iv: Intervention, map_name: str = "aqli", curves: list[str] | None = Non
         var = {k: _var(v) for k, v in alone.items()}
         total = sum(var.values())
         per_curve[curve.name] = CurveRun(
-            curve=curve, life_years=joint.yll * years, deaths_postponed=joint.deaths * years,
+            curve=curve, life_years=joint.yll * years, deaths_postponed=joint.deaths * deaths_years,
             e0_change_years=joint.e0_change, cost_inr=cost_inr, cost_usd=cost_usd, pm25_after=joint.pm25_after,
             p_success=iv.p_success, cost_share_only_on_success=iv.cost_share_only_on_success,
             spread={k: v / total if total > 0 else 0.0 for k, v in var.items()},
@@ -246,7 +292,7 @@ def run(iv: Intervention, map_name: str = "aqli", curves: list[str] | None = Non
     return Run(intervention=iv, map_name=map_name, per_curve=per_curve, seed=seed, n=n,
                year=first.year, population=first.population,
                deaths_baseline=first.deaths_baseline, pm25_before=first.pm25_before,
-               shares=shares, usd_per_unit=usd, fallback_states=first.fallback,
+               shares=shares, discount=discount, horizon_years=len(shares), usd_per_unit=usd, fallback_states=first.fallback,
                unavailable=unavailable, deaths_model=first.deaths_model,
                reconciliations=first.reconciliations, rate_adjustments=first.rate_adjustments,
                sources=first.sources, un_scaling=first.un_scaling,
