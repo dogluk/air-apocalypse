@@ -75,7 +75,7 @@ Not solid, and you should say so when you use a result:
   numbers. See [`health/IHME_DOWNLOADS.md`](health/IHME_DOWNLOADS.md).
 - **No specialist has reviewed the method yet.** The modelling calls are written down so
   that one can: see "Known limitations" in `health/README.md` and the list of unreviewed
-  calls at the end of `docs/STATUS.md`.
+  calls at the end of [`docs/STATUS.md`](docs/STATUS.md).
 - **Every curve is stretched past its evidence.** No study has followed people who breathe
   air like Delhi's for years.
 - **The ranking of measures by cost does not exist yet.** Design:
@@ -106,7 +106,7 @@ check.
 4. **Reproduce GBD's India count.** Download GBD 2023's household air pollution estimates
    (GHDx record 594794; no login needed for that file), apply GBD's split between outdoor
    air and cooking smoke, and see how much of the gap above it explains.
-5. **The measure library and ranking** (the large one). Plans C and D in `docs/STATUS.md`.
+5. **The measure library and ranking** (the large one). "Next, in order" in `docs/STATUS.md`.
    Talk to the maintainer before starting.
 
 Other gaps nobody has worked on are in `lit/gaps.md` (G2 to G7).
@@ -118,7 +118,7 @@ health/     airhealth: the package, its data (with sources), tests, benchmarks
 diwali/     finished study: ten cities, ten years of hourly PM2.5 around Diwali
 lit/        reading list, who is doing what, gaps nobody has filled
 bets/       interventions sorted by what the physics allows
-docs/       STATUS.md, design notes (specs/), build plans (plans/)
+docs/       STATUS.md and design notes (specs/)
 ```
 
 ## Sending work back

@@ -229,7 +229,7 @@ Columns: state (canonical name, airhealth.places.canonical_state, of the parquet
 (stations of the state with any valid hour that year), hours_share. Same QC as monthly_cpcb.csv (the Diwali track's,
 whole-year; its saturation rule uses the state's hourly median in place of the city's), same hourly-median-across-stations
 method, same 75% month coverage rule, built in the same pass. Used by airhealth.months for a state or city with no
-complete profile among the 50 cities (Claude's call: a state's monitors, wherever in the state, stand in for the shape;
+complete profile among the 50 cities (modelling call: a state's monitors, wherever in the state, stand in for the shape;
 Haryana's are mostly Gurugram, Faridabad and the rest of the NCR). Every monitor is used, not only those of the 50 cities.
 """
 
@@ -249,7 +249,7 @@ Fifty cities: Delhi plus every airshed of the APnA table (49; Varanasi is missin
 map; chosen by hand, checked by the script to exist in the map's table in the city's state), apna_airshed (the APnA 'City'
 string, empty for Delhi), cpcb_cities (';'-separated CPCB city names; empty where CPCB has no station). These are final
 2011 figures, not the provisional ones. The original 11 rows (Delhi to Lucknow) are unchanged.
-Claude's call (not in any source): an airshed's population is the SUM of the Class I entries for the towns its APnA name
+modelling call (not in any source): an airshed's population is the SUM of the Class I entries for the towns its APnA name
 lists. A town inside another listed entry's U.A. is not added again (Howrah in Kolkata U.A.; Pimpri-Chinchwad in Pune U.A.;
 Gandhinagar in Ahmadabad U.A.; Vasco da Gama taken to be in Mormugao U.A.). A listed town that is not a Class I entry is
 left out: Tarn Taran (Amritsar) and Phillaur (Ludhiana). Dispur is part of Guwahati U.A.
