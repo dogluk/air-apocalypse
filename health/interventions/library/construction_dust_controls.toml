@@ -1,0 +1,61 @@
+# Bengaluru: enforcing dust controls (barriers, water, fogging) at construction sites.
+name = "Enforcing dust controls at Bengaluru's construction sites"
+kind = "air"
+scope = "city"
+who_reaches = "everyone in Bengaluru, through the outdoor air"
+cities = ["Bengaluru"]
+
+start_year = 2027
+ramp_years = 1
+duration_years = 10
+lag = "epa20"
+
+p_success = 0.4
+p_success_basis = "judgement: the rules already exist (barriers, sprinkling, covering) and are widely ignored; the measure is enforcement, which depends on inspectors and fines being used"
+
+placeholders = []
+
+notes = """
+Construction sites are made to use barriers, water sprinkling and fogging machines, and the city
+inspects and fines.
+
+The cut is borrowed from Delhi-NCR: TERI (2021) found strict construction norms (barriers and
+fogging controlling 60% of dust) remove 53% of construction's PM2.5 emissions by 2022 and 43% by
+2030. That range is applied to the construction part of Bengaluru's dust, from CSTEP's 2022
+Bengaluru inventory. CSTEP counted only new private projects (RERA), not roads, metro, bridges or
+demolition, so the construction part, and this cut, are probably too small.
+
+The cost is what CSTEP (2022) estimates Bengaluru's government would spend to enforce existing
+road and construction dust rules: "<1" crore, shared with road dust. It is taken here as each
+year, from a tenth of a crore (a judgement) to one crore. It leaves out what builders spend on
+barriers, water and fogging machines, which TERI counts for NCR; those are not the funder's
+rupees, but a reader should know the ratio rests on a policy-only cost.
+"""
+
+[[targets]]
+cause = "dust"
+cut = { dist = "uniform", p5 = 0.133, p95 = 0.164 }
+
+[cost]
+driver = "city"
+annual = { dist = "uniform", p5 = 1000000, p95 = 10000000 }
+currency = "INR"
+year = 2021
+
+[[evidence]]
+fields = ["targets.dust.cut"]
+source = "TERI (2021), Cost effectiveness of interventions for control of air pollution in Delhi"
+url = "https://teriin.org/sites/default/files/2021-12/Cost-effectiveness-of%20-interventions-for-control-of%20-air-pollution-in-Delhi.pdf"
+locator = "Section 6 'Dust', text under Figure 20, printed p. 33 (PDF p. 44): 'strict norms for construction activities showed reduction of ... 53% in PM2.5 emissions in the respective sectors by 2022, and reduction of ... 43% by 2030'; the norm is defined in Table 4 (printed p. 18) as 'barriers and fogging based controls which control 60% of dust'"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "construction share of Bengaluru's dust x (43% to 53%). CSTEP (2022) Bengaluru inventory (https://web.archive.org/web/2023/https://cstep.in/drupal/sites/default/files/2022-02/EI_Report_Final_04Feb22.pdf): construction 450 t/yr PM2.5 (Sec. 3.2.2.5, printed p. 37), road dust 1,005 t/yr (printed p. 45); 450 / 1455 = 0.309; p5 = 0.309 x 0.43 = 0.133, p95 = 0.309 x 0.53 = 0.164."
+
+[[evidence]]
+fields = ["cost.annual"]
+source = "CSTEP (2022), Emission inventory and pollution reduction strategies for Bengaluru"
+url = "https://web.archive.org/web/2023/https://cstep.in/drupal/sites/default/files/2022-02/EI_Report_Final_04Feb22.pdf"
+locator = "Table 5.11 'Economic Comparison (HER vs MER vs LER)', printed p. 93 (PDF p. 111): 'Road & Construction Dust | BBMP (Policy Implementation) | <1 | <1 | <1' crore; the measure is Table 5.6 (printed p. 80), 'Implementation of existing norms and regulations ... Policy enforcement'"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "p95 = Rs 1 crore = 10,000,000 (the source's bound); p5 = Rs 0.1 crore, a judgement (the source gives only '<1'). Taken as a yearly cost, which is the larger reading. Price year not stated; taken as 2021, the year before publication (February 2022)."

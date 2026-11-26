@@ -1,0 +1,60 @@
+# Bengaluru: mechanical (vacuum) sweeping of arterial and sub-arterial roads.
+name = "Mechanical sweeping of Bengaluru's main roads"
+kind = "air"
+scope = "city"
+who_reaches = "everyone in Bengaluru, through the outdoor air"
+cities = ["Bengaluru"]
+
+start_year = 2027
+ramp_years = 0
+duration_years = 7          # the length of the Greater Bengaluru Authority's rental contract
+lag = "epa20"
+
+p_success = 0.5
+p_success_basis = "judgement: the rental contract was approved in November 2025, but Bengaluru has bought sweepers before that stood idle, and silt returns to roads whose edges are not paved"
+
+placeholders = []
+
+notes = """
+Machines vacuum the silt off about 1,688 km of arterial and sub-arterial roads, so less of it is
+lifted back into the air by traffic.
+
+The cut is borrowed from Delhi-NCR: TERI (2021) modelled vacuum cleaning of every arterial road in
+NCR and found it removes 8% of the PM2.5 emitted as road dust. That 8% is applied to the road-dust
+part of Bengaluru's dust, using CSTEP's 2022 inventory for Bengaluru to split dust into road dust
+and construction. The spread around it (half to one and a half times) is a judgement for carrying
+a Delhi number to Bengaluru, not a figure from a source.
+
+The cost is Bengaluru's own: the state's order of November 2025 lets the Greater Bengaluru
+Authority rent the machines for seven years for at most Rs 613.25 crore, about Rs 894 per km.
+The upper end scales that to Rs 1,350 per km, the dearest of the other cities the authority
+compared itself with. These are the funder's rupees; nothing is netted off.
+"""
+
+[[targets]]
+cause = "dust"
+cut = { dist = "triangular", p5 = 0.0276, mode = 0.0553, p95 = 0.0829 }
+
+[cost]
+driver = "city"
+annual = { dist = "uniform", p5 = 876070000, p95 = 1322500000 }
+currency = "INR"
+year = 2025
+
+[[evidence]]
+fields = ["targets.dust.cut"]
+source = "TERI (2021), Cost effectiveness of interventions for control of air pollution in Delhi"
+url = "https://teriin.org/sites/default/files/2021-12/Cost-effectiveness-of%20-interventions-for-control-of%20-air-pollution-in-Delhi.pdf"
+locator = "Section 6 'Dust', text under Figure 20, printed p. 33 (PDF p. 44): 'Silt removal using vacuum cleaning machines ... showed reduction of 8% ... in PM2.5 emissions in the respective sectors by 2022, and reduction of 8% ... by 2030'"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "road-dust share of Bengaluru's dust x 8%. CSTEP (2022), Emission inventory and pollution reduction strategies for Bengaluru (https://web.archive.org/web/2023/https://cstep.in/drupal/sites/default/files/2022-02/EI_Report_Final_04Feb22.pdf): re-suspended road dust 1,005 t/yr PM2.5 (Sec. 3.2.2.8, printed p. 45), construction 450 t/yr PM2.5 (Sec. 3.2.2.5, printed p. 37); 1005 / (1005 + 450) = 0.691; 0.691 x 0.08 = 0.0553 (mode). p5 and p95 are 0.5x and 1.5x of that, a judgement for borrowing an NCR result."
+
+[[evidence]]
+fields = ["cost.annual"]
+source = "Deccan Herald (20 Nov 2025), Rs 613 crore road-sweeper rental plan gets nod, but Karnataka government silent on machine count"
+url = "https://www.deccanherald.com/india/karnataka/bengaluru/rs-613-crore-road-sweeper-rental-plan-gets-nod-but-karnataka-government-silent-on-machine-count-3803925"
+locator = "'GBA will hire the machines for seven years to maintain arterial and sub-arterial roads. While the cost is pegged at Rs 613.25 crore'; 'Rs 613 crore is only an upper ceiling'; other cities 'spend between Rs 1,350 and Rs 923 per kilometre on mechanical sweeping, while its projected cost of Rs 894/km is among the lowest'"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "p5: 613.25 crore / 7 years = Rs 87.607 crore a year (the ceiling; bids may come in under it, so this low end may still be high). p95: 87.607 crore x 1350 / 894.3 = Rs 132.25 crore a year, as if Bengaluru paid the dearest per-km rate quoted (894.3/km from Free Press Journal, 20 Nov 2025). Prices of 2025."

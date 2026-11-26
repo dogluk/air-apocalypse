@@ -1,0 +1,62 @@
+# Bengaluru: enforcing the ban on open waste burning, with full door-to-door collection.
+name = "Ending open waste burning in Bengaluru"
+kind = "air"
+scope = "city"
+who_reaches = "everyone in Bengaluru, through the outdoor air"
+cities = ["Bengaluru"]
+
+start_year = 2027
+ramp_years = 1
+duration_years = 10
+lag = "epa20"
+
+p_success = 0.35
+p_success_basis = "judgement: open burning has been banned under the Solid Waste Management Rules since 2016 and still goes on; success needs collection that actually reaches every street, not only a ban"
+
+placeholders = []
+
+notes = """
+The ban on burning rubbish in the open is enforced (patrols, fines, audits of the contractors who
+collect waste), with door-to-door collection and segregation at 100%.
+
+This is Bengaluru's own evidence: CSTEP (2022), working for the Karnataka State Pollution Control
+Board, puts the cut in waste-burning emissions at 20% (low scenario), 30% (medium) and 50% (high);
+those are used as the low end, most likely value and high end.
+
+The cost is CSTEP's estimate of what the city government spends on the policy: "<1" crore,
+taken here as each year, from a tenth of a crore (a judgement) to one crore. CSTEP assumes the
+city's planned waste-treatment plants give enough capacity by 2024; the cost of making collection
+reach every household, if that capacity or collection is not there, is not in it and has not been
+found at its source (see data/MISSING.md). The ratio therefore rests on a policy-only cost.
+
+CSTEP's own receptor study of Bengaluru (cstep_bengaluru2022_cmb) does not report waste burning,
+so this measure gets no credit on that study: not reported is not zero.
+"""
+
+[[targets]]
+cause = "waste_burning"
+cut = { dist = "triangular", p5 = 0.2, mode = 0.3, p95 = 0.5 }
+
+[cost]
+driver = "city"
+annual = { dist = "uniform", p5 = 1000000, p95 = 10000000 }
+currency = "INR"
+year = 2021
+
+[[evidence]]
+fields = ["targets.waste_burning.cut"]
+source = "CSTEP (2022), Emission inventory and pollution reduction strategies for Bengaluru"
+url = "https://web.archive.org/web/2023/https://cstep.in/drupal/sites/default/files/2022-02/EI_Report_Final_04Feb22.pdf"
+locator = "Table 5.7 'Emission reduction scenarios', section C 'Open waste burning', printed pp. 81-82 (PDF pp. 99-100): 'Ban open waste burning- reduction in open waste burning 50% | 30% | 20%' (HER | MER | LER), emission reduction potential the same; measure in Table 5.5 and roadmap Table 5.10 (printed p. 92: door-to-door collection 100%, segregation 100%)"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "p5 = LER 0.20, mode = MER 0.30, p95 = HER 0.50."
+
+[[evidence]]
+fields = ["cost.annual"]
+source = "CSTEP (2022), Emission inventory and pollution reduction strategies for Bengaluru"
+url = "https://web.archive.org/web/2023/https://cstep.in/drupal/sites/default/files/2022-02/EI_Report_Final_04Feb22.pdf"
+locator = "Table 5.11 'Economic Comparison (HER vs MER vs LER)', printed p. 93 (PDF p. 111): 'Open Waste Burning | BBMP (Policy Implementation) | <1 | <1 | <1' crore"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "p95 = Rs 1 crore (the source's bound); p5 = Rs 0.1 crore, a judgement (the source gives only '<1'). Taken as yearly, the larger reading. Price year not stated; taken as 2021, the year before publication (February 2022)."

@@ -1,0 +1,70 @@
+# Bengaluru: fitting every diesel generator with a certified emission control device (RECD).
+name = "Cleaning up Bengaluru's diesel generators (retrofit filters)"
+kind = "air"
+scope = "city"
+who_reaches = "everyone in Bengaluru, through the outdoor air"
+cities = ["Bengaluru"]
+
+start_year = 2027
+ramp_years = 2
+duration_years = 10
+lag = "epa20"
+
+p_success = 0.4
+p_success_basis = "judgement: the pollution boards already require these devices on large generators, and a subsidy removes the cost objection, but devices must be maintained to keep working and owners have little reason to"
+
+placeholders = []
+
+notes = """
+Every diesel generator in Bengaluru (about 8,700, 2.8 million kVA, mostly in IT parks, offices
+and apartment blocks) is fitted with a retrofit emission control device (RECD), paid for by the
+funder. The pollution boards' standard asks such devices to capture at least 70% of particles.
+
+The cut is 70% of generator PM times the share of capacity fitted and kept working, taken as
+between half and all of it (a judgement); 70% is a minimum certified on a test bench, and devices
+that are not maintained capture less.
+
+The cost uses Haryana's 2026 benchmark price for an RECD, Rs 2,500 per kVA (excluding tax and
+installation), times Bengaluru's installed capacity from CSTEP's 2022 inventory. Haryana's prices
+are of 2026 and are used as 2025 rupees (the price tables here stop at 2025), which overstates the
+cost very slightly. Upkeep is not counted. Keeping generators off by keeping the power on, which
+CSTEP proposes, is a different measure and is not scored here.
+"""
+
+[[targets]]
+cause = "dg_sets"
+cut = { dist = "uniform", p5 = 0.35, p95 = 0.70 }
+
+[cost]
+driver = "unit"
+unit = "kVA of diesel generator capacity"
+units = 2801180
+once = 2500
+currency = "INR"
+year = 2025
+
+[[evidence]]
+fields = ["targets.dg_sets.cut"]
+source = "Chhattisgarh Environment Conservation Board (2026), reply as Respondent 25 to the National Green Tribunal in OA 216 of 2026, Shriya Kumawat vs MoEFCC and others"
+url = "https://www.greentribunal.gov.in/sites/default/files/news_updates/Reply%20by%20R%2025%20CECB%20in%20OA%20No%20216%20of%202026%20Shriya%20Kumawat%20Vs%20MoEFCC%20and%20Ors.pdf"
+locator = "Para 4, PDF p. 3 (repeated p. 6): complying with 'the CPCB directions', establishments with DG sets of 125 kVA and above must 'Retrofit all operational DG sets ... with an Emission Control Device (ECD)/Equipment having a minimum specified Particulate Matter (PM) capturing efficiency of at least 70%, tested as per ISO-8178 D2 cycle'"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "0.70 x share of capacity fitted and working, 0.5 to 1.0 (a judgement): p5 = 0.35, p95 = 0.70."
+
+[[evidence]]
+fields = ["cost.once"]
+source = "Haryana Government Gazette (19 Aug 2026), Industries & Commerce Department notification No. 02/05/2026-1IB-II, Diesel Generator Set Subsidy Scheme"
+url = "https://simpliance.in/download/file/dXBsb2Fkcy9nb3Z0bm90aWZpY2F0aW9uL05vdGlmaWNhdGlvbiBvZiB0aGUgRGllc2VsIEdlbmVyYXRvciBTZXQgU3Vic2lkeSBTY2hlbWUgZm9yIFByb21vdGlvbiBvZiBDbGVhbmVyIEZ1ZWwgYW5kIEVtaXNzaW9uIENvbnRyb2wgTWVhc3VyZXMgaW4gTWljcm8gYW5kIFNtYWxsIEVudGVycHJpc2VzLnBkZg=="
+locator = "Para 4 'Benchmark Pricing', pp. 2066-2067: 'benchmark rates derived from prevailing market prices ... RECD unit/ Dual-fuel conversion kit Rs 2,500 per KVA'; excludes GST and installation"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "Rs 2,500 per kVA, prices of 2026 used as 2025 rupees (the deflator table stops at 2025)."
+
+[[evidence]]
+fields = ["cost.units"]
+source = "CSTEP (2022), Emission inventory and pollution reduction strategies for Bengaluru"
+url = "https://web.archive.org/web/2023/https://cstep.in/drupal/sites/default/files/2022-02/EI_Report_Final_04Feb22.pdf"
+locator = "Executive summary, 'Diesel generator (DG) sets' (PDF p. 7): 'The BBMP area has around 8,700 DG sets installed with a cumulative installed capacity of 28,01,180 KVA'"
+key = "O"
+retrieved = "2026-11-27"

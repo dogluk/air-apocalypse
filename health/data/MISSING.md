@@ -113,3 +113,26 @@ values (Kulkarni, Biswal 2022-24, Govardhan, ARAI), so they are not in `causes.c
   Not used: press report of a paper whose abstract was not opened; Delhi has O stubble values. Kanpur has none, so confirming the 21% from the paper
   (ScienceDirect, doi 10.1016/j.uclim.2022.101084 area; check the table) would give Kanpur its only stubble row. Biswal et al. quote the Delhi value for
   October to December, the press for October-November.
+
+## Bengaluru air measures (interventions/library): numbers not found at source
+
+Written while building the first nine Bengaluru measures (2026-11-27). Each measure file says where it leans on these gaps.
+
+- **Buses' share of Bengaluru's transport PM2.5.** `electric_buses` borrows TERI's NCR result (electrifying all buses cuts transport PM2.5
+  emissions 23%). CSTEP's 2022 Bengaluru inventory (Sec. 3.2.2.8, Figure 3-35, printed p. 43) lumps buses with trucks (heavy commercial
+  vehicles, 56.5% of tailpipe PM together); the APnA Bengaluru report (UrbanEmissions.Info 2018, p. 14) says only that diesel vehicles
+  (some 4-wheelers, taxis, buses, HDVs, LDVs) make more than 70%. Would settle it: a Bengaluru inventory by vehicle class with buses alone
+  (BMTC fleet x km x emission factor), e.g. the APnA gridded inventory files on Zenodo, or an ICCT or CSTEP bus study.
+- **What full door-to-door waste collection would cost Bengaluru.** `waste_collection_burning_ban` uses CSTEP's government cost for the
+  policy, "<1" crore (Table 5.11, printed p. 93), which assumes the city's planned treatment capacity exists and leaves out the cost of
+  collection reaching every household. Not tried this session: the GBA (formerly BBMP) budget's solid-waste line and the share of households
+  without door-to-door collection. Either would give a real incremental cost.
+- **Compliance cost of construction-dust controls in Bengaluru.** `construction_dust_controls` uses CSTEP's government enforcement cost ("<1"
+  crore), the funder's cost, which leaves out builders' spending. TERI gives NCR's (Table 34: water tankers, barriers, anti-smog guns, for
+  54.04 sq km under construction in 2020), but Bengaluru's area under construction was not found (CSTEP used 235 RERA projects without giving
+  their area, Sec. 3.2.2.5). Would settle it: the area under active construction in Bengaluru (RERA or building permissions).
+- **Lower ends of CSTEP's "<1 crore" costs.** `construction_dust_controls` and `waste_collection_burning_ban` take Rs 0.1 crore a year as the
+  low end, a judgement; CSTEP gives only the upper bound.
+- **Not used: Vital Strategies (2024), Accelerating the health benefits of scaling clean household energy in India.** It costs LPG refill
+  subsidies per DALY, which is household exposure, the second pass (design spec, "Order" 6); its cost per household was not read (the PDF
+  was not opened this session). `lpg_refill_subsidy` uses CSTEP's Bengaluru figures instead.
