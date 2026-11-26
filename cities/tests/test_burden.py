@@ -1,3 +1,4 @@
+import html as _h
 import json
 import shutil
 
@@ -54,3 +55,10 @@ def test_standard_missing_from_file_is_left_out(monkeypatch, tmp_path):
     monkeypatch.setattr(b, "_TARGETS", f)
     assert [x.key for x in b.targets()] == ["round", "india_naaqs_annual"]
     assert b.render("Bengaluru").html
+
+
+def test_report_footer_shown_once_per_chapter():
+    from citypage.burden import burden, _maps
+    html = render("Bengaluru").html
+    for m in _maps():
+        assert html.count(_h.escape(burden("Bengaluru", m)["footer"])) == 1

@@ -126,9 +126,11 @@ def test_assumptions_and_engine_limit_are_printed(page):
 
 def test_no_ranking_no_average(page):
     assert "library order" in page
-    names = [library.load(LIB / f"{i}.toml").name for i in FIXTURE]
-    at = [page.index(html_.escape(n)) for n in names]
-    assert at == sorted(at)                                # file order, not sorted by a value
+    full = [library.load(LIB / f"{i}.toml").name for i in ("lpg_refill_subsidy", "road_paving")]
+    part = [library.load(LIB / f"{i}.toml").name for i in ("school_purifiers", "smog_tower")]
+    each = page[page.index("<h3>Each measure</h3>"):]
+    at = [each.index(html_.escape(n)) for n in full + part]
+    assert at == sorted(at)                    # library order inside each group, not by a value
     for phrase in ("central estimate", "average of the curves", "best curve", "best measure"):
         assert phrase not in page.lower()
 
@@ -145,3 +147,18 @@ def test_curves_not_run_named_without_ihme(no_ihme, tmp_path):
     h = render("Bengaluru", folder=tmp_path, n=N).html
     assert "gbd2023" in h and "IHME" in h
     assert measures.__doc__ and "seam" in measures.__doc__
+
+
+def test_partial_cost_measures_come_last_in_their_own_group(page):
+    head = "Costs that leave things out"
+    assert head in page
+    each = page[page.index("<h3>Each measure</h3>"):]
+    cut = each.index("<h3>" + head)
+    for i in ("lpg_refill_subsidy", "road_paving"):
+        assert each.index(html_.escape(library.load(LIB / f"{i}.toml").name)) < cut
+    for i in ("school_purifiers", "smog_tower"):
+        assert each.index(html_.escape(library.load(LIB / f"{i}.toml").name)) > cut
+    # the glance charts do the same: the group's heading comes after the fully costed charts
+    glance = page[page.index("All measures at a glance"):page.index("<h3>Each measure</h3>")]
+    assert glance.index("<h3>" + head) > glance.index("air measures on study")
+    assert "not comparable" in page

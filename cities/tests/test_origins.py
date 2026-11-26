@@ -45,3 +45,13 @@ def test_partials_listed():
 def test_emission_columns_empty_ok():
     assert emission_columns("Bengaluru") == []
     assert render("Bengaluru").id == "sources"
+
+
+def test_does_not_report_names_only_sources_a_reader_knows():
+    html = render("Bengaluru").html
+    sentences = re.findall(r"It does not report: ([^<]*)\.", html)
+    assert sentences
+    for s in sentences:
+        for bad in ("local_all", "all sources inside the city, not split", "from outside the city",
+                    "other sources", "source not assigned", "not split further"):
+            assert bad not in s

@@ -30,6 +30,9 @@ PLAIN: dict[str, str] = {
     "local_all": "all sources inside the city, not split",
     "other": "other sources",
 }
+# Harmonised codes that are bookkeeping, not sources a reader would look for: left out of the
+# "does not report" sentence (they stay in the table, where a dash still means not reported).
+BOOKKEEPING = ("local_all", "outside", "other", "secondary_unassigned", "biomass_unassigned")
 RECEPTOR = ("CMB", "PMF")
 MODELS = ("CAMx", "CMAQ", "GEOS-Chem", "WRF-Chem")
 LEGEND = "— = the study does not report this source."
@@ -110,7 +113,7 @@ def blind_spots(col: StudyColumn) -> list[str]:
                        f"({fmt(s['outside'], 'pct_points')} outside) with no split by source.")
     if col.months != "1-12":
         out.append(f"It covers only {months_text(col.months)}.")
-    missing = [PLAIN[k] for k in causes.HARMONISED if pd.isna(s[k])]
+    missing = [PLAIN[k] for k in causes.HARMONISED if pd.isna(s[k]) and k not in BOOKKEEPING]
     if missing:
         out.append("It does not report: " + "; ".join(missing) + ".")
     return out

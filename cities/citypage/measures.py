@@ -37,6 +37,8 @@ MAP = "acag_total"            # the ranking's default exposure map
 PROMINENT = ("partial_cost", "upper_bound_all_origins", "long_shot", "placeholder",
              "odds_judgement", "evidence_S", "evidence_R")
 
+PARTIAL_HEAD = "Costs that leave things out"
+
 STATUS_WORDS = {
     "scored": "scored",
     "no_cost": "shown without a ratio: no cost given",
@@ -226,6 +228,10 @@ def _flag_items(flags) -> str:
     return "".join(f"<li>{esc(f.text)}</li>" for f in flags)
 
 
+def _partial(e: Entry) -> bool:
+    return any(f.code == "partial_cost" for s in e.scores.values() for f in s.flags)
+
+
 def _prominent(s: score.Score):
     return sorted((f for f in s.flags if f.code in PROMINENT), key=lambda f: PROMINENT.index(f.code))
 
@@ -402,17 +408,40 @@ def render(city: str, folder: Path | None = None, n: int = 2000, seed: int = 0) 
              "Each dot is one curve's expected life-years per crore; the line runs from the "
              "lowest curve to the highest. The scale is logarithmic: each step to the right is "
              "ten times more. Caveats for each measure are with its own table below.</p>")
-    groups = [(st, f"{city}: air measures on study {st}") for st in studies]
-    groups.append((None, f"{city}: exposure measures (no study needed)"))
-    for key, title in groups:
-        chart, left_out = _chart(ok, key, curve_names, title)
-        h.append(chart)
-        if left_out:
-            h.append(f'<p class="note">Not on the chart "{esc(title)}", because it has no ratio: '
-                     f"{esc('; '.join(left_out))}.</p>")
+    full = [e for e in ok if not _partial(e)]
+    part = [e for e in ok if _partial(e)]
+    if part:
+        h.append("<p>The measures listed under <b>" + PARTIAL_HEAD + "</b> carry a cost that "
+                 "leaves out something real, so their ratios are not comparable with the "
+                 "others' and sit below them, after every fully costed measure.</p>")
+
+    def charts(group):
+        out = []
+        keys = [(st, f"{city}: air measures on study {st}") for st in studies]
+        keys.append((None, f"{city}: exposure measures (no study needed)"))
+        for key, title in keys:
+            chart, left_out = _chart(group, key, curve_names, title)
+            out.append(chart)
+            if left_out:
+                out.append(f'<p class="note">Not on the chart "{esc(title)}", because it has no '
+                           f"ratio: {esc('; '.join(left_out))}.</p>")
+        return "".join(out)
+    h.append(charts(full))
+    if part:
+        h.append(f"<h3>{PARTIAL_HEAD}, at a glance</h3><p>The costs behind these charts leave "
+                 "things out, so the ratios are not comparable with each other or with the "
+                 "measures above.</p>")
+        h.append(charts(part))
 
     h.append("<h3>Each measure</h3>")
-    for e in ok:
+    for e in full:
         h.append(_measure_block(e, labels))
+    if part:
+        h.append(f"<h3>{PARTIAL_HEAD}</h3><p>Each measure here has a cost that leaves out "
+                 "something real (its own caveat says what), so its ratios are not comparable "
+                 "with other measures' and are listed after the fully costed ones, in library "
+                 "order.</p>")
+        for e in part:
+            h.append(_measure_block(e, labels))
     h.append(_broken(entries))
     return Section("measures", "What could work, and what it would buy", "".join(h))

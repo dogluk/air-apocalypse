@@ -76,6 +76,11 @@ svg .ln{{fill:none;stroke-width:2}} svg .bar{{stroke-width:6;stroke-linecap:roun
 .note{{color:var(--ink2);font-size:.9rem}}
 .caveats{{border-left:3px solid var(--s1);background:var(--band);padding:.2rem .9rem;margin:.8rem 0}}
 .caveats ul{{margin:.3rem 0;padding-left:1.1rem}}
+.card{{border:1px solid var(--grid);background:var(--band);border-radius:6px;padding:.2rem 1rem .6rem;margin:1rem 0}}
+.card h4{{margin:.7rem 0 .3rem}} .card ul{{margin:.3rem 0;padding-left:1.1rem}}
+details{{margin:.5rem 0;color:var(--ink2)}} summary{{cursor:pointer;color:var(--s0)}}
+details p{{margin:.4rem 0 .4rem 1rem}}
+h4{{font-size:1.02rem;margin:1.2rem 0 .3rem}}
 footer{{border-top:1px solid var(--grid);margin-top:3rem;padding-top:1rem;color:var(--ink2);font-size:.9rem}}
 """
 

@@ -98,7 +98,6 @@ def _burden_table(d: dict, caption: str) -> str:
         out.append(f'<p class="note">{esc(STAR)}</p>')
     if any(r["below_floor"] for r in d["rows"]):
         out.append(f'<p class="note">{esc(DAGGER)}</p>')
-    out.append(f'<p class="note">{esc(d["footer"])}</p>')
     return "".join(out)
 
 
@@ -108,6 +107,11 @@ def render(city: str) -> Section:
     results = {m: burden(city, m) for m in maps}
     lv = {m: level(city, m) for m in maps}
     h = []
+    footers: list[str] = []          # each distinct report footer, shown once at the chapter's end
+
+    def keep(d):
+        if d["footer"] not in footers:
+            footers.append(d["footer"])
 
     deaths_all = [r["deaths_averted"] for d in results.values() for r in d["rows"]]
     pm_text = "; ".join(f"{m} {lv[m][0]:.1f} µg/m³ ({lv[m][1]})" for m in maps)
@@ -138,6 +142,7 @@ def render(city: str) -> Section:
         h.append(f"<h4>{esc(m)}: {esc(exposure.LABELS[m])}, {lv[m][1]}</h4>")
         h.append(f"<p>Starting level {lv[m][0]:.1f} µg/m³ in {lv[m][1]}.</p>")
         h.append(_burden_table(results[m], f"{city}, map {m}: every curve down to its own floor"))
+        keep(results[m])
 
     names = [r["curve"] for r in results[maps[0]]["rows"]] if maps else []
 
@@ -170,4 +175,9 @@ def render(city: str) -> Section:
             else:
                 h.append(f"<p>Map {esc(m)}:</p>")
                 h.append(_burden_table(d, f"{city}, map {m}: down to {t.pm25:g} µg/m³"))
+                keep(d)
+    if footers:
+        h.append("<h3>How these figures were made</h3><p>The notes below apply to every table "
+                 "above, one note for each exposure map (each says which map it is for).</p>"
+                 + "".join(f'<p class="note">{esc(f)}</p>' for f in footers))
     return Section("health", "What it does to health", "".join(h))
