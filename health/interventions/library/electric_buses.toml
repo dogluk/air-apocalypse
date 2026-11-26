@@ -31,6 +31,8 @@ PM2.5 is written up in data/MISSING.md.
 The cost is CSTEP's: about Rs 1 crore per bus, the whole purchase, as if paid up front. Under the
 gross-cost contracts BMTC actually uses, it pays per km instead, and the diesel bus it would
 otherwise have bought is not netted off; both make this a high cost. Running costs are left out.
+
+city-specific: the share of the fleet electrified (2,000 of BMTC's 6,400 buses) and the price per bus (CSTEP's Bengaluru plan) are Bengaluru's; another city needs its own bus fleet count and its own bus share of transport PM2.5.
 """
 
 [[targets]]
