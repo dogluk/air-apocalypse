@@ -29,6 +29,8 @@ installation), times Bengaluru's installed capacity from CSTEP's 2022 inventory.
 are of 2026 and are used as 2025 rupees (the price tables here stop at 2025), which overstates the
 cost very slightly. Upkeep is not counted. Keeping generators off by keeping the power on, which
 CSTEP proposes, is a different measure and is not scored here.
+
+city-specific: the number of kVA fitted (2,801,180) is Bengaluru's installed diesel generator capacity (CSTEP); the cut (the CPCB device standard) and the price per kVA (Haryana's benchmark) would transfer, so another city needs only its own installed kVA read at source.
 """
 
 [[targets]]
