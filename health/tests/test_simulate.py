@@ -511,3 +511,16 @@ def test_covered_draws_use_their_own_stream_and_split_in_pm25_group():
     r = _ly(dataclasses.replace(base, covered=cov))
     assert np.array_equal(r.cost_inr, _ly(base).cost_inr)      # other streams untouched
     assert r.spread["pm25_change"] > 0.9                       # change fixed, curve at its median
+
+
+def test_run_with_covered_ages():
+    base = load("delhi_100_to_80")
+    c = "loglinear_jaganathan"
+    a = simulate.run(dataclasses.replace(base, covered=Dist.fixed(1.0)), curves=[c], n=100)
+    b = simulate.run(dataclasses.replace(base, covered=Dist.fixed(1.0), covered_ages=(5, 19)),
+                     curves=[c], n=100)
+    assert 0 < b.per_curve[c].life_years.mean() < a.per_curve[c].life_years.mean()
+    assert 0 < b.per_curve[c].deaths_postponed.mean() < a.per_curve[c].deaths_postponed.mean()
+    half = simulate.run(dataclasses.replace(base, covered=Dist.fixed(0.5), covered_ages=(5, 19)),
+                        curves=[c], n=100)
+    assert np.allclose(half.per_curve[c].life_years, 0.5 * b.per_curve[c].life_years)

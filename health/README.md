@@ -367,7 +367,7 @@ the odds), cost in 2025 rupees (crore, median), life-years per crore if it works
 the odds, and flag codes (PH placeholder, ES/ER evidence seen or recalled, OJ odds are a
 judgement, LS long shot, NR cause not reported, AF whole-year share used for part-year cut, BS
 borrowed month shape, CO covered people only, RG regional, RB what the source-receptor table
-stands for, RF the source-receptor table is a stand-in, UB upper bound, PC the cost leaves out part of what the measure costs). A table of PM2.5 change follows; for an exposure
+stands for, RF the source-receptor table is a stand-in, UB upper bound, PC the cost leaves out part of what the measure costs, AG one age group reached, counted with its own death rates). A table of PM2.5 change follows; for an exposure
 measure it is what the covered people breathe. A measure whose source prices only part of it
 (say, the government's enforcement but not what builders spend) says what is left out in
 `cost.partial`; that sentence is printed under the table and carried as flag `partial_cost`. Statuses:
@@ -482,9 +482,11 @@ the id to a list in `tests/test_library.py` and run `airhealth score CITY --meas
   fires could be used, so the stubble measures run on McDuffie et al.'s all-origin crop-burning
   share (flag RF; it even gives Bengaluru a small change), and Cropper's power-plant table is by
   state, not district. `data/MISSING.md` lists what would replace them.
-- **Exposure measures for a sub-group use everyone's death rates.** School purifiers reach
-  children, N95s working adults, but the covered share is given the whole city's death rates by
-  age, so these are overstated. Plan D fixes this.
+- **Only an age group can be singled out.** An exposure measure that reaches one age group
+  names it (`[exposure] ages = [5, 19]`) and is counted with that group's own death rates (flag
+  AG): school purifiers do, and on curves that start at 25 they give children nothing. A group
+  defined by something other than age cannot be: N95s reach working people, but their covered
+  share is spread over every age, as if it were a slice of the whole city.
 - **This is a library, not a ranking.** `score` prints measures in library order. The ranking
   (`airhealth rank`, all-India and per city, splitting a regional measure's benefit and cost
   across city tables, curve flips) is the next plan (D).

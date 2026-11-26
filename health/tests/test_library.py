@@ -237,3 +237,11 @@ def test_every_measure_runs_in_every_city():
     for city in causes.known_cities():
         for s in score.city(city, n=50, curves=["gemm_ncd_lri"]):
             assert s.status in score.STATUSES
+
+
+def test_school_purifiers_reach_children_only():
+    m = measures.library()["school_purifiers"]
+    assert m.exposure.ages == (5, 19)
+    s = score.city("Bengaluru", ["school_purifiers"], n=200, curves=["gemm_ncd_lri"])[0]
+    assert s.per_curve["gemm_ncd_lri"]["life_years"]["median"] == 0     # adult-only curve
+    assert "age_group" in {f.code for f in s.flags}

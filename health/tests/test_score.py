@@ -275,3 +275,23 @@ def test_json_has_the_page_fields():
     assert "run" not in m
     assert all(s["status"] in score.STATUSES for s in out["measures"])
     json.dumps(out, allow_nan=False)
+
+
+def test_age_group_cost_counts_only_that_group(tmp_path):
+    from airhealth import impact
+    text = (FIXTURES / "exposure_purifier.toml").read_text()
+    text = text.replace('driver = "household"', 'driver = "person"')
+    text = text.replace("cut = 0.5\n", "cut = 0.5\nages = [5, 19]\n", 1)
+    (tmp_path / "kids.toml").write_text(text)
+    m = measures.load(tmp_path / "kids.toml")
+    assert m.exposure.ages == (5, 19)
+    iv, status, _, flags, trail = score.compile(m, "Bengaluru")
+    place = places.resolve("Bengaluru", kind="city")
+    people = exposure.cells(place, "acag_total").population.sum()
+    assert trail["cost"]["units_count"] == pytest.approx(
+        people * impact.age_share(place, "acag_total", (5, 19)))
+    assert trail["exposure"]["ages"] == [5, 19]
+    assert iv.covered_ages == (5, 19) and status == "scored"
+    assert "age_group" in codes(flags)
+    plain, *_ = score.compile(fx("exposure_purifier"), "Bengaluru")
+    assert plain.covered_ages is None

@@ -604,7 +604,7 @@ FLAG_CODES = {"placeholder": "PH", "evidence_S": "ES", "evidence_R": "ER", "odds
               "long_shot": "LS", "not_reported": "NR", "annual_share_flat": "AF",
               "borrowed_shape": "BS", "covered_only": "CO", "regional": "RG",
               "upper_bound_all_origins": "UB", "partial_cost": "PC", "receptor_basis": "RB",
-              "receptor_fallback": "RF"}
+              "receptor_fallback": "RF", "age_group": "AG"}
 FLAG_LEGEND = {"PH": "a number is a placeholder", "ES": "a number seen only in a snippet or summary",
                "ER": "a number recalled, not read at the source",
                "OJ": "odds are a judgement", "LS": "long shot",
@@ -612,6 +612,7 @@ FLAG_LEGEND = {"PH": "a number is a placeholder", "ES": "a number seen only in a
                "AF": "one whole-year share used for a part-year cut",
                "BS": "month-by-month shape borrowed from another place",
                "CO": "only the covered people breathe less",
+               "AG": "only one age group is reached, counted with its own death rates",
                "RG": "a source spread over states; a city's part has no cost of its own (the "
                      "cost belongs to the whole region: airhealth score --region ID)",
                "RB": "what the source-receptor table stands for (its data/sources.toml caveat)",

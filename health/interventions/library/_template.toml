@@ -106,6 +106,13 @@ months = [10, 11, 12, 1, 2]
 # hours = 0.5            # (Dist, 0-1) share of their hours it works (e.g. at home, asleep)
 # cut = 0.5              # (Dist, 0-1) fraction cut in what they breathe in those hours
 # months = [11, 12, 1]   # optional, default all twelve
+# ages = [5, 19]         # optional: the people reached are this age group (first and last age),
+#                        # in whole age bands: the first age is a band start (0, 1, 5, 10, ...,
+#                        # 85) and the last is one less than a band start, or 85 or more.
+#                        # covered is then a share of that group, deaths and life-years use the
+#                        # group's own death rates (a curve that starts at 25 gives children
+#                        # nothing), and a "person" cost counts only the group. Not with
+#                        # cost.driver = "household". Not a number, so it needs no evidence.
 
 # ---- scope = "region" (kind = "air"): one [region] table, instead of [[targets]] ----
 # [region]

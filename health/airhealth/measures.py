@@ -10,7 +10,8 @@ Two kinds:
             the part of the cause that comes from inside the city ([[targets]]); a region measure
             cuts a source spread over several states and reaches everyone downwind ([region]).
   exposure  cuts what people breathe without touching the air outside (purifiers, masks):
-            a share of a city's people, for a share of their hours, breathe less ([exposure]).
+            a share of a city's people, for a share of their hours, breathe less ([exposure]);
+            with ages, a share of one age group, counted with that group's own death rates.
 
 The evidence rule: every number in a file is either backed by exactly one [[evidence]] entry
 (source, link, where in it, how it was seen) or listed in `placeholders` (a stand-in, not an
@@ -29,6 +30,7 @@ from functools import cache
 from pathlib import Path
 
 from . import causes, paths
+from .ages import AGE_STARTS
 from . import lag as lags
 from .intervention import Dist, Invalid, _check_floor, _integer, _number
 
@@ -47,7 +49,7 @@ TOP_KEYS = ("name", "kind", "scope", "who_reaches", "cities", "min_share_pct", "
             "ramp_years", "duration_years", "lag", "p_success", "p_success_basis", "long_shot",
             "placeholders", "notes", "targets", "exposure", "region", "cost", "evidence")
 TARGET_KEYS = ("cause", "cut", "months")
-EXPOSURE_KEYS = ("covered", "hours", "cut", "months")
+EXPOSURE_KEYS = ("covered", "hours", "cut", "months", "ages")
 REGION_KEYS = ("receptor", "cut")
 # A receptor file: one row per district the source-receptor study covers (an explicit 0 where its
 # result is 0); delta_pm25_full is the change in that district's annual-mean PM2.5, µg/m³ (negative
@@ -72,6 +74,8 @@ class Exposure:
     hours: Dist                 # share of their hours it works, 0-1
     cut: Dist                   # fraction cut in what they breathe in those hours, 0-1
     months: tuple[int, ...]
+    ages: tuple[int, int] | None = None   # the people reached are this age group (first and last
+                                          # age, whole bands); covered is a share of it
 
 
 @dataclass(frozen=True)
@@ -237,7 +241,27 @@ def _exposure(value) -> Exposure:
         if key not in t:
             raise Invalid(f"exposure.{key}: missing; a fraction, 0 to 1")
         parts[key] = _fraction(t[key], f"exposure.{key}")
-    return Exposure(**parts, months=_months(t.get("months"), "exposure.months"))
+    return Exposure(**parts, months=_months(t.get("months"), "exposure.months"),
+                    ages=_ages(t.get("ages")))
+
+
+def _ages(value) -> tuple[int, int] | None:
+    """[first, last] age of the group reached, in whole age bands (ages.AGE_STARTS), or None."""
+    if value is None:
+        return None
+    if (not isinstance(value, list) or len(value) != 2
+            or not all(isinstance(v, int) and not isinstance(v, bool) for v in value)):
+        raise Invalid(f"exposure.ages: must be [first, last] ages, e.g. [5, 19], got {value!r}")
+    lo, hi = value
+    if lo not in AGE_STARTS:
+        raise Invalid(f"exposure.ages: {lo} is not the start of an age band; use one of "
+                      f"{', '.join(map(str, AGE_STARTS))}")
+    if hi < lo:
+        raise Invalid(f"exposure.ages: the last age ({hi}) is below the first ({lo})")
+    if hi + 1 not in AGE_STARTS and hi < AGE_STARTS[-1]:
+        raise Invalid(f"exposure.ages: {hi} does not end an age band; the last age must be one "
+                      f"less than a band's start (e.g. 19), or {AGE_STARTS[-1]} or more")
+    return (lo, hi)
 
 
 def _region(value) -> Region:
@@ -426,6 +450,10 @@ def parse(t: dict, measure_id: str) -> Measure:
         region = _region(t["region"])
 
     cost = _cost(t["cost"]) if "cost" in t else None
+    if exposure is not None and exposure.ages is not None and cost is not None \
+            and cost.driver == "household":
+        raise Invalid('exposure.ages: households are not an age group; with ages, give the cost '
+                      'per "person" (or "unit" or "city")')
     if scope == "region" and cost is not None and cost.driver == "household":
         raise Invalid('cost.driver: "household" needs one city\'s household size; a region '
                       'measure uses "unit", "city" (a total for the whole region) or "person"')

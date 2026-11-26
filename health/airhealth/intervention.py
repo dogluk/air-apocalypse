@@ -288,6 +288,8 @@ class Intervention:
     covered: Dist | None = None         # share of each place's people the change reaches, 0-1
     cost_per_covered: bool = False      # cost Dists are per covered unit: cost x the covered draw
     scale: dict[str, float] | None = None   # Place.label -> multiplier of the annual change
+    covered_ages: tuple[int, int] | None = None   # the covered people are this age group (first
+                                        # and last age, whole bands); covered is a share of it
 
     def as_change(self, value: float) -> Change:
         """The impact.Change for one value (e.g. one draw) of the annual change."""

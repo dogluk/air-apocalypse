@@ -267,3 +267,30 @@ def test_receptor_files_in_data_are_well_formed():
     for p in found:
         t = measures.receptor(p.name)
         assert (t.delta_pm25_full <= 0).all() and len(t) > 600, p.name
+
+
+@pytest.mark.parametrize("ages, ok", [([5, 19], True), ([6, 19], False), ([5, 18], False),
+                                      ([20, 10], False), ([60, 200], True), ([0, 0], True),
+                                      ([5], False), ("5-19", False)])
+def test_exposure_ages_validation(tmp_path, ages, ok):
+    t = base("exposure_city")
+    t["exposure"] = {**t["exposure"], "ages": ages}
+    t["cost"] = {**t["cost"], "driver": "person"}
+    path = write(tmp_path, t)
+    if ok:
+        assert measures.load(path).exposure.ages == tuple(ages)
+    else:
+        with pytest.raises(intervention.Invalid, match=r"^exposure\.ages"):
+            measures.load(path)
+
+
+def test_exposure_without_ages_is_everyone(tmp_path):
+    assert measures.load(write(tmp_path, base("exposure_city"))).exposure.ages is None
+
+
+def test_household_driver_with_ages_is_invalid(tmp_path):
+    t = base("exposure_city")
+    t["exposure"] = {**t["exposure"], "ages": [5, 19]}
+    assert t["cost"]["driver"] == "household"
+    with pytest.raises(intervention.Invalid, match=r"^exposure\.ages: households"):
+        measures.load(write(tmp_path, t))

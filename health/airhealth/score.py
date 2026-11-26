@@ -27,6 +27,8 @@ from one source study (causes.py), never an average of several:
 
 An exposure measure cuts what people breathe, not the outdoor air: in its months the change
 is -100 x hours x cut percent, for the covered share of people only (simulate.run's covered).
+With [exposure] ages, covered is a share of that age group, the run counts only its age bands
+(Intervention.covered_ages), and a per-person cost counts only its people (impact.age_share).
 
 A regional measure (scope = "region") removes a fraction (region.cut) of a source spread over
 several states (crop burning, coal power). How much each district's PM2.5 falls when the whole
@@ -55,7 +57,7 @@ from pathlib import Path
 
 import numpy as np
 
-from . import causes, exposure, measures, months, places, prices, simulate
+from . import causes, exposure, impact, measures, months, places, prices, simulate
 from .intervention import Dist, Intervention, Linear, MonthlyMean, Product
 from .measures import ALL_MONTHS, Measure
 from .months import MONTH_DAYS
@@ -91,7 +93,9 @@ class Flag:
     """A caveat printed with a result. code is stable, one of: "placeholder", "evidence_S",
     "evidence_R", "odds_judgement", "long_shot", "not_reported", "annual_share_flat",
     "borrowed_shape", "covered_only", "regional", "receptor_basis", "receptor_fallback",
-    "upper_bound_all_origins", "partial_cost". receptor_fallback: the measure's source-receptor
+    "upper_bound_all_origins", "partial_cost", "age_group". age_group: an exposure measure that
+    reaches one age group, whose deaths and life-years use that group's own death rates and
+    whose per-person cost counts only that group. receptor_fallback: the measure's source-receptor
     table is a stand-in built because no published source-receptor result could be used (its
     data/sources.toml entry has a `fallback` sentence saying how far off it may be)."""
     code: str
@@ -158,6 +162,10 @@ def _fixed_flags(m: Measure, place: places.Place | None) -> list[Flag]:
     elif m.kind == "exposure":
         out.append(Flag("covered_only", "Only the people it reaches breathe less; the outdoor "
                                         "air and everyone else are unchanged."))
+        if m.exposure.ages is not None:
+            lo, hi = m.exposure.ages
+            out.append(Flag("age_group", f"Only people aged {lo}-{hi} are reached, and their own "
+                                         "death rates are used."))
     if m.cost is not None and m.cost.partial:
         out.append(Flag("partial_cost", m.cost.partial))
     shape = months.shape(place) if place is not None else None
@@ -324,7 +332,8 @@ def _air(m: Measure, city: str, study: str, flags: list[Flag], trail: dict):
 def _exposure_change(m: Measure, trail: dict) -> list:
     e = m.exposure
     trail["exposure"] = {"covered": _dist(e.covered), "hours": _dist(e.hours),
-                         "cut": _dist(e.cut), "months": list(e.months)}
+                         "cut": _dist(e.cut), "months": list(e.months),
+                         "ages": list(e.ages) if e.ages is not None else None}
     step = Linear(((-100.0, Product((e.hours, e.cut))),))
     return [step if mo in e.months else Dist.fixed(0.0) for mo in ALL_MONTHS]
 
@@ -343,6 +352,8 @@ def _count(m: Measure, place: places.Place, city: str, map_name: str) -> float:
     people = float(exposure.cells(place, map_name).population.sum())
     driver = m.cost.driver
     if driver == "person":
+        if m.kind == "exposure" and m.exposure.ages is not None:
+            return people * impact.age_share(place, map_name, m.exposure.ages)
         return people
     if driver == "household":
         return people / measures.persons_per_household(city)
@@ -421,6 +432,7 @@ def compile(measure: Measure, city: str, *, study: str | None = None,
         monthly=list(monthly), start_year=m.start_year, ramp_years=m.ramp_years,
         duration_years=m.duration_years, p_success=m.p_success, lag=m.lag, notes=m.notes,
         covered=m.exposure.covered if m.kind == "exposure" else None,
+        covered_ages=m.exposure.ages if m.kind == "exposure" else None,
         cost_per_covered=m.kind == "exposure", **cost)
     return iv, status, reason, tuple(flags), trail
 

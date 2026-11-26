@@ -29,15 +29,21 @@ How long: the Right to Education Act's minimum of 800 instructional hours a year
 1,000 (classes 6-8), out of 8,760 hours in a year. The KV pilot assumed 4 hours a day, 5 days a
 week, which is about the same.
 
-Who: every enrolled student, as a share of the population: 17.6%, Karnataka's UDISE+ enrolment for
-2023-24 (pre-primary to class 12) over Karnataka's projected 2023 population. That is a state
-figure used for Bengaluru; a migrant-heavy city probably has a smaller share of children.
-Bengaluru's own school-by-school UDISE+ files exist (OpenCity) but could not be downloaded
-(data/MISSING.md).
+Who: children aged 5-19 (ages = [5, 19], whole age bands), counted with their own death rates.
+The share of them reached is 78.7%: Karnataka's UDISE+ enrolment for 2023-24 (pre-primary to
+class 12) over Karnataka's projected 2023 population aged 5-19. Enrolment includes pre-primary
+children under 5 and the age bands do not match school classes exactly, so this is a rough
+share. It is a state figure used for Bengaluru; a migrant-heavy city probably has a smaller
+share of children in school. Bengaluru's own school-by-school UDISE+ files exist (OpenCity) but
+could not be downloaded (data/MISSING.md).
 
-A caution the model cannot yet express: the people covered here are children, but the engine
-applies the city's all-age death rates to them. Most deaths from PM2.5 are in adults, so this
-measure's life-years are overstated, possibly by a large factor. Read its rank with that in mind.
+What counting children's own death rates changed (`airhealth score Bengaluru --measure
+school_purifiers`, 2,000 draws, seed 0, curve loglinear_jaganathan): before, when 17.6% of all
+people were credited with the city's all-age death rates, 14,800 life-years if it works (9,670 to
+21,300) and 76.1 life-years per crore; after, 4,410 (2,880 to 6,340) and 22.7 per crore, about a third.
+The cost did not change (the same children are counted). On curves that start at age 25
+(gemm_ncd_lri, loglinear_vodonos) children now get nothing: those curves have no evidence on
+children, which is not the same as evidence of no effect.
 
 Cost per child: one Xiaomi Smart Air Purifier 4 (particle clean-air rate 400 m³/h, for rooms up to
 516 sq ft, 48 m²) at Rs 18,999 per classroom, and its filter at Rs 3,499 every 6-12 months, shared
@@ -47,9 +53,10 @@ used larger machines (600 m³/h, rooms up to 60 m²); bigger classrooms may need
 """
 
 [exposure]
-covered = 0.1758
+covered = 0.7871
 hours = { dist = "uniform", p5 = 0.0913, p95 = 0.1142 }
 cut = { dist = "uniform", p5 = 0.49, p95 = 0.76 }
+ages = [5, 19]
 
 [cost]
 driver = "person"
@@ -84,7 +91,7 @@ url = "https://www.dsel-education.gov.in/static/uploads/2025/09/57501621802afd72
 locator = "Table 5.1 'Enrolment of students by school management and level of school education, 2023-24: All Management', p. 74: Karnataka total 11,926,303"
 key = "O"
 retrieved = "2026-11-27"
-derivation = "11,926,303 / 67,833,000 = 0.1758. Karnataka's projected 2023 population, 678.33 lakh, from NCRB, Crime in India annexure 'Projected Population - States/UTs' (https://www.ncrb.mha.gov.in/uploads/files/12AnnexurePopulation.pdf), which cites the Report of the Technical Group on Population Projections (July 2020), MoHFW. A state ratio used for Bengaluru."
+derivation = "11,926,303 / 15,151,594 = 0.7871, the share of 5-19-year-olds enrolled (exposure.ages = [5, 19]). 15,151,594 = Karnataka's projected population aged 5-9 (4,855,744), 10-14 (5,055,213) and 15-19 (5,240,637) on 1 July 2023, read from data/population_age_state.csv (rows KARNATAKA, 2023, age_start 5, 10, 15), which is the Report of the Technical Group on Population Projections (MoHFW, July 2020), Tables 11 and 18 (see data/sources.toml). Enrolment includes pre-primary children aged 3-5, so the share is rough; it stays below 1, so no cap was needed. A state ratio used for Bengaluru."
 
 [[evidence]]
 fields = ["cost.once"]

@@ -42,7 +42,14 @@ its own stream. Life-years, deaths postponed (and cost, when cost_per_covered) a
 population result times the covered draw, draw by draw: covered people are spread like everyone
 else across units and ages, so this is exact, and it applies the cut to the covered people only
 (not coverage x cut to everyone, which is wrong on curves that flatten at high levels).
-e0_change_years and pm25_after describe the covered people. In the variance split the covered
+e0_change_years and pm25_after describe the covered people.
+
+covered_ages (Intervention.covered_ages): the covered people are one age group, e.g. (5, 19)
+for schoolchildren, and covered is the share of that group reached. Deaths and life-years then
+come from that group's own age bands only (impact.steady_state_many's ages), times the covered
+draw; a curve that starts at 25 gives children nothing. e0_change_years then means the change
+if everyone in the place breathed the change (no single life expectancy describes one age
+group's gain). In the variance split the covered
 draws belong to the pm25_change group; the curve_parameters group uses the covered median.
 
 spread: the share of variance in life-years from the PM2.5 change and from the curve
@@ -222,7 +229,8 @@ def _steady(iv: Intervention, curve: Curve, q: np.ndarray, map_name: str,
             deaths: "str | Sources" = "srs") -> _Steady:
     """Steady-state results for every draw, added over the intervention's places."""
     parts = [impact.steady_state_many(p, curve, map_name, iv.change_kind, iv.annual_change(p, q),
-                                      pm25_override=iv.from_level, deaths=deaths)
+                                      pm25_override=iv.from_level, deaths=deaths,
+                                      ages=iv.covered_ages)
              for p in iv.places]
     pop = np.array([r.population for r in parts])
     return _Steady(
