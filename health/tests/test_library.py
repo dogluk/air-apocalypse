@@ -36,7 +36,7 @@ def test_bengaluru_air_measure_is_sourced(mid):
     m = measures.library()[mid]
     assert m.placeholders == ()
     assert {e.key for e in m.evidence} == {"O"}
-    assert m.cities == ("Bengaluru",)
+    assert m.cities == (None if mid in WIDENED else ("Bengaluru",))
     assert m.p_success_basis.startswith("judgement:")
 
 
@@ -73,7 +73,7 @@ def test_bengaluru_exposure_measure_is_sourced(mid):
     m = measures.library()[mid]
     assert m.placeholders == ()
     assert all(e.locator and e.url for e in m.evidence)
-    assert m.cities == ("Bengaluru",)
+    assert m.cities == (None if mid in WIDENED else ("Bengaluru",))
     assert m.p_success_basis.startswith("judgement:")
 
 
@@ -245,3 +245,66 @@ def test_school_purifiers_reach_children_only():
     s = score.city("Bengaluru", ["school_purifiers"], n=200, curves=["gemm_ncd_lri"])[0]
     assert s.per_curve["gemm_ncd_lri"]["life_years"]["median"] == 0     # adult-only curve
     assert "age_group" in {f.code for f in s.flags}
+
+
+# ---- Measures for every city where their numbers transfer (plan D Task 5) ----
+# Rule: a measure is widened only when (a) its cut (or exposure hours and cut) is read from a
+# source not about its one city alone, (b) its cost is per person, household or unit at a price
+# not tied to that city's contract or budget, with no count of that city's units, and (c) its
+# covered share is not a ratio for that city or its state. One city-specific number blocks it.
+
+WIDENED: set[str] = {"home_purifiers", "old_vehicle_retirement"}
+
+# General variants: a single-city measure whose city-specific numbers are replaced by all-India
+# ones read at source; each runs in every city except the one whose own file keeps its own values.
+GENERAL = {"school_purifiers_india": "school_purifiers"}
+
+
+@pytest.mark.parametrize("mid", sorted(WIDENED))
+def test_widened_measure_is_for_every_city(mid):
+    m = measures.library()[mid]
+    assert m.cities is None                                # cities = "all"
+    assert m.min_share_pct is None                         # no source gives a threshold
+    assert "Bengaluru" not in m.name and "Bengaluru" not in m.who_reaches
+    assert "Widened to every city" in m.notes
+
+
+@pytest.mark.parametrize("mid", sorted(WIDENED) + sorted(GENERAL))
+def test_widened_measure_scores_outside_bengaluru(mid):
+    # Delhi has no APnA study (the default), so an air measure is scored on one of its own
+    # studies; in the all-India table it is simply not scored there (not reported is not zero).
+    study = "arai_teri_delhi2018_receptor" if measures.library()[mid].kind == "air" else None
+    s = score.city("Delhi", [mid], study=study, n=100, curves=["gemm_ncd_lri"])[0]
+    assert s.status in ("scored", "no_cost", "pays_for_itself", "not_applicable")
+    assert "Bengaluru" not in s.reason
+    assert s.pm25_change["median"] < 0
+
+
+def test_every_single_city_measure_says_why():
+    """A measure kept to one city names, in a 'city-specific:' line in its notes, the number
+    that blocks widening (the plan asks this of Bengaluru-only ones; it holds for every city)."""
+    for mid, m in measures.library().items():
+        if m.cities is not None and len(m.cities) == 1:
+            assert "city-specific:" in m.notes, mid
+
+
+@pytest.mark.parametrize("variant,original", sorted(GENERAL.items()))
+def test_general_variant_leaves_out_the_original_city(variant, original):
+    from airhealth import causes
+    lib = measures.library()
+    (home,) = lib[original].cities
+    assert set(lib[variant].cities) == set(causes.known_cities()) - {home}
+    assert "city-specific:" in lib[original].notes
+
+
+def test_school_purifiers_india_uses_all_india_ratios():
+    """Only the Karnataka numbers change: the enrolled share and the pupil-teacher ratio are
+    India's (UDISE+ 2023-24); cut and hours rest on the same sources as Bengaluru's file."""
+    lib = measures.library()
+    g, b = lib["school_purifiers_india"], lib["school_purifiers"]
+    assert g.exposure.cut == b.exposure.cut and g.exposure.hours == b.exposure.hours
+    assert g.exposure.ages == b.exposure.ages
+    assert g.exposure.covered.median != b.exposure.covered.median
+    assert {e.key for e in g.evidence} == {"O"} and g.placeholders == ()
+    covered = [e for e in g.evidence if "exposure.covered" in e.fields]
+    assert "Karnataka" not in covered[0].derivation
