@@ -74,6 +74,8 @@ svg .cellink{{fill:var(--ink)}} svg .cellink.on{{fill:var(--bg)}}
 {series}
 svg .ln{{fill:none;stroke-width:2}} svg .bar{{stroke-width:6;stroke-linecap:round}}
 .note{{color:var(--ink2);font-size:.9rem}}
+.caveats{{border-left:3px solid var(--s1);background:var(--band);padding:.2rem .9rem;margin:.8rem 0}}
+.caveats ul{{margin:.3rem 0;padding-left:1.1rem}}
 footer{{border-top:1px solid var(--grid);margin-top:3rem;padding-top:1rem;color:var(--ink2);font-size:.9rem}}
 """
 
