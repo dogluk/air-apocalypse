@@ -9,6 +9,12 @@ from .page import esc, fmt
 _ids = itertools.count()
 
 
+def reset_ids() -> None:
+    """Restart the pattern-id counter, so a rebuild gives the same bytes."""
+    global _ids
+    _ids = itertools.count()
+
+
 @dataclass
 class Series:
     name: str

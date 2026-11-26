@@ -118,6 +118,7 @@ health/     airhealth: the package, its data (with sources), tests, benchmarks
 diwali/     finished study: ten cities, ten years of hourly PM2.5 around Diwali
 lit/        reading list, who is doing what, gaps nobody has filled
 bets/       interventions sorted by what the physics allows
+cities/     one city from monitors to measures: cities/bengaluru/index.html (generated; rebuild: PYTHONPATH=health:cities python -m citypage.build --city Bengaluru)
 docs/       STATUS.md and design notes (specs/)
 ```
 
