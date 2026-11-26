@@ -31,6 +31,8 @@ found at its source (see data/MISSING.md). The ratio therefore rests on a policy
 
 CSTEP's own receptor study of Bengaluru (cstep_bengaluru2022_cmb) does not report waste burning,
 so this measure gets no credit on that study: not reported is not zero.
+
+city-specific: the cut is CSTEP's Bengaluru scenario (20-50% of waste burning) and the cost is BBMP's enforcement budget (CSTEP); another city needs its own.
 """
 
 [[targets]]
