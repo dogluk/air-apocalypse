@@ -136,3 +136,22 @@ Written while building the first nine Bengaluru measures (2026-11-27). Each meas
 - **Not used: Vital Strategies (2024), Accelerating the health benefits of scaling clean household energy in India.** It costs LPG refill
   subsidies per DALY, which is household exposure, the second pass (design spec, "Order" 6); its cost per household was not read (the PDF
   was not opened this session). `lpg_refill_subsidy` uses CSTEP's Bengaluru figures instead.
+
+## Bengaluru exposure measures and the smog tower (interventions/library): numbers not found at source
+
+Written while building `home_purifiers`, `school_purifiers`, `n95_winter` and `smog_tower` (2026-11-27).
+
+- **IIT Bombay's final report on the Connaught Place smog tower (30 September 2023).** `smog_tower` takes its cut (12-18% of PM2.5,
+  500 m radius) from the Indian Express (26 Oct 2023) and Hindustan Times (10 Nov 2023) accounts of the report, so the cut is evidence S.
+  Not reached: the report went to the DPCC and, per HT, was to go to the Supreme Court; no public copy was found. Would settle it: the
+  report itself (DPCC, or the Supreme Court record), especially reductions by distance and direction and the yearly operating cost.
+- **Bengaluru's own school enrolment and classrooms.** `school_purifiers` uses Karnataka's UDISE+ 2023-24 enrolment over Karnataka's projected
+  2023 population (17.6%) for the share covered, and class sizes of 27-50 from the state pupil-teacher ratio and Delhi KV classes. OpenCity
+  publishes school-by-school UDISE+ files for Bengaluru Urban North and South (https://data.opencity.in/dataset/bengaluru-urban-udise-2024-25,
+  enrolment and `total_class_rooms` columns), but the site's bot check blocked every download tried. Would settle it: those files, summed.
+- **How many people would wear a free N95 every time they go out.** `n95_winter` has no wear or adherence figure; it is folded into the
+  odds as a judgement. Would settle it: an Indian or Chinese study of sustained mask wear among people given masks free during pollution
+  episodes (wear diaries or sensors), not one-off surveys.
+- **Children's share of air-pollution deaths, for school measures.** Not a missing input but a gap in the engine: an exposure measure's
+  covered people are given the city's all-age death rates, so `school_purifiers`, which covers only children, has its life-years
+  overstated. Would settle it: letting an exposure measure name the ages it covers.
