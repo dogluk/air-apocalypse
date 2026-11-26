@@ -18,6 +18,7 @@ PLAIN: dict[str, str] = {
     "transport": "road and other transport",
     "residential": "household cooking and heating",
     "industry": "industry",
+    "power": "power plants",
     "dust": "dust (roads, construction)",
     "waste_burning": "burning of waste",
     "dg_sets": "diesel generators",

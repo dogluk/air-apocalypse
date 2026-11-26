@@ -734,6 +734,12 @@ file; Delhi has no airshed). The 2017 booklet's printed table differs from the Z
 Atlas of Urban Expansion T3 urban extent), origin all_origins; sector map and reasons in scripts/build_causes.py; the 20 shares sum to 100 +/- 0.2.
 The build checks the McDuffie xlsx sha256 against its entry below. Emission shares and concentration shares never share a group (metric column).
 A cause a group does not list is not reported, not zero (causes.shares returns NaN).
+power (added 2026-11-27): electricity generation, only where a study gives power plants a row of their own: TERI Kolkata 2025 CMAQ 'Power'
+(summer, winter), TERI Lucknow 2022 CMAQ 'Power' (five seasons), TERI Surat 2021 CMAQ 'Thermal Power plants' (summer, winter); 9 rows moved
+from industry. Rows that lump the two ('Industry (incl. power plants, ...)' ARAI/TERI Delhi, 'Industry/Power Plant' TERI Surat CMB) stay
+industry. APnA's industry group includes power plants, so APnA's power is NaN. McDuffie's 'Energy Coal' and 'Energy NonCoal' stay industry: the
+README of the paper's gridded results (Zenodo record 4739100, read 2026-11-27) defines the energy sector as 'electricity and heat production,
+fuel production and transformation, oil and gas fugitive/flaring, and fossil fuel fires', which is wider than power plants.
 """
 
 ["causes_transcribed.csv"]
@@ -749,6 +755,8 @@ Sectors and `origin` follow the study type: CMAQ/WRF-Chem sector tables and CMB/
 (local_all = the city's own sources, all sectors). A group with covers = all sums to 100 +/- 2; partial groups (stubble-only, Lucknow monsoon)
 do not. Derived values are marked DERIVED in their locator (Kolkata summer HMC slice = 60 - 12 - 46). Mapping calls (coal and fly ash -> other,
 Kolkata cooking -> residential, transport including DG sets) are stated in the locators; source_raw keeps each report's own words.
+Power plants: a row whose source_raw is power alone ('Power', 'Thermal Power plants') is source_harmonised = power (since 2026-11-27);
+rows lumping industry and power stay industry.
 """
 
 ["mcduffie2021_supp_data_1.xlsx"]

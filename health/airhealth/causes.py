@@ -29,6 +29,13 @@ share as another's:
               geography, so it has no `local_all` row and its `transport` and `other` rows are
               Delhi's own emissions only, although the group's origin is `region`.
 
+`power` is electricity generation (power plants), used only where a study gives it a row of its own
+("Power", "Thermal Power plants"). A row that lumps the two ("Industry (incl. power plants)",
+"Industry/Power Plant") stays `industry`. APnA folds power plants into industry everywhere, and
+McDuffie's energy sector also holds fuel production and transformation and oil and gas flaring, so
+both keep it in `industry` and their `power` is NaN (not reported, never 0): a city air measure
+cannot target power plants on those studies.
+
 A harmonised cause a group does not list is NOT REPORTED by that study, never 0: use shares(),
 which returns NaN for those. `months`, not `season`, says which months a share covers (a
 campaign-mean label such as Kolkata's 'winter+summer campaigns' is not 'annual').
@@ -43,7 +50,7 @@ import pandas as pd
 
 from . import paths
 
-HARMONISED = ("transport", "residential", "industry", "dust", "waste_burning", "dg_sets", "brick_kilns",
+HARMONISED = ("transport", "residential", "industry", "power", "dust", "waste_burning", "dg_sets", "brick_kilns",
               "agri_burning", "natural", "secondary_unassigned", "biomass_unassigned", "outside", "local_all", "other")
 COLUMNS = ("city", "study", "institution", "year_sampled", "season", "months", "size_fraction", "method",
            "metric", "boundary", "origin", "covers", "source_raw", "source_harmonised", "share_pct", "n_sites",
