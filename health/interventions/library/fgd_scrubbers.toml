@@ -1,0 +1,91 @@
+# India: fitting flue-gas desulphurisation units (scrubbers) to the 2018 fleet of coal power plants.
+name = "Scrubbers (flue-gas desulphurisation) on India's coal power plants"
+kind = "air"
+scope = "region"
+who_reaches = "everyone in India downwind of a coal power plant, through the outdoor air"
+
+start_year = 2028
+ramp_years = 4
+duration_years = 20
+lag = "epa20"
+
+p_success = 0.6
+p_success_basis = "judgement: scrubbers are proven and some already run in India, and paying for them removes the plants' main objection, but the 2015 sulphur limits have been postponed again and again, and a fitted scrubber still has to be run, which costs the plant power"
+
+placeholders = []
+
+notes = """
+Every coal-fired unit of India's 2018 fleet (208 GW) is fitted with a wet limestone scrubber, paid for
+by the funder, and runs it for the 20-year life the DCP3 chapter assumes for a retrofit.
+
+How much of the plants' PM2.5 it removes: a scrubber removes 90% (DCP3 ch. 13) to 98% (Cropper et
+al. 2021) of the sulphur dioxide, and so of the sulphate particles it forms; it does nothing to the
+nitrate or the directly emitted particles. The sulphate share of power-plant PM2.5 is read from the
+share of power-plant deaths the DCP3 chapter cites as due to SO2: 30-40% (Guttikunda and Jawahar
+2014) to as many as 60% (Cropper et al. 2012); the chapter itself treats the relation as about linear.
+So the cut is 0.27 to 0.59 of the plants' PM2.5.
+
+Where it lands: data/receptor_power_cropper2021.csv, the PM2.5 India's 2018 coal plants add, from
+Cropper et al. 2021's model runs with and without the plants (which assume no scrubbers), as state
+averages given to each district. The alternative table, data/receptor_energy_coal.csv (McDuffie et
+al.'s whole coal energy sector, a fallback), is kept and not averaged with it.
+
+Cost: DCP3 ch. 13 Table 13.4, in rupees (the chapter converted rupee costs to dollars at Rs 55 per
+dollar and calls them 2013 dollars, so they are turned back at the same rate and taken as 2013
+rupees): capital Rs 60 lakh per MW for a new wet unit (US$109,091 x 55), plus the 30% retrofit
+factor, Rs 78 lakh per MW, once; fixed running cost US$0.473 per MWh plus the 1.5% of output the
+unit uses, valued at US$0.0636 per kWh, per year, at a capacity factor between 60.9% (the 2018
+average, Cropper et al. 2021) and 85% (the benchmark DCP3 uses): Rs 4.19 to 5.84 lakh per MW a year.
+Capital costs per MW fall with unit size (the chapter's 250 MW basis), so large units cost less.
+Scrubbers fitted since 2018 are not netted off: the receptor table and the capacity are both the
+2018 fleet before them.
+"""
+
+[region]
+receptor = "receptor_power_cropper2021.csv"
+cut = { dist = "uniform", p5 = 0.27, p95 = 0.59 }
+
+[cost]
+driver = "unit"
+unit = "MW of coal-fired capacity (2018 fleet) fitted with a wet scrubber"
+units = 208000
+once = 7800000
+annual = { dist = "uniform", p5 = 418700, p95 = 584400 }
+currency = "INR"
+year = 2013
+
+[[evidence]]
+fields = ["region.cut"]
+source = "Cropper M, Guttikunda S, Jawahar P, Malik K, Partridge I (2017), Costs and Benefits of Installing Flue-Gas Desulfurization Units at Coal-Fired Power Plants in India, ch. 13 in Disease Control Priorities (3rd ed.), vol. 7, Injury Prevention and Environmental Health, World Bank"
+url = "https://dcp-3.org/sites/default/files/chapters/DCP3%20Injury%20%26%20Environment_Ch13.pdf"
+locator = "p. 239, Introduction: 'Guttikunda and Jawahar (2014) estimate that Indian power plants caused more than 80,000 deaths in 2011; they attribute 30-40 percent of these deaths to SO2. Cropper and others (2012) suggest that as many as 60 percent of the deaths associated with coal-fired power plants in India may be attributable to SO2'; Table 13.4 (p. 242) 'FGD unit efficiency (%) 90'; p. 242: 'Because of the linearity of sulfate formation and the approximate linearity of relative risk for a small change in concentrations, this reduction in emissions implies a 90 percent reduction in deaths attributable to SO2'. Upper removal: Cropper et al. 2021, PNAS 118: e2017936118, p. 5 (https://urbanemissions.info/wp-content/uploads/docs/2021-01-PNAS-India-PP-Health.pdf): FGD units 'would reduce their SO2 emissions by 90-98%'."
+key = "O"
+retrieved = "2026-11-27"
+derivation = "SO2 removed 0.90 to 0.98 times the sulphate share of power-plant PM2.5, 0.30 to 0.60 (deaths share, taken as the PM2.5 share by the chapter's linearity): p5 = 0.90 x 0.30 = 0.27, p95 = 0.98 x 0.60 = 0.59."
+
+[[evidence]]
+fields = ["cost.once"]
+source = "Cropper M, Guttikunda S, Jawahar P, Malik K, Partridge I (2017), Costs and Benefits of Installing Flue-Gas Desulfurization Units at Coal-Fired Power Plants in India, DCP3 vol. 7 ch. 13"
+url = "https://dcp-3.org/sites/default/files/chapters/DCP3%20Injury%20%26%20Environment_Ch13.pdf"
+locator = "Table 13.4 'Operating Characteristics for Cost Calculations' (p. 242): Wet limestone, Capital costs (US$/MW) $109,091; Retrofit cost factor (%) 30. Note 14 (p. 245): 'All costs in Indian rupees (Rs) have been converted to US$ using an exchange rate of US$1 = 55Rs and are thus in 2013 US$'."
+key = "O"
+retrieved = "2026-11-27"
+derivation = "109,091 x 1.30 x 55 = Rs 7,800,007 per MW, rounded to 7,800,000; 2013 rupees."
+
+[[evidence]]
+fields = ["cost.annual"]
+source = "Cropper M, Guttikunda S, Jawahar P, Malik K, Partridge I (2017), Costs and Benefits of Installing Flue-Gas Desulfurization Units at Coal-Fired Power Plants in India, DCP3 vol. 7 ch. 13"
+url = "https://dcp-3.org/sites/default/files/chapters/DCP3%20Injury%20%26%20Environment_Ch13.pdf"
+locator = "Table 13.4 (p. 242), wet limestone: Fixed operating costs (US$/MWh) $0.473; Electricity costs (US$/kWh) $0.0636; Auxiliary consumption (%) 1.5; Capacity utilization (%) 85 (benchmark). Checked against Table 13.5 (p. 243): average plant fixed US$3.3 million and variable US$6.7 million a year. Lower capacity factor: Cropper et al. 2021, PNAS, p. 4: 'the average load factor of 60.9% in 2018'."
+key = "O"
+retrieved = "2026-11-27"
+derivation = "(0.473 + 0.015 x 63.6) US$/MWh x 8,760 h x capacity factor x 55 Rs/US$: 0.609 -> Rs 418,705, 0.85 -> Rs 584,399 per MW a year; p5 = 418,700, p95 = 584,400, 2013 rupees."
+
+[[evidence]]
+fields = ["cost.units"]
+source = "Cropper M, Cui R, Guttikunda S, Hultman N, Jawahar P, Park Y, Yao X, Song X-P (2021), The mortality impacts of current and planned coal-fired power plants in India, PNAS 118: e2017936118, SI Appendix"
+url = "https://urbanemissions.info/wp-content/uploads/docs/2021-01-PNAS-India-PP-Health-SI.pdf"
+locator = "SI Appendix, Table S1 'Plant Capacity (GW) and Summary of Pollutant Emissions (Kilotons) by State' (PDF p. 6): 2018 Coal-Fired Power Plants, Total Capacity 208.0 GW"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "208.0 GW = 208,000 MW."

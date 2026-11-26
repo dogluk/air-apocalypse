@@ -367,7 +367,7 @@ the odds), cost in 2025 rupees (crore, median), life-years per crore if it works
 the odds, and flag codes (PH placeholder, ES/ER evidence seen or recalled, OJ odds are a
 judgement, LS long shot, NR cause not reported, AF whole-year share used for part-year cut, BS
 borrowed month shape, CO covered people only, RG regional, RB what the source-receptor table
-stands for, UB upper bound, PC the cost leaves out part of what the measure costs). A table of PM2.5 change follows; for an exposure
+stands for, RF the source-receptor table is a stand-in, UB upper bound, PC the cost leaves out part of what the measure costs). A table of PM2.5 change follows; for an exposure
 measure it is what the covered people breathe. A measure whose source prices only part of it
 (say, the government's enforcement but not what builders spend) says what is left out in
 `cost.partial`; that sentence is printed under the table and carried as flag `partial_cost`. Statuses:
@@ -384,10 +384,16 @@ A regional measure (stubble, coal power) removes a fraction of a source spread o
 states. How much each district's PM2.5 falls when the whole source goes is read from a
 source-receptor table, `data/receptor_<name>.csv` (district, state, delta_pm25_full), built by
 `scripts/build_receptor.py`. No published district-level source-receptor result could be used
-yet (see `data/MISSING.md`), so the two tables there come from McDuffie et al. 2021's gridded
-sector fractions times ACAG PM2.5: `receptor_stubble.csv` (crop-residue burning) and
+yet (see `data/MISSING.md`), so two tables come from McDuffie et al. 2021's gridded sector
+fractions times ACAG PM2.5: `receptor_stubble.csv` (crop-residue burning) and
 `receptor_energy_coal.csv` (coal burned for energy production, wider than power plants alone),
-each a sector from every origin, not only the named states (flag RB). `score CITY` gives the
+each a sector from every origin, not only the named states (flag RB). Both are stand-ins, and
+every result on them carries flag RF (`receptor_fallback`) saying so; the stubble one is about 14
+times smaller India-wide than Lan et al. 2022's estimate, so results on it are likely understated.
+A third, `receptor_power_cropper2021.csv` (`scripts/build_receptor_cropper.py`), is the PM2.5 of
+India's 2018 coal power plants from Cropper et al. 2021's model runs, by state, given to each
+district. The library's regional measures: `stubble_pes_upfront`, `happy_seeder_subsidy`,
+`punjab_out_of_rice` (all on the stubble table) and `fgd_scrubbers` (on Cropper's). `score CITY` gives the
 part that reaches the city (life-years, no cost or ratio: the cost belongs to the whole region);
 `score --region ID` scores every district the source reaches, with the measure's whole cost.
 `power` is a cause of its own in `data/causes.csv` only where a study gives power plants their

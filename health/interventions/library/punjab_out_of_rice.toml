@@ -1,0 +1,76 @@
+# Punjab and Haryana: paying farmers to move 8 lakh hectares out of non-basmati paddy.
+name = "Paying Punjab and Haryana farmers to move 8 lakh hectares out of paddy"
+kind = "air"
+scope = "region"
+who_reaches = "everyone downwind of Punjab's and Haryana's paddy fields, through the outdoor air"
+
+start_year = 2027
+ramp_years = 2
+duration_years = 5
+lag = "epa20"
+
+p_success = 0.3
+p_success_basis = "judgement: ICRIER's own report shows the existing switching incentives barely moved anyone (Haryana's rice area grew while it paid Rs 17,500 a hectare; Punjab spent Rs 0.85 crore of a Rs 500 crore budget in 2024-25); twice the money may still not beat assured paddy procurement"
+
+placeholders = []
+
+notes = """
+ICRIER's 2026 report (Singh, Thangaraj and Gulati) proposes paying Rs 35,000 to 40,000 a hectare a
+year, for at least five years, to farmers in Punjab and Haryana who move out of paddy, aiming at 8 to
+15 lakh hectares of non-basmati paddy. This measure is the lower target, 8 lakh hectares, for five
+years. (15 lakh hectares would double cost and effect alike.)
+
+How much burning it removes: 8 lakh hectares of the two states' 48.5 lakh hectares of rice (2024-25):
+16.5% of the area, if the land taken out burned as much as the rest. Which smoke that is: the share
+of burning removed times Punjab's and Haryana's joint share of India's exposure to crop-burning
+smoke, 0.61 to 0.80 in 2015-19 (Lan et al. 2022), because the source-receptor table
+(data/receptor_stubble.csv) is all crop burning from every origin. The table is a fallback and about
+14 times smaller than Lan et al.'s national figure, so the result is likely understated (flag
+receptor_fallback). It was not scaled to close that gap.
+
+Farmers may go back to paddy when the payments stop; nothing after the five years is counted.
+
+The report's case is that the payment costs governments little, because each hectare out of paddy
+saves power and fertiliser subsidies (in Punjab Rs 34,195 a hectare for pulses, Rs 31,892 for oilseeds,
+2022-23). Those savings are not netted off here: the cost is the funder's payment. A funder that is
+also the government paying those subsidies would pay far less than shown.
+"""
+
+[region]
+receptor = "receptor_stubble.csv"
+cut = { dist = "uniform", p5 = 0.10, p95 = 0.13 }
+
+[cost]
+driver = "unit"
+unit = "hectare of non-basmati paddy moved to another crop"
+units = 800000
+annual = { dist = "uniform", p5 = 35000, p95 = 40000 }
+currency = "INR"
+year = 2025
+
+[[evidence]]
+fields = ["region.cut"]
+source = "Singh R, Thangaraj P, Gulati A (2026), Diversification to Augment Farmers' Incomes and Promote Sustainable Agriculture in Punjab and Haryana, ICRIER"
+url = "https://icrier.org/pdf/Diversification-to-augment-farmers-incomes-and-promote-sustainable-agriculture-in-punjab-and-haryana.pdf"
+locator = "Foreword/summary (PDF text near 'paddy-wheat rotation'): Punjab and Haryana 'together accounting for about 4.85 million hectares under rice in 2024-25'; Executive Summary and Box 4.1: 'shift 8-15 lakh hectares of non-basmati paddy area from Punjab and Haryana'. Joint share of exposure: Lan et al. 2022, Nat Commun 13:6537, Supplementary Table 9 (https://static-content.springer.com/esm/art%3A10.1038%2Fs41467-022-34093-z/MediaObjects/41467_2022_34093_MOESM11_ESM.xlsx), whole-year 2015-2019, Punjab 'contribution to annual exposure' 0.7, 0.67, 0.49, 0.53, 0.51 and Haryana 'ratio to annual total' 0.097, 0.09, 0.12, 0.093, 0.11."
+key = "O"
+retrieved = "2026-11-27"
+derivation = "Area share 8 / 48.5 = 0.165; joint share by year 0.797, 0.76, 0.61, 0.623, 0.62, so 0.61 to 0.80: p5 = 0.165 x 0.61 = 0.10, p95 = 0.165 x 0.80 = 0.13."
+
+[[evidence]]
+fields = ["cost.annual"]
+source = "Singh R, Thangaraj P, Gulati A (2026), Diversification to Augment Farmers' Incomes and Promote Sustainable Agriculture in Punjab and Haryana, ICRIER"
+url = "https://icrier.org/pdf/Diversification-to-augment-farmers-incomes-and-promote-sustainable-agriculture-in-punjab-and-haryana.pdf"
+locator = "Executive Summary, recommendation (i): 'the farmer will get ₹35,000 to ₹40,000 per hectare for switching from paddy. It should be made available at least for 5 years'; recommendation (ii): 'Incentive of ₹35,000 per hectare in Punjab and Haryana for non-paddy farmers should be provided for at least five years'."
+key = "O"
+retrieved = "2026-11-27"
+derivation = "Rs 35,000 to 40,000 per hectare per year; the report's 2026 rupees used as 2025 rupees (the deflator table stops at 2025)."
+
+[[evidence]]
+fields = ["cost.units"]
+source = "Singh R, Thangaraj P, Gulati A (2026), Diversification to Augment Farmers' Incomes and Promote Sustainable Agriculture in Punjab and Haryana, ICRIER"
+url = "https://icrier.org/pdf/Diversification-to-augment-farmers-incomes-and-promote-sustainable-agriculture-in-punjab-and-haryana.pdf"
+locator = "Box 4.1 'Reduce 8-15 Lakh Hectares of Non-Basmati Paddy Area from Punjab and Haryana'; Executive Summary: 'if we shift 8-15 lakh hectares of non-basmati paddy area from Punjab and Haryana'."
+key = "O"
+retrieved = "2026-11-27"
+derivation = "The lower end, 8 lakh hectares = 800,000 ha."

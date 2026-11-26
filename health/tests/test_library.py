@@ -99,3 +99,79 @@ def test_policy_only_cost_is_flagged_partial():
     partial = [f for f in s.flags if f.code == "partial_cost"]
     assert len(partial) == 1 and "leaves out" in partial[0].text
     assert partial[0].text == measures.library()["waste_collection_burning_ban"].cost.partial
+
+
+# ---- Regional measures (stubble smoke, coal power plants) ----
+
+REGIONAL = ["stubble_pes_upfront", "happy_seeder_subsidy", "punjab_out_of_rice", "fgd_scrubbers"]
+STUBBLE = ["stubble_pes_upfront", "happy_seeder_subsidy", "punjab_out_of_rice"]
+
+
+@pytest.mark.parametrize("mid", REGIONAL)
+def test_regional_measure_reach_scores(mid):
+    if mid in WRITTEN_UP_AS_MISSING:
+        pytest.skip("see data/MISSING.md")
+    s = score.region(mid, n=200, curves=["gemm_ncd_lri"])
+    assert s.scope == "region" and s.status in ("scored", "no_cost", "pays_for_itself")
+    assert s.pm25_change["median"] < 0
+
+
+@pytest.mark.parametrize("mid", REGIONAL)
+def test_regional_measure_is_sourced(mid):
+    """Every number read at source (key O), none a placeholder; the odds a flagged judgement."""
+    m = measures.library()[mid]
+    assert m.scope == "region" and m.placeholders == ()
+    assert {e.key for e in m.evidence} == {"O"}
+    assert all(e.locator and e.url for e in m.evidence)
+    assert m.p_success_basis.startswith("judgement:")
+
+
+@pytest.mark.parametrize("mid", STUBBLE)
+def test_stubble_measures_carry_the_fallback_flag(mid):
+    """The stubble table is a stand-in for a published source-receptor result (Task 10), about
+    14 times smaller than Lan et al. 2022's national figure: every result says so."""
+    m = measures.library()[mid]
+    assert m.region.receptor == "receptor_stubble.csv"
+    s = score.city("Delhi", [mid], n=100, curves=["gemm_ncd_lri"])[0]
+    fallback = [f for f in s.flags if f.code == "receptor_fallback"]
+    assert len(fallback) == 1
+    assert "fallback" in fallback[0].text and "14 times smaller" in fallback[0].text
+    assert "understated" in fallback[0].text
+
+
+def test_scrubbers_use_the_power_plant_table_not_the_coal_energy_one():
+    """Two coal tables are kept side by side, never averaged: scrubbers act on power plants,
+    so they use Cropper et al. 2021's (no fallback flag); the McDuffie one stays a fallback."""
+    m = measures.library()["fgd_scrubbers"]
+    assert m.region.receptor == "receptor_power_cropper2021.csv"
+    s = score.city("Delhi", ["fgd_scrubbers"], n=100, curves=["gemm_ncd_lri"])[0]
+    codes = {f.code for f in s.flags}
+    assert "receptor_basis" in codes and "receptor_fallback" not in codes
+    assert score.receptor_basis("receptor_energy_coal.csv", key="fallback")
+
+
+def test_cropper_receptor_is_its_state_figure():
+    """Each district takes its state's Table S2 value; states the table omits get no row."""
+    import pandas as pd
+
+    from airhealth import paths
+    t = measures.receptor("receptor_power_cropper2021.csv")
+    s2 = pd.read_csv(paths.DATA / "cropper2021_state_power_pm25.csv").set_index("state")
+    assert set(t.state) == set(s2.index)
+    for state, g in t.groupby("state"):
+        assert (g.delta_pm25_full == -s2.loc[state, "pm25_power_2018"]).all()
+    assert "Ladakh" not in set(t.state) and "Chandigarh" not in set(t.state)
+
+
+def test_stubble_reaches_delhi():
+    assert score.city("Delhi", ["stubble_pes_upfront"], n=100,
+                      curves=["gemm_ncd_lri"])[0].status == "scored"
+
+
+@pytest.mark.xfail(strict=True, reason=(
+    "receptor_stubble.csv (the McDuffie fallback) counts crop fires from every origin, so "
+    "Bengaluru gets a small change from southern burning that a Punjab measure would not touch; "
+    "it passes once a Punjab-origin source-receptor table replaces it (data/MISSING.md)"))
+def test_stubble_does_not_reach_bengaluru():
+    assert score.city("Bengaluru", ["stubble_pes_upfront"], n=100,
+                      curves=["gemm_ncd_lri"])[0].status in ("not_applicable", "not_scored")

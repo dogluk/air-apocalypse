@@ -172,6 +172,28 @@ flagged "sector from every origin, not only the named states".
   ch. 13, https://www.ncbi.nlm.nih.gov/books/NBK525204/). Not read: PNAS returned 403, Europe PMC's full text (PMC7865184) returned a
   server error twice, and NCBI Bookshelf served a bot check. Whether it or its data release gives the PM2.5 change by receiving
   district is not known. Would settle it: the paper's SI and data release, read.
+  **Update (Task 11, 2026-11-27):** the paper and its SI Appendix were read from co-author Guttikunda's site (urbanemissions.info).
+  The SI gives the PM2.5 the 2018 plants add by STATE (Table S2), not by district; that is now
+  data/receptor_power_cropper2021.csv (each district takes its state's figure) and fgd_scrubbers uses it. The gridded results are in
+  the data release, openICPSR project 130404 (doi 10.3886/E130404V1, cited in the paper's Data Availability), which served a
+  Cloudflare check to scripts and to a headless browser (HTTP 403); openICPSR downloads also need a free login. Would settle it:
+  download that release by hand and average its CAMx difference field (0.25°) to districts with scripts/build_receptor.py's pixels.
 - **A power-only gridded field.** McDuffie's ENEcoal (used for receptor_energy_coal.csv) is "Energy Production (coal combustion only)",
   which the README says also holds fuel production and transformation, so it is wider than power plants. A power-plant-only zero-out
   run (GBD MAPS India stays local-only here) would replace it.
+- **Lan et al. 2022's supplementary files (Task 11, 2026-11-27).** All twelve were downloaded from the Nature page and opened
+  (Supplementary Tables 1-11 as xlsx, the SI PDF). Every exposure table has the one India-wide receptor: Table 2 and 3 by source state,
+  Table 9 the source-state contributions to India's exposure for 2015-19 (Punjab 4.0 of 7.7 µg/m³ in 2019). None gives a receiving
+  district. Table 9's source-state shares are what the stubble measures use to take Punjab's (and Haryana's) part of the McDuffie
+  table, which counts all crop burning; that share is India-wide, so it is too small near Punjab and too large far away.
+- **The stubble table reaches Bengaluru.** Because receptor_stubble.csv counts crop fires from every origin, Bengaluru gets about
+  -0.3 µg/m³ from all burning, and a Punjab measure is credited with a share of it (test_library's
+  test_stubble_does_not_reach_bengaluru is an expected failure until this is fixed). Would settle it: a source-receptor result for
+  Punjab and Haryana's fires alone by receiving district (Lan et al.'s forward runs; or a GEOS-Chem or WRF-Chem tagged run such as
+  Kulkarni et al. 2020, ES&T 54: 4790, paywalled).
+- **Happy Seeder: Shyamsundar P, Springer NP et al. 2019, Science 365: 536, doi 10.1126/science.aaw4085.** The UC eScholarship copy
+  returned 403 to scripts and an empty page to a fetcher; Science is paywalled. Wanted: its costs per hectare of the Happy Seeder and
+  other options against burning. happy_seeder_subsidy is built instead from the Government of Punjab's 2023 action plan (spend and
+  Happy-Seeder area), and the share of that area that would otherwise have burned is a judgement (a quarter to three quarters); no
+  source read here measures what the machinery subsidy did to burning. Would settle it: an evaluation of the CRM scheme's effect on
+  fires (for example district fire counts against machines delivered).
