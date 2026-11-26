@@ -30,6 +30,8 @@ road and construction dust rules: "<1" crore, shared with road dust. It is taken
 year, from a tenth of a crore (a judgement) to one crore. It leaves out what builders spend on
 barriers, water and fogging machines, which TERI counts for NCR; those are not the funder's
 rupees, but a reader should know the ratio rests on a policy-only cost.
+
+city-specific: the cut is TERI's NCR effect times the construction part of Bengaluru's dust (0.309, CSTEP's Bengaluru inventory), and the cost is BBMP's enforcement budget (CSTEP); another city needs its own construction share of dust and its own enforcement cost.
 """
 
 [[targets]]
