@@ -825,6 +825,7 @@ licence = "McDuffie gridded results: CC BY 4.0 (Zenodo record). ACAG: CC BY 4.0.
 method = "derived"
 script = "scripts/build_receptor.py"
 caveat = "The district changes come from McDuffie et al. 2021's global model share of crop-residue burning (all such burning, from every origin, not only Punjab and Haryana), rescaled so all sources sum to 100%, times 2023 satellite PM2.5; no published district-level source-receptor result for stubble could be used. It is far smaller than Lan et al. 2022's estimate (India-wide population-weighted 0.48 against 6.7 µg/m³), so it is likely an underestimate."
+fallback = "This source-receptor table is a fallback: no published district-level result for stubble smoke could be used, so it is built from a global model's share of all crop burning (McDuffie et al. 2021). Its India-wide figure is about 14 times smaller than Lan et al. 2022's national estimate (0.48 against 6.7 µg/m³), so results on it are likely understated; and because it counts crop fires everywhere, places far from Punjab and Haryana (southern India, for example) get a small change the measure would not bring them."
 notes = """
 Columns: district, state, delta_pm25_full (µg/m³, 0 or below): the change in the district's annual-mean PM2.5 when the whole source is removed.
 735 districts, every district of exposure_acag_total.csv (McDuffie's grid covers all of India, so the study's area is the whole country; no
@@ -856,10 +857,42 @@ licence = "McDuffie gridded results: CC BY 4.0 (Zenodo record). ACAG: CC BY 4.0.
 method = "derived"
 script = "scripts/build_receptor.py"
 caveat = "The district changes come from McDuffie et al. 2021's global model share of coal burned for energy production (power plants plus other coal-fired energy production, from every origin, not only India's plants), rescaled so all sources sum to 100%, times 2023 satellite PM2.5; no published plant-level source-receptor result by district could be used."
+fallback = "This source-receptor table is a fallback: no published district-level result for coal power plants could be used, so it is built from a global model's share of all coal burned for energy production (McDuffie et al. 2021), which is wider than power plants alone."
 notes = """
 Columns and method as receptor_stubble.csv. 735 districts, none 0. Built 2026-11-27: India population-weighted change -3.60 µg/m³; largest
 -8.92 (Raigarh, Chhattisgarh). Not power plants alone: the energy sector also holds fuel production and transformation (README), which is
 why causes.csv keeps McDuffie's energy rows in industry. A coal-power measure scored on it gets the whole sector's change times its cut.
 The spec's first choice, the plant-level work behind Cropper et al. (DCP3 ch. 13; PNAS 2021, doi 10.1073/pnas.2017936118), could not be read
 (data/MISSING.md).
+"""
+
+["cropper2021_state_power_pm25.csv"]
+source = "Cropper M, Cui R, Guttikunda S, Hultman N, Jawahar P, Park Y, Yao X, Song X-P (2021). The mortality impacts of current and planned coal-fired power plants in India. PNAS 118(5): e2017936118, SI Appendix, Table S2"
+url = "https://urbanemissions.info/wp-content/uploads/docs/2021-01-PNAS-India-PP-Health-SI.pdf"
+paper = "https://urbanemissions.info/wp-content/uploads/docs/2021-01-PNAS-India-PP-Health.pdf"
+locator = "SI Appendix, PDF p. 7, 'Table S2. Estimates of Population-Weighted Ambient PM2.5 by State and PM2.5 Attributable to Power Plants (µg/m3)', columns 'Ambient PM2.5 Attributable to Coal-Fired Power Plants': 'in 2018' (pm25_power_2018) and 'in 2018 + planned plants' (pm25_power_2018_plus_planned); 30 states, transcribed by hand in the table's order. Method (paper, p. 1-2 and Methods): CAMx at 0.25° for 365 days of 2018, run 1 without and run 2 with 2018 power-plant emissions; plants assumed to have 99% electrostatic precipitators and low-NOx burners but no flue-gas desulfurisation (paper p. 4); load factor 60.9%."
+retrieved = "2026-11-27"
+licence = "Figures tabulated with a citation; the paper is the authors' (PNAS). The SI is hosted by co-author Guttikunda's Urban Emissions."
+method = "transcribed"
+notes = """
+state uses data/places.csv spellings (here identical to the paper's: state_raw). Ambient PM2.5 columns not transcribed.
+Gridded or district results: the paper's data release, openICPSR project 130404 (doi 10.3886/E130404V1), was behind a Cloudflare
+check from scripts and a browser (2026-11-27), see data/MISSING.md.
+"""
+
+["receptor_power_cropper2021.csv"]
+source = "Change in each district's annual-mean PM2.5 (µg/m³) if India's 2018 coal-fired power plants were removed: the state's population-weighted figure from Cropper et al. 2021 (PNAS 118: e2017936118, SI Appendix Table S2, 'in 2018'), given to every district of the state."
+url = "https://urbanemissions.info/wp-content/uploads/docs/2021-01-PNAS-India-PP-Health-SI.pdf"
+locator = "data/cropper2021_state_power_pm25.csv (its entry gives the table and page); districts per state from data/exposure_acag_total.csv."
+retrieved = "2026-11-27"
+licence = "Derived from figures tabulated with a citation; shared under ODbL 1.0 like the district list."
+method = "derived"
+script = "scripts/build_receptor_cropper.py"
+caveat = "The district changes are Cropper et al. 2021's state averages of the PM2.5 India's 2018 coal power plants add (a chemical transport model run with and without the plants, assuming no sulphur scrubbers), given to every district in the state, so differences inside a state are lost; seven small states and territories the table does not list are left out."
+notes = """
+Columns as receptor_stubble.csv. 720 districts (735 less the 15 of Andaman & Nicobar, Chandigarh, Dadra & Nagar Haveli, Daman & Diu,
+Ladakh, Lakshadweep and Puducherry). Built 2026-11-27: population-weighted change over the 720 districts -4.47 µg/m³; largest -7.59
+(every district of Chhattisgarh). This is power plants alone (the paper's runs add or remove only plant emissions); the alternative
+receptor_energy_coal.csv (McDuffie's coal energy sector, India -3.60) is wider in sector but varies within states. Both are kept;
+they are never averaged. fgd_scrubbers uses this one because scrubbers act on power plants only.
 """

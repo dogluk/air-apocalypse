@@ -13,9 +13,10 @@ Which source a receptor comes from (spec part 3, in order of preference):
        SOURCE district's share of the national exposure (Supplementary Data 2-4, by state and season),
        not the change in PM2.5 in each RECEPTOR district. Their forward runs with and without burning
        are shown only as maps. See data/MISSING.md.
-     - Coal power plants: the plant-level work behind Cropper et al. (DCP3 ch. 13; PNAS 2021, doi
-       10.1073/pnas.2017936118) could not be read (publisher 403, Europe PMC error, NCBI bot
-       check), so whether it gives PM2.5 by receiving district is unknown. See data/MISSING.md.
+     - Coal power plants: Cropper et al. 2021 (PNAS, doi 10.1073/pnas.2017936118) give the
+       plants' PM2.5 by state only (SI Table S2); scripts/build_receptor_cropper.py turns that into
+       receptor_power_cropper2021.csv. Their gridded release (openICPSR 130404) could not be
+       opened. See data/MISSING.md.
   2. Otherwise McDuffie et al. 2021 (Nat Commun 12:3594, CC BY 4.0) gridded fractional contributions
      (Zenodo record 4739100, 0.01°, one CSV per source, one value per line, global grid in row order
      from (-89.995, -179.995), longitude fastest) times ACAG total PM2.5. This is what is built here:

@@ -90,8 +90,10 @@ UPPER_BOUND_TEXT = ("This study's shares include air blown in from outside the c
 class Flag:
     """A caveat printed with a result. code is stable, one of: "placeholder", "evidence_S",
     "evidence_R", "odds_judgement", "long_shot", "not_reported", "annual_share_flat",
-    "borrowed_shape", "covered_only", "regional", "receptor_basis", "upper_bound_all_origins",
-    "partial_cost"."""
+    "borrowed_shape", "covered_only", "regional", "receptor_basis", "receptor_fallback",
+    "upper_bound_all_origins", "partial_cost". receptor_fallback: the measure's source-receptor
+    table is a stand-in built because no published source-receptor result could be used (its
+    data/sources.toml entry has a `fallback` sentence saying how far off it may be)."""
     code: str
     text: str     # one plain sentence
 
@@ -150,6 +152,9 @@ def _fixed_flags(m: Measure, place: places.Place | None) -> list[Flag]:
         basis = receptor_basis(m.region.receptor)
         if basis:
             out.append(Flag("receptor_basis", basis))
+        fallback = receptor_basis(m.region.receptor, key="fallback")
+        if fallback:
+            out.append(Flag("receptor_fallback", fallback))
     elif m.kind == "exposure":
         out.append(Flag("covered_only", "Only the people it reaches breathe less; the outdoor "
                                         "air and everyone else are unchanged."))
@@ -167,14 +172,16 @@ def _empty_trail(shape_basis: str, m: Measure) -> dict:
             "cost": None, "evidence": [asdict(e) for e in m.evidence], "shape": shape_basis}
 
 
-def receptor_basis(name: str) -> str:
-    """The `caveat` sentence of a receptor file's data/sources.toml entry ("" if none): what the
-    table stands for (e.g. a sector from every origin, not only the named states)."""
+def receptor_basis(name: str, key: str = "caveat") -> str:
+    """A sentence from a receptor file's data/sources.toml entry ("" if none). key "caveat": what
+    the table stands for (e.g. a sector from every origin, not only the named states); key
+    "fallback": present only when the table is a stand-in for a published source-receptor
+    result, saying so and how far off it may be."""
     import tomllib
 
     from . import paths
     entry = tomllib.loads((paths.DATA / "sources.toml").read_text()).get(name, {})
-    return " ".join(str(entry.get("caveat", "")).split())
+    return " ".join(str(entry.get(key, "")).split())
 
 
 def _region_city(m: Measure, place: places.Place, map_name: str, folder: Path, trail: dict):

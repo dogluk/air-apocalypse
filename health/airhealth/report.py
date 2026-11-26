@@ -603,7 +603,8 @@ def causes_cities(counts: list[tuple[str, int]]) -> str:
 FLAG_CODES = {"placeholder": "PH", "evidence_S": "ES", "evidence_R": "ER", "odds_judgement": "OJ",
               "long_shot": "LS", "not_reported": "NR", "annual_share_flat": "AF",
               "borrowed_shape": "BS", "covered_only": "CO", "regional": "RG",
-              "upper_bound_all_origins": "UB", "partial_cost": "PC", "receptor_basis": "RB"}
+              "upper_bound_all_origins": "UB", "partial_cost": "PC", "receptor_basis": "RB",
+              "receptor_fallback": "RF"}
 FLAG_LEGEND = {"PH": "a number is a placeholder", "ES": "a number seen only in a snippet or summary",
                "ER": "a number recalled, not read at the source",
                "OJ": "odds are a judgement", "LS": "long shot",
@@ -614,6 +615,8 @@ FLAG_LEGEND = {"PH": "a number is a placeholder", "ES": "a number seen only in a
                "RG": "a source spread over states; a city's part has no cost of its own (the "
                      "cost belongs to the whole region: airhealth score --region ID)",
                "RB": "what the source-receptor table stands for (its data/sources.toml caveat)",
+               "RF": "the source-receptor table is a stand-in (no published one could be used), "
+                     "so the result may be far off",
                "UB": "shares include air blown in from outside, so an upper bound",
                "PC": "the cost leaves out part of what the measure costs (listed above)"}
 EVIDENCE_LEGEND = "O read at the source; S seen in a snippet or summary; R recalled"
