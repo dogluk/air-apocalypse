@@ -1,0 +1,87 @@
+# Delhi: seeding winter clouds to make rain wash the air. A long shot with odds close to zero.
+name = "Cloud seeding over Delhi in winter (long shot)"
+kind = "exposure"
+scope = "city"
+who_reaches = "everyone in Delhi, on the few winter days that have seedable cloud, if rain falls"
+cities = ["Delhi"]
+long_shot = true
+
+start_year = 2027
+ramp_years = 0
+duration_years = 3
+lag = "epa20"
+
+p_success = 0.02
+p_success_basis = "judgement: the lowest in the library. Delhi's winter air holds too little water to rain out much (under 1 mm even if every molecule in a 1 km column condensed), seeding only triggers storms that winter does not have the energy to make, and forcing it means out-heating the sun (bets/README.md, 'Why winter cloud seeding can't work in Delhi'); the October 2025 trials gave no rain in Delhi (cloud moisture 10-20% against about 50% needed). Not zero because the trials were few and in one dry week"
+
+placeholders = []
+
+notes = """
+IIT Kanpur seeds clouds over Delhi with silver iodide and salt flares through each winter, on the
+days that have cloud, hoping rain will wash particles out of the air. It is scored as a cut in what
+everyone breathes, not as a cut to a cause, because rain would remove particles from every origin.
+Everything here describes what happens if it works; the odds say how likely that is.
+
+The October 2025 trials: two sorties on 28 October, 14 to 16 flares, no rain in Delhi (0.1 mm in
+Noida and 0.2 mm in Greater Noida); cloud moisture 10-20%. IIT Kanpur's director said its 15 monitors
+showed PM2.5 6-10% lower after the sorties. The Indian Express, reading the official monitors, found
+PM2.5 had already fallen before the first sortie and rose afterwards. The trial report itself was
+not read; all of this is from press accounts (evidence S; data/MISSING.md).
+
+If it works: rain on the days with seedable cloud, about one day in ten (the director's estimate),
+lowering PM2.5 by the 6-10% IIT Kanpur claimed for the trial, over the four winter months his season
+cost covers (taken as October to January). That is generous to the measure: the claimed fall was
+not shown to be caused by the seeding, and lasted hours, not days.
+
+Cost: IIT Kanpur's director put a whole winter at Rs 20-30 crore (Rs 25-30 crore in another account),
+against Rs 60 lakh for the 300 km^2 seeded on 28 October (about Rs 20,000 per km^2). The Delhi cabinet
+sanctioned Rs 3.21 crore for five trials.
+"""
+
+[exposure]
+covered = 1.0
+hours = 0.1
+cut = { dist = "uniform", p5 = 0.06, p95 = 0.10 }
+months = [10, 11, 12, 1]
+
+[cost]
+driver = "city"
+annual = { dist = "uniform", p5 = 200000000, p95 = 300000000 }
+currency = "INR"
+year = 2025
+
+[[evidence]]
+fields = ["exposure.cut"]
+source = "Hindustan Times (30 Oct 2025), '15 stations set up for trial in Delhi showed 6-10% less pollution, says IIT Kanpur director', reporting IIT Kanpur's statement on the 28 October 2025 trials; checked against Indian Express (30 Oct 2025), 'Did Delhi's pollution dip after cloud seeding? Here's what data shows'"
+url = "https://www.hindustantimes.com/cities/lucknow-news/15-stations-set-up-for-trial-in-delhi-showed-6-10-less-pollution-says-iit-kanpur-director-101761768534627.html"
+locator = "paragraph 2: 'data collected from 15 air quality monitoring stations ... showed a reduction of about 6-10% in PM2.5 and PM10 levels following the trial'. Indian Express (https://indianexpress.com/article/cities/delhi/delhi-pollution-dip-cloud-seeding-data-10335630/): at Burari 'PM 2.5 levels had already dropped sharply from 198 to 88 ug/m3 between 9 am and 1 pm before the first seeding window' and rose to 144 by midnight"
+key = "S"
+retrieved = "2026-11-27"
+derivation = "p5 = 0.06, p95 = 0.10, the director's claimed range, taken as the cut on a day it rains; the trial report itself was not reached."
+
+[[evidence]]
+fields = ["exposure.hours"]
+source = "Hindustan Times (29 Oct 2025), '2 sorties, 16 flares: What happened, what didn't & at what cost', quoting IIT Kanpur director Manindra Agrawal"
+url = "https://www.hindustantimes.com/india-news/2-sorties-16-flares-what-happened-what-didnt-at-what-cost-delhi-cloud-seeding-101761746673965.html"
+locator = "section 'Math behind cost of cloud seeding': 'if the process continues over the entire winter period, considering that the clouds are present once in every ten days, the total cost would come to around Rs 25 to Rs 30 crore'"
+key = "S"
+retrieved = "2026-11-27"
+derivation = "clouds one day in ten: 0.1 of the winter's days, each taken as one clean day."
+
+[[evidence]]
+fields = ["exposure.covered"]
+source = "Hindustan Times (30 Oct 2025), reporting IIT Kanpur's director on the season cost"
+url = "https://www.hindustantimes.com/cities/lucknow-news/15-stations-set-up-for-trial-in-delhi-showed-6-10-less-pollution-says-iit-kanpur-director-101761768534627.html"
+locator = "last paragraphs: the trials 'covered about 300 square kilometres at an estimated cost of Rs 60 lakh'; the cost 'would scale up to about Rs 25-30 crore if seeding were to be done periodically throughout the winter over larger areas'"
+key = "S"
+retrieved = "2026-11-27"
+derivation = "The season cost is for seeding over the whole city, so everyone in Delhi is taken as reached: covered = 1."
+
+[[evidence]]
+fields = ["cost.annual"]
+source = "India Today (29 Oct 2025), 'Cloud seeding in Delhi: No rain but IIT Kanpur Director sees silver lining', quoting Manindra Agrawal; Hindustan Times (29 Oct 2025)"
+url = "https://www.indiatoday.in/india/story/cloud-seeding-delhi-pollution-reduction-artificial-rain-trial-iit-kanpur-director-data-criticism-2809992-2025-10-29"
+locator = "India Today: 'Cost for today's procedure was Rs 60 lakh, that is Rs 20,000 per square kilometre. Expense for the whole season (four months) would be around Rs 20-30 crore'; Hindustan Times: 'around Rs 25 to Rs 30 crore'"
+key = "S"
+retrieved = "2026-11-27"
+derivation = "p5 = Rs 20 crore = 200,000,000, p95 = Rs 30 crore = 300,000,000 a winter, 2025 rupees."

@@ -175,3 +175,65 @@ def test_stubble_reaches_delhi():
 def test_stubble_does_not_reach_bengaluru():
     assert score.city("Bengaluru", ["stubble_pes_upfront"], n=100,
                       curves=["gemm_ncd_lri"])[0].status in ("not_applicable", "not_scored")
+
+
+# ---- The rest of the first library: industry, brick kilns, the cloud-seeding long shot ----
+
+OTHERS = ["emissions_market", "zigzag_kilns", "industrial_fuel_switch", "winter_cloud_seeding"]
+SCORED = ("scored", "no_cost", "pays_for_itself")
+
+
+@pytest.mark.parametrize("mid", OTHERS)
+def test_other_measure_loads_and_scores_where_it_applies(mid):
+    m = measures.library()[mid]
+    assert m.scope == "city" and len(m.cities) == 1
+    s = score.city(m.cities[0], [mid], n=100, curves=["gemm_ncd_lri"])[0]
+    assert s.status in SCORED
+    assert s.pm25_change["median"] < 0
+
+
+@pytest.mark.parametrize("mid", OTHERS)
+def test_other_measure_is_sourced(mid):
+    """Every number backed by evidence with a link and a locator, none a placeholder; the odds a
+    flagged judgement. Only the cloud-seeding long shot rests on press accounts (key S)."""
+    m = measures.library()[mid]
+    assert m.placeholders == ()
+    assert all(e.locator and e.url for e in m.evidence)
+    assert {e.key for e in m.evidence} == ({"S"} if mid == "winter_cloud_seeding" else {"O"})
+    assert m.p_success_basis.startswith("judgement:")
+
+
+def test_emissions_market_is_surat_industry_at_the_trial_effect():
+    """Greenstone et al. 2025: the market cut plants' emissions 20-30% against the old rules."""
+    m = measures.library()["emissions_market"]
+    (t,) = m.targets
+    assert t.cause == "industry" and (t.cut.p5, t.cut.p95) == (0.20, 0.30)
+    assert m.cost.units.median == 906 and m.cost.currency == "USD"
+
+
+def test_zigzag_kilns_pay_for_themselves():
+    """The owner earns the conversion back in a season or two (CSE 2017): society's net cost is
+    below zero, so the measure is listed apart, not ranked by a ratio."""
+    s = score.city("Patna", ["zigzag_kilns"], n=100, curves=["gemm_ncd_lri"])[0]
+    assert s.status == "pays_for_itself"
+    assert s.per_curve["gemm_ncd_lri"]["expected_life_years_per_crore"] is None
+
+
+def test_cloud_seeding_is_a_long_shot_with_near_zero_odds():
+    m = measures.library()["winter_cloud_seeding"]
+    assert m.long_shot and m.p_success <= 0.05
+    s = score.city("Delhi", ["winter_cloud_seeding"], n=100, curves=["gemm_ncd_lri"])[0]
+    codes = {f.code for f in s.flags}
+    assert {"long_shot", "evidence_S", "odds_judgement"} <= codes
+
+
+def test_library_has_about_twenty_measures():
+    assert len(measures.library()) + len(WRITTEN_UP_AS_MISSING) >= 20
+
+
+def test_every_measure_runs_in_every_city():
+    """No exception anywhere; every result has a known status (n kept tiny: statuses only)."""
+    from airhealth import causes
+    for city in causes.known_cities():
+        for s in score.city(city, n=50, curves=["gemm_ncd_lri"]):
+            assert s.status in score.STATUSES

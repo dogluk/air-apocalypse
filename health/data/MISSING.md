@@ -197,3 +197,27 @@ flagged "sector from every origin, not only the named states".
   Happy-Seeder area), and the share of that area that would otherwise have burned is a judgement (a quarter to three quarters); no
   source read here measures what the machinery subsidy did to burning. Would settle it: an evaluation of the CRM scheme's effect on
   fires (for example district fire counts against machines delivered).
+
+## Industry, brick kilns and cloud seeding (interventions/library, 2026-11-27): leads not settled
+
+- **Surat emissions market: how many of the 906 plants it covers now.** Greenstone et al. 2025 (QJE) trialled the market on 162 of
+  318 plants (2019-21); `emissions_market` scores putting all 906 solid-fuel plants in (the paper's Table VI scenario) against
+  APnA's 2018 shares, which predate the market. If GPCB has already brought many more plants in, part of this benefit is already
+  happening. Also not found: the regulator's own cost of running the market (staff, the trading platform), so the cost is flagged
+  partial. Would settle it: GPCB's scheme documents or annual report on the Surat market (number of plants, budget).
+- **Patna's brick kilns: how many are already zig-zag.** APnA (2017) counts 300 kilns in Patna's airshed and gives them 9.3% of
+  PM2.5 for base year 2015. Kilns converted since then shrink what `zigzag_kilns` can still cut; no count of converted kilns in
+  or around Patna was found. Would settle it: the Bihar State Pollution Control Board's kiln register, or a satellite count of
+  zig-zag against fixed-chimney kilns (the kiln shapes are visible in imagery).
+- **Brooks N et al. 2025, Science, doi 10.1126/science.adr7394** (a trial of cheaper changes to how brick kilns are fired, in
+  Bangladesh). Not read for this task. A lead for a separate, practices-only measure, which may cost less than conversion.
+- **Amritsar: industry's PM2.5 by fuel, and what UNDP's cost includes.** `industrial_fuel_switch` takes TERI's 99% (Delhi-NCR, the
+  industries that switch) as the upper cut; the lower cut, 50%, is a judgement because no split of Amritsar's industrial PM2.5
+  into fuel smoke and process dust was found. UNDP 2025 (Table 2) gives INR 248.6 million for Amritsar's industries but does not
+  say whether the higher gas bill is in it; for Delhi-NCR TERI found the fuel bill is most of the cost. Would settle it: UNDP's
+  literature-and-cost review ("available upon request" in the report), or the Punjab Pollution Control Board's count of
+  solid-fuel units in Amritsar with their fuel use.
+- **IIT Kanpur's report on the October 2025 Delhi cloud-seeding trials.** Only press accounts were read (Hindustan Times, India
+  Today, Indian Express, 28-30 Oct 2025), so every number in `winter_cloud_seeding` is key S: the 6-10% fall in PM2.5 the institute
+  claimed (which the Indian Express found began before the seeding), clouds one day in ten, and Rs 20-30 crore for a winter. Would
+  settle it: the trial report submitted to the Delhi Environment Department, or the parliamentary answers on its cost.

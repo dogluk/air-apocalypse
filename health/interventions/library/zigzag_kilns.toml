@@ -1,0 +1,88 @@
+# Patna: converting the brick kilns in the city's airshed from fixed-chimney firing to zig-zag firing.
+name = "Converting Patna's brick kilns to zig-zag firing"
+kind = "air"
+scope = "city"
+who_reaches = "everyone in Patna, through the outdoor air"
+cities = ["Patna"]
+
+start_year = 2027
+ramp_years = 1
+duration_years = 10
+lag = "epa20"
+
+p_success = 0.5
+p_success_basis = "judgement: at the air measures' middle value. The technology is proven, kilns are converted on the same site in one off-season, and the owner earns the cost back in one or two seasons (CSE 2017, in GIZ 2023); but that a conversion which pays for itself has not spread on its own says owners face barriers other than money, and a badly fired zig-zag kiln loses much of the cut"
+
+placeholders = []
+
+notes = """
+A funder pays to convert the 300 brick kilns in Patna's airshed (APnA 2017, which mapped them) from
+fixed-chimney bull's trench or clamp firing to zig-zag firing, in which the air takes a zig-zag path
+through the stacked bricks and the coal burns more completely.
+
+How much it cuts: a zig-zag kiln emits 70% less suspended particulate matter than a fixed-chimney
+kiln (TERI 2021, citing Bhattacharjya 2017), and stack concentrations about 75% lower (GIZ 2023,
+from reported measurements). These are suspended particles and stack concentrations, not PM2.5
+mass; the cut to PM2.5 mass is taken as the same. Applied to the brick kilns' share of Patna's
+PM2.5 from APnA (9.3%, base year 2015).
+
+What may already be done: the APnA base year is 2015. If some of these kilns have been converted
+since, the share left to cut, and this measure's benefit, are smaller; how many have been was not
+found (data/MISSING.md). Brooks et al. 2025 (Science), a trial of cheaper changes to firing practice
+in Bangladesh, was not read; it is a lead for a separate, practices-only measure.
+
+Cost: Rs 17.5 to 38.5 lakh per kiln, once (CSE's 2017 design manual, as reproduced by GIZ 2023;
+TERI 2021 uses Rs 17.5 lakh). The owner then saves Rs 21.5 to 24 lakh a year (160 tonnes of coal at
+Rs 10,000 a tonne, plus 8 lakh more first-class bricks at Rs 1 each, less Rs 2.5 lakh a year to run
+the fan of an induced-draught kiln). So society's net cost is negative: the measure pays for itself,
+as TERI found for Delhi-NCR (Table 24: net cost -14.43 billion rupees). It is shown apart, not ranked.
+"""
+
+[[targets]]
+cause = "brick_kilns"
+cut = { dist = "uniform", p5 = 0.70, p95 = 0.75 }
+
+[cost]
+driver = "unit"
+unit = "brick kiln in Patna's airshed converted to zig-zag firing"
+units = 300
+once = { dist = "uniform", p5 = 1750000, p95 = 3850000 }
+society_net_once = { dist = "uniform", p5 = 1750000, p95 = 3850000 }
+society_net_annual = { dist = "uniform", p5 = -2400000, p95 = -2150000 }
+currency = "INR"
+year = 2017
+
+[[evidence]]
+fields = ["targets.brick_kilns.cut"]
+source = "TERI (2021), Cost effectiveness of interventions for control of air pollution in Delhi; and GIZ / Enzen (2023), Guidance Document on Environmental Technologies for Brick Kilns in India"
+url = "https://teriin.org/sites/default/files/2021-12/Cost-effectiveness-of%20-interventions-for-control-of%20-air-pollution-in-Delhi.pdf"
+locator = "TERI 2021, 'Enforcement of Zig-Zag Brick kiln technology', printed p. 49 (PDF p. 60): zig-zag 'consumes 25% less coal and emits 70% less suspended particulate matter (Bhattacharjya, 2017)'. GIZ 2023 (https://www.giz.de/sites/default/files/media/pkb-document/2025-11/2023-brick-kilns-india-guidance-document.pdf), section 3.2.1, printed p. 22 (PDF p. 28): 'The reported concentration of Particulate Matter (PM) in stack gas of Zigzag kilns ranged from 30 to 263 mg/Nm3, which is about 75% less than reported PM levels in the range of 150 to 1250 mg/NM3 from FCBTK'"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "p5 = 0.70 (TERI), p95 = 0.75 (GIZ); all 300 kilns taken as converted, so the cut to the kilns' share is the cut per kiln."
+
+[[evidence]]
+fields = ["cost.units"]
+source = "UrbanEmissions.Info (2017), Air Pollution knowledge Assessment (APnA): Patna"
+url = "https://urbanemissions.info/wp-content/uploads/apna/docs/india_apna_2017_patna.pdf"
+locator = "p. 2, right column: 'The 300 brick kilns in the urban airshed can benefit from a technology upgrade from the current fixed-chimney and clamp-style baking to (for example) zig-zag'; the brick kiln share of PM2.5, 9.3%, is on p. 1 (the same figure as data/causes.csv, apna_2015)"
+key = "O"
+retrieved = "2026-11-27"
+
+[[evidence]]
+fields = ["cost.once", "cost.society_net_once"]
+source = "GIZ / Enzen Global Solutions (2023), Guidance Document on Environmental Technologies for Brick Kilns in India, reproducing Yadav N K and Kumar R (2017), Zigzag Kilns: A Design Manual, Centre for Science and Environment"
+url = "https://www.giz.de/sites/default/files/media/pkb-document/2025-11/2023-brick-kilns-india-guidance-document.pdf"
+locator = "Section 3.4, printed p. 24 (PDF p. 30): 'Approximate cost of retrofitting an FCBTK into a zigzag kiln ranges from Rs. 17.5-38.5 lakh'; Table 12 'Comparison of retrofitting', printed p. 25 (PDF p. 31): 'Total estimated cost Rs 17.5-24.5 lakh' (induced zig-zag), 'Rs 25.5-38.5 lakh' (natural zig-zag). TERI 2021 Table 23 (printed p. 49) uses Rs 1.75 million per kiln."
+key = "O"
+retrieved = "2026-11-27"
+derivation = "p5 = Rs 17.5 lakh = 1,750,000; p95 = Rs 38.5 lakh = 3,850,000 per kiln. The whole conversion cost is a cost to society too. Price year 2017 (the CSE manual whose figures the table reproduces)."
+
+[[evidence]]
+fields = ["cost.society_net_annual"]
+source = "GIZ / Enzen Global Solutions (2023), Guidance Document on Environmental Technologies for Brick Kilns in India, reproducing CSE (2017)"
+url = "https://www.giz.de/sites/default/files/media/pkb-document/2025-11/2023-brick-kilns-india-guidance-document.pdf"
+locator = "Table 12, 'Retrofitting Benefits', printed p. 25 (PDF p. 31): 'Annual coal savings 160 tonne @ Rs 10,000 per tonne Rs 16 lakh'; 'Increase in revenue ... 8 lakh additional Class-I bricks annually @ Rs 1 per brick Rs 8 lakh'; 'Total annual savings Rs 21.5 lakh (Rs 16 + 8 - 2.5)' (induced, after Rs 2.5 lakh fan running cost), 'Rs 24 lakh' (natural)"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "society's net cost each year = minus the owner's saving: p5 = -2,400,000, p95 = -2,150,000 per kiln; 2017 rupees."
