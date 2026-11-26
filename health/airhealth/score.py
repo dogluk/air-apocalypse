@@ -121,6 +121,8 @@ class Score:
     per_curve: dict[str, dict]   # curve name -> CurveRun.summary()
     trail: dict
     run: simulate.Run | None     # not in JSON
+    society_net_inr: float | None = None   # society's net cost over the measure's years, median,
+                                           # discounted, 2025 rupees; None if the file gives none
 
 
 def _dist(d) -> dict | None:
@@ -480,7 +482,7 @@ def city(city: str, measures: Sequence[str] | None = None, *, study: str | None 
             used = study if study is not None else _default_study(city)
         iv, status, reason, flags, trail = compile(m, city, study=used, map_name=map_name,
                                                    folder=folder)
-        per_curve, pm25, run = {}, None, None
+        per_curve, pm25, run, net = {}, None, None, None
         if iv is not None:
             run = simulate.run(iv, map_name=map_name, curves=curves, n=n, seed=seed,
                                deaths=deaths, discount=discount)
@@ -507,7 +509,7 @@ def city(city: str, measures: Sequence[str] | None = None, *, study: str | None 
             measure=mid, name=m.name, kind=m.kind, scope=m.scope, place=city, study=used,
             status=status, reason=reason, who_reaches=m.who_reaches, p_success=m.p_success,
             p_success_basis=m.p_success_basis, flags=flags, pm25_change=pm25,
-            per_curve=per_curve, trail=trail, run=run))
+            per_curve=per_curve, trail=trail, run=run, society_net_inr=net))
     return out
 
 
@@ -584,6 +586,7 @@ def region(measure: str, *, map_name: str = "acag_total", curves: list[str] | No
     d = next(iter(run.per_curve.values())).pm25_after - run.pm25_before
     pm25 = {"median": float(np.median(d)), "p5": float(np.percentile(d, 5)),
             "p95": float(np.percentile(d, 95))}
+    net = None
     if status == "scored":
         net = _society_net(m, iv, count, discount)
         if net is not None and net < 0:
@@ -598,7 +601,7 @@ def region(measure: str, *, map_name: str = "acag_total", curves: list[str] | No
         place=f"the region {m.region.receptor} reaches ({len(reached)} districts)", study=None,
         status=status, reason=reason, who_reaches=m.who_reaches, p_success=m.p_success,
         p_success_basis=m.p_success_basis, flags=tuple(flags), pm25_change=pm25,
-        per_curve=per_curve, trail=trail, run=run)
+        per_curve=per_curve, trail=trail, run=run, society_net_inr=net)
 
 
 def _clean(x):
