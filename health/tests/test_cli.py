@@ -342,3 +342,78 @@ def test_run_discount_flag(capsys):
     assert code == 0 and zero["discount"] == 0 and zero["horizon_years"] == 30
     default = json.loads(run(capsys, "run", iv, "--n", "100", "--json")[1])
     assert default["discount"] == pytest.approx(0.03)
+
+
+# ---- airhealth score / measures ----
+
+from pathlib import Path  # noqa: E402
+
+LIB = str(Path(__file__).parent / "fixtures" / "library")
+FAST = ("--library", LIB, "--n", "100", "--curves", "gemm_ncd_lri")
+
+
+def test_score_json_is_the_function(capsys):
+    code, out, _ = run(capsys, "score", "Bengaluru", "--measure", "air_dust", *FAST, "--json")
+    assert code == 0
+    out = json.loads(out)
+    assert out["place"] == "Bengaluru" and out["map"] == "acag_total" and out["discount"] == 0.03
+    assert out["assumptions"]
+    from airhealth import score
+    direct = score.to_json(score.city("Bengaluru", ["air_dust"], n=100, curves=["gemm_ncd_lri"],
+                                      folder=Path(LIB)))
+    assert out == json.loads(json.dumps(direct))
+
+
+def test_score_per_study_and_discount(capsys):
+    code, out, _ = run(capsys, "score", "Bengaluru", "--measure", "air_dust", *FAST, "--json",
+                       "--study", "cstep_bengaluru2022_cmb", "--discount", "0")
+    assert code == 0
+    out = json.loads(out)
+    assert out["study"] == "cstep_bengaluru2022_cmb" and out["discount"] == 0.0
+    m = out["measures"][0]
+    assert any(f["code"] == "upper_bound_all_origins" for f in m["flags"])
+
+
+def test_score_text_names_status_and_flags(capsys):
+    code, out, _ = run(capsys, "score", "Bengaluru", *FAST)
+    assert code == 0
+    for word in ("scored", "no_cost", "pays_for_itself", "not_applicable", "not_scored",
+                 "PH", "CO", "Study: apna_2015", "Map: acag_total", "Shape:", "Evidence keys",
+                 "what the covered people breathe"):
+        assert word in out
+    assert "gemm_ncd_lri" in out and "life-years per crore" in out
+
+
+def test_unknown_city_is_one_line(capsys):
+    code, out, err = run(capsys, "score", "Bengalur", *FAST)
+    assert code == 1 and out == ""
+    assert err.startswith("airhealth: unknown city") and len(err.strip().splitlines()) == 1
+    assert "Bengaluru" in err
+
+
+def test_unknown_measure_lists_the_library(capsys):
+    code, _, err = run(capsys, "score", "Bengaluru", "--measure", "nope", *FAST)
+    assert code == 1
+    assert "nope" in err and "air_dust" in err and "exposure_city" in err
+
+
+def test_unknown_study_lists_the_studies(capsys):
+    code, _, err = run(capsys, "score", "Bengaluru", "--study", "nope", *FAST)
+    assert code == 1 and "apna_2015" in err
+
+
+def test_measures_lists_every_file(capsys):
+    code, out, _ = run(capsys, "measures", "--library", LIB)
+    assert code == 0
+    ids = sorted(p.stem for p in Path(LIB).glob("*.toml"))
+    assert all(i in out for i in ids)
+    code, out, _ = run(capsys, "measures", "--library", LIB, "--json")
+    rows = json.loads(out)
+    assert [r["id"] for r in rows] == ids
+    assert {"name", "kind", "scope", "cities", "who_reaches", "p_success", "placeholders",
+            "evidence_keys"} <= set(rows[0])
+
+
+def test_measures_on_the_empty_shipped_library(capsys):
+    code, out, _ = run(capsys, "measures")
+    assert code == 0 and out.strip()

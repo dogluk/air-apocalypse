@@ -596,3 +596,101 @@ def causes_cities(counts: list[tuple[str, int]]) -> str:
     w = max(len(c) for c, _ in counts)
     return "\n".join([*(f"{c.ljust(w)}  {n} {'study' if n == 1 else 'studies'}" for c, n in counts),
                       "", "airhealth causes CITY shows each study's split of a city's PM2.5."])
+
+
+# ---- airhealth score: the measure library scored in one city ----
+
+FLAG_CODES = {"placeholder": "PH", "evidence_S": "ES", "evidence_R": "ER", "odds_judgement": "OJ",
+              "long_shot": "LS", "not_reported": "NR", "annual_share_flat": "AF",
+              "borrowed_shape": "BS", "covered_only": "CO", "regional": "RG",
+              "upper_bound_all_origins": "UB"}
+FLAG_LEGEND = {"PH": "a number is a placeholder", "ES": "a number seen only in a snippet or summary",
+               "ER": "a number recalled, not read at the source",
+               "OJ": "odds are a judgement", "LS": "long shot",
+               "NR": "a targeted cause is not reported by the study (not reported is not zero)",
+               "AF": "one whole-year share used for a part-year cut",
+               "BS": "month-by-month shape borrowed from another place",
+               "CO": "only the covered people breathe less", "RG": "scored for a region",
+               "UB": "shares include air blown in from outside, so an upper bound"}
+EVIDENCE_LEGEND = "O read at the source; S seen in a snippet or summary; R recalled"
+
+
+def _flag_codes(flags) -> str:
+    seen = []
+    for f in flags:
+        code = FLAG_CODES.get(f.code, f.code)
+        if code not in seen:
+            seen.append(code)
+    return " ".join(seen) or "-"
+
+
+def _lyr(d: dict) -> str:
+    if d["p5"] == d["p95"]:
+        return _sig(d["median"])
+    return f"{_sig(d['median'])} ({_sig(d['p5'])} to {_sig(d['p95'])})"
+
+
+def _crore(a, b) -> str:
+    return "-" if a is None else f"{_sig(a)} / {_sig(b)}"
+
+
+def score_table(scores: list, context: dict) -> str:
+    """The scored library as text: one block per curve, measures in library order, then the
+    PM2.5 each would change, why any were not a plain scored row, and a footer naming the
+    study, map, shape basis, assumptions and the legends."""
+    from .score import ASSUMPTIONS
+    if not scores:
+        return f"No measures in the library for {context.get('place', 'this city')}."
+    labels = {}
+    for s in scores:
+        if s.run is not None:
+            for name, cr in s.run.per_curve.items():
+                labels.setdefault(name, cr.curve.label)
+    lines = [f"{context['place']}: {len(scores)} measures. Life-years are counted over each "
+             f"measure's years and the tail of the lag, discounted at "
+             f"{100 * context['discount']:g}% a year; cost in 2025 rupees (1 crore = 10 million). "
+             f"{context['n']:,} draws, seed {context['seed']}."]
+    head = ("measure", "status", "life-years if it works", "expected life-years",
+            "cost, ₹ crore median", "life-years per crore: works / expected", "odds", "flags")
+    for name in labels or [None]:
+        lines += ["", f"Curve {name}: {labels[name]}" if name else "No curve was run."]
+        rows = []
+        for s in scores:
+            c = s.per_curve.get(name)
+            odds = f"{100 * s.p_success:g}%"
+            if c is None:
+                rows.append((s.measure, s.status, "-", "-", "-", "-", odds, _flag_codes(s.flags)))
+                continue
+            rows.append((s.measure, s.status, _lyr(c["life_years"]),
+                         _sig(c["expected_life_years"]),
+                         "none given" if s.status == "no_cost" else _sig(c["cost_inr"]["median"] / 1e7),
+                         _crore(c["life_years_per_crore_if_works"],
+                                c["expected_life_years_per_crore"]),
+                         odds, _flag_codes(s.flags)))
+        lines += _columns(head, rows)
+
+    ran = [s for s in scores if s.pm25_change is not None]
+    if ran:
+        lines += ["", "PM2.5 change if it works (annual, µg/m³, median and 5-95% range):"]
+        for s in ran:
+            d = s.pm25_change
+            what = ("what the covered people breathe, the rest unchanged" if s.kind == "exposure"
+                    else "population-weighted over the city")
+            spread = ("" if d["p5"] == d["p95"]
+                      else f" ({d['p5']:+.2f} to {d['p95']:+.2f})")
+            lines.append(f"  {s.measure}: {d['median']:+.2f}{spread}, {what}")
+    other = [s for s in scores if s.reason]
+    if other:
+        lines += ["", "Why not a plain scored row:"]
+        lines += [f"  {s.measure} ({s.status}): {s.reason}" for s in other]
+
+    study = context.get("study") or next((s.study for s in scores if s.study), None)
+    lines += ["", f"Study: {study}." if study else "Study: none used (no air measure was scored).",
+              f"Map: {context['map']}.",
+              "Shape: " + "; ".join(sorted({s.trail["shape"] for s in scores})) + ".",
+              *("Assumption: " + a for a in ASSUMPTIONS), ""]
+    codes = sorted({FLAG_CODES.get(f.code, f.code) for s in scores for f in s.flags})
+    lines.append("Flags: " + "; ".join(f"{c} {FLAG_LEGEND.get(c, c)}" for c in codes) + "."
+                 if codes else "Flags: none.")
+    lines.append(f"Evidence keys: {EVIDENCE_LEGEND}.")
+    return "\n".join(lines)

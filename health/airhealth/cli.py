@@ -6,6 +6,9 @@
   airhealth chart PLACE [PLACE ...] [--map M] [--age A] [--out FILE]
   airhealth run FILE [--map M] [--curves a,b] [--n N] [--seed S] [--charts DIR] [--use ...]
   airhealth causes [CITY] [--study ID] [--season S] [--all]   every study's split of a city's PM2.5
+  airhealth score CITY [--measure ID ...] [--study ID] [--map M] [--curves a,b] [--n N] [--seed S]
+                       [--discount PCT] [--use input=source]   the measure library scored in a city
+  airhealth measures                               the library: id, name, kind, scope, odds, evidence
   airhealth dashboard [--port 8765] [--no-open]     a local page over the same functions
 
 --use input=source picks a source for population, death_rates or deaths (airhealth list
@@ -24,7 +27,7 @@ import numpy as np
 
 from pathlib import Path
 
-from . import baseline, causes, curves, exposure, intervention, paths, places, provenance, report, simulate
+from . import baseline, causes, curves, exposure, intervention, measures, paths, places, provenance, report, score, simulate
 from .impact import Change, steady_state
 from .inputs import DEMOGRAPHIC, REGISTRY, Choice
 from .places import KINDS
@@ -320,6 +323,61 @@ def cmd_causes(args) -> None:
         print(report.causes_table(city, df, args.all, causes.HARMONISED))
 
 
+def _city_name(text: str) -> str:
+    try:
+        return places.resolve(text, kind="city").name
+    except KeyError:
+        raise ValueError(f"unknown city {text!r}{places._suggest(text.partition(',')[0])}") from None
+
+
+def cmd_score(args) -> None:
+    city = _city_name(args.city)
+    folder = Path(args.library) if args.library else measures.LIBRARY
+    lib = measures.library(folder)
+    unknown = [m for m in args.measure or [] if m not in lib]
+    if unknown:
+        raise ValueError(f"no measure {unknown[0]!r}; the library has: "
+                         + (", ".join(lib) or "no measures yet"))
+    if args.study and args.study not in causes.studies(city):
+        raise ValueError(f"{city} has no study {args.study!r}; it has: "
+                         f"{', '.join(causes.studies(city)) or 'none'}")
+    names = [n.strip() for n in args.curves.split(",") if n.strip()] if args.curves else None
+    if names is not None:
+        _curves(args.curves)            # the same one-line error as the other commands
+    combos = _choice(args).combinations()
+    if len(combos) > 1:
+        raise ValueError("score takes one source per input; give --use input=source once")
+    scored = score.city(city, args.measure, study=args.study, map_name=args.map or "acag_total",
+                        curves=names, n=args.n, seed=args.seed, discount=args.discount / 100,
+                        deaths=combos[0], folder=folder)
+    out = score.to_json(scored, place=city, study=args.study) if args.study else score.to_json(scored)
+    if args.json:
+        print(json.dumps(out, indent=2, ensure_ascii=False, allow_nan=False))
+    else:
+        print(report.score_table(scored, out))
+
+
+def cmd_measures(args) -> None:
+    folder = Path(args.library) if args.library else measures.LIBRARY
+    lib = measures.library(folder)
+    rows = [dict(id=i, name=m.name, kind=m.kind, scope=m.scope,
+                 cities=list(m.cities) if m.cities else None, who_reaches=m.who_reaches,
+                 p_success=m.p_success, placeholders=len(m.placeholders),
+                 evidence_keys=sorted({e.key for e in m.evidence})) for i, m in lib.items()]
+    if args.json:
+        print(json.dumps(rows, indent=2, ensure_ascii=False))
+        return
+    if not rows:
+        print(f"No measures in {folder} yet (see interventions/library/_template.toml).")
+        return
+    print("\n".join(report._columns(
+        ("id", "name", "kind", "scope", "cities", "who reaches", "odds", "placeholders", "evidence"),
+        [(r["id"], r["name"], r["kind"], r["scope"], ", ".join(r["cities"] or ["all"]),
+          r["who_reaches"], f"{100 * r['p_success']:g}%", str(r["placeholders"]),
+          ",".join(r["evidence_keys"]) or "-") for r in rows])))
+    print("\nEvidence keys: " + report.EVIDENCE_LEGEND + ".")
+
+
 def cmd_dashboard(args) -> None:
     from . import dashboard  # http.server only when asked for
     dashboard.serve(port=args.port, open_browser=not args.no_open)
@@ -407,6 +465,27 @@ def _parser() -> argparse.ArgumentParser:
                     "(covers = all) are columns, and partial estimates such as stubble-only shares are "
                     "counted and listed under the table, to keep it readable")
     ca.set_defaults(func=cmd_causes)
+
+    sc = sub.add_parser("score", parents=[shared], help="the measure library scored in one city",
+                        description="Every measure in interventions/library scored in one city: "
+                        "life-years if it works, expected life-years, cost and life-years per crore, "
+                        "on each curve, with the flags that qualify each row. Not a ranking.")
+    sc.add_argument("city", help="one of the fifty cities")
+    sc.add_argument("--measure", action="append", metavar="ID", help="only this measure; repeatable")
+    sc.add_argument("--study", help="score air measures on this causes study (default: the city's APnA study)")
+    sc.add_argument("--map", choices=exposure.MAPS, help="exposure map (default: acag_total)")
+    sc.add_argument("--curves", help="comma-separated curve names (default: every curve)")
+    sc.add_argument("--n", type=int, default=2000, help="Monte Carlo draws (default 2000)")
+    sc.add_argument("--seed", type=int, default=0, help="random seed (default 0)")
+    sc.add_argument("--discount", type=float, default=simulate.DISCOUNT * 100, metavar="PCT",
+                    help="discount rate in percent a year (default 3)")
+    sc.add_argument("--library", help=argparse.SUPPRESS)
+    deaths_flag(sc)
+    sc.set_defaults(func=cmd_score)
+
+    me = sub.add_parser("measures", parents=[shared], help="the measure library")
+    me.add_argument("--library", help=argparse.SUPPRESS)
+    me.set_defaults(func=cmd_measures)
 
     ls = sub.add_parser("list", parents=[shared], help="curves, maps or places, each with its source")
     ls.add_argument("what", choices=("curves", "maps", "places", "inputs"))

@@ -343,6 +343,43 @@ and over uses life expectancy at 85. Taking life expectancy at the start of the 
 instead, as an earlier version did, overstates life-years by about 7%. A year-by-year cohort
 run to 2050, with the population ageing, replaces this accounting in the next version.
 
+## Measures: the library, scored city by city
+
+A measure is something a city (or region) could do about its air, written as one TOML file in
+`interventions/library/` (the file name is its id; `_template.toml` is the commented reference
+for the format and must stay valid). An **air** measure cuts causes of PM2.5 (dust, transport,
+...) by a fraction; an **exposure** measure (purifiers, masks) cuts what a covered share of
+people breathe. Each file gives the years, the odds it works (`p_success`, a judgement with its
+basis), the cost per person, household, city or unit, and a `[[evidence]]` entry for every
+number (key O read at the source, S seen in a snippet or summary, R recalled) or the number is
+listed as a `placeholder`.
+
+```
+airhealth measures [--json]            # the library: id, name, kind, scope, cities, odds, placeholders, evidence keys
+airhealth score CITY [--measure ID ...] [--study ID] [--map M] [--curves a,b] [--n N] [--seed S]
+                     [--discount PCT] [--use input=source] [--json]
+```
+
+`score` scores each measure in the city and prints one block per curve, in library order (it
+is not a ranking): status, life-years if it works (median, 5-95%), expected life-years (times
+the odds), cost in 2025 rupees (crore, median), life-years per crore if it works and expected,
+the odds, and flag codes (PH placeholder, ES/ER evidence seen or recalled, OJ odds are a
+judgement, LS long shot, NR cause not reported, AF whole-year share used for part-year cut, BS
+borrowed month shape, CO covered people only, RG regional, UB upper bound). A table of PM2.5
+change follows; for an exposure measure it is what the covered people breathe. Statuses:
+`scored`, `no_cost` (no cost given; shown, not ranked), `pays_for_itself` (society saves money
+overall; shown apart, no ratios), `not_applicable` (wrong city, or its cause is too small a
+share), `not_scored` (no usable study, or a regional measure). `--json` prints exactly what
+`score.to_json` returns. Air measures are scored on the city's APnA study unless `--study`
+names another; studies that count air from every origin (CSTEP Bengaluru) are scored too,
+flagged UB as an upper bound, so score each study with its own `--study` call. `--discount` is
+a percent; the default is 3.
+
+The assumptions printed under every result: share times cut (cutting a cause by x% cuts its
+share of PM2.5 by x%); no chemistry (air is not additive); health only (no climate, crop or
+time benefits, nothing valued in money); life-years and costs counted over the measure's years
+plus the lag tail, discounted at 3% a year; cost is the funder's rupees in 2025 prices.
+
 ## Writing an intervention file
 
 Copy `interventions/_template.toml`; every field is explained there. A mistake is reported
