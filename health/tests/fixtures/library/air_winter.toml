@@ -1,0 +1,22 @@
+# Test fixture: cuts transport in November to February only. Every number is a placeholder.
+name = "Fixture: transport, winter"
+kind = "air"
+scope = "city"
+who_reaches = "everyone in the city"
+cities = "all"
+start_year = 2027
+duration_years = 5
+p_success = 0.5
+p_success_basis = "judgement: fixture"
+placeholders = ["targets.transport.cut", "cost.annual"]
+
+[[targets]]
+cause = "transport"
+cut = 0.3
+months = [11, 12, 1, 2]
+
+[cost]
+driver = "city"
+annual = 1e8
+currency = "INR"
+year = 2024

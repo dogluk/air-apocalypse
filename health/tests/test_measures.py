@@ -84,7 +84,7 @@ def test_each_fixture_kind_loads():
                                   "cost.society_net_annual"}
 
     free = measures.load(FIXTURES / "no_cost.toml")
-    assert free.cost is None and free.numbers() == ["targets.agri_burning.cut"]
+    assert free.cost is None and free.numbers() == ["targets.dust.cut"]
 
 
 def test_library_skips_underscored_files(tmp_path):
@@ -199,7 +199,7 @@ def test_evidence_for_a_number_not_in_the_file_is_refused(tmp_path):
 
 
 def test_placeholder_not_in_the_file_is_refused(tmp_path):
-    t = edited("no_cost", {"placeholders": ["targets.agri_burning.cut", "cost.once"]})
+    t = edited("no_cost", {"placeholders": ["targets.dust.cut", "cost.once"]})
     with pytest.raises(measures.Invalid, match=r"^placeholders: 'cost\.once'"):
         measures.load(write(tmp_path, t))
 

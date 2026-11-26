@@ -1,0 +1,21 @@
+# Test fixture: cuts dust all year, cost per person. Every number is a placeholder.
+name = "Fixture: dust, all year"
+kind = "air"
+scope = "city"
+who_reaches = "everyone in the city"
+cities = "all"
+start_year = 2027
+duration_years = 5
+p_success = 0.5
+p_success_basis = "judgement: fixture"
+placeholders = ["targets.dust.cut", "cost.annual"]
+
+[[targets]]
+cause = "dust"
+cut = { dist = "uniform", p5 = 0.1, p95 = 0.3 }
+
+[cost]
+driver = "person"
+annual = 100
+currency = "INR"
+year = 2024
