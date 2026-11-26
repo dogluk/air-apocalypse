@@ -377,11 +377,26 @@ def test_score_per_study_and_discount(capsys):
 def test_score_text_names_status_and_flags(capsys):
     code, out, _ = run(capsys, "score", "Bengaluru", *FAST)
     assert code == 0
-    for word in ("scored", "no_cost", "pays_for_itself", "not_applicable", "not_scored",
+    for word in ("scored", "no_cost", "pays_for_itself", "not_applicable", "whole region", "RG",
                  "PH", "CO", "Study: apna_2015", "Map: acag_total", "Shape:", "Evidence keys",
                  "what the covered people breathe"):
         assert word in out
     assert "gemm_ncd_lri" in out and "life-years per crore" in out
+
+
+def test_score_region_is_the_whole_reach(capsys):
+    code, out, _ = run(capsys, "score", "--region", "air_region", *FAST, "--json")
+    assert code == 0
+    m = json.loads(out)["measures"][0]
+    assert m["scope"] == "region" and m["trail"]["region"]["districts"] == 4
+    assert m["per_curve"]["gemm_ncd_lri"]["cost_inr"]["median"] > 0
+    code, out, _ = run(capsys, "score", "--region", "air_region", *FAST)
+    assert code == 0 and "air_region" in out and "RG" in out
+    # the city view of the same measure: its part, no cost of its own
+    code, out, _ = run(capsys, "score", "Bengaluru", "--measure", "air_region", *FAST)
+    assert code == 0 and "whole region" in out and "--region air_region" in out
+    code, _, err = run(capsys, "score", "--region", "air_dust", *FAST)
+    assert code == 1 and "city measure" in err
 
 
 def test_unknown_city_is_one_line(capsys):

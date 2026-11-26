@@ -603,14 +603,17 @@ def causes_cities(counts: list[tuple[str, int]]) -> str:
 FLAG_CODES = {"placeholder": "PH", "evidence_S": "ES", "evidence_R": "ER", "odds_judgement": "OJ",
               "long_shot": "LS", "not_reported": "NR", "annual_share_flat": "AF",
               "borrowed_shape": "BS", "covered_only": "CO", "regional": "RG",
-              "upper_bound_all_origins": "UB", "partial_cost": "PC"}
+              "upper_bound_all_origins": "UB", "partial_cost": "PC", "receptor_basis": "RB"}
 FLAG_LEGEND = {"PH": "a number is a placeholder", "ES": "a number seen only in a snippet or summary",
                "ER": "a number recalled, not read at the source",
                "OJ": "odds are a judgement", "LS": "long shot",
                "NR": "a targeted cause is not reported by the study (not reported is not zero)",
                "AF": "one whole-year share used for a part-year cut",
                "BS": "month-by-month shape borrowed from another place",
-               "CO": "only the covered people breathe less", "RG": "scored for a region",
+               "CO": "only the covered people breathe less",
+               "RG": "a source spread over states; a city's part has no cost of its own (the "
+                     "cost belongs to the whole region: airhealth score --region ID)",
+               "RB": "what the source-receptor table stands for (its data/sources.toml caveat)",
                "UB": "shares include air blown in from outside, so an upper bound",
                "PC": "the cost leaves out part of what the measure costs (listed above)"}
 EVIDENCE_LEGEND = "O read at the source; S seen in a snippet or summary; R recalled"
@@ -664,7 +667,9 @@ def score_table(scores: list, context: dict) -> str:
                 continue
             rows.append((s.measure, s.status, _lyr(c["life_years"]),
                          _sig(c["expected_life_years"]),
-                         "none given" if s.status == "no_cost" else _sig(c["cost_inr"]["median"] / 1e7),
+                         "none given" if s.status == "no_cost"
+                         else "whole region" if c["cost_inr"] is None
+                         else _sig(c["cost_inr"]["median"] / 1e7),
                          _crore(c["life_years_per_crore_if_works"],
                                 c["expected_life_years_per_crore"]),
                          odds, _flag_codes(s.flags)))

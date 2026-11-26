@@ -25,6 +25,7 @@ from __future__ import annotations
 import tomllib
 from dataclasses import dataclass
 from datetime import date
+from functools import cache
 from pathlib import Path
 
 from . import causes, paths
@@ -48,6 +49,10 @@ TOP_KEYS = ("name", "kind", "scope", "who_reaches", "cities", "min_share_pct", "
 TARGET_KEYS = ("cause", "cut", "months")
 EXPOSURE_KEYS = ("covered", "hours", "cut", "months")
 REGION_KEYS = ("receptor", "cut")
+# A receptor file: one row per district the source-receptor study covers (an explicit 0 where its
+# result is 0); delta_pm25_full is the change in that district's annual-mean PM2.5, µg/m³ (negative
+# or 0), when the whole source is removed. Built by scripts/build_receptor.py.
+RECEPTOR_COLUMNS = ("district", "state", "delta_pm25_full")
 COST_KEYS = ("driver", "once", "annual", "units", "unit", "society_net_once",
              "society_net_annual", "currency", "year", "share_only_on_success", "partial")
 EVIDENCE_FIELDS = ("fields", "source", "url", "locator", "key", "retrieved", "derivation")
@@ -71,7 +76,7 @@ class Exposure:
 
 @dataclass(frozen=True)
 class Region:
-    receptor: str               # a data/ file, receptor_<name>.csv
+    receptor: str               # receptor_<name>.csv: in data/ (or beside the measure file)
     cut: Dist                   # fraction of the source removed, 0-1
 
 
@@ -420,12 +425,17 @@ def parse(t: dict, measure_id: str) -> Measure:
             raise Invalid("region: missing; a region measure needs a [region] table")
         region = _region(t["region"])
 
+    cost = _cost(t["cost"]) if "cost" in t else None
+    if scope == "region" and cost is not None and cost.driver == "household":
+        raise Invalid('cost.driver: "household" needs one city\'s household size; a region '
+                      'measure uses "unit", "city" (a total for the whole region) or "person"')
+
     m = Measure(
         id=measure_id, name=name, kind=kind, scope=scope, who_reaches=who,
         cities=_cities(t.get("cities"), scope), min_share_pct=min_share, start_year=start,
         ramp_years=ramp, duration_years=duration, lag=lag, p_success=p,
         p_success_basis=basis.strip(), long_shot=long_shot, targets=targets, exposure=exposure,
-        region=region, cost=_cost(t["cost"]) if "cost" in t else None,
+        region=region, cost=cost,
         evidence=_evidence(t.get("evidence")), placeholders=_placeholders(t.get("placeholders")),
         notes=notes.strip())
     _evidence_rule(m)
@@ -433,14 +443,87 @@ def parse(t: dict, measure_id: str) -> Measure:
 
 
 def load(path: Path | str) -> Measure:
-    """Read and check a measure file; its id is the file name without .toml."""
+    """Read and check a measure file; its id is the file name without .toml. A region measure's
+    receptor file must exist (data/, or beside the measure file) and be well formed."""
     path = Path(path)
     try:
         with open(path, "rb") as f:
             t = tomllib.load(f)
     except tomllib.TOMLDecodeError as e:
         raise Invalid(f"{path.name}: not valid TOML ({e})") from None
-    return parse(t, path.stem)
+    m = parse(t, path.stem)
+    if m.region is not None:
+        receptor(m.region.receptor, path.parent)
+    return m
+
+
+def receptor_path(name: str, folder: Path | str | None = None) -> Path:
+    """Where a receptor file is: beside the measure files in `folder` if one is there (test
+    fixtures), else data/. Invalid if neither has it."""
+    for d in ([Path(folder)] if folder is not None else []) + [paths.DATA]:
+        if (d / name).is_file():
+            return d / name
+    raise Invalid(f"region.receptor: no file {name!r} in data/; build it with "
+                  "scripts/build_receptor.py (or write the lead in data/MISSING.md)")
+
+
+def receptor(name: str, folder: Path | str | None = None):
+    """The receptor table (RECEPTOR_COLUMNS plus `label`, each district's Place.label), checked:
+    exact columns, every district resolves (places.resolve, kind="district") and is listed once,
+    every delta a number at or below 0. Invalid naming the file and the problem."""
+    path = receptor_path(name, folder)
+    stamp = path.stat().st_mtime_ns
+    return _receptor(str(path), stamp).copy()
+
+
+def district(name: str, state: str):
+    """The district Place a receptor row names: the one spelled exactly so in data/places.csv
+    (two maps' spellings can match the same key, e.g. 'North  & Middle Andaman' and 'North and
+    Middle Andaman'), else places.resolve(kind="district"). KeyError if none."""
+    from . import places
+
+    st = places.canonical_state(state)
+    exact = places.Place("district", name, st)
+    t = places._table()
+    if ((t.kind == "district") & (t.name == name) & (t.state == st)).any():
+        return exact
+    return places.resolve(f"{name}, {state}", kind="district")
+
+
+@cache
+def _receptor(path: str, _stamp: int):
+    import pandas as pd
+
+    from . import places
+
+    name = Path(path).name
+    try:
+        t = pd.read_csv(path)
+    except (pd.errors.ParserError, pd.errors.EmptyDataError, UnicodeDecodeError) as e:
+        raise Invalid(f"region.receptor: {name} is not a readable CSV ({e})") from None
+    if tuple(t.columns) != RECEPTOR_COLUMNS:
+        raise Invalid(f"region.receptor: {name} must have exactly the columns "
+                      f"{', '.join(RECEPTOR_COLUMNS)}; got {', '.join(map(str, t.columns))}")
+    if t.empty:
+        raise Invalid(f"region.receptor: {name} has no rows")
+    delta = pd.to_numeric(t.delta_pm25_full, errors="coerce")
+    bad = t[delta.isna() | ~delta.between(-1e6, 0)]
+    if len(bad):
+        r = bad.iloc[0]
+        raise Invalid(f"region.receptor: {name}: delta_pm25_full must be a number at or below 0 "
+                      f"(the change when the source is removed), got {r.delta_pm25_full!r} for "
+                      f"{r.district}, {r.state}")
+    labels = []
+    for r in t.itertuples():
+        try:
+            labels.append(district(r.district, r.state).label)
+        except KeyError as e:
+            raise Invalid(f"region.receptor: {name}: {e.args[0]}") from None
+    t = t.assign(delta_pm25_full=delta.astype(float), label=labels)
+    dup = t[t.label.duplicated()]
+    if len(dup):
+        raise Invalid(f"region.receptor: {name}: {dup.label.iloc[0]} is listed twice")
+    return t
 
 
 def library(folder: Path | str = LIBRARY) -> dict[str, Measure]:

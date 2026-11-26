@@ -358,6 +358,7 @@ listed as a `placeholder`.
 airhealth measures [--json]            # the library: id, name, kind, scope, cities, odds, placeholders, evidence keys
 airhealth score CITY [--measure ID ...] [--study ID] [--map M] [--curves a,b] [--n N] [--seed S]
                      [--discount PCT] [--use input=source] [--json]
+airhealth score --region ID [--map M] [--curves a,b] [--n N] [--seed S] [--discount PCT] [--json]
 ```
 
 `score` scores each measure in the city and prints one block per curve, in library order (it
@@ -365,18 +366,33 @@ is not a ranking): status, life-years if it works (median, 5-95%), expected life
 the odds), cost in 2025 rupees (crore, median), life-years per crore if it works and expected,
 the odds, and flag codes (PH placeholder, ES/ER evidence seen or recalled, OJ odds are a
 judgement, LS long shot, NR cause not reported, AF whole-year share used for part-year cut, BS
-borrowed month shape, CO covered people only, RG regional, UB upper bound, PC the cost
-leaves out part of what the measure costs). A table of PM2.5 change follows; for an exposure
+borrowed month shape, CO covered people only, RG regional, RB what the source-receptor table
+stands for, UB upper bound, PC the cost leaves out part of what the measure costs). A table of PM2.5 change follows; for an exposure
 measure it is what the covered people breathe. A measure whose source prices only part of it
 (say, the government's enforcement but not what builders spend) says what is left out in
 `cost.partial`; that sentence is printed under the table and carried as flag `partial_cost`. Statuses:
 `scored`, `no_cost` (no cost given; shown, not ranked), `pays_for_itself` (society saves money
 overall; shown apart, no ratios), `not_applicable` (wrong city, or its cause is too small a
-share), `not_scored` (no usable study, or a regional measure). `--json` prints exactly what
+share, or a regional source whose table gives the city no change), `not_scored` (no usable
+study, or a city outside a regional measure's source-receptor table). `--json` prints exactly what
 `score.to_json` returns. Air measures are scored on the city's APnA study unless `--study`
 names another; studies that count air from every origin (CSTEP Bengaluru) are scored too,
 flagged UB as an upper bound, so score each study with its own `--study` call. `--discount` is
 a percent; the default is 3.
+
+A regional measure (stubble, coal power) removes a fraction of a source spread over several
+states. How much each district's PM2.5 falls when the whole source goes is read from a
+source-receptor table, `data/receptor_<name>.csv` (district, state, delta_pm25_full), built by
+`scripts/build_receptor.py`. No published district-level source-receptor result could be used
+yet (see `data/MISSING.md`), so the two tables there come from McDuffie et al. 2021's gridded
+sector fractions times ACAG PM2.5: `receptor_stubble.csv` (crop-residue burning) and
+`receptor_energy_coal.csv` (coal burned for energy production, wider than power plants alone),
+each a sector from every origin, not only the named states (flag RB). `score CITY` gives the
+part that reaches the city (life-years, no cost or ratio: the cost belongs to the whole region);
+`score --region ID` scores every district the source reaches, with the measure's whole cost.
+`power` is a cause of its own in `data/causes.csv` only where a study gives power plants their
+own row (TERI's CMAQ runs for Kolkata, Lucknow and Surat); APnA folds them into industry, so a
+city measure cannot target power plants on APnA.
 
 The assumptions printed under every result: share times cut (cutting a cause by x% cuts its
 share of PM2.5 by x%); no chemistry (air is not additive); health only (no climate, crop or

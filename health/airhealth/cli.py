@@ -8,6 +8,7 @@
   airhealth causes [CITY] [--study ID] [--season S] [--all]   every study's split of a city's PM2.5
   airhealth score CITY [--measure ID ...] [--study ID] [--map M] [--curves a,b] [--n N] [--seed S]
                        [--discount PCT] [--use input=source]   the measure library scored in a city
+  airhealth score --region ID [--map M] [--curves a,b] [--n N] ...   a regional measure, whole reach
   airhealth measures                               the library: id, name, kind, scope, odds, evidence
   airhealth dashboard [--port 8765] [--no-open]     a local page over the same functions
 
@@ -331,9 +332,13 @@ def _city_name(text: str) -> str:
 
 
 def cmd_score(args) -> None:
-    city = _city_name(args.city)
     folder = Path(args.library) if args.library else measures.LIBRARY
     lib = measures.library(folder)
+    if args.region:
+        return _score_region(args, folder, lib)
+    if not args.city:
+        raise ValueError("score needs a CITY, or --region ID for a regional measure")
+    city = _city_name(args.city)
     unknown = [m for m in args.measure or [] if m not in lib]
     if unknown:
         raise ValueError(f"no measure {unknown[0]!r}; the library has: "
@@ -355,6 +360,31 @@ def cmd_score(args) -> None:
         print(json.dumps(out, indent=2, ensure_ascii=False, allow_nan=False))
     else:
         print(report.score_table(scored, out))
+
+
+def _score_region(args, folder, lib) -> None:
+    if args.city or args.measure or args.study:
+        raise ValueError("--region scores one regional measure over its whole reach; give no "
+                         "CITY, --measure or --study with it")
+    if args.region not in lib:
+        raise ValueError(f"no measure {args.region!r}; the library has: " + (", ".join(lib) or "none"))
+    if lib[args.region].scope != "region":
+        regional = [k for k, m in lib.items() if m.scope == "region"]
+        raise ValueError(f"{args.region} is a city measure (airhealth score CITY); regional "
+                         f"measures: {', '.join(regional) or 'none yet'}")
+    names = [n.strip() for n in args.curves.split(",") if n.strip()] if args.curves else None
+    if names is not None:
+        _curves(args.curves)
+    combos = _choice(args).combinations()
+    if len(combos) > 1:
+        raise ValueError("score takes one source per input; give --use input=source once")
+    s = score.region(args.region, map_name=args.map or "acag_total", curves=names, n=args.n,
+                     seed=args.seed, discount=args.discount / 100, deaths=combos[0], folder=folder)
+    out = score.to_json([s], place=s.place)
+    if args.json:
+        print(json.dumps(out, indent=2, ensure_ascii=False, allow_nan=False))
+    else:
+        print(report.score_table([s], out))
 
 
 def cmd_measures(args) -> None:
@@ -470,7 +500,9 @@ def _parser() -> argparse.ArgumentParser:
                         description="Every measure in interventions/library scored in one city: "
                         "life-years if it works, expected life-years, cost and life-years per crore, "
                         "on each curve, with the flags that qualify each row. Not a ranking.")
-    sc.add_argument("city", help="one of the fifty cities")
+    sc.add_argument("city", nargs="?", help="one of the fifty cities (leave out with --region)")
+    sc.add_argument("--region", metavar="ID", help="score this regional measure over its whole "
+                    "reach, with its whole cost (the ratio figures for a regional measure)")
     sc.add_argument("--measure", action="append", metavar="ID", help="only this measure; repeatable")
     sc.add_argument("--study", help="score air measures on this causes study (default: the city's APnA study)")
     sc.add_argument("--map", choices=exposure.MAPS, help="exposure map (default: acag_total)")

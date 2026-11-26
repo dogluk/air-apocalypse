@@ -243,3 +243,27 @@ def test_judgement_odds_are_valid(tmp_path):
 
 def test_library_is_clean():
     assert measures.check_library() == []
+
+
+@pytest.mark.parametrize("csv, message", [
+    (None, "no file"),
+    ("district,state,delta\nMumbai,Maharashtra,-1\n", "exactly the columns"),
+    ("district,state,delta_pm25_full\nMumbai,Maharashtra,1.5\n", "at or below 0"),
+    ("district,state,delta_pm25_full\nMumbai,Maharashtra,x\n", "at or below 0"),
+    ("district,state,delta_pm25_full\nAtlantis,Maharashtra,-1\n", "unknown place"),
+    ("district,state,delta_pm25_full\nMumbai,Maharashtra,-1\nMumbai,Maharashtra,-2\n", "twice"),
+])
+def test_receptor_file_must_exist_and_be_well_formed(tmp_path, csv, message):
+    (tmp_path / "m.toml").write_text((FIXTURES / "air_region.toml").read_text())
+    if csv is not None:
+        (tmp_path / "receptor_fixture.csv").write_text(csv)
+    with pytest.raises(measures.Invalid, match=f"^region.receptor: .*{message}"):
+        measures.load(tmp_path / "m.toml")
+
+
+def test_receptor_files_in_data_are_well_formed():
+    from airhealth import paths
+    found = sorted(paths.DATA.glob("receptor_*.csv"))
+    for p in found:
+        t = measures.receptor(p.name)
+        assert (t.delta_pm25_full <= 0).all() and len(t) > 600, p.name

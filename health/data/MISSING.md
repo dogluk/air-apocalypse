@@ -155,3 +155,23 @@ Written while building `home_purifiers`, `school_purifiers`, `n95_winter` and `s
 - **Children's share of air-pollution deaths, for school measures.** Not a missing input but a gap in the engine: an exposure measure's
   covered people are given the city's all-age death rates, so `school_purifiers`, which covers only children, has its life-years
   overstated. Would settle it: letting an exposure measure name the ages it covers.
+
+## Regional measures: published source-receptor results not usable (2026-11-27)
+
+The receptor tables (data/receptor_*.csv) should come from a published source-receptor result at district level first (spec part 3).
+Neither lead gives one, so both tables are built from McDuffie et al. 2021's gridded sector fractions instead (scripts/build_receptor.py),
+flagged "sector from every origin, not only the named states".
+
+- **Stubble: Lan et al. 2022, Nat Commun 13:6537, doi 10.1038/s41467-022-34093-z.** Read in full (Europe PMC, PMC9663555, 2026-11-27).
+  Its adjoint runs have one receptor, India-wide population-weighted PM2.5 exposure ("the cost function is the India-wide
+  population-weighted exposure to PM2.5", Methods), so its district results are by SOURCE district (Supplementary Data 2-4: contributions
+  by state and season to national exposure, deaths and cost), not the change in each RECEIVING district. Its 23 forward runs with and
+  without residue burning (0.5° x 0.625°) are shown only as maps. The Data availability statement lists inputs only (GFED, IER curves,
+  GPW population). Would settle it: the forward runs' gridded difference fields from the authors, averaged to districts.
+- **Coal power plants: Cropper et al. 2021, PNAS, "The mortality impacts of current and planned coal-fired power plants in India", doi 10.1073/pnas.2017936118** (the plant-level work behind DCP3
+  ch. 13, https://www.ncbi.nlm.nih.gov/books/NBK525204/). Not read: PNAS returned 403, Europe PMC's full text (PMC7865184) returned a
+  server error twice, and NCBI Bookshelf served a bot check. Whether it or its data release gives the PM2.5 change by receiving
+  district is not known. Would settle it: the paper's SI and data release, read.
+- **A power-only gridded field.** McDuffie's ENEcoal (used for receptor_energy_coal.csv) is "Energy Production (coal combustion only)",
+  which the README says also holds fuel production and transformation, so it is wider than power plants. A power-plant-only zero-out
+  run (GBD MAPS India stays local-only here) would replace it.

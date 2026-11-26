@@ -809,3 +809,57 @@ beaef684d144a096700b4821e31de4bca26ed14ab084c74659370e2d3fc4858e DDW_PCA1601 (We
 bf8f3a824db52c21bab6a511871a937106af0c660351eab16fb8794668aa0585 DDW_PCA2813 (Visakhapatnam), 894e69f6a4f01b5f92b6d9605deaa94f513469f1065c9313a6cd684a8a394249 DDW_PCA0307 (Ludhiana),
 01f76fee426e400add44ab373112a56342c888af6eaa51142262f215ea5fa0d6 DDW_PCA0602 (Ambala).
 """
+
+["receptor_stubble.csv"]
+source = "Change in each district's annual-mean PM2.5 (µg/m³) if all agricultural (crop-residue) burning were removed: McDuffie EE et al. 2021, Nature Communications 12:3594, gridded fractional source contributions (GBD-MAPS-Global, Zenodo record 4739100, sector GFEDagburn, 2017, 0.01°), times ACAG V6.GL.02.04 total PM2.5 2023 (the acag_total map), population-weighted to geoBoundaries districts with WorldPop 2023 (the same pixels and districts as exposure_acag_total.csv)."
+url = "https://zenodo.org/records/4739100"
+paper = "https://www.nature.com/articles/s41467-021-23853-y"
+files = """
+GBD-MAPS_Gridded_Fractional_Contributions_GFEDagburn.csv  md5 0548514ad214583517f90b81a0352c33 (Zenodo's checksum; 4,925,012,511 bytes; streamed, only India's box kept)
+GBD-MAPS_Gridded_Fractional_Contributions_LatLon.csv  md5 d494baa4f7a3fe160036b43745b4f9ae (streamed once to check the grid order for India's box)
+ACAG, WorldPop and geoBoundaries files: the sha256s in the exposure_acag_total.csv entry (the build printed the same four).
+"""
+locator = "Zenodo record 4739100 (version 2021_v1, published 2021-06-14), file GBD-MAPS_Gridded_Fractional_Contributions_GFEDagburn.csv: one fractional contribution per line (0.0245 = 2.45%), on the global 0.01° grid of the LatLon file (rows from -89.995, -179.995, longitude fastest; checked for lat 6.005-37.495, lon 68.005-97.495). Sector definition: the record's README, 'GFEDagburn - Agricultural Waste Burning ... (from the GFED fires inventory)'. How a fraction becomes µg/m³: the record's description, 'Multiply the 0.01°x0.01° fractional source contributions by downscaled 0.01°x0.01° resolution PM2.5 mass estimates'; here ACAG 2023 is the PM2.5. How a fraction is made: paper, Methods, Eq. 4-5 (zero-out difference over the sum of the 24 sources' differences)."
+retrieved = "2026-11-27"
+licence = "McDuffie gridded results: CC BY 4.0 (Zenodo record). ACAG: CC BY 4.0. WorldPop: CC BY 4.0. geoBoundaries IND ADM2: ODbL 1.0. The derived table is shared under ODbL 1.0."
+method = "derived"
+script = "scripts/build_receptor.py"
+caveat = "The district changes come from McDuffie et al. 2021's global model share of crop-residue burning (all such burning, from every origin, not only Punjab and Haryana), rescaled so all sources sum to 100%, times 2023 satellite PM2.5; no published district-level source-receptor result for stubble could be used. It is far smaller than Lan et al. 2022's estimate (India-wide population-weighted 0.48 against 6.7 µg/m³), so it is likely an underestimate."
+notes = """
+Columns: district, state, delta_pm25_full (µg/m³, 0 or below): the change in the district's annual-mean PM2.5 when the whole source is removed.
+735 districts, every district of exposure_acag_total.csv (McDuffie's grid covers all of India, so the study's area is the whole country; no
+district is 0). delta = - sum over populated WorldPop pixels of (pop x ACAG PM2.5 x McDuffie fraction of the 0.01° cell holding the pixel
+centre) / sum(pop). The build checks that the same sums without the fraction reproduce exposure_acag_total.csv's pm25 (largest gap 0.000).
+Built 2026-11-27: India population-weighted change -0.48 µg/m³; largest -2.78 (Fatehabad, Haryana); Delhi's districts about -1.7.
+Why McDuffie and not a published source-receptor table: Lan et al. 2022 (Nat Commun 13:6537), the spec's first choice, is an adjoint study
+with one receptor (India-wide exposure), so it gives source districts' shares of national exposure, not the change in each receiving
+district (data/MISSING.md). For comparison only, Lan et al. 2022 Results: 'From 2003 to 2019 we estimate that the annual mean
+population-weighted PM2.5 exposure due to burning activities in India averaged 6.7 µg m-3' (Europe PMC PMC9663555, read 2026-11-27);
+this table's India mean is 0.48 (McDuffie's 2017 GFED fires). The gap is not explained here, and the two are not averaged.
+The McDuffie fraction is a zero-out difference rescaled so the 24 sources sum to 100% (paper Eq. 4-5), not the raw zero-out change; and it is a
+2017 fraction applied to 2023 PM2.5. The README's GFEDagburn line repeats the waste sector's description ('solid waste disposal ...'); its
+name, the paper's 'Agricultural Waste Burning' and the GFED source say crop burning.
+"""
+
+["receptor_energy_coal.csv"]
+source = "Change in each district's annual-mean PM2.5 (µg/m³) if all coal burned for energy production (power and heat plants, plus fuel production and transformation) were removed: McDuffie EE et al. 2021, Nature Communications 12:3594, gridded fractional source contributions (GBD-MAPS-Global, Zenodo record 4739100, sector ENEcoal, 2017, 0.01°), times ACAG V6.GL.02.04 total PM2.5 2023, population-weighted to geoBoundaries districts with WorldPop 2023 (as exposure_acag_total.csv)."
+url = "https://zenodo.org/records/4739100"
+paper = "https://www.nature.com/articles/s41467-021-23853-y"
+files = """
+GBD-MAPS_Gridded_Fractional_Contributions_ENEcoal.csv  md5 08216fa5ef0b8397efc4960a99f7a228 (Zenodo's checksum; 5,139,572,508 bytes; streamed, only India's box kept)
+GBD-MAPS_Gridded_Fractional_Contributions_LatLon.csv  md5 d494baa4f7a3fe160036b43745b4f9ae (grid order check)
+ACAG, WorldPop and geoBoundaries files: the sha256s in the exposure_acag_total.csv entry.
+"""
+locator = "Zenodo record 4739100 (version 2021_v1), file GBD-MAPS_Gridded_Fractional_Contributions_ENEcoal.csv, same grid and method as receptor_stubble.csv. Sector definition, the record's README: 'ENEcoal - Energy Production (coal combustion only) - Includes electricity and heat production, fuel production and transformation, oil and gas fugitive/flaring, and fossil fuel fires'."
+retrieved = "2026-11-27"
+licence = "McDuffie gridded results: CC BY 4.0 (Zenodo record). ACAG: CC BY 4.0. WorldPop: CC BY 4.0. geoBoundaries IND ADM2: ODbL 1.0. The derived table is shared under ODbL 1.0."
+method = "derived"
+script = "scripts/build_receptor.py"
+caveat = "The district changes come from McDuffie et al. 2021's global model share of coal burned for energy production (power plants plus other coal-fired energy production, from every origin, not only India's plants), rescaled so all sources sum to 100%, times 2023 satellite PM2.5; no published plant-level source-receptor result by district could be used."
+notes = """
+Columns and method as receptor_stubble.csv. 735 districts, none 0. Built 2026-11-27: India population-weighted change -3.60 µg/m³; largest
+-8.92 (Raigarh, Chhattisgarh). Not power plants alone: the energy sector also holds fuel production and transformation (README), which is
+why causes.csv keeps McDuffie's energy rows in industry. A coal-power measure scored on it gets the whole sector's change times its cut.
+The spec's first choice, the plant-level work behind Cropper et al. (DCP3 ch. 13; PNAS 2021, doi 10.1073/pnas.2017936118), could not be read
+(data/MISSING.md).
+"""

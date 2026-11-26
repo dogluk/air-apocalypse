@@ -28,6 +28,18 @@ from one source study (causes.py), never an average of several:
 An exposure measure cuts what people breathe, not the outdoor air: in its months the change
 is -100 x hours x cut percent, for the covered share of people only (simulate.run's covered).
 
+A regional measure (scope = "region") removes a fraction (region.cut) of a source spread over
+several states (crop burning, coal power). How much each district's PM2.5 falls when the whole
+source goes is read from a source-receptor table (measures.receptor, data/receptor_<name>.csv);
+the change in a district is cut x that full change, an ordinary "delta" run with a per-place
+scale. Two views, never mixed:
+  - region(): the whole reach, every district whose full change is not 0, with the measure's
+    whole cost: the ratio figures belong here (airhealth score --region ID).
+  - city(): the part that reaches one city, its scale the population-weighted mean full change
+    over the city's map units. Life-years only: the cost belongs to the whole reach, so cost and
+    ratio figures are None and the reason points to the region view. A city with a map unit the
+    table does not cover is not_scored; one whose units all change by 0 is not_applicable.
+
 Costs are per driver unit (a person, a household, the city, or `units` of something) and are
 multiplied out here; an exposure measure's cost is then multiplied by the covered share in the
 run (cost_per_covered). A measure with no [cost] is status no_cost; one whose society-wide net
@@ -68,6 +80,8 @@ RATIO_KEYS = ("cost_per_life_year_if_works", "expected_cost_per_expected_life_ye
               "inr_per_life_year_if_works", "expected_inr_per_expected_life_year",
               "life_years_per_crore_if_works", "expected_life_years_per_crore")
 
+COST_KEYS = ("cost_usd", "cost_inr", "expected_cost_usd", "expected_cost_inr")
+
 UPPER_BOUND_TEXT = ("This study's shares include air blown in from outside the city, so a city "
                     "measure scored on them is an upper bound.")
 
@@ -76,7 +90,8 @@ UPPER_BOUND_TEXT = ("This study's shares include air blown in from outside the c
 class Flag:
     """A caveat printed with a result. code is stable, one of: "placeholder", "evidence_S",
     "evidence_R", "odds_judgement", "long_shot", "not_reported", "annual_share_flat",
-    "borrowed_shape", "covered_only", "regional", "upper_bound_all_origins", "partial_cost"."""
+    "borrowed_shape", "covered_only", "regional", "receptor_basis", "upper_bound_all_origins",
+    "partial_cost"."""
     code: str
     text: str     # one plain sentence
 
@@ -87,7 +102,7 @@ class Score:
     name: str
     kind: str                    # "air" | "exposure"
     scope: str                   # "city" | "region"
-    place: str                   # the city's name
+    place: str                   # the city's name; for region(), "region reached by <receptor>"
     study: str | None            # the causes study used (air/city), else None
     status: str                  # one of STATUSES
     reason: str                  # why, when status is not "scored"; "" otherwise
@@ -110,8 +125,9 @@ def _months_of(text: str) -> tuple[int, ...]:
     return ALL_MONTHS if text == "1-12" else tuple(sorted(int(m) for m in text.split(",")))
 
 
-def _fixed_flags(m: Measure, place: places.Place) -> list[Flag]:
-    """The flags that depend on the measure and the place, not on the study."""
+def _fixed_flags(m: Measure, place: places.Place | None) -> list[Flag]:
+    """The flags that depend on the measure and the place, not on the study (place None: a
+    region's whole reach, which has no month-by-month shape)."""
     out = [Flag("placeholder", f"{name} is a placeholder: a stand-in, not an estimate.")
            for name in m.placeholders]
     for e in m.evidence:
@@ -128,23 +144,76 @@ def _fixed_flags(m: Measure, place: places.Place) -> list[Flag]:
         out.append(Flag("long_shot", "This is a long shot: a large effect if it works, but "
                                      "unlikely to work."))
     if m.scope == "region":
-        out.append(Flag("regional", "This measure acts on a source spread over several states, "
-                                    "so it is scored for the region, not city by city."))
+        out.append(Flag("regional", "This measure acts on a source spread over several states; "
+                                    "how much each district gains is read from a source-receptor "
+                                    "table, and its cost belongs to the whole region it reaches."))
+        basis = receptor_basis(m.region.receptor)
+        if basis:
+            out.append(Flag("receptor_basis", basis))
     elif m.kind == "exposure":
         out.append(Flag("covered_only", "Only the people it reaches breathe less; the outdoor "
                                         "air and everyone else are unchanged."))
     if m.cost is not None and m.cost.partial:
         out.append(Flag("partial_cost", m.cost.partial))
-    shape = months.shape(place)
-    if shape.borrowed:
+    shape = months.shape(place) if place is not None else None
+    if shape is not None and shape.borrowed:
         out.append(Flag("borrowed_shape", f"{place.name} has no month-by-month PM2.5 record of "
                                           f"its own, so the shape is {shape.basis}."))
     return out
 
 
 def _empty_trail(shape_basis: str, m: Measure) -> dict:
-    return {"shares": {}, "share_basis": {}, "cuts": [], "exposure": None, "cost": None,
-            "evidence": [asdict(e) for e in m.evidence], "shape": shape_basis}
+    return {"shares": {}, "share_basis": {}, "cuts": [], "exposure": None, "region": None,
+            "cost": None, "evidence": [asdict(e) for e in m.evidence], "shape": shape_basis}
+
+
+def receptor_basis(name: str) -> str:
+    """The `caveat` sentence of a receptor file's data/sources.toml entry ("" if none): what the
+    table stands for (e.g. a sector from every origin, not only the named states)."""
+    import tomllib
+
+    from . import paths
+    entry = tomllib.loads((paths.DATA / "sources.toml").read_text()).get(name, {})
+    return " ".join(str(entry.get("caveat", "")).split())
+
+
+def _region_city(m: Measure, place: places.Place, map_name: str, folder: Path, trail: dict):
+    """(scale for the city, status, reason): the population-weighted mean full change over the
+    city's map units, from the measure's receptor table."""
+    column = exposure.DISTRICT_MAPS.get(map_name)
+    if column is None:
+        return None, "not_scored", (f"the map {map_name} is not by district, so the source-"
+                                    "receptor table cannot be read for this city; use acag_total "
+                                    "or aqli")
+    table = measures.receptor(m.region.receptor, folder)
+    full = dict(zip(table.label, table.delta_pm25_full))
+    units = exposure._cities().loc[place.name, column].split(";")
+    state = exposure.cells(places.resolve(place.state, kind="state"), map_name)
+    state = state[state.unit.isin(units)]
+    labels, missing = [], []
+    for u in state.unit:
+        try:
+            label = measures.district(u, place.state).label
+        except KeyError:
+            label = None
+        if label not in full:
+            missing.append(u)
+        labels.append(label)
+    trail["region"] = {"receptor": m.region.receptor, "cut": _dist(m.region.cut),
+                       "units": list(state.unit), "population": list(state.population),
+                       "delta_pm25_full": [full.get(x) for x in labels]}
+    if missing:
+        return None, "not_scored", (f"outside the source-receptor study's area: "
+                                    f"{m.region.receptor} has no row for {', '.join(missing)}")
+    deltas = np.array([full[x] for x in labels])
+    if not deltas.any():
+        return None, "not_applicable", (f"the source-receptor study gives no change in "
+                                        f"{place.name}'s PM2.5 ({m.region.receptor})")
+    scale = float(np.average(deltas, weights=state.population.to_numpy(float)))
+    trail["region"]["city_delta_pm25_full"] = scale
+    return scale, "scored", (f"this is the part that reaches {place.name}; the cost belongs to "
+                             "the whole region the measure reaches, so the ratio figures are "
+                             f"given only by airhealth score --region {m.id}")
 
 
 def _study_shares(city: str, study: str):
@@ -280,12 +349,14 @@ def _times(c, d: Dist, count: float):
 
 
 def compile(measure: Measure, city: str, *, study: str | None = None,
-            map_name: str = "acag_total"
+            map_name: str = "acag_total", folder: Path = measures.LIBRARY
             ) -> tuple[Intervention | None, str, str, tuple[Flag, ...], dict]:
     """(intervention or None, status, reason, flags, trail) for one measure in one city; what
     city() runs. study: the causes study for an air measure in a city (None: the city's APnA
     study). Status here is one of not_applicable, not_scored, no_cost or scored; city() turns
-    scored into pays_for_itself when society's net cost is below zero."""
+    scored into pays_for_itself when society's net cost is below zero. A regional measure gives
+    the part that reaches the city (no cost; see the module docstring); folder is where its
+    receptor file may sit beside the measure files (else data/)."""
     m = measure
     place = places.resolve(city, kind="city")
     flags = _fixed_flags(m, place)
@@ -295,7 +366,16 @@ def compile(measure: Measure, city: str, *, study: str | None = None,
         return None, status, reason, tuple(flags), trail
 
     if m.scope == "region":
-        return stop("not_scored", "regional: see Task 10")
+        scale, status, reason = _region_city(m, place, map_name, folder, trail)
+        if scale is None:
+            return stop(status, reason)
+        iv = Intervention(
+            name=m.name, places=[place], change_kind="delta", change=m.region.cut, monthly=None,
+            start_year=m.start_year, ramp_years=m.ramp_years, duration_years=m.duration_years,
+            p_success=m.p_success, lag=m.lag, notes=m.notes, cost_once=Dist.fixed(0.0),
+            cost_annual=Dist.fixed(0.0), cost_currency="INR", cost_year=prices.BASE_YEAR,
+            scale={place.label: scale})
+        return iv, status, reason, tuple(flags), trail
     if m.cities is not None and city not in m.cities:
         return stop("not_applicable", f"this measure is written for {', '.join(m.cities)}, "
                                       f"not {city}")
@@ -379,7 +459,8 @@ def city(city: str, measures: Sequence[str] | None = None, *, study: str | None 
         used = None
         if m.kind == "air" and m.scope == "city":
             used = study if study is not None else _default_study(city)
-        iv, status, reason, flags, trail = compile(m, city, study=used, map_name=map_name)
+        iv, status, reason, flags, trail = compile(m, city, study=used, map_name=map_name,
+                                                   folder=folder)
         per_curve, pm25, run = {}, None, None
         if iv is not None:
             run = simulate.run(iv, map_name=map_name, curves=curves, n=n, seed=seed,
@@ -389,7 +470,10 @@ def city(city: str, measures: Sequence[str] | None = None, *, study: str | None 
             d = first.pm25_after - run.pm25_before
             pm25 = {"median": float(np.median(d)), "p5": float(np.percentile(d, 5)),
                     "p95": float(np.percentile(d, 95))}
-            if status == "scored":
+            if m.scope == "region":
+                for summary in per_curve.values():
+                    summary.update({k: None for k in (*RATIO_KEYS, *COST_KEYS)})
+            elif status == "scored":
                 count = trail["cost"]["units_count"]
                 net = _society_net(m, iv, count, discount)
                 if net is not None and net < 0:
@@ -406,6 +490,96 @@ def city(city: str, measures: Sequence[str] | None = None, *, study: str | None 
             p_success_basis=m.p_success_basis, flags=flags, pm25_change=pm25,
             per_curve=per_curve, trail=trail, run=run))
     return out
+
+
+def region(measure: str, *, map_name: str = "acag_total", curves: list[str] | None = None,
+           n: int = 2000, seed: int = 0, discount: float = simulate.DISCOUNT, deaths=None,
+           folder: Path = measures.LIBRARY) -> Score:
+    """A regional measure scored over its whole reach: every district of its receptor table whose
+    full change is not 0, each changed by region.cut x its own full change (one "delta" run,
+    scale per district), with the measure's whole cost (driver "unit", "city" as one total for
+    the region, or "person" over everyone reached). The ratio figures for a regional measure
+    come from here, never from a city's part.
+
+    Speed: one run is one steady-state calculation per district per curve (three per curve for
+    the spread). Timed 2026-11-27 on the maintainer's laptop: receptor_stubble.csv (735 districts),
+    n = 1000, the eight curves open with IHME files present: 136 s, over the two minutes the plan
+    allowed (n = 100 took 128 s, so the time is per-district work, not draws). Left for plan D to
+    decide; no district is dropped to make it faster."""
+    from . import measures as library_
+    lib = library_.library(folder)
+    if measure not in lib:
+        raise KeyError(f"no measure {measure!r} in {folder}")
+    m = lib[measure]
+    if m.scope != "region":
+        raise ValueError(f"{measure} is a city measure; score it with airhealth score CITY")
+    if map_name not in exposure.DISTRICT_MAPS:
+        raise ValueError("a regional measure needs a district map "
+                         f"({', '.join(exposure.DISTRICT_MAPS)}), not {map_name}")
+    table = measures.receptor(m.region.receptor, folder)
+    reach = table[table.delta_pm25_full != 0]
+    if reach.empty:
+        raise ValueError(f"{m.region.receptor} gives no change in any district")
+    reached = [measures.district(r.district, r.state)
+               for r in reach.itertuples()]
+    people, off_map = 0.0, []
+    for p in reached:
+        try:
+            people += float(exposure.cells(p, map_name).population.sum())
+        except KeyError:
+            off_map.append(p.label)
+    if off_map:
+        raise ValueError(f"{len(off_map)} districts of {m.region.receptor} are not on the map "
+                         f"{map_name} (e.g. {off_map[0]}); use acag_total, the map the table "
+                         "was built on")
+    flags = _fixed_flags(m, None)
+    trail = _empty_trail("not used: a regional change is one annual figure per district", m)
+    trail["region"] = {"receptor": m.region.receptor, "cut": _dist(m.region.cut),
+                       "districts": len(reached), "districts_in_table": len(table),
+                       "population": people}
+    c = m.cost
+    if c is None:
+        cost = dict(cost_once=Dist.fixed(0.0), cost_annual=Dist.fixed(0.0), cost_currency="INR",
+                    cost_year=prices.BASE_YEAR, cost_share_only_on_success=0.0)
+        status, reason, count = "no_cost", "it has no cost given, so it is shown but not ranked", 1.0
+    else:
+        count = people if c.driver == "person" else (1.0 if c.driver == "city" else c.units.median)
+        cost = dict(cost_once=_times(c, c.once, count), cost_annual=_times(c, c.annual, count),
+                    cost_currency=c.currency, cost_year=c.year,
+                    cost_share_only_on_success=c.share_only_on_success)
+        trail["cost"] = {"driver": c.driver, "units_count": count, "once": _dist(c.once),
+                         "annual": _dist(c.annual), "currency": c.currency, "year": c.year,
+                         "cost_in_2025_rupees_basis": _rupees_basis(c.currency, c.year),
+                         "unit": c.unit, "units": _dist(c.units),
+                         "society_net_once": _dist(c.society_net_once),
+                         "society_net_annual": _dist(c.society_net_annual)}
+        status, reason = "scored", ""
+    iv = Intervention(
+        name=m.name, places=reached, change_kind="delta", change=m.region.cut, monthly=None,
+        start_year=m.start_year, ramp_years=m.ramp_years, duration_years=m.duration_years,
+        p_success=m.p_success, lag=m.lag, notes=m.notes,
+        scale=dict(zip((p.label for p in reached), reach.delta_pm25_full)), **cost)
+    run = simulate.run(iv, map_name=map_name, curves=curves, n=n, seed=seed, deaths=deaths,
+                       discount=discount)
+    per_curve = {k: r.summary() for k, r in run.per_curve.items()}
+    d = next(iter(run.per_curve.values())).pm25_after - run.pm25_before
+    pm25 = {"median": float(np.median(d)), "p5": float(np.percentile(d, 5)),
+            "p95": float(np.percentile(d, 95))}
+    if status == "scored":
+        net = _society_net(m, iv, count, discount)
+        if net is not None and net < 0:
+            status = "pays_for_itself"
+            reason = (f"society as a whole saves money overall (about {-net:,.0f} rupees over "
+                      "its years, net), so it is listed apart, not ranked by a ratio")
+    if status in ("no_cost", "pays_for_itself"):
+        for summary in per_curve.values():
+            summary.update({k: None for k in RATIO_KEYS})
+    return Score(
+        measure=m.id, name=m.name, kind=m.kind, scope=m.scope,
+        place=f"the region {m.region.receptor} reaches ({len(reached)} districts)", study=None,
+        status=status, reason=reason, who_reaches=m.who_reaches, p_success=m.p_success,
+        p_success_basis=m.p_success_basis, flags=tuple(flags), pm25_change=pm25,
+        per_curve=per_curve, trail=trail, run=run)
 
 
 def _clean(x):

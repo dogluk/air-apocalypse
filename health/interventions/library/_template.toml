@@ -109,9 +109,15 @@ months = [10, 11, 12, 1, 2]
 
 # ---- scope = "region" (kind = "air"): one [region] table, instead of [[targets]] ----
 # [region]
-# receptor = "receptor_stubble.csv"   # a data/ file: how much each district's PM2.5 changes
-#                                     # when the source is removed (its format comes with it)
+# receptor = "receptor_stubble.csv"   # a data/ file (scripts/build_receptor.py): columns
+#                                     # district, state, delta_pm25_full = the change in each
+#                                     # district's annual PM2.5 (µg/m³, 0 or below) when the whole
+#                                     # source is removed; every district the study covers
 # cut = 0.3              # (Dist, 0-1) fraction of the source removed
+# A region measure is scored two ways: `airhealth score --region ID` over every district it
+# reaches, with its whole cost (driver "unit", "person", or "city" = one total for the region;
+# not "household"), and `airhealth score CITY` for the part that reaches one city, which has
+# life-years but no cost or ratio of its own.
 
 # ---- [cost]: optional; leave it out and the measure is shown as "no cost", never ranked ----
 # All costs are turned into 2025 rupees: rupees by India's GDP deflator
