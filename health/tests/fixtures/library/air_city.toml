@@ -1,0 +1,28 @@
+# Test fixture: an air measure in cities. Every number is a placeholder.
+name = "Fixture: air, city"
+kind = "air"
+scope = "city"
+who_reaches = "everyone in the city"
+cities = ["Delhi", "Mumbai"]
+min_share_pct = 5
+start_year = 2027
+ramp_years = 2
+duration_years = 10
+p_success = 0.6
+p_success_basis = "judgement: fixture"
+placeholders = ["targets.dust.cut", "targets.waste_burning.cut", "cost.annual"]
+
+[[targets]]
+cause = "dust"
+cut = { dist = "uniform", p5 = 0.1, p95 = 0.3 }
+
+[[targets]]
+cause = "waste_burning"
+cut = 0.5
+months = [12, 11, 1]
+
+[cost]
+driver = "city"
+annual = { dist = "lognormal", p5 = 1e7, p95 = 1e8 }
+currency = "INR"
+year = 2023

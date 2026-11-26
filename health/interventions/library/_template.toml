@@ -1,0 +1,158 @@
+# Measure file template: the reference for the library format. Copy it to <id>.toml (the
+# file name, without .toml, is the measure's id), then change every value.
+# Read by airhealth.measures.load(); a mistake is reported in one line naming the field.
+# Files whose names start with "_" are not part of the library, but this one must stay valid:
+# it loads as a measure whose every number is a placeholder.
+#
+# A measure is something a city or region could do about its air. Two kinds:
+#   kind = "air"       cuts a cause of PM2.5 (dust, transport, ...) by a fraction
+#   kind = "exposure"  cuts what people breathe without touching the outdoor air
+#                      (purifiers, masks)
+# and two scopes:
+#   scope = "city"     acts inside one city at a time and helps that city's people
+#   scope = "region"   acts on a source spread over states (stubble, power plants) and helps
+#                      everyone downwind of it; only for kind = "air"
+#
+# Any value marked (Dist) is a plain number or a distribution given by its 5th and 95th
+# percentiles:
+#   { dist = "normal",     p5 = 0.2, p95 = 0.4 }
+#   { dist = "lognormal",  p5 = 500, p95 = 5000 }     # skewed; must not cross zero
+#   { dist = "uniform",    p5 = 0.1, p95 = 0.3 }      # its ends lie a little outside p5 and p95
+#   { dist = "triangular", p5 = 0.1, p95 = 0.4, mode = 0.2 }
+#
+# THE EVIDENCE RULE. Every number below (each cut, coverage, hours, cost, unit count) is either
+# backed by exactly one [[evidence]] entry or listed in `placeholders`, never both and never
+# neither. A placeholder is a stand-in, not an estimate, and every result that uses one is
+# flagged. Write no number you have not read at its source (AGENTS.md rule 1); if you cannot
+# reach the source, leave the number a placeholder and write the lead in data/MISSING.md.
+# The names the rule uses: targets.<cause>.cut, exposure.covered, exposure.hours,
+# exposure.cut, region.cut, cost.once, cost.annual, cost.units, cost.society_net_once,
+# cost.society_net_annual (only those present; an absent once or annual counts as 0 and
+# needs nothing). p_success is outside the rule: it is a judgement, explained in
+# p_success_basis.
+
+name = "Template: sweeping and paving city roads"   # required; shown on every result
+kind = "air"             # required; "air" or "exposure" (see above)
+scope = "city"           # required; "city" or "region" (see above)
+
+# Required, free text shown on every result: who the measure actually reaches.
+who_reaches = "everyone in the city, through the outdoor air"
+
+# City scope only (required there; leave it out for region scope): "all" for every city in
+# data/cities.csv, or a list of names exactly as written there, e.g. ["Delhi", "Kanpur"].
+cities = "all"
+
+# Optional, air measures in cities only: score only cities where the causes this measure
+# targets make up at least this percent of PM2.5 from inside the city (their share, averaged
+# over the year weighted by days, in the source study chosen for the run). Leave it out to
+# score every city listed above.
+# min_share_pct = 5
+
+start_year = 2027        # required; first year the measure works
+ramp_years = 0           # optional (default 0); years to reach its full effect, at most duration_years
+duration_years = 10      # required; years the measure lasts, from start_year
+
+# Optional. How fast deaths fall after the air (or what people breathe) gets cleaner:
+#   "epa20"      US EPA 20-year lag: 30% of the fall in risk in year 1, 50% over years 2-5,
+#                20% over years 6-20 (the default; source in airhealth/lag.py)
+#   "immediate"  the whole fall in year 1
+lag = "epa20"
+
+# Required; the probability the measure works at all, 0 to 1. Not sampled: results are shown
+# if it works, and times p_success.
+p_success = 0.5
+# Required; one line on why p_success is this number. It is a judgement unless it cites a
+# source listed in [[evidence]]; say which. Exposure measures (purifiers, masks) should
+# carry lower odds than cuts to outdoor air: trials show they lower the PM2.5 people breathe
+# indoors and their blood pressure, but no trial shows they cut deaths (design spec, part 3).
+# Say so here when it applies.
+p_success_basis = "judgement: placeholder odds for the template, not an estimate"
+
+# Optional (default false). true marks a long shot (smog towers, cloud seeding): it is still
+# scored, and every result is flagged.
+long_shot = false
+
+# Dotted names of the numbers that are placeholders, not estimates (see the evidence rule).
+placeholders = ["targets.dust.cut", "targets.transport.cut", "cost.once", "cost.annual"]
+
+notes = """
+Free text: what the measure is, how the numbers were turned into this file's terms, and what
+is uncertain. Say plainly which values are placeholders.
+"""
+
+# ---- kind = "air", scope = "city": one [[targets]] table per cause ----
+# cause: one of the causes in airhealth/causes.py (HARMONISED) that come from inside a city:
+#   transport, residential, industry, dust, waste_burning, dg_sets, brick_kilns,
+#   agri_burning, natural.
+#   Not allowed: outside, local_all, other, secondary_unassigned, biomass_unassigned (a city
+#   cannot cut air that blows in from elsewhere, or a share nobody has traced to a cause).
+# cut: (Dist, 0 to 1) the fraction of the cause's inside-city share of PM2.5 removed.
+#   Cutting a cause by x cuts its share of PM2.5 by x (every result carries this caveat).
+# months: optional, the months it works (1 = January); default all twelve.
+[[targets]]
+cause = "dust"
+cut = { dist = "uniform", p5 = 0.1, p95 = 0.3 }
+
+[[targets]]
+cause = "transport"
+cut = 0.05
+months = [10, 11, 12, 1, 2]
+
+# ---- kind = "exposure" (scope = "city"): one [exposure] table, instead of [[targets]] ----
+# Applied to the covered people only: the city's people are split into those reached and
+# the rest, and what the reached breathe falls by hours x cut.
+# [exposure]
+# covered = { dist = "uniform", p5 = 0.02, p95 = 0.1 }  # (Dist, 0-1) share of the city's people reached
+# hours = 0.5            # (Dist, 0-1) share of their hours it works (e.g. at home, asleep)
+# cut = 0.5              # (Dist, 0-1) fraction cut in what they breathe in those hours
+# months = [11, 12, 1]   # optional, default all twelve
+
+# ---- scope = "region" (kind = "air"): one [region] table, instead of [[targets]] ----
+# [region]
+# receptor = "receptor_stubble.csv"   # a data/ file: how much each district's PM2.5 changes
+#                                     # when the source is removed (its format comes with it)
+# cut = 0.3              # (Dist, 0-1) fraction of the source removed
+
+# ---- [cost]: optional; leave it out and the measure is shown as "no cost", never ranked ----
+# All costs are turned into 2025 rupees: rupees by India's GDP deflator
+# (data/gdp_deflator_ind.csv); dollars first into rupees at their price year's World Bank
+# average rate (data/fx_inr_usd.csv), then likewise.
+[cost]
+driver = "person"        # required: what the cost scales with
+                         #   "person"     per person (exposure measures: per person covered)
+                         #   "household"  per household (exposure measures: per household covered)
+                         #   "city"       per city, whatever its size
+                         #   "unit"       per unit of something counted (acres, stacks); give
+                         #                units and unit below
+once = { dist = "lognormal", p5 = 50, p95 = 500 }     # (Dist, at least 0) optional, default 0;
+                                                      # per driver unit, spent at the start
+annual = { dist = "lognormal", p5 = 20, p95 = 200 }   # (Dist, at least 0) optional, default 0;
+                                                      # per driver unit, each year of duration
+# units = 1000           # (Dist) driver = "unit" only: how many units
+# unit = "acre"          # driver = "unit" only: what one unit is
+# society_net_once = -100    # (Dist, signed) optional: society's net cost per driver unit at the
+#                            # start, where a source gives it (fuel saved minus spent, ...)
+# society_net_annual = -10   # (Dist, signed) optional: the same, each year. A measure whose
+#                            # society-wide net cost is below zero is shown as "pays for itself"
+currency = "INR"         # required; "INR" or "USD"
+year = 2025              # required; the price year the costs are in (2000-2025)
+share_only_on_success = 0.0   # optional, 0 to 1; share of the cost spent only if it works
+                              # (default 0: the full cost is spent either way)
+
+# ---- [[evidence]]: one table per source ----
+# fields:     the numbers it backs, by dotted name (each number in exactly one entry)
+# source:     author, year, title
+# url:        a link to it
+# locator:    where in it the number sits: "Table 36, p. 112"
+# key:        "O" read at source; "S" seen only in a snippet or summary; "R" recalled.
+#             Prefer O. S and R are allowed only because every result flags them.
+# retrieved:  the date you read it, YYYY-MM-DD
+# derivation: optional; the arithmetic, when the number is computed from values read there
+# [[evidence]]
+# fields = ["targets.dust.cut"]
+# source = "Author (year), Title"
+# url = "https://..."
+# locator = "Table 36, p. 112"
+# key = "O"
+# retrieved = "2026-11-28"
+# derivation = "share swept (Table 3) x PM2.5 fraction of road dust (Table 5)"

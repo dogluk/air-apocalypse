@@ -1,0 +1,15 @@
+# Test fixture: a measure with no [cost] table. Every number is a placeholder.
+name = "Fixture: no cost"
+kind = "air"
+scope = "city"
+who_reaches = "everyone in the city"
+cities = "all"
+start_year = 2027
+duration_years = 1
+p_success = 0.5
+p_success_basis = "judgement: fixture"
+placeholders = ["targets.agri_burning.cut"]
+
+[[targets]]
+cause = "agri_burning"
+cut = 0.2
