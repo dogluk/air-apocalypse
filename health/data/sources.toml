@@ -749,3 +749,14 @@ MOESM5 is Data File 2 (fuel-type contributions) and MOESM6 Data File 3 (2019 exp
 among the 50 cities (Jaipur, Ahmedabad, Kanpur, Kolkata, Mumbai, Pune, Hyderabad, Vijayawada, Coimbatore); dropped and counted by the
 build: Belgaum, Hindupur, Jalna, Kozhikode, Malegaon, Parbhani, Singrauli, Sitapur. Delhi is not in the file as a sub-national area.
 """
+
+["targets.csv"]
+source = "Two annual-mean PM2.5 targets used to frame 'what if the air reached this level': India's National Ambient Air Quality Standards (Central Pollution Control Board notification No. B-29016/20/90/PCI-L, 18 November 2009) and WHO global air quality guidelines 2021 (Table 0.1)."
+url = "https://scclmines.com/env/docs/naaqs-2009.pdf (a copy of the CPCB notification, text read directly); https://iris.who.int/server/api/core/bitstreams/551b515e-2a32-4e1a-a58c-cdaecd395b19/content (WHO IRIS, document 9789240034228)"
+locator = "NAAQS: page 1, table row S. No. 4 (PM2.5), Annual, 40 in both area columns. WHO: Table 0.1, PDF page 19, PM2.5 Annual, AQG level 5. Each row's own locator column says the same."
+retrieved = "2026-11-27"
+licence = "No licence stated (Indian government notification); WHO publication is CC BY-NC-SA 3.0 IGO (stated on the document's copyright page). Only the two values are tabulated, with citation."
+method = "transcribed"
+notes = """
+Both values were read in the documents on 2026-11-27, not typed from memory. The NAAQS copy is hosted by a mining company's environment page (SCCL); the notification text, number and date on it match the CPCB notification. If a CPCB-hosted copy is found, swap the url.
+"""
