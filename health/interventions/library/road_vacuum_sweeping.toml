@@ -29,6 +29,8 @@ The cost is Bengaluru's own: the state's order of November 2025 lets the Greater
 Authority rent the machines for seven years for at most Rs 613.25 crore, about Rs 894 per km.
 The upper end scales that to Rs 1,350 per km, the dearest of the other cities the authority
 compared itself with. These are the funder's rupees; nothing is netted off.
+
+city-specific: the cut is TERI's NCR effect times the road-dust part of Bengaluru's dust (0.691, CSTEP), and the cost is the Greater Bengaluru Authority's rental contract (Rs 613.25 crore over seven years).
 """
 
 [[targets]]
