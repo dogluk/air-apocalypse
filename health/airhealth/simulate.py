@@ -37,6 +37,14 @@ cost-effectiveness figures are ratios of means over draws: mean cost / mean life
 it works, and expected cost / expected life-years. Also given in rupees: rupees per life-year,
 and life-years per crore (1 crore = 1e7 rupees).
 
+covered (Intervention.covered): the share of each place's people the change reaches, drawn from
+its own stream. Life-years, deaths postponed (and cost, when cost_per_covered) are the full-
+population result times the covered draw, draw by draw: covered people are spread like everyone
+else across units and ages, so this is exact, and it applies the cut to the covered people only
+(not coverage x cut to everyone, which is wrong on curves that flatten at high levels).
+e0_change_years and pm25_after describe the covered people. In the variance split the covered
+draws belong to the pm25_change group; the curve_parameters group uses the covered median.
+
 spread: the share of variance in life-years from the PM2.5 change and from the curve
 parameters, each measured by sampling that group alone with the other at its median (the
 published curve; the median change), and divided by the sum of the two.
@@ -266,6 +274,12 @@ def run(iv: Intervention, map_name: str = "aqli", curves: list[str] | None = Non
     annual = iv.cost_annual.sample(cost_rng, n)
     paid = discount_factors(iv.duration_years, discount).sum()    # annual cost, in present value
     cost_inr = prices.to_base_inr(once + annual * paid, iv.cost_currency, iv.cost_year)
+    covered, covered_median = np.ones(n), 1.0
+    if iv.covered is not None:
+        covered = iv.covered.sample(_rng(seed, 3), n)
+        covered_median = iv.covered.median
+        if iv.cost_per_covered:
+            cost_inr = cost_inr * covered
     cost_usd = cost_inr * usd
     shares = yearly_shares(iv, tail)
     deaths_years = shares.sum()
@@ -279,11 +293,13 @@ def run(iv: Intervention, map_name: str = "aqli", curves: list[str] | None = Non
         curve_only = _steady(iv, batch, median_q, map_name, deaths)
         if first is None:
             first = joint
-        alone = {"pm25_change": change_only.yll * years, "curve_parameters": curve_only.yll * years}
+        alone = {"pm25_change": change_only.yll * years * covered,
+                 "curve_parameters": curve_only.yll * years * covered_median}
         var = {k: _var(v) for k, v in alone.items()}
         total = sum(var.values())
         per_curve[curve.name] = CurveRun(
-            curve=curve, life_years=joint.yll * years, deaths_postponed=joint.deaths * deaths_years,
+            curve=curve, life_years=joint.yll * years * covered,
+            deaths_postponed=joint.deaths * deaths_years * covered,
             e0_change_years=joint.e0_change, cost_inr=cost_inr, cost_usd=cost_usd, pm25_after=joint.pm25_after,
             p_success=iv.p_success, cost_share_only_on_success=iv.cost_share_only_on_success,
             spread={k: v / total if total > 0 else 0.0 for k, v in var.items()},

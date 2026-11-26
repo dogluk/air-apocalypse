@@ -202,11 +202,55 @@ class Dist:
     def median(self) -> float:
         return float(self.ppf(0.5))
 
+    def scaled(self, k: float) -> Dist:
+        """Every percentile (and the mode) times k; k = 0 is the fixed value 0."""
+        if k < 0:
+            raise ValueError(f"scaled: k must not be negative, got {k:g}")
+        if k == 0:
+            return Dist.fixed(0.0)
+        return Dist(self.kind, self.p5 * k, self.p95 * k,
+                    None if self.mode is None else self.mode * k)
+
+
+@dataclass(frozen=True)
+class Linear:
+    """sum of coef_i x dist_i, every dist drawn at the same quantile (as months are)."""
+    terms: tuple[tuple[float, Dist], ...]
+
+    def ppf(self, q) -> np.ndarray:
+        return sum(c * d.ppf(q) for c, d in self.terms)
+
+    def sample(self, rng: np.random.Generator, n: int) -> np.ndarray:
+        return self.ppf(rng.random(n))
+
+    @property
+    def median(self) -> float:
+        return float(self.ppf(0.5))
+
+
+@dataclass(frozen=True)
+class Product:
+    """Product of dists, every one drawn at the same quantile."""
+    factors: tuple[Dist, ...]
+
+    def ppf(self, q) -> np.ndarray:
+        out = self.factors[0].ppf(q)
+        for d in self.factors[1:]:
+            out = out * d.ppf(q)
+        return out
+
+    def sample(self, rng: np.random.Generator, n: int) -> np.ndarray:
+        return self.ppf(rng.random(n))
+
+    @property
+    def median(self) -> float:
+        return float(self.ppf(0.5))
+
 
 @dataclass(frozen=True)
 class MonthlyMean:
     """The annual change from twelve monthly ones, drawn together (see module docstring)."""
-    months: tuple[Dist, ...]
+    months: tuple[Dist | Linear | Product, ...]   # anything with ppf
 
     def ppf(self, q, weights: np.ndarray | None = None) -> np.ndarray:
         """Weighted sum of the months' quantiles; weights default to days / 365."""
@@ -241,6 +285,9 @@ class Intervention:
     from_level: float | None = None     # what-if: every unit starts here (pm25_override)
     notes: str = ""
     sources: Sources = Sources()        # [sources]: population, death_rates, deaths
+    covered: Dist | None = None         # share of each place's people the change reaches, 0-1
+    cost_per_covered: bool = False      # cost Dists are per covered unit: cost x the covered draw
+    scale: dict[str, float] | None = None   # Place.label -> multiplier of the annual change
 
     def as_change(self, value: float) -> Change:
         """The impact.Change for one value (e.g. one draw) of the annual change."""
@@ -248,10 +295,17 @@ class Intervention:
 
     def annual_change(self, place: Place, q: np.ndarray) -> np.ndarray:
         """The annual change at quantiles q for this place: monthly_pct weights months by the
-        place's shape; every other kind ignores the place."""
+        place's shape; every other kind ignores the place. When scale is set the result is
+        multiplied by scale[place.label] (a place missing from it is a KeyError)."""
         if self.monthly is not None and self.change_kind == "pct":
-            return self.change.ppf(q, MONTH_DAYS * months.shape(place).values / MONTH_DAYS.sum())
-        return self.change.ppf(q)
+            out = self.change.ppf(q, MONTH_DAYS * months.shape(place).values / MONTH_DAYS.sum())
+        else:
+            out = self.change.ppf(q)
+        if self.scale is not None:
+            if place.label not in self.scale:
+                raise KeyError(f"scale: no multiplier for {place.label!r}")
+            out = out * self.scale[place.label]
+        return out
 
 
 def _places(value) -> list[Place]:

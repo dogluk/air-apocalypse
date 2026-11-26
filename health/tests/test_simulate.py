@@ -469,3 +469,45 @@ def test_discount_rate_is_a_listed_constant():
     c = {x["name"]: x for x in provenance.constants()}
     d = c["Discount rate a year, for costs and life-years"]
     assert d["value"] == 0.03 and "WHO" in d["source"] and "http" in d["source"]
+
+
+# --- a change that reaches only part of the population ------------------------------------------
+
+def _ly(iv, **kw):
+    return simulate.run(iv, curves=["gemm_ncd_lri"], n=200, **kw).per_curve["gemm_ncd_lri"]
+
+
+def test_covered_share_extremes():
+    base = load("delhi_100_to_80")
+    plain = _ly(base)
+    full = _ly(dataclasses.replace(base, covered=Dist.fixed(1)))
+    assert np.allclose(full.life_years, plain.life_years)
+    none = _ly(dataclasses.replace(base, covered=Dist.fixed(0), cost_per_covered=True))
+    assert not none.life_years.any() and not none.cost_inr.any() and not none.deaths_postponed.any()
+
+
+def test_half_covered_is_half():
+    base = load("delhi_100_to_80")
+    plain, half = _ly(base), _ly(dataclasses.replace(base, covered=Dist.fixed(0.5)))
+    assert np.allclose(half.life_years, 0.5 * plain.life_years)
+    assert np.allclose(half.deaths_postponed, 0.5 * plain.deaths_postponed)
+    assert np.allclose(half.cost_inr, plain.cost_inr)          # cost not per covered unit
+    per = _ly(dataclasses.replace(base, covered=Dist.fixed(0.5), cost_per_covered=True))
+    assert np.allclose(per.cost_inr, 0.5 * plain.cost_inr)
+
+
+def test_covered_only_is_not_the_average():
+    # GEMM flattens at Delhi's level: 50% of people with a 40% cut is not everyone with 20%
+    base = dataclasses.replace(load("delhi_100_to_80"), change_kind="pct", change=Dist.fixed(-40),
+                               monthly=None)
+    half = _ly(dataclasses.replace(base, covered=Dist.fixed(0.5))).life_years
+    avg = _ly(dataclasses.replace(base, change=Dist.fixed(-20))).life_years
+    assert abs(half.mean() / avg.mean() - 1) > 0.01
+
+
+def test_covered_draws_use_their_own_stream_and_split_in_pm25_group():
+    base = load("delhi_100_to_80")
+    cov = Dist.parse({"dist": "uniform", "p5": 0.2, "p95": 0.8}, "covered")
+    r = _ly(dataclasses.replace(base, covered=cov))
+    assert np.array_equal(r.cost_inr, _ly(base).cost_inr)      # other streams untouched
+    assert r.spread["pm25_change"] > 0.9                       # change fixed, curve at its median

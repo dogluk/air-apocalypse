@@ -239,3 +239,49 @@ def test_report_names_the_shape():
     footer_text = report.run_footer(run)
     assert "shape" in footer_text and "CPCB 2023-25" in footer_text and "borrowed" in footer_text
     assert "as polluted as the annual mean" not in footer_text
+
+
+# --- composites, per-place scale ---------------------------------------------------------------
+
+from airhealth.intervention import Linear, Product  # noqa: E402
+
+
+def test_scaled_dist():
+    d = Dist.parse({"dist": "lognormal", "p5": 2, "p95": 8}, "x").scaled(3)
+    assert (d.p5, d.p95) == (6, 24)
+    t = Dist.parse({"dist": "triangular", "p5": 1, "p95": 5, "mode": 2}, "x").scaled(2)
+    assert (t.p5, t.p95, t.mode) == (2, 10, 4)
+    assert Dist.parse({"dist": "normal", "p5": 1, "p95": 2}, "x").scaled(0) == Dist.fixed(0)
+
+
+def test_linear_and_product_draw_together():
+    a, b = Dist.parse({"dist": "uniform", "p5": 1, "p95": 2}, "a"), Dist.fixed(4)
+    q = np.array([0.05, 0.5, 0.95])
+    lin, prod = Linear(((-2.0, a), (1.0, b))), Product((a, b))
+    assert np.allclose(lin.ppf(q), -2 * a.ppf(q) + 4)
+    assert np.allclose(prod.ppf(q), 4 * a.ppf(q))
+    assert lin.median == pytest.approx(-2 * a.median + 4)
+    assert prod.median == pytest.approx(4 * a.median)
+    assert np.allclose(prod.sample(np.random.default_rng(1), 5),
+                       prod.ppf(np.random.default_rng(1).random(5)))
+
+
+def test_monthly_mean_accepts_composites():
+    a = Dist.parse({"dist": "uniform", "p5": 1, "p95": 2}, "a")
+    m = intervention.MonthlyMean(tuple(Product((a, Dist.fixed(2))) for _ in range(12)))
+    assert m.median == pytest.approx(2 * a.median)
+
+
+def test_scale_multiplies_per_place():
+    iv = replace(load(INTERVENTIONS / "punjab_haryana_10pct.toml"), change_kind="delta",
+                 change=Dist.fixed(1.0), monthly=None,
+                 scale={"Punjab (state)": -5.0, "Haryana (state)": -2.0})
+    q = np.array([0.5])
+    assert iv.annual_change(iv.places[0], q)[0] == -5.0
+    assert iv.annual_change(iv.places[1], q)[0] == -2.0
+
+
+def test_scale_missing_place_is_a_key_error_naming_it():
+    iv = replace(load(INTERVENTIONS / "punjab_haryana_10pct.toml"), scale={"Punjab (state)": 1.0})
+    with pytest.raises(KeyError, match="Haryana"):
+        iv.annual_change(iv.places[1], np.array([0.5]))
