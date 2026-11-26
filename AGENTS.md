@@ -78,8 +78,16 @@ Not solid, and you should say so when you use a result:
   calls at the end of [`docs/STATUS.md`](docs/STATUS.md).
 - **Every curve is stretched past its evidence.** No study has followed people who breathe
   air like Delhi's for years.
-- **The ranking of measures by cost does not exist yet.** Design:
-  [`docs/specs/2026-11-12-intervention-ranking-design.md`](docs/specs/2026-11-12-intervention-ranking-design.md).
+- **The measures are scored, but not yet ranked.** A library of 21 measures (13 for Bengaluru,
+  4 regional, 4 elsewhere) sits in `health/interventions/library/`, every number sourced or
+  flagged. `airhealth measures` lists them; `airhealth score CITY [--study S]` and
+  `airhealth score --region ID` score them on every curve, in life-years per crore of 2025
+  rupees. Read the flags: `partial_cost` (the cost leaves part out), `upper_bound_all_origins`,
+  `receptor_fallback` (the regional tables are stand-ins), `long_shot`, `placeholder`,
+  `odds_judgement`. Known gaps: the regional source-receptor tables are fallbacks, and exposure
+  measures for a sub-group (school purifiers, masks for workers) use everyone's death rates. The
+  ranking itself (`airhealth rank`) is the next plan. See "Measures" in `health/README.md` and the
+  design: [`docs/specs/2026-11-12-intervention-ranking-design.md`](docs/specs/2026-11-12-intervention-ranking-design.md).
 
 ## Open work, roughly smallest first
 
@@ -106,8 +114,10 @@ check.
 4. **Reproduce GBD's India count.** Download GBD 2023's household air pollution estimates
    (GHDx record 594794; no login needed for that file), apply GBD's split between outdoor
    air and cooking smoke, and see how much of the gap above it explains.
-5. **The measure library and ranking** (the large one). "Next, in order" in `docs/STATUS.md`.
-   Talk to the maintainer before starting.
+5. **The ranking** (the large one): `airhealth rank` over the library, all-India and per city.
+   "Next, in order" in `docs/STATUS.md`. Talk to the maintainer before starting. A smaller step
+   is one more library measure from `health/interventions/library/_template.toml`, or closing
+   one of its leads in `health/data/MISSING.md`.
 
 Other gaps nobody has worked on are in `lit/gaps.md` (G2 to G7).
 

@@ -405,6 +405,90 @@ share of PM2.5 by x%); no chemistry (air is not additive); health only (no clima
 time benefits, nothing valued in money); life-years and costs counted over the measure's years
 plus the lag tail, discounted at 3% a year; cost is the funder's rupees in 2025 prices.
 
+### What the library holds
+
+Twenty-one measures. Thirteen are Bengaluru's (the city page's chapter 4 scores them), four are
+regional, and four are written for the one city where their evidence sits. Odds are the
+probability it works at all, each a judgement with its reason in the file. Evidence: O every
+number read at its source, S some seen only in a press account or summary. "Partial" means the
+cost leaves something out (flag `partial_cost`).
+
+| Measure | Kind | Scope | Where | Odds | | Cost | Evidence |
+|---|---|---|---|---|---|---|---|
+| `road_vacuum_sweeping` | air | city | Bengaluru | 0.5 | | | O |
+| `construction_dust_controls` | air | city | Bengaluru | 0.4 | | partial | O |
+| `road_paving` | air | city | Bengaluru | 0.6 | | | O |
+| `waste_collection_burning_ban` | air | city | Bengaluru | 0.35 | | partial | O |
+| `electric_buses` | air | city | Bengaluru | 0.75 | | | O |
+| `old_vehicle_retirement` | air | city | Bengaluru | 0.3 | | | O |
+| `electric_two_three_wheelers` | air | city | Bengaluru | 0.6 | | | O |
+| `dg_set_replacement` | air | city | Bengaluru | 0.4 | | | O |
+| `lpg_refill_subsidy` | air | city | Bengaluru | 0.5 | | | O |
+| `home_purifiers` | exposure | city | Bengaluru | 0.3 | | partial | O |
+| `school_purifiers` | exposure | city | Bengaluru | 0.35 | | partial | O |
+| `n95_winter` | exposure | city | Bengaluru | 0.2 | | partial | O |
+| `smog_tower` | exposure | city | Bengaluru | 0.1 | long shot | partial | O, S |
+| `stubble_pes_upfront` | air | region | stubble table | 0.5 | | partial | O |
+| `happy_seeder_subsidy` | air | region | stubble table | 0.7 | | partial | O |
+| `punjab_out_of_rice` | air | region | stubble table | 0.3 | | | O |
+| `fgd_scrubbers` | air | region | Cropper power table | 0.6 | | | O |
+| `emissions_market` | air | city | Surat | 0.7 | | partial | O |
+| `zigzag_kilns` | air | city | Patna | 0.5 | | | O |
+| `industrial_fuel_switch` | air | city | Amritsar | 0.5 | | partial | O |
+| `winter_cloud_seeding` | exposure | city | Delhi | 0.02 | long shot | | S |
+
+The last four: the Surat particulate emissions market scaled to all 906 solid-fuel plants, at the
+20-30% cut its randomised trial found (Greenstone et al. 2025); converting Patna's 300 brick kilns
+to zig-zag firing, which pays for itself (the owner earns the conversion back in a season or
+two), so it is listed apart, not ranked; Amritsar's industry onto piped gas (UNDP 2025's cost);
+and winter cloud seeding over Delhi, a long shot scored on what its promoters claim, at odds of 2%
+because the physics is against it (`../bets/README.md`) and the 2025 trials gave no rain.
+
+To run them:
+
+```
+airhealth measures                              # the list above, from the files
+airhealth score Bengaluru                       # every measure that applies to Bengaluru
+airhealth score Bengaluru --study cstep_bengaluru2022_cmb   # the same on another study
+airhealth score Surat --measure emissions_market
+airhealth score --region fgd_scrubbers          # a regional measure over every district it reaches
+```
+
+**Flags a reader must not skip.** They are on every result they apply to, in the text and in
+`--json`:
+
+- `partial_cost` (PC): the source prices only part of the measure (often the government's
+  enforcement, not what firms or households spend). A cheap-looking ratio may be cheap only
+  because of what is left out; the sentence saying what is printed under the table.
+- `upper_bound_all_origins` (UB): the study's shares count air from every origin, so a city
+  measure is credited with cutting air that partly blows in from outside. Read it as a ceiling.
+- `receptor_fallback` (RF): the regional measure's source-receptor table is a stand-in for a
+  published result that could not be used. The stubble table is about 14 times smaller
+  India-wide than Lan et al. 2022's estimate, so the stubble measures are likely understated.
+- `long_shot` (LS): a large effect if it works, low odds that it does.
+- `placeholder` (PH): a number is a stand-in, not an estimate. No library measure has one now;
+  the flag stays for drafts.
+- `odds_judgement` (OJ): the odds are a judgement, not a measurement. Every measure carries it.
+
+**Adding a measure.** Copy `interventions/library/_template.toml` to `<id>.toml`; every field is
+explained in it. Every number needs an `[[evidence]]` entry with its source, link, locator (table,
+page) and key, or a place in `placeholders`; `measures.check_library()` and `tests/test_library.py`
+refuse anything else. Write the lead in `data/MISSING.md` when a source cannot be reached. Then add
+the id to a list in `tests/test_library.py` and run `airhealth score CITY --measure ID`.
+
+**Known gaps.**
+
+- **The regional tables are fallbacks.** No district-level source-receptor result for Punjab's
+  fires could be used, so the stubble measures run on McDuffie et al.'s all-origin crop-burning
+  share (flag RF; it even gives Bengaluru a small change), and Cropper's power-plant table is by
+  state, not district. `data/MISSING.md` lists what would replace them.
+- **Exposure measures for a sub-group use everyone's death rates.** School purifiers reach
+  children, N95s working adults, but the covered share is given the whole city's death rates by
+  age, so these are overstated. Plan D fixes this.
+- **This is a library, not a ranking.** `score` prints measures in library order. The ranking
+  (`airhealth rank`, all-India and per city, splitting a regional measure's benefit and cost
+  across city tables, curve flips) is the next plan (D).
+
 ## Writing an intervention file
 
 Copy `interventions/_template.toml`; every field is explained there. A mistake is reported
@@ -710,7 +794,9 @@ The two IHME-tier cases skip where the IHME files are absent.
   uncertainty and the cost. They do not cover the choice of curve or map (shown as separate
   results instead), the death rates, the death count or the population. AQLI has no
   published interval, and its row shows none.
-- **Costs are converted at one annual exchange rate and not adjusted for inflation.**
+- **Costs are put in 2025 rupees with India's GDP deflator, and dollars converted at one
+  annual exchange rate for their price year.** Where a source does not state its price year,
+  the measure file says which year was taken.
 - **The IHME-tier curves (gbd2019, gbd2023, gemm_5cod) count IHME's deaths, not the SRS's.**
   Their deaths are the GBD 2023 round's rates by cause, state and age times this tool's
   population, unscaled; their share of deaths divides by the tool's (SRS-scaled) all-cause
