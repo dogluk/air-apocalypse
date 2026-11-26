@@ -1,9 +1,9 @@
-# Bengaluru: replacing every older (pre-BS-VI) truck and bus with a BS-VI one.
-name = "Retiring Bengaluru's older trucks and buses"
+# Every city: replacing every older (pre-BS-VI) truck and bus with a BS-VI one.
+name = "Retiring older trucks and buses"
 kind = "air"
 scope = "city"
-who_reaches = "everyone in Bengaluru, through the outdoor air"
-cities = ["Bengaluru"]
+who_reaches = "everyone in the city, through the outdoor air"
+cities = "all"
 
 start_year = 2027
 ramp_years = 3
@@ -11,7 +11,7 @@ duration_years = 10
 lag = "epa20"
 
 p_success = 0.3
-p_success_basis = "judgement: the national scrapping policy has had little uptake, and many trucks in Bengaluru are registered elsewhere and pass through, beyond the city's reach"
+p_success_basis = "judgement: the national scrapping policy has had little uptake, and many trucks in a city are registered elsewhere and pass through, beyond the city's reach"
 
 placeholders = []
 
@@ -31,6 +31,15 @@ applied per person in Bengaluru. That is a society-wide cost, not only a funder'
 people assumes Bengaluru has as many old heavy vehicles per head as NCR. The cheaper cost goes with
 the bigger cut (2022) and the dearer with the smaller (2030), but the two are drawn independently
 here, which widens the range of the ratio.
+
+Widened to every city (plan D, 2026-11-27): written first for Bengaluru, but neither number is
+Bengaluru's. The cut is TERI's for Delhi-NCR, a fraction of transport's share, and the cost is
+TERI's NCR net cost per person; Bengaluru's inventory was used only to judge the cut plausible.
+So every city gets the same numbers. Outside Delhi the evidence is borrowed from Delhi-NCR; in
+Delhi it is the city's own (NCR is larger than Delhi). Scaling the cost by people assumes each
+city has as many old heavy vehicles per head as NCR; cities with fewer get too high a cost, cities
+where through-traffic is heavy too low a one. No source gives a threshold share of transport
+below which the measure should not be scored, so there is no min_share_pct.
 """
 
 [[targets]]
