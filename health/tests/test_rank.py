@@ -1,8 +1,10 @@
 """rank.py: ordering one place's scored measures per curve, and their spread across curves."""
 import json
 from pathlib import Path
+from dataclasses import replace
 from types import SimpleNamespace
 
+import numpy as np
 import pytest
 
 from airhealth import rank, score
@@ -169,3 +171,134 @@ def test_to_json_is_json_safe():
     assert {"measure", "flags", "rank", "rank_comparable", "comparable", "curve_gap"} <= set(row)
     assert all(isinstance(f, str) for f in row["flags"])
     assert out["parts"] == {} and out["context"]["map"] == "acag_total"
+
+
+# --- all India: the cities added up, regional measures over their whole reach ---------------
+
+CITIES = ["Bengaluru", "Delhi", "Mumbai"]     # Delhi has no APnA study: its air measures are not scored
+
+
+@pytest.fixture(scope="module")
+def india_three():
+    return rank.india(cities=CITIES, folder=FIXTURES, n=100, curves=[CURVE])
+
+
+def _by(table):
+    return {x.measure: x for x in table.rows}
+
+
+def test_india_sums_only_scored_cities(india_three):
+    r = india_three
+    assert r.place == rank.INDIA
+    for mid in ("air_dust", "air_city", "exposure_city"):
+        row = _by(r.tables[CURVE])[mid]
+        parts = [_by(r.parts[c].tables[CURVE])[mid] for c in CITIES]
+        scored = [p for p in parts if p.status == "scored"]
+        assert scored, mid
+        assert row.mean_life_years == pytest.approx(sum(p.mean_life_years for p in scored))
+        assert row.mean_cost_inr == pytest.approx(sum(p.mean_cost_inr for p in scored))
+        assert row.reach.startswith(f"scored in {len(scored)} of 3 cities")
+        assert [c["city"] for c in row.trail["cities"]] == CITIES
+
+
+def test_india_life_years_are_summed_draw_by_draw(india_three):
+    row = _by(india_three.tables[CURVE])["air_dust"]
+    sc = {c: score.city(c, ["air_dust"], folder=FIXTURES, n=100, curves=[CURVE])[0] for c in CITIES}
+    draws = sum(sc[c].run.per_curve[CURVE].life_years for c in CITIES if sc[c].status == "scored")
+    assert row.life_years["median"] == pytest.approx(float(np.median(draws)))
+    assert row.life_years["p95"] == pytest.approx(float(np.percentile(draws, 95)))
+
+
+def test_city_only_measure_reach_names_the_rest(india_three):
+    row = _by(india_three.tables[CURVE])["air_city"]        # cities = ["Delhi", "Mumbai"]
+    assert row.reach == "scored in 1 of 3 cities; not applicable in 1; not scored in 1"
+    assert row.status == "scored" and row.rank is not None
+    mumbai = _by(india_three.parts["Mumbai"].tables[CURVE])["air_city"]
+    assert row.mean_life_years == pytest.approx(mumbai.mean_life_years)
+    assert row.expected_ly_per_crore == pytest.approx(mumbai.expected_ly_per_crore)
+
+
+def test_india_parts_equal_city_rankings(india_three):
+    c = rank.city("Delhi", folder=FIXTURES, n=100, curves=[CURVE])
+    assert rank.to_json(india_three.parts["Delhi"])["tables"] == rank.to_json(c)["tables"]
+
+
+def test_expected_uses_the_measure_odds(india_three):
+    checked = 0
+    for row in india_three.tables[CURVE].rows:
+        if row.status == "scored" and row.scope == "city" and not row.curve_gap:
+            assert row.expected_life_years == pytest.approx(row.p_success * row.mean_life_years)
+            s, p = row.cost_share_only_on_success, row.p_success
+            assert row.expected_ly_per_crore == pytest.approx(
+                row.expected_life_years * 1e7 / (row.mean_cost_inr * (1 - s + s * p)))
+            checked += 1
+    assert checked
+
+
+def test_unscored_everywhere_keeps_the_first_city_reason():
+    a = _fake("m", scope="city", status="not_scored", reason="no study here", flags=())
+    b = _fake("m", scope="city", status="not_scored", reason="no study there", flags=())
+    r = rank.india_from_scores({"A": [a], "B": [b]}, {}, {})
+    row = r.tables[CURVE].rows[0]
+    assert row.status == "not_scored" and row.rank is None and row.mean_life_years is None
+    assert row.reason == "not scored in any city: no study here"
+    assert row.reach == "scored in 0 of 2 cities; not scored in 2"
+
+
+def _draws(ly, cost):
+    cr = SimpleNamespace(life_years=np.full(10, ly), cost_inr=np.full(10, cost),
+                         cost_share_only_on_success=0.0,
+                         curve=SimpleNamespace(min_age=0, label="curve"))
+    return SimpleNamespace(per_curve={CURVE: cr})
+
+
+def test_pays_for_itself_in_some_is_ranked_on_the_rest():
+    a = _fake("m", scope="city", ratio=2.0, flags=("partial_cost",), run=_draws(100.0, 5e7))
+    b = _fake("m", scope="city", status="pays_for_itself", reason="saves", flags=(),
+              run=_draws(100.0, 5e7))
+    row = rank.india_from_scores({"A": [a], "B": [b]}, {}, {}).tables[CURVE].rows[0]
+    assert row.status == "scored" and row.rank == 1 and row.mean_life_years == 100.0
+    assert "pays_for_itself_in_some" in row.flags and "partial_cost" in row.flags
+    assert row.comparable is False
+    assert row.reach == "scored in 1 of 2 cities; pays for itself in 1"
+
+
+def test_pays_for_itself_everywhere_is_listed_apart():
+    a = _fake("m", scope="city", status="pays_for_itself", reason="saves", flags=(),
+              run=_draws(100.0, 5e7))
+    b = _fake("m", scope="city", status="not_applicable", reason="not here", flags=())
+    row = rank.india_from_scores({"A": [a], "B": [b]}, {}, {}).tables[CURVE].rows[0]
+    assert row.status == "pays_for_itself" and row.rank is None
+    assert row.mean_life_years == 100.0 and row.expected_ly_per_crore is None
+    assert row.reach == "scored in 0 of 2 cities; not applicable in 1; pays for itself in 1"
+
+
+def test_regional_row_is_its_whole_reach(monkeypatch):
+    reach = _fake("air_region", ratio=7.0, ly=1000.0, flags=())
+    reach = replace(reach, run=SimpleNamespace(
+        intervention=SimpleNamespace(places=["d1", "d2"]),
+        per_curve={CURVE: SimpleNamespace(cost_share_only_on_success=0.0,
+                                          curve=SimpleNamespace(min_age=0, label="x"))}))
+    calls = []
+    monkeypatch.setattr(score, "region", lambda m, **k: calls.append(m) or reach)
+    r = rank.india(cities=CITIES, folder=FIXTURES, n=50, curves=[CURVE])
+    assert calls == ["air_region"]                        # once, not once per city
+    row = _by(r.tables[CURVE])["air_region"]
+    assert row.reach == "region: 2 districts" and "regional" in row.flags
+    assert row.expected_ly_per_crore == 7.0 and row.mean_life_years == 1000.0
+    assert row.rank is not None and row.reason == ""
+    for c in CITIES:                                         # the same reach in every city table
+        part = _by(r.parts[c].tables[CURVE])["air_region"]
+        assert part.status != "scored" or part.expected_ly_per_crore == 7.0
+
+
+def test_progress_names_each_city():
+    seen = []
+    rank.india(cities=CITIES, folder=FIXTURES, n=50, curves=[CURVE], progress=seen.append)
+    assert seen == CITIES
+
+
+def test_india_to_json_is_json_safe(india_three):
+    out = rank.to_json(india_three)
+    json.dumps(out, allow_nan=False)
+    assert set(out["parts"]) == set(CITIES) and out["context"]["cities"] == CITIES
