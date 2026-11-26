@@ -777,3 +777,27 @@ method = "transcribed"
 notes = """
 Both values were read in the documents on 2026-11-27, not typed from memory. The NAAQS copy is hosted by a mining company's environment page (SCCL); the notification text, number and date on it match the CPCB notification. If a CPCB-hosted copy is found, swap the url.
 """
+
+["city_households.csv"]
+source = "Office of the Registrar General & Census Commissioner, India. Census of India 2011: Primary Census Abstract - Urban Agglomeration (PCA11-UA-00) and Primary Census Abstract at town, village and ward level (PCA TV), district files."
+url = "https://censusindia.gov.in/nada/index.php/catalog/45261/download/48987/PCA11-UA-0000.xlsx"
+catalog = "https://censusindia.gov.in/nada/index.php/catalog/45261"
+sha256 = "c38d96e0d1bd027ab141cd13a14d45f6410e72d90fbff8880941c62afce04c72"
+locator = "PCA-UA workbook (sheet 'Data'): rows with Level 0 (the urban agglomeration's own row, not its towns), column No_HH (number of households), matched by 'UA Name' to each census_name entry printed 'U.A.' in cities.csv; TOT_P (persons) of the same row equals the cities.csv population. Nine entries that cities.csv takes as one town (no UA in table A-04) come from the PCA TV district workbooks, rows Level 'TOWN' with the town code, column No_HH, summed where the town is printed in parts: Jaipur (M Corp.) 800522, 3 parts, Rajasthan Jaipur, catalog 6301; Agartala (M Cl) 801523, West Tripura, 6480; Hubli-Dharwad (M Corp.) 803083, Dharwad, 6753; Kota (M Corp.) 800609, Kota, 6318; Cuddalore (M) 803650, Cuddalore, 6808; Tenali (M) 802982, Guntur, 6739; Greater Visakhapatnam (GVMC) 802947, 7 parts, Visakhapatnam, 6735; Ludhiana (M Corp.) 800196, Ludhiana, 6232; Ambala (M Cl) 800365, Ambala, 6261. Catalog pages and file names are in the script's TOWN_ENTRIES."
+retrieved = "2026-11-27"
+licence = "Government of India publication; no licence stated on the catalog pages. Factual statistics reproduced with attribution."
+method = "derived"
+script = "scripts/build_households.py"
+notes = """
+Columns: city, households, population, census_name. census_name and population are copied from cities.csv; households is the sum of No_HH
+over the ';'-separated census_name entries. The script stops unless the persons it finds in the Census files equal cities.csv's population
+for every one of the 50 cities, so households and population describe the same area. Census 2011 only: no later household count is
+used (the 2011 count is a ratio source for persons per household, not a current number of homes). Persons per household ranges from
+3.67 (Coimbatore) to 6.50 (Gaya).
+PCA TV district workbook sha256 (file name):
+c21e3798aa64dd861106a45423147f3406caf467983290fb75e7cccb0d6266f3 DDW_PCA0812 (Jaipur), 3b766760cca136f8ac5af28bf69e41cc861fba9dd7dae026002eff1b33f21bfd DDW_PCA0829 (Kota),
+beaef684d144a096700b4821e31de4bca26ed14ab084c74659370e2d3fc4858e DDW_PCA1601 (West Tripura), 176b1284e08ff7cb59793ba68d0405ddf47f7f768c1ec1a3c506d4ad385dad0b DDW_PCA2908 (Dharwad),
+8a490aaf8148563f4ec8a9549ef84e86c0ec16ecb93139fd64f7061c4486b00e DDW_PCA3316 (Cuddalore), 0f8796a5ae061b69a29183fb0cca65bf071c361246fbd5e17476321ad489b60d DDW_PCA2817 (Guntur),
+bf8f3a824db52c21bab6a511871a937106af0c660351eab16fb8794668aa0585 DDW_PCA2813 (Visakhapatnam), 894e69f6a4f01b5f92b6d9605deaa94f513469f1065c9313a6cd684a8a394249 DDW_PCA0307 (Ludhiana),
+01f76fee426e400add44ab373112a56342c888af6eaa51142262f215ea5fa0d6 DDW_PCA0602 (Ambala).
+"""

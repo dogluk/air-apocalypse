@@ -457,3 +457,15 @@ def check_library(folder: Path | str = LIBRARY) -> list[str]:
         except Invalid as e:
             problems.append(f"{p.name}: {e}")
     return problems
+
+
+def persons_per_household(city: str) -> float:
+    """People per household in the city, Census 2011: its population divided by its number of
+    households (data/city_households.csv). The household cost driver uses it to turn a cost per
+    household into a cost per person. KeyError for a city not in data/cities.csv."""
+    import pandas as pd
+
+    h = pd.read_csv(paths.DATA / "city_households.csv").set_index("city")
+    if city not in h.index:
+        raise KeyError(f"{city!r} is not one of the cities in data/city_households.csv")
+    return float(h.loc[city, "population"] / h.loc[city, "households"])
