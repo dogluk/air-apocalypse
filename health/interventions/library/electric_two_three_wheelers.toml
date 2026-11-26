@@ -31,6 +31,8 @@ The cost is the PM E-DRIVE subsidy per vehicle (Rs 2,679 crore for about 28 lakh
 about Rs 9,585 each; half that from April 2025, when the rate per kWh halved), times a quarter of
 Bengaluru's 2016 two- and three-wheeler registrations. Registrations include vehicles no longer
 on the road, so the count is high. Owners save on fuel; that is not counted.
+
+city-specific: the cut uses two- and three-wheelers' share of Bengaluru's transport PM (CSTEP, APnA Bengaluru) and the vehicle count is Bengaluru's 2016 registrations; the subsidy per vehicle (PM E-DRIVE) would transfer.
 """
 
 [[targets]]
