@@ -78,15 +78,17 @@ Not solid, and you should say so when you use a result:
   calls at the end of [`docs/STATUS.md`](docs/STATUS.md).
 - **Every curve is stretched past its evidence.** No study has followed people who breathe
   air like Delhi's for years.
-- **The measures are scored, but not yet ranked.** A library of 21 measures (13 for Bengaluru,
+- **The measures are scored and ranked.** `airhealth rank [CITY]` ranks them (all India, or one city) by
+  expected life-years per crore, one table per curve; most measures are city-specific and only
+  Bengaluru has them until the library grows (plan D Task 5), and ranks on different curves must be read
+  side by side (the grid prints first), never averaged. A library of 21 measures (13 for Bengaluru,
   4 regional, 4 elsewhere) sits in `health/interventions/library/`, every number sourced or
   flagged. `airhealth measures` lists them; `airhealth score CITY [--study S]` and
   `airhealth score --region ID` score them on every curve, in life-years per crore of 2025
   rupees. Read the flags: `partial_cost` (the cost leaves part out), `upper_bound_all_origins`,
   `receptor_fallback` (the regional tables are stand-ins), `long_shot`, `placeholder`,
   `odds_judgement`. Known gaps: the regional source-receptor tables are fallbacks, and exposure
-  measures for a sub-group (school purifiers, masks for workers) use everyone's death rates. The
-  ranking itself (`airhealth rank`) is the next plan. See "Measures" in `health/README.md` and the
+  measures for a sub-group (school purifiers, masks for workers) use everyone's death rates. See "Measures" in `health/README.md` and the
   design: [`docs/specs/2026-11-12-intervention-ranking-design.md`](docs/specs/2026-11-12-intervention-ranking-design.md).
 
 ## Open work, roughly smallest first

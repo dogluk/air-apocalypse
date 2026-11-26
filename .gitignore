@@ -15,3 +15,4 @@ health/data_local
 # Working notes kept off the public repo (status, build plans).
 docs/private/
 *.egg-info/
+health/out/

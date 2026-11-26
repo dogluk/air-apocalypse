@@ -708,3 +708,193 @@ def score_table(scores: list, context: dict) -> str:
                  if codes else "Flags: none.")
     lines.append(f"Evidence keys: {EVIDENCE_LEGEND}.")
     return "\n".join(lines)
+
+
+# ---- airhealth rank: the measure library ranked by life-years per crore ----
+
+CSV_COLUMNS = ("place", "curve", "rank", "rank_if_works", "measure", "name", "status", "reason", "kind",
+               "scope", "reach", "who_reaches", "life_years_median", "life_years_p5", "life_years_p95",
+               "expected_life_years", "cost_inr_mean", "society_net_inr", "ly_per_crore_if_works",
+               "expected_ly_per_crore", "p_success", "p_success_basis", "flags", "curves_best_rank",
+               "curves_worst_rank", "curves_disagree", "map", "study", "share_basis", "cuts", "cost_basis",
+               "evidence")
+DASH = "—"        # a rank a measure does not have on a curve
+
+
+def _months_text(months) -> str:
+    months = sorted(int(m) for m in months)
+    spans = []
+    for m in months:
+        if spans and m == spans[-1][1] + 1:
+            spans[-1][1] = m
+        else:
+            spans.append([m, m])
+    return ",".join(f"{a}-{b}" if a != b else str(a) for a, b in spans)
+
+
+def _share_basis(trail: dict) -> str:
+    """The trail's {month: study/season} collapsed to text: 'apna_2015/annual: months 1-12'."""
+    basis = (trail or {}).get("share_basis") or {}
+    by: dict[str, list] = {}
+    for month, what in basis.items():
+        by.setdefault(str(what), []).append(month)
+    return "; ".join(f"{what}: months {_months_text(ms)}" for what, ms in by.items())
+
+
+def _cuts_text(trail: dict) -> str:
+    return "; ".join(f"{c['cause']} months {_months_text(c['months'])} {c['p5']:g}-{c['p95']:g}"
+                     for c in (trail or {}).get("cuts") or [])
+
+
+def _cost_basis(trail: dict) -> str:
+    c = (trail or {}).get("cost")
+    if not c:
+        return ""
+    return (f"driver {c.get('driver')}; count {c.get('units_count')}; "
+            f"2025-rupee basis: {c.get('cost_in_2025_rupees_basis')}")
+
+
+def _evidence_text(trail: dict) -> str:
+    return " ;; ".join(" | ".join(str(e.get(k, "")) for k in ("source", "locator", "url", "key"))
+                       for e in (trail or {}).get("evidence") or [])
+
+
+def rank_csv_rows(r) -> list[dict]:
+    """One row per curve x measure, with the sources behind every number on each row."""
+    out = []
+    for curve, t in r.tables.items():
+        for x in t.rows:
+            sp = r.spread.get(x.measure, {})
+            ly = x.life_years or {}
+            out.append({
+                "place": r.place, "curve": curve, "rank": x.rank, "rank_if_works": x.rank_if_works,
+                "measure": x.measure, "name": x.name, "status": x.status,
+                "reason": x.reason or x.curve_gap,
+                "kind": x.kind, "scope": x.scope, "reach": x.reach, "who_reaches": x.who_reaches,
+                "life_years_median": ly.get("median"), "life_years_p5": ly.get("p5"),
+                "life_years_p95": ly.get("p95"), "expected_life_years": x.expected_life_years,
+                "cost_inr_mean": x.mean_cost_inr, "society_net_inr": x.society_net_inr,
+                "ly_per_crore_if_works": x.ly_per_crore_if_works,
+                "expected_ly_per_crore": x.expected_ly_per_crore, "p_success": x.p_success,
+                "p_success_basis": x.p_success_basis, "flags": " ".join(x.flags),
+                "curves_best_rank": sp.get("best"), "curves_worst_rank": sp.get("worst"),
+                "curves_disagree": sp.get("disagree"), "map": r.context.get("map"),
+                "study": x.study or r.context.get("study"), "share_basis": _share_basis(x.trail),
+                "cuts": _cuts_text(x.trail), "cost_basis": _cost_basis(x.trail),
+                "evidence": _evidence_text(x.trail)})
+    return out
+
+
+def _ratio(x) -> str:
+    if x.expected_ly_per_crore is None:
+        return DASH
+    marks = [FLAG_CODES[f] for f in ("partial_cost", "upper_bound_all_origins") if f in x.flags]
+    return _sig(x.expected_ly_per_crore) + (" " + "/".join(marks) if marks else "")
+
+
+def _flag_text(flags) -> str:
+    return " ".join(dict.fromkeys(FLAG_CODES.get(f, f) for f in flags)) or "-"
+
+
+def _rank_grid(r) -> list[str]:
+    curves_ = list(r.tables)
+    lines = ["Rank on each curve (1 = most life-years per crore; " + DASH + " = not ranked on that "
+             "curve; read the curves side by side, no one of them is the answer)"]
+    head = ("measure", "reach", *curves_, "best-worst", "comparable", "curves disagree")
+    rows = []
+    ranked = [(m, d) for m, d in r.spread.items() if d["best"] is not None]
+    ranked.sort(key=lambda md: (md[1]["best"], md[1]["worst"], md[0]))
+    for m, d in ranked:
+        ranks = [DASH if d["ranks"].get(c) is None else str(d["ranks"][c]) for c in curves_]
+        row = next(x for t in r.tables.values() for x in t.rows if x.measure == m)
+        if not d["comparable"]:
+            comp = "PC"
+        elif d["comparable_best"] == d["comparable_worst"]:
+            comp = str(d["comparable_best"])
+        else:
+            comp = f"{d['comparable_best']}-{d['comparable_worst']}"
+        rows.append((m, row.reach, *ranks, f"{d['best']}-{d['worst']}", comp,
+                     "curves disagree" if d["disagree"] else ""))
+    if not rows:
+        return lines + ["  No measure is ranked on any curve."]
+    return lines + _columns(head, rows)
+
+
+def _curve_table(rows, show_reach: bool) -> list[str]:
+    head = ["rank", "measure", *(["reach"] if show_reach else []), "expected life-years per crore",
+            "per crore if it works", "rank if works", "life-years if it works (median, p5-p95)",
+            "cost, ₹ crore (mean)", "society's net cost, ₹ crore", "odds", "comparable rank", "flags"]
+    body = []
+    for x in rows:
+        body.append((str(x.rank), x.measure, *([x.reach] if show_reach else []), _ratio(x),
+                     DASH if x.ly_per_crore_if_works is None else _sig(x.ly_per_crore_if_works),
+                     DASH if x.rank_if_works is None else str(x.rank_if_works),
+                     _lyr(x.life_years) if x.life_years else DASH,
+                     DASH if x.mean_cost_inr is None else _sig(x.mean_cost_inr / 1e7),
+                     DASH if x.society_net_inr is None else _sig(x.society_net_inr / 1e7),
+                     f"{100 * x.p_success:g}%",
+                     "PC" if x.rank_comparable is None else str(x.rank_comparable),
+                     _flag_text(x.flags)))
+    return _columns(tuple(head), body)
+
+
+def rank_table(r) -> str:
+    """The ranking as text: the grid of ranks on every curve first, then one table per curve,
+    the measures listed apart or not ranked (with why), and a footer of settings, assumptions
+    and legends."""
+    from .rank import INDIA, RANK_ASSUMPTIONS
+    from .score import ASSUMPTIONS
+    india = r.place == INDIA
+    lines = [f"Ranking of measures by life-years per crore: {r.place}. Each measure is ranked on its "
+             "own; benefits do not add up. 1 crore = 10 million rupees, 2025 rupees."]
+    lines += ["", *_rank_grid(r)]
+    legend_gaps = []
+    for curve, t in r.tables.items():
+        ranked = [x for x in t.rows if x.rank is not None]
+        lines += ["", f"Curve {curve}: {t.curve_label}"]
+        if not ranked:
+            lines.append("  No measure is ranked on this curve.")
+        elif india:
+            lines += _curve_table(ranked, True)
+        else:
+            city_rows = [x for x in ranked if x.scope != "region"]
+            region_rows = [x for x in ranked if x.scope == "region"]
+            lines += _curve_table(city_rows, False) if city_rows else ["  No city measure is ranked."]
+            if region_rows:
+                lines += ["", "Regional measures. Their ratio is over their whole reach, and most of their "
+                          "benefit falls outside this city; their life-years here are only this city's part.",
+                          *_curve_table(region_rows, True)]
+        legend_gaps += [(curve, x) for x in t.rows if x.curve_gap]
+
+    first = next(iter(r.tables.values()), None)
+    rest = [x for x in (first.rows if first else ()) if x.rank is None and not x.curve_gap]
+    for status, title in (("pays_for_itself", "Pays for itself (no rank)"),
+                          ("no_cost", "No cost given (no rank)")):
+        group = [x for x in rest if x.status == status]
+        if group:
+            lines += ["", title + ":"]
+            lines += [f"  {x.measure}: {x.reach}; life-years if it works "
+                      f"{_lyr(x.life_years) if x.life_years else DASH}; {x.reason}" for x in group]
+    others = [x for x in rest if x.status not in ("pays_for_itself", "no_cost")]
+    if others:
+        lines += ["", "Not ranked (why):"]
+        lines += [f"  {x.measure} ({x.status}): {x.reason}" for x in others]
+    if legend_gaps:
+        lines += ["", f"{DASH} in the grid means no rank on that curve:"]
+        lines += [f"  {x.measure} on {c}: {x.curve_gap}" for c, x in legend_gaps]
+
+    ctx = r.context
+    lines += ["", f"Place: {r.place}. Map: {ctx.get('map')}. Study: {ctx.get('study') or 'none'}. "
+              f"Deaths: {ctx.get('deaths') or 'default'}. Discount: {100 * ctx.get('discount', 0):g}% a year. "
+              f"{ctx.get('n'):,} draws, seed {ctx.get('seed')}.",
+              *("Assumption: " + a for a in (*ASSUMPTIONS, *RANK_ASSUMPTIONS))]
+    if ctx.get("curves_unavailable"):
+        lines.append("Curves not run: " + "; ".join(f"{k}: {v}" for k, v in ctx["curves_unavailable"].items()))
+    lines += ["", "PC beside a ratio: the cost leaves out part of what the measure costs, so its ratio is "
+              "flattering; the comparable column ranks without such measures. UB: shares include air blown "
+              "in from outside, an upper bound."]
+    used = sorted({FLAG_CODES.get(f, f) for t in r.tables.values() for x in t.rows for f in x.flags})
+    lines.append("Flags: " + "; ".join(f"{c} {FLAG_LEGEND.get(c, c)}" for c in used) + "."
+                 if used else "Flags: none.")
+    lines.append(f"Evidence keys: {EVIDENCE_LEGEND}.")
+    return "\n".join(lines)

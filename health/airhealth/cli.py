@@ -9,6 +9,8 @@
   airhealth score CITY [--measure ID ...] [--study ID] [--map M] [--curves a,b] [--n N] [--seed S]
                        [--discount PCT] [--use input=source]   the measure library scored in a city
   airhealth score --region ID [--map M] [--curves a,b] [--n N] ...   a regional measure, whole reach
+  airhealth rank [PLACE] [--study ID] [--map M] [--curves a,b] [--n N] [--seed S] [--discount PCT]
+                 [--use input=source] [--csv PATH] [--write [DIR]]   the library ranked, India or a city
   airhealth measures                               the library: id, name, kind, scope, odds, evidence
   airhealth dashboard [--port 8765] [--no-open]     a local page over the same functions
 
@@ -28,7 +30,7 @@ import numpy as np
 
 from pathlib import Path
 
-from . import baseline, causes, curves, exposure, intervention, measures, paths, places, provenance, report, score, simulate
+from . import baseline, causes, curves, exposure, intervention, measures, paths, places, provenance, rank, report, score, simulate
 from .impact import Change, steady_state
 from .inputs import DEMOGRAPHIC, REGISTRY, Choice
 from .places import KINDS
@@ -387,6 +389,74 @@ def _score_region(args, folder, lib) -> None:
         print(report.score_table([s], out))
 
 
+def _slug(name: str) -> str:
+    return name.lower().replace(" ", "_")
+
+
+def _write_csv(path: Path, ranking) -> None:
+    import csv
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=report.CSV_COLUMNS)
+        w.writeheader()
+        w.writerows(report.rank_csv_rows(ranking))
+
+
+def _write_ranking(folder: Path, ranking) -> list[Path]:
+    """rank_<slug>.json and .csv for the ranking and, for India, for every city from the same run."""
+    named = [("india" if ranking.place == rank.INDIA else _slug(ranking.place), ranking)]
+    named += [(_slug(c), p) for c, p in ranking.parts.items()]
+    folder.mkdir(parents=True, exist_ok=True)
+    out = []
+    for slug, r in named:
+        j, c = folder / f"rank_{slug}.json", folder / f"rank_{slug}.csv"
+        j.write_text(json.dumps(rank.to_json(r), indent=2, ensure_ascii=False, allow_nan=False))
+        _write_csv(c, r)
+        out += [j, c]
+    return out
+
+
+def cmd_rank(args) -> None:
+    folder = Path(args.library) if args.library else measures.LIBRARY
+    india = args.place is None or args.place.strip().lower() in ("india", "all india")
+    if india and args.study:
+        raise ValueError("--study needs a city: it picks one city's causes study")
+    city = None if india else _city_name(args.place)
+    if args.study and args.study not in causes.studies(city):
+        raise ValueError(f"{city} has no study {args.study!r}; it has: "
+                         f"{', '.join(causes.studies(city)) or 'none'}")
+    names = [n.strip() for n in args.curves.split(",") if n.strip()] if args.curves else None
+    if names is not None:
+        _curves(args.curves)
+    combos = _choice(args).combinations()
+    if len(combos) > 1:
+        raise ValueError("rank takes one source per input; give --use input=source once")
+    settings = dict(map_name=args.map or "acag_total", curves=names, n=args.n, seed=args.seed,
+                    discount=args.discount / 100, deaths=combos[0], folder=folder)
+    if india:
+        known = sorted(causes.known_cities())
+        done = []
+
+        def progress(c):
+            done.append(c)
+            print(f"airhealth: scoring {c} ({len(done)}/{len(known)})", file=sys.stderr)
+        print("airhealth: scoring each regional measure over its whole reach first; "
+              "this takes minutes", file=sys.stderr)
+        ranking = rank.india(progress=progress, **settings)
+    else:
+        ranking = rank.city(city, study=args.study, **settings)
+    if args.json:
+        print(json.dumps(rank.to_json(ranking), indent=2, ensure_ascii=False, allow_nan=False))
+    else:
+        print(report.rank_table(ranking))
+    if args.csv:
+        _write_csv(Path(args.csv), ranking)
+        print(f"airhealth: wrote {args.csv}", file=sys.stderr)
+    if args.write is not None:
+        for path in _write_ranking(Path(args.write), ranking):
+            print(f"airhealth: wrote {path}", file=sys.stderr)
+
+
 def cmd_measures(args) -> None:
     folder = Path(args.library) if args.library else measures.LIBRARY
     lib = measures.library(folder)
@@ -514,6 +584,27 @@ def _parser() -> argparse.ArgumentParser:
     sc.add_argument("--library", help=argparse.SUPPRESS)
     deaths_flag(sc)
     sc.set_defaults(func=cmd_score)
+
+    rk = sub.add_parser("rank", parents=[shared], help="the measure library ranked by life-years per crore",
+                        description="Rank the library by expected life-years per crore of the funder's "
+                        "rupees, for all India (omit PLACE) or one city, one table per curve, with the "
+                        "ranks on every curve side by side first. Measures are ranked one at a time; "
+                        "their benefits do not add up.")
+    rk.add_argument("place", nargs="?", help="India (the default) or one of the fifty cities")
+    rk.add_argument("--study", help="a city only: score air measures on this causes study")
+    rk.add_argument("--map", choices=exposure.MAPS, help="exposure map (default: acag_total)")
+    rk.add_argument("--curves", help="comma-separated curve names (default: every curve)")
+    rk.add_argument("--n", type=int, default=2000, help="Monte Carlo draws (default 2000)")
+    rk.add_argument("--seed", type=int, default=0, help="random seed (default 0)")
+    rk.add_argument("--discount", type=float, default=simulate.DISCOUNT * 100, metavar="PCT",
+                    help="discount rate in percent a year (default 3)")
+    rk.add_argument("--csv", metavar="PATH", help="also write the rows, with their sources, as CSV")
+    rk.add_argument("--write", nargs="?", const=str(paths.HEALTH / "out" / "rank"), default=None,
+                    metavar="DIR", help="write rank_india.json/.csv and one pair per city "
+                    "(default health/out/rank/; not committed)")
+    rk.add_argument("--library", help=argparse.SUPPRESS)
+    deaths_flag(rk)
+    rk.set_defaults(func=cmd_rank)
 
     me = sub.add_parser("measures", parents=[shared], help="the measure library")
     me.add_argument("--library", help=argparse.SUPPRESS)

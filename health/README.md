@@ -487,9 +487,40 @@ the id to a list in `tests/test_library.py` and run `airhealth score CITY --meas
   AG): school purifiers do, and on curves that start at 25 they give children nothing. A group
   defined by something other than age cannot be: N95s reach working people, but their covered
   share is spread over every age, as if it were a slice of the whole city.
-- **This is a library, not a ranking.** `score` prints measures in library order. The ranking
-  (`airhealth rank`, all-India and per city, splitting a regional measure's benefit and cost
-  across city tables, curve flips) is the next plan (D).
+- **Rankings are one measure at a time.** See "Ranking" below.
+
+## Ranking
+
+```
+airhealth rank [PLACE] [--study ID] [--map M] [--curves a,b] [--n N] [--seed S] [--discount PCT]
+               [--use input=source] [--json] [--csv PATH] [--write [DIR]]
+```
+
+`airhealth rank` orders the library by **expected life-years per crore** of the funder's rupees
+(a crore is 10 million; 2025 rupees), highest first, one table per curve. Expected = the odds it
+works times what it gives if it works, over the expected cost (a cost paid only on success is
+weighted by the odds). Ties break by measure id; "if it works" has its own rank. Measures are
+ranked **one at a time: their benefits do not add up.** Ratios and ranks are never averaged across
+curves, studies or maps.
+
+- **Block 1, the grid.** The first thing printed is each measure's rank on every curve, side by
+  side, with best-worst and a "curves disagree" mark when the rank moves by 3 places or more
+  (`rank.FLIP_PLACES`). A dash means no rank on that curve (a measure for children on a curve that
+  starts at age 25 has no curve to count on; the legend says so).
+- **Then one table per curve**: rank, measure, expected life-years per crore (`PC` beside it when the
+  cost leaves part out, `UB` for an upper bound), the ratio if it works and its rank, life-years if
+  it works (median, p5-p95), cost (mean, ₹ crore), society's net cost, odds, the rank among
+  measures whose cost is whole (`PC` for those that are not), flags. Then measures that pay for
+  themselves, that have no cost given, and those not ranked, with why.
+- **PLACE** is a city (one table of that city's measures; regional measures follow in their own
+  group, because their ratio is over their whole reach and most of their benefit falls outside the
+  city) or `India`/omitted: every city scored on its own study and added up for a measure that
+  applies in several, plus each regional measure over its reach; the reach column is beside the
+  name. It takes minutes (the regional measures dominate); progress goes to stderr.
+- **Output.** `--json` is `rank.to_json`; `--csv PATH` is one row per curve and measure with the
+  sources on each row (`evidence`: source | locator | url | key); `--write [DIR]` (default
+  `health/out/rank/`, git-ignored) writes `rank_india.json/.csv` and a pair for every city from the
+  same run (`rank_<city>.json/.csv`); for a city, only its pair.
 
 ## Writing an intervention file
 

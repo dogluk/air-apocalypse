@@ -432,3 +432,70 @@ def test_measures_lists_every_file(capsys):
 def test_measures_on_the_empty_shipped_library(capsys):
     code, out, _ = run(capsys, "measures")
     assert code == 0 and out.strip()
+
+
+# ---- airhealth rank ----
+
+def test_rank_city_json_is_the_function(capsys):
+    from airhealth import rank
+    from airhealth.inputs import Choice
+    code, out, _ = run(capsys, "rank", "Bengaluru", *FAST, "--json")
+    assert code == 0
+    deaths = Choice.parse(None, None).combinations()[0]
+    direct = rank.to_json(rank.city("Bengaluru", folder=Path(LIB), n=100, curves=["gemm_ncd_lri"],
+                                    deaths=deaths))
+    assert json.loads(out) == json.loads(json.dumps(direct))
+
+
+def test_rank_text_starts_with_the_grid(capsys):
+    code, out, _ = run(capsys, "rank", "Bengaluru", "--library", LIB, "--n", "100",
+                       "--curves", "gemm_ncd_lri,aqli")
+    assert code == 0
+    assert out.index("Rank on each curve") < out.index("Curve gemm_ncd_lri")
+    assert "benefits do not add" in out
+
+
+def test_csv_has_a_source_on_every_row(capsys, tmp_path):
+    import pandas as pd
+    from airhealth import report
+    import shutil
+    lib = tmp_path / "lib"
+    shutil.copytree(LIB, lib)
+    dust = lib / "air_dust.toml"
+    dust.write_text(dust.read_text().replace('placeholders = ["targets.dust.cut", "cost.annual"]',
+                                             'placeholders = ["cost.annual"]'))
+    with open(dust, "a") as f:
+        f.write('\n[[evidence]]\nfields = ["targets.dust.cut"]\nsource = "Fixture source"\n'
+                'url = "https://example.org"\nlocator = "Table 1"\nkey = "O"\n'
+                'retrieved = "2026-11-27"\nderivation = "fixture"\n')
+    code, _, _ = run(capsys, "rank", "Bengaluru", "--library", str(lib), "--n", "100", "--curves",
+                     "gemm_ncd_lri", "--csv", str(tmp_path / "r.csv"))
+    assert code == 0
+    df = pd.read_csv(tmp_path / "r.csv")
+    assert list(df.columns) == list(report.CSV_COLUMNS)
+    assert df[df.measure == "air_dust"].evidence.iloc[0] == "Fixture source | Table 1 | https://example.org | O"
+    assert (df.curve == "gemm_ncd_lri").all()
+
+
+def test_write_puts_india_and_every_city(capsys, tmp_path, monkeypatch):
+    from airhealth import causes
+    monkeypatch.setattr(causes, "known_cities", lambda: {"Bengaluru", "Delhi", "Mumbai"})
+    code, _, err = run(capsys, "rank", *FAST, "--write", str(tmp_path))
+    assert code == 0, err
+    for name in ("rank_india.json", "rank_india.csv", "rank_bengaluru.json", "rank_delhi.csv"):
+        assert (tmp_path / name).exists(), name
+    parts = json.loads((tmp_path / "rank_india.json").read_text())["parts"]
+    assert set(parts) == {"Bengaluru", "Delhi", "Mumbai"}
+    code, _, _ = run(capsys, "rank", "Bengaluru", *FAST, "--write", str(tmp_path / "c"))
+    assert sorted(p.name for p in (tmp_path / "c").iterdir()) == ["rank_bengaluru.csv", "rank_bengaluru.json"]
+
+
+def test_study_needs_a_city(capsys):
+    code, out, err = run(capsys, "rank", "--study", "apna_2015", *FAST)
+    assert code == 1 and out == "" and len(err.strip().splitlines()) == 1 and "city" in err
+
+
+def test_unknown_place_is_one_line(capsys):
+    code, out, err = run(capsys, "rank", "Bengalur", *FAST)
+    assert code == 1 and out == ""
+    assert err.startswith("airhealth: unknown city") and len(err.strip().splitlines()) == 1
