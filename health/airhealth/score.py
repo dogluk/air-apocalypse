@@ -464,10 +464,15 @@ def _society_net(m: Measure, iv: Intervention, count: float, discount: float) ->
 def city(city: str, measures: Sequence[str] | None = None, *, study: str | None = None,
          map_name: str = "acag_total", curves: list[str] | None = None, n: int = 2000,
          seed: int = 0, discount: float = simulate.DISCOUNT, deaths=None,
-         folder: Path = measures.LIBRARY) -> list[Score]:
+         folder: Path = measures.LIBRARY, monthly_curves: bool = False) -> list[Score]:
     """One Score per library measure in `folder` (or per id asked for), in library order (file
     name). study=None scores air measures on the city's APnA study; a city without one gets
-    not_scored for them. Callers that want every study call once per study."""
+    not_scored for them. Callers that want every study call once per study.
+
+    monthly_curves: the month-by-month sensitivity (simulate.run); it applies to percent changes,
+    so a regional measure's part in a city (a delta) is run on the annual mean as before.
+    Timed 2026-11-27 on the maintainer's laptop (a test suite running beside it): Bengaluru,
+    n=500, the real library (22 measures, 17 run): 4.7 s annual, 30.1 s with monthly_curves=True."""
     from . import measures as library_
     lib = library_.library(folder)
     ids = list(lib) if measures is None else [i for i in lib if i in set(measures)]
@@ -485,7 +490,8 @@ def city(city: str, measures: Sequence[str] | None = None, *, study: str | None 
         per_curve, pm25, run, net = {}, None, None, None
         if iv is not None:
             run = simulate.run(iv, map_name=map_name, curves=curves, n=n, seed=seed,
-                               deaths=deaths, discount=discount)
+                               deaths=deaths, discount=discount,
+                               monthly_curves=monthly_curves and iv.change_kind == "pct")
             per_curve = {k: r.summary() for k, r in run.per_curve.items()}
             first = next(iter(run.per_curve.values()))
             d = first.pm25_after - run.pm25_before
@@ -515,7 +521,7 @@ def city(city: str, measures: Sequence[str] | None = None, *, study: str | None 
 
 def region(measure: str, *, map_name: str = "acag_total", curves: list[str] | None = None,
            n: int = 2000, seed: int = 0, discount: float = simulate.DISCOUNT, deaths=None,
-           folder: Path = measures.LIBRARY) -> Score:
+           folder: Path = measures.LIBRARY, monthly_curves: bool = False) -> Score:
     """A regional measure scored over its whole reach: every district of its receptor table whose
     full change is not 0, each changed by region.cut x its own full change (one "delta" run,
     scale per district), with the measure's whole cost (driver "unit", "city" as one total for
@@ -526,7 +532,10 @@ def region(measure: str, *, map_name: str = "acag_total", curves: list[str] | No
     the spread). Timed 2026-11-27 on the maintainer's laptop: receptor_stubble.csv (735 districts),
     n = 1000, the eight curves open with IHME files present: 136 s, over the two minutes the plan
     allowed (n = 100 took 128 s, so the time is per-district work, not draws). Left for plan D to
-    decide; no district is dropped to make it faster."""
+    decide; no district is dropped to make it faster.
+
+    monthly_curves: a regional change is a delta, and month by month applies to percent changes
+    only, so the Score is not_scored and nothing is run."""
     from . import measures as library_
     lib = library_.library(folder)
     if measure not in lib:
@@ -537,6 +546,14 @@ def region(measure: str, *, map_name: str = "acag_total", curves: list[str] | No
     if map_name not in exposure.DISTRICT_MAPS:
         raise ValueError("a regional measure needs a district map "
                          f"({', '.join(exposure.DISTRICT_MAPS)}), not {map_name}")
+    if monthly_curves:
+        return Score(
+            measure=m.id, name=m.name, kind=m.kind, scope=m.scope,
+            place=f"the region {m.region.receptor} reaches", study=None, status="not_scored",
+            reason="month by month applies to percent changes only", who_reaches=m.who_reaches,
+            p_success=m.p_success, p_success_basis=m.p_success_basis, flags=(), pm25_change=None,
+            per_curve={}, trail=_empty_trail("not run: month by month applies to percent "
+                                             "changes only", m), run=None)
     table = measures.receptor(m.region.receptor, folder)
     reach = table[table.delta_pm25_full != 0]
     if reach.empty:

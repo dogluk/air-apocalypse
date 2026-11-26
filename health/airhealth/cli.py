@@ -7,10 +7,11 @@
   airhealth run FILE [--map M] [--curves a,b] [--n N] [--seed S] [--charts DIR] [--use ...]
   airhealth causes [CITY] [--study ID] [--season S] [--all]   every study's split of a city's PM2.5
   airhealth score CITY [--measure ID ...] [--study ID] [--map M] [--curves a,b] [--n N] [--seed S]
-                       [--discount PCT] [--use input=source]   the measure library scored in a city
+                       [--discount PCT] [--use input=source] [--monthly-curves]
+                                                              the measure library scored in a city
   airhealth score --region ID [--map M] [--curves a,b] [--n N] ...   a regional measure, whole reach
   airhealth rank [PLACE] [--study ID] [--map M] [--curves a,b] [--n N] [--seed S] [--discount PCT]
-                 [--use input=source] [--csv PATH] [--write [DIR]]   the library ranked, India or a city
+                 [--use input=source] [--monthly-curves] [--csv PATH] [--write [DIR]]   the library ranked, India or a city
   airhealth measures                               the library: id, name, kind, scope, odds, evidence
   airhealth dashboard [--port 8765] [--no-open]     a local page over the same functions
 
@@ -333,6 +334,10 @@ def _city_name(text: str) -> str:
         raise ValueError(f"unknown city {text!r}{places._suggest(text.partition(',')[0])}") from None
 
 
+MONTHLY_HELP = ("sensitivity: apply the curves to each month's level instead of the annual "
+                "mean (percent changes only; about twelve times slower)")
+
+
 def cmd_score(args) -> None:
     folder = Path(args.library) if args.library else measures.LIBRARY
     lib = measures.library(folder)
@@ -356,7 +361,7 @@ def cmd_score(args) -> None:
         raise ValueError("score takes one source per input; give --use input=source once")
     scored = score.city(city, args.measure, study=args.study, map_name=args.map or "acag_total",
                         curves=names, n=args.n, seed=args.seed, discount=args.discount / 100,
-                        deaths=combos[0], folder=folder)
+                        deaths=combos[0], folder=folder, monthly_curves=args.monthly_curves)
     out = score.to_json(scored, place=city, study=args.study) if args.study else score.to_json(scored)
     if args.json:
         print(json.dumps(out, indent=2, ensure_ascii=False, allow_nan=False))
@@ -381,7 +386,8 @@ def _score_region(args, folder, lib) -> None:
     if len(combos) > 1:
         raise ValueError("score takes one source per input; give --use input=source once")
     s = score.region(args.region, map_name=args.map or "acag_total", curves=names, n=args.n,
-                     seed=args.seed, discount=args.discount / 100, deaths=combos[0], folder=folder)
+                     seed=args.seed, discount=args.discount / 100, deaths=combos[0], folder=folder,
+                     monthly_curves=args.monthly_curves)
     out = score.to_json([s], place=s.place)
     if args.json:
         print(json.dumps(out, indent=2, ensure_ascii=False, allow_nan=False))
@@ -432,7 +438,8 @@ def cmd_rank(args) -> None:
     if len(combos) > 1:
         raise ValueError("rank takes one source per input; give --use input=source once")
     settings = dict(map_name=args.map or "acag_total", curves=names, n=args.n, seed=args.seed,
-                    discount=args.discount / 100, deaths=combos[0], folder=folder)
+                    discount=args.discount / 100, deaths=combos[0], folder=folder,
+                    monthly_curves=args.monthly_curves)
     if india:
         known = sorted(causes.known_cities())
         done = []
@@ -581,6 +588,7 @@ def _parser() -> argparse.ArgumentParser:
     sc.add_argument("--seed", type=int, default=0, help="random seed (default 0)")
     sc.add_argument("--discount", type=float, default=simulate.DISCOUNT * 100, metavar="PCT",
                     help="discount rate in percent a year (default 3)")
+    sc.add_argument("--monthly-curves", action="store_true", help=MONTHLY_HELP)
     sc.add_argument("--library", help=argparse.SUPPRESS)
     deaths_flag(sc)
     sc.set_defaults(func=cmd_score)
@@ -598,6 +606,7 @@ def _parser() -> argparse.ArgumentParser:
     rk.add_argument("--seed", type=int, default=0, help="random seed (default 0)")
     rk.add_argument("--discount", type=float, default=simulate.DISCOUNT * 100, metavar="PCT",
                     help="discount rate in percent a year (default 3)")
+    rk.add_argument("--monthly-curves", action="store_true", help=MONTHLY_HELP)
     rk.add_argument("--csv", metavar="PATH", help="also write the rows, with their sources, as CSV")
     rk.add_argument("--write", nargs="?", const=str(paths.HEALTH / "out" / "rank"), default=None,
                     metavar="DIR", help="write rank_india.json/.csv and one pair per city "

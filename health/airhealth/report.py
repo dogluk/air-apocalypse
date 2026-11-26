@@ -483,6 +483,7 @@ def run_json(run: Run) -> dict:
         start_year=iv.start_year, duration_years=iv.duration_years, ramp_years=iv.ramp_years,
         lag=iv.lag, realised_share_by_year=[float(x) for x in run.shares],
         discount=run.discount, horizon_years=run.horizon_years,
+        monthly_curves=run.monthly_curves,
         cost_currency=iv.cost_currency, cost_year=iv.cost_year, usd_per_unit=run.usd_per_unit,
         cost_share_only_on_success=iv.cost_share_only_on_success,
         rows=run_rows(run), across_curve_spread=across_curve_spread(run),

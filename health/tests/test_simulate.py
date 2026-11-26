@@ -524,3 +524,53 @@ def test_run_with_covered_ages():
     half = simulate.run(dataclasses.replace(base, covered=Dist.fixed(0.5), covered_ages=(5, 19)),
                         curves=[c], n=100)
     assert np.allclose(half.per_curve[c].life_years, 0.5 * b.per_curve[c].life_years)
+
+
+# --- month by month (monthly_curves) ---------------------------------------------------------
+
+def test_flat_shape_monthly_equals_annual(monkeypatch):
+    from airhealth import months
+    flat = months.Shape(np.ones(12), "flat", False)
+    monkeypatch.setattr(months, "shape", lambda place, *a, **k: flat)
+    # the same percent every month (a month-only cut differs even on a flat shape, because the
+    # curves are not straight lines)
+    iv = dataclasses.replace(load("november_pct_delhi"), monthly=None, change=Dist.fixed(-10.0))
+    a = simulate.run(iv, curves=["gemm_ncd_lri"], n=100)
+    b = simulate.run(iv, curves=["gemm_ncd_lri"], n=100, monthly_curves=True)
+    assert b.monthly_curves and not a.monthly_curves
+    np.testing.assert_allclose(b.per_curve["gemm_ncd_lri"].life_years,
+                               a.per_curve["gemm_ncd_lri"].life_years, rtol=1e-9)
+
+
+def test_winter_cut_in_delhi_is_worth_less_month_by_month():
+    iv = load("november_pct_delhi")
+    a = simulate.run(iv, curves=["gemm_ncd_lri"], n=200)
+    b = simulate.run(iv, curves=["gemm_ncd_lri"], n=200, monthly_curves=True)
+    assert b.per_curve["gemm_ncd_lri"].life_years.mean() < a.per_curve["gemm_ncd_lri"].life_years.mean()
+
+
+def test_delta_change_is_refused():
+    with pytest.raises(ValueError, match="monthly_curves"):
+        simulate.run(load("delhi_100_to_80"), monthly_curves=True, n=10)
+
+
+def test_level_factor_with_override_is_refused():
+    iv = load("november_pct_delhi")
+    with pytest.raises(ValueError, match="level_factor"):
+        impact.steady_state_many(iv.places[0], curves.select(["gemm_ncd_lri"])[0][0], "aqli",
+                                 "pct", np.zeros(3), pm25_override=50.0, level_factor=1.2)
+
+
+def test_default_never_touches_the_switch(monkeypatch):
+    """Off by default: the annual path calls impact exactly as before (no level_factor)."""
+    seen = []
+    real = impact.steady_state_many
+
+    def spy(*a, **k):
+        seen.append(k.get("level_factor"))
+        return real(*a, **k)
+    monkeypatch.setattr(impact, "steady_state_many", spy)
+    a = simulate.run(load("november_pct_delhi"), curves=["gemm_ncd_lri"], n=20)
+    assert seen and set(seen) == {None}
+    assert not a.monthly_curves
+    assert report.run_json(a)["monthly_curves"] is False

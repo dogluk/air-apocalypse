@@ -55,9 +55,20 @@ draws belong to the pm25_change group; the curve_parameters group uses the cover
 spread: the share of variance in life-years from the PM2.5 change and from the curve
 parameters, each measured by sampling that group alone with the other at its median (the
 published curve; the median change), and divided by the sum of the two.
+
+monthly_curves (a sensitivity, off by default; percent changes only): the curves are applied
+to each month's level instead of the annual mean. Month m starts from the place's level times
+its shape for that month (months.shape), takes its own percent change (the file's monthly
+entry m at the draw's quantile, or the flat percent), and the steady-state deaths and
+life-years are the day-weighted mean (days / 365) of the twelve results. On a curve that
+flattens at high levels a winter cut in Delhi is then worth less than the same annual mean
+change spread evenly. Everything after the steady state (shares, discounting, cost, covered)
+is as before. Twelve steady-state calculations replace one, so a run takes about twelve times
+as long (see score.city for a timing).
 """
 from __future__ import annotations
 
+import dataclasses
 import zlib
 from dataclasses import dataclass, field
 from itertools import combinations
@@ -159,6 +170,7 @@ class Run:
     population_year: int = 0        # the year the population is for (2011 if any place is a city)
     census_places: tuple = ()       # the places whose population is the Census's, not the map year's
     shapes: dict = field(default_factory=dict)   # months.Shape by Place.label; monthly_pct runs only
+    monthly_curves: bool = False    # the curves were applied to each month's level
 
 
 def yearly_shares(iv: Intervention, tail: bool = True) -> np.ndarray:
@@ -225,13 +237,45 @@ class _Steady:
     census_places: tuple
 
 
+def _month_values(iv: Intervention, place: Place, m: int, q: np.ndarray) -> np.ndarray:
+    """Month m's (0-11) own percent change at quantiles q (flat pct when the file has no months)."""
+    out = (iv.monthly[m] if iv.monthly is not None else iv.change).ppf(q)
+    if iv.scale is not None:
+        if place.label not in iv.scale:
+            raise KeyError(f"scale: no multiplier for {place.label!r}")
+        out = out * iv.scale[place.label]
+    return out
+
+
+def _steady_monthly(iv: Intervention, place: Place, curve: Curve, q: np.ndarray,
+                    map_name: str, deaths) -> impact.ImpactDraws:
+    """impact.steady_state_many for one place, month by month: the day-weighted mean of twelve."""
+    shape = months.shape(place).values
+    w = months.MONTH_DAYS / months.MONTH_DAYS.sum()
+    rs = [impact.steady_state_many(place, curve, map_name, "pct", _month_values(iv, place, m, q),
+                                   deaths=deaths, ages=iv.covered_ages,
+                                   level_factor=float(shape[m]))
+          for m in range(12)]
+
+    def mean(f):
+        return sum(wi * f(r) for wi, r in zip(w, rs))
+    return dataclasses.replace(
+        rs[0], pm25_before=float(mean(lambda r: r.pm25_before)),
+        pm25_after=mean(lambda r: r.pm25_after), deaths_averted=mean(lambda r: r.deaths_averted),
+        yll_averted=mean(lambda r: r.yll_averted),
+        e0_after=mean(lambda r: r.e0_after), e0_before=float(mean(lambda r: r.e0_before)))
+
+
 def _steady(iv: Intervention, curve: Curve, q: np.ndarray, map_name: str,
-            deaths: "str | Sources" = "srs") -> _Steady:
+            deaths: "str | Sources" = "srs", monthly_curves: bool = False) -> _Steady:
     """Steady-state results for every draw, added over the intervention's places."""
-    parts = [impact.steady_state_many(p, curve, map_name, iv.change_kind, iv.annual_change(p, q),
-                                      pm25_override=iv.from_level, deaths=deaths,
-                                      ages=iv.covered_ages)
-             for p in iv.places]
+    if monthly_curves:
+        parts = [_steady_monthly(iv, p, curve, q, map_name, deaths) for p in iv.places]
+    else:
+        parts = [impact.steady_state_many(p, curve, map_name, iv.change_kind,
+                                          iv.annual_change(p, q), pm25_override=iv.from_level,
+                                          deaths=deaths, ages=iv.covered_ages)
+                 for p in iv.places]
     pop = np.array([r.population for r in parts])
     return _Steady(
         deaths=sum(r.deaths_averted for r in parts), yll=sum(r.yll_averted for r in parts),
@@ -258,12 +302,19 @@ def _width(x: np.ndarray) -> float:
 
 def run(iv: Intervention, map_name: str = "aqli", curves: list[str] | None = None,
         n: int = 5000, seed: int = 0, deaths: "str | Sources | None" = None,
-        discount: float = DISCOUNT, tail: bool = True) -> Run:
+        discount: float = DISCOUNT, tail: bool = True,
+        monthly_curves: bool = False) -> Run:
     """Run the intervention on every curve asked for (default: every curve that can run).
     discount: a year, for life-years and costs (0 for none); tail: count the years after the
     intervention ends in which its effect is still arriving (see the module docstring).
     deaths: an inputs.Sources or a deaths basis ("srs", "model", "unwpp"); None takes the
-    intervention file's [sources] table, else the defaults."""
+    intervention file's [sources] table, else the defaults. monthly_curves: see the module
+    docstring."""
+    if monthly_curves:
+        if iv.change_kind != "pct":
+            raise ValueError("monthly_curves: percent changes only")
+        if iv.from_level is not None:
+            raise ValueError("monthly_curves: not with from_level (a what-if level has no months)")
     deaths = Sources.of(iv.sources if deaths is None else deaths)
     if n < 2:
         raise ValueError(f"n: need at least 2 draws, got {n}")
@@ -296,9 +347,9 @@ def run(iv: Intervention, map_name: str = "aqli", curves: list[str] | None = Non
     per_curve, first = {}, None
     for curve in chosen:
         batch = curve.sample_many(_rng(seed, 2, zlib.crc32(curve.name.encode())), n)
-        joint = _steady(iv, batch, q, map_name, deaths)
-        change_only = joint if batch is curve else _steady(iv, curve, q, map_name, deaths)
-        curve_only = _steady(iv, batch, median_q, map_name, deaths)
+        joint = _steady(iv, batch, q, map_name, deaths, monthly_curves)
+        change_only = joint if batch is curve else _steady(iv, curve, q, map_name, deaths, monthly_curves)
+        curve_only = _steady(iv, batch, median_q, map_name, deaths, monthly_curves)
         if first is None:
             first = joint
         alone = {"pm25_change": change_only.yll * years * covered,
@@ -321,7 +372,7 @@ def run(iv: Intervention, map_name: str = "aqli", curves: list[str] | None = Non
                reconciliations=first.reconciliations, rate_adjustments=first.rate_adjustments,
                sources=first.sources, un_scaling=first.un_scaling,
                population_year=first.population_year,
-               census_places=first.census_places,
+               census_places=first.census_places, monthly_curves=monthly_curves,
                shapes={p.label: months.shape(p) for p in iv.places}
                if iv.monthly is not None and iv.change_kind == "pct" else {})
 

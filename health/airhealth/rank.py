@@ -286,20 +286,21 @@ def city(city: str, *, study=None, map_name="acag_total", curves=None, n=2000, s
     """score.city for one city, then from_scores. A regional measure scored in the city takes its
     ratio from its whole reach: score.region with the same settings, unless given in
     `regional`."""
-    if monthly_curves:
-        raise NotImplementedError("month-by-month curves are not built yet (plan D Task 6)")
     folder = Path(folder)
     scores = score.city(city, study=study, map_name=map_name, curves=curves, n=n, seed=seed,
-                        discount=discount, deaths=deaths, folder=folder)
+                        discount=discount, deaths=deaths, folder=folder,
+                        monthly_curves=monthly_curves)
     wanted = [s.measure for s in scores if s.scope == "region" and s.status == "scored"]
     reach, missing = _reaches(wanted, regional, map_name=map_name, curves=curves, n=n, seed=seed,
-                              discount=discount, deaths=deaths, folder=folder)
+                              discount=discount, deaths=deaths, folder=folder,
+                              monthly_curves=monthly_curves)
     context = _context(scores, study, map_name=map_name, curves=curves, n=n, seed=seed,
-                       discount=discount, deaths=deaths)
+                       discount=discount, deaths=deaths, monthly_curves=monthly_curves)
     return from_scores(scores, city, context, reach, regional_missing=missing)
 
 
-def _reaches(wanted, given, *, map_name, curves, n, seed, discount, deaths, folder):
+def _reaches(wanted, given, *, map_name, curves, n, seed, discount, deaths, folder,
+             monthly_curves=False):
     """Whole-reach Scores (score.region) for the regional measures in `wanted` not already in
     `given`; and measure -> why, for those whose reach could not be scored."""
     reach, missing = dict(given or {}), {}
@@ -308,18 +309,20 @@ def _reaches(wanted, given, *, map_name, curves, n, seed, discount, deaths, fold
             continue
         try:
             reach[m] = score.region(m, map_name=map_name, curves=curves, n=n, seed=seed,
-                                    discount=discount, deaths=deaths, folder=folder)
+                                    discount=discount, deaths=deaths, folder=folder,
+                                    monthly_curves=monthly_curves)
         except (ValueError, KeyError) as e:
             missing[m] = f"its whole reach could not be scored: {e}"
     return reach, missing
 
 
-def _context(scores, study, *, map_name, curves, n, seed, discount, deaths) -> dict:
+def _context(scores, study, *, map_name, curves, n, seed, discount, deaths,
+             monthly_curves=False) -> dict:
     used_study = study if study is not None else next((s.study for s in scores if s.study), None)
     first = next((s.run for s in scores if s.run is not None), None)
     context = {"map": map_name, "study": used_study,
                "deaths": deaths if isinstance(deaths, (str, type(None))) else str(deaths),
-               "discount": discount, "n": n, "seed": seed,
+               "discount": discount, "n": n, "seed": seed, "monthly_curves": monthly_curves,
                "curves": list(curves) if curves is not None else _curves(scores)}
     if first is not None and first.unavailable:
         context["curves_unavailable"] = dict(first.unavailable)
@@ -531,12 +534,10 @@ def india(*, map_name="acag_total", curves=None, n=2000, seed=0, discount=simula
     564 s. 518 s of it is the four whole-reach runs (score.region, once each); the 50 cities
     take 45 s together. The sensitivity reruns should reuse the reaches, not rerun them.
     """
-    if monthly_curves:
-        raise NotImplementedError("month-by-month curves are not built yet (plan D Task 6)")
     folder = Path(folder)
     names = sorted(causes.known_cities()) if cities is None else list(cities)
     settings = dict(map_name=map_name, curves=curves, n=n, seed=seed, discount=discount,
-                    deaths=deaths)
+                    deaths=deaths, monthly_curves=monthly_curves)
     lib = measures.library(folder)
     reach, missing = _reaches([m for m, x in lib.items() if x.scope == "region"], None,
                               folder=folder, **settings)

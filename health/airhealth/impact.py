@@ -371,14 +371,19 @@ def steady_state_many(place: Place, curve: Curve, map_name: str, kind: str,
                       values: np.ndarray, year: int | None = None,
                       pm25_override: float | None = None,
                       deaths: "str | Sources" = "srs",
-                      ages: tuple[int, int] | None = None) -> ImpactDraws:
+                      ages: tuple[int, int] | None = None,
+                      level_factor: float = 1.0) -> ImpactDraws:
     """steady_state() for n draws: values[i] is the change (of `kind`: delta, pct or to) in
     draw i, and draw i uses row i of the curve's parameters if the curve came from
-    sample_many(), else the curve as it is. ages: as steady_state()."""
+    sample_many(), else the curve as it is. ages: as steady_state(). level_factor: the map's
+    level of every cell times this before the change is applied (a month's shape, for the
+    month-by-month sensitivity); with pm25_override it is a ValueError."""
+    if level_factor != 1.0 and pm25_override is not None:
+        raise ValueError("level_factor cannot be combined with pm25_override")
     src = Sources.of(deaths)
     cells: pd.DataFrame = exposure.cells(place, map_name, year, src.population)
     year = int(cells.attrs["year"])
-    before = cells.pm25.to_numpy(float)
+    before = cells.pm25.to_numpy(float) * level_factor
     if pm25_override is not None:
         before = np.full_like(before, float(pm25_override))
     after = apply_many(kind, values, before)

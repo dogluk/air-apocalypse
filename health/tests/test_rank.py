@@ -158,9 +158,14 @@ def test_society_net_is_carried():
     assert row.society_net_inr == s.society_net_inr and row.rank is None
 
 
-def test_monthly_curves_not_yet():
-    with pytest.raises(NotImplementedError):
-        rank.city("Bengaluru", folder=FIXTURES, monthly_curves=True)
+def test_monthly_curves_pass_through():
+    r = rank.city("Bengaluru", folder=FIXTURES, n=50, curves=[CURVE], monthly_curves=True)
+    assert r.context["monthly_curves"] is True
+    base = rank.city("Bengaluru", folder=FIXTURES, n=50, curves=[CURVE])
+    assert base.context["monthly_curves"] is False
+    a = {x.measure: x.mean_life_years for x in base.tables[CURVE].rows}
+    b = {x.measure: x.mean_life_years for x in r.tables[CURVE].rows}
+    assert a != b
 
 
 def test_to_json_is_json_safe():

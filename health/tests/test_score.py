@@ -295,3 +295,17 @@ def test_age_group_cost_counts_only_that_group(tmp_path):
     assert "age_group" in codes(flags)
     plain, *_ = score.compile(fx("exposure_purifier"), "Bengaluru")
     assert plain.covered_ages is None
+
+
+def test_score_passes_monthly_curves():
+    s = score.city("Bengaluru", folder=FIXTURES, n=50, curves=CURVE, monthly_curves=True)
+    ran = [x for x in s if x.run is not None]
+    assert ran and all(x.run.monthly_curves for x in ran
+                       if x.run.intervention.change_kind == "pct")
+    assert any(x.run.monthly_curves for x in ran)
+
+
+def test_region_is_not_scored_month_by_month():
+    s = score.region("air_region", folder=FIXTURES.parent / "library", n=50, curves=CURVE,
+                     monthly_curves=True)
+    assert s.status == "not_scored" and "percent changes only" in s.reason and s.run is None
