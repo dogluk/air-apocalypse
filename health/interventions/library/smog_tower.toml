@@ -40,6 +40,8 @@ not working, Census 2011).
 Cost: Rs 20 crore for the Connaught Place tower including two years of running it (Delhi Pollution
 Control Committee, 2021), reported as Rs 22-25 crore in 2023. Land is not in it. Shared over the
 8,540 people it reaches.
+
+city-specific: the share covered (0.1%) and the cost per person both come from the people within 500 m at urban Bangalore's density (Census 2011); another city needs its own density at the tower's site.
 """
 
 [exposure]
