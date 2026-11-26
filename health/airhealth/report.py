@@ -336,13 +336,13 @@ def _cost_text(run: Run, cost: dict) -> str:
     iv = run.intervention
     if cost["p95"] == 0:
         return "No cost given."
-    rate = ("" if iv.cost_currency == "USD"
-            else f", ₹{1 / run.usd_per_unit:.2f} per $ (World Bank {iv.cost_year} average)")
+    origin = ("" if (iv.cost_currency, iv.cost_year) == ("INR", 2025)
+              else f" (given as {iv.cost_currency} in {iv.cost_year} prices)")
+    rate = f", ₹{1 / run.usd_per_unit:.2f} per $ (World Bank 2025 average)"
     s = iv.cost_share_only_on_success
     spent = ("all of it spent whether or not it works" if s == 0
              else f"{100 * s:.0f}% of it spent only if it works")
-    return (f"Cost if it works: {_range(cost, _usd)}, {iv.cost_year} prices{rate}, no inflation "
-            f"adjustment; {spent}.")
+    return (f"Cost if it works: {_range(cost, _usd)}, in 2025 rupees{origin}{rate}; {spent}.")
 
 
 def run_rows(run: Run) -> list[dict]:
@@ -357,7 +357,12 @@ def run_rows(run: Run) -> list[dict]:
             curve=name, label=r.curve.label, deaths_derived=r.curve.kind == "life_expectancy",
             published_interval=interval == "published", interval=interval,
             life_years=s["life_years"], deaths_postponed=s["deaths_postponed"],
-            e0_change_years=s["e0_change_years"], cost_usd=s["cost_usd"],
+            e0_change_years=s["e0_change_years"], cost_usd=s["cost_usd"], cost_inr=s["cost_inr"],
+            expected_cost_inr=s["expected_cost_inr"],
+            inr_per_life_year_if_works=s["inr_per_life_year_if_works"],
+            expected_inr_per_expected_life_year=s["expected_inr_per_expected_life_year"],
+            life_years_per_crore_if_works=s["life_years_per_crore_if_works"],
+            expected_life_years_per_crore=s["expected_life_years_per_crore"],
             expected_life_years=s["expected_life_years"], expected_cost_usd=s["expected_cost_usd"],
             cost_per_life_year_if_works=s["cost_per_life_year_if_works"],
             expected_cost_per_expected_life_year=s["expected_cost_per_expected_life_year"],

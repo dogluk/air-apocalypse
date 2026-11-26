@@ -400,9 +400,26 @@ script = "scripts/build_fx.py"
 notes = """
 Columns: year, inr_per_usd (rupees per US dollar, annual average of the official rate), written as the API gives them. The
 World Bank takes this series from the IMF's International Financial Statistics. Used by airhealth.simulate to turn an
-intervention's rupee costs into dollars at the rate of its cost.year; a cost.year outside 2000-2025 is rejected. No
-inflation (price-level) adjustment is made: costs stay in the prices of their cost.year. Not cross-checked against the
-RBI reference rate.
+dollar costs into rupees at the rate of their cost.year (airhealth.prices), before the GDP deflator
+(gdp_deflator_ind.csv) brings them to 2025 rupees; a cost.year outside 2000-2025 is rejected. Not cross-checked against
+the RBI reference rate.
+"""
+
+["gdp_deflator_ind.csv"]
+source = "World Bank, World Development Indicators: NY.GDP.DEFL.ZS 'GDP deflator (base year varies by country)', India (World Bank API, source id 2, last updated 2026-11-11)."
+url = "https://api.worldbank.org/v2/country/IND/indicator/NY.GDP.DEFL.ZS?format=json&per_page=100&date=2000:2026"
+page = "https://data.worldbank.org/indicator/NY.GDP.DEFL.ZS?locations=IN"
+sha256 = "03359993bf6900970ceadb76567206771a7d98b9d73ac222d557f5d2daab86c5"
+locator = "API JSON, second element: one record per year, fields date and value; India, 2000-2025 (2026 has no value yet)."
+retrieved = "2026-11-27"
+licence = "CC BY 4.0 (World Bank Open Data terms of use)"
+method = "downloaded"
+script = "scripts/build_deflator.py"
+notes = """
+Columns: year, deflator (India's GDP deflator, an index of prices across the whole economy, written as the API gives them;
+the API's own label is "base year varies by country"). Used only as a ratio of two years, by airhealth.prices, to turn a
+cost in its price year's rupees into 2025 rupees: amount x deflator[2025] / deflator[year]. 2024 = 106.064599179458,
+2025 = 107.097208955348. The SHA-256 is that of the downloaded JSON.
 """
 
 ["srs_crude_death_rate.csv"]

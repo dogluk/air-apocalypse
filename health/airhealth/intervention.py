@@ -28,10 +28,11 @@ months are given as distributions they are drawn together (one percentile for al
 each draw): an intervention that does better than expected in November is taken to do
 better in December too.
 
-Costs are in the currency and price year of the file. Rupees become dollars at the World
-Bank's annual average rate for cost.year (data/fx_inr_usd.csv); a rupee cost whose year is
-not in that table is Invalid. There is no inflation adjustment: costs stay in the prices of
-their year.
+Costs are in the currency and price year of the file, and are turned into 2025 rupees
+(airhealth/prices.py): rupees are scaled by India's GDP deflator (World Bank, data/gdp_deflator_ind.csv)
+from cost.year to 2025; dollars are first turned into rupees at the World Bank's annual average
+rate for cost.year (data/fx_inr_usd.csv), then scaled the same way. A cost.year missing from
+either table (2000-2025) is Invalid.
 """
 from __future__ import annotations
 
@@ -322,7 +323,8 @@ def _cost(table) -> dict:
     if not 0 <= share <= 1:
         raise Invalid(f"cost.share_only_on_success: must be between 0 and 1, got {share:g}")
     year = _integer(table["year"], "cost.year")
-    usd_per(currency, year)                     # Invalid if there is no rate for the year
+    from . import prices                        # (imported here: prices imports this module)
+    prices.to_base_inr(1.0, currency, year)     # Invalid if either table lacks the year
     return dict(cost_once=once, cost_annual=annual, cost_currency=currency, cost_year=year,
                 cost_share_only_on_success=share)
 

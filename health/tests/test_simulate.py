@@ -3,7 +3,8 @@ import dataclasses
 import numpy as np
 import pytest
 
-from airhealth import charts, cli, curves, impact, intervention, lifetable, paths, report, simulate
+from airhealth import (charts, cli, curves, impact, intervention, lifetable, paths, prices, report,
+                       simulate)
 from airhealth.intervention import Dist, Invalid
 from airhealth.places import resolve
 
@@ -144,12 +145,29 @@ def test_life_years_are_steady_state_times_realised_years():
     assert run.shares[1] == pytest.approx(0.5 * 0.425 + 0.5 * 0.30)
 
 
-def test_cost_converted_at_the_years_rate():
+def test_cost_is_in_2025_rupees_and_dollars_at_the_2025_rate():
     iv = fixed(-10, cost_once=Dist.fixed(0), cost_annual=Dist.fixed(1e8), cost_year=2024,
                duration_years=10)
     run = simulate.run(iv, curves=["loglinear_jaganathan"], n=10)
-    cost = run.per_curve["loglinear_jaganathan"].cost_usd
-    assert cost == pytest.approx(np.full(10, 1e9 / 83.669281580941))
+    r = run.per_curve["loglinear_jaganathan"]
+    d = prices.deflator()
+    assert r.cost_inr == pytest.approx(np.full(10, 1e9 * d[2025] / d[2024]))
+    assert r.cost_usd == pytest.approx(r.cost_inr * prices.usd_per_base_inr())
+    assert run.usd_per_unit == prices.usd_per_base_inr()
+
+
+def test_summary_gives_rupee_ratios():
+    iv = fixed(-10, cost_once=Dist.fixed(1e9), cost_annual=Dist.fixed(0), p_success=0.5,
+               cost_share_only_on_success=0.0)
+    s = simulate.run(iv, curves=["loglinear_jaganathan"], n=50).per_curve[
+        "loglinear_jaganathan"].summary()
+    assert s["cost_inr"]["mean"] == pytest.approx(1e9)
+    assert s["inr_per_life_year_if_works"] == pytest.approx(1e9 / s["life_years"]["mean"])
+    assert s["life_years_per_crore_if_works"] == pytest.approx(s["life_years"]["mean"] / 100)
+    assert s["expected_life_years_per_crore"] == pytest.approx(
+        0.5 * s["life_years"]["mean"] / 100)    # all of the cost is spent either way
+    assert s["expected_inr_per_expected_life_year"] == pytest.approx(
+        2 * s["inr_per_life_year_if_works"])
 
 
 def test_cost_year_outside_the_table_is_invalid(tmp_path):
@@ -159,11 +177,15 @@ def test_cost_year_outside_the_table_is_invalid(tmp_path):
         intervention.load(tmp_path / "x.toml")
 
 
-def test_dollar_costs_need_no_rate(tmp_path):
-    text = (IV / "november_only_delhi.toml").read_text().replace(
-        'currency = "INR"\nyear = 2025', 'currency = "USD"\nyear = 1990')
-    (tmp_path / "x.toml").write_text(text)
-    assert intervention.load(tmp_path / "x.toml").cost_year == 1990
+def test_dollar_costs_need_a_rate_and_a_deflator_for_their_year(tmp_path):
+    text = (IV / "november_only_delhi.toml").read_text()
+    (tmp_path / "x.toml").write_text(text.replace(
+        'currency = "INR"\nyear = 2025', 'currency = "USD"\nyear = 2012'))
+    assert intervention.load(tmp_path / "x.toml").cost_year == 2012
+    (tmp_path / "y.toml").write_text(text.replace(
+        'currency = "INR"\nyear = 2025', 'currency = "USD"\nyear = 1990'))
+    with pytest.raises(Invalid, match=r"^cost\.year"):
+        intervention.load(tmp_path / "y.toml")
 
 
 def test_sampled_target_and_result_never_below_zero():

@@ -242,7 +242,7 @@ loglinear_vodonos        281,000 (195,000 to 363,000)       16,900 (11,700 to 21
 gemm_ncd_lri                82,000 (69,600 to 94,600)          4,920 (4,180 to 5,670)         +0.09 (+0.08 to +0.11)
 aqli *                339,000 (no published interval)  16,400 (no published interval)  +0.32 (no published interval)
 
-Expected = mean if it works × probability it works (0.5). Cost if it works: $18.2 M ($5.78 M to $61.6 M), 2025 prices, ₹87.16 per $ (World Bank 2025 average), no inflation adjustment; all of it spent whether or not it works.
+Expected = mean if it works × probability it works (0.5). Cost if it works: $18.2 M ($5.78 M to $61.6 M), in 2025 rupees, ₹87.16 per $ (World Bank 2025 average); all of it spent whether or not it works.
 curve                 expected life-years  cost per life-year if it works  expected cost per expected life-year
 --------------------  -------------------  ------------------------------  ------------------------------------
 loglinear_jaganathan              192,000                           $61.7                                  $123
@@ -283,10 +283,13 @@ How to read it:
 - **Two cost figures.** *Cost per life-year if it works* is mean cost over mean life-years,
   given success. *Expected cost per expected life-year* charges the cost that is spent
   whether or not it works against the life-years you can expect. By default the whole cost
-  is spent either way, so the second is the first divided by the probability. Rupees become
-  dollars at the World Bank's annual average rate for the file's price year
-  (`data/fx_inr_usd.csv`, 2000-2025). There is **no inflation adjustment**: a 2015-price
-  file is reported in 2015 dollars.
+  is spent either way, so the second is the first divided by the probability. All costs are
+  turned into **2025 rupees**: a rupee cost is scaled by how much India's prices rose from the
+  file's price year to 2025 (the World Bank's GDP deflator, `data/gdp_deflator_ind.csv`); a
+  dollar cost is first turned into rupees at the World Bank's annual average rate for its own
+  price year (`data/fx_inr_usd.csv`), then scaled the same way. Years 2000-2025 are covered.
+  Dollars shown are 2025 rupees at the 2025 rate. The JSON also gives rupees per life-year and
+  life-years per crore (1 crore = 10 million rupees).
 - **What drives the spread.** Each part is sampled alone with the other held at its median,
   and its share of the variance is shown. In this file the PM2.5 change is a fixed number,
   so all of the spread within a curve comes from the curve's own published uncertainty.

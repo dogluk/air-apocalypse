@@ -19,10 +19,13 @@ lag profile itself. Deaths postponed and life-years over the run are the steady-
 figures times the sum of those shares. Years after duration_years count for nothing, in
 either direction; nothing is discounted.
 
-Cost if it works = (once + annual × duration_years), in dollars at the cost year's rate.
+Cost if it works = (once + annual × duration_years), in 2025 rupees (prices.to_base_inr: the
+GDP deflator, and for dollar costs the rate of the cost year); dollars shown are those rupees at
+the 2025 rate.
 Expected cost = that × (1 − s + s × p_success), s = cost_share_only_on_success. The two
 cost-effectiveness figures are ratios of means over draws: mean cost / mean life-years if
-it works, and expected cost / expected life-years.
+it works, and expected cost / expected life-years. Also given in rupees: rupees per life-year,
+and life-years per crore (1 crore = 1e7 rupees).
 
 spread: the share of variance in life-years from the PM2.5 change and from the curve
 parameters, each measured by sampling that group alone with the other at its median (the
@@ -37,7 +40,7 @@ from itertools import combinations
 import numpy as np
 
 from . import curves as curves_
-from . import exposure, impact, intervention, months
+from . import exposure, impact, intervention, months, prices
 from . import lag as lags
 from .curves import Curve
 from .inputs import Sources
@@ -54,7 +57,8 @@ class CurveRun:
     life_years: np.ndarray        # over the run
     deaths_postponed: np.ndarray  # over the run
     e0_change_years: np.ndarray   # population-weighted, at full effect
-    cost_usd: np.ndarray          # the whole cost, if it works
+    cost_inr: np.ndarray          # the whole cost, if it works, in 2025 rupees
+    cost_usd: np.ndarray          # the same, in dollars at the 2025 rate
     pm25_after: np.ndarray        # population-weighted annual mean at full effect, µg/m³
     p_success: float
     cost_share_only_on_success: float
@@ -63,19 +67,29 @@ class CurveRun:
 
     def summary(self) -> dict:
         out = {}
-        for k in ("life_years", "deaths_postponed", "e0_change_years", "cost_usd"):
+        for k in ("life_years", "deaths_postponed", "e0_change_years", "cost_usd", "cost_inr"):
             a = getattr(self, k)
             out[k] = dict(median=float(np.median(a)), p5=float(np.percentile(a, 5)),
                           p95=float(np.percentile(a, 95)), mean=float(np.mean(a)))
         p, s = self.p_success, self.cost_share_only_on_success
         mean_ly, mean_cost = float(np.mean(self.life_years)), float(np.mean(self.cost_usd))
+        mean_inr = float(np.mean(self.cost_inr))
         expected_ly = p * mean_ly
         expected_cost = mean_cost * (1 - s + s * p)
+        expected_inr = mean_inr * (1 - s + s * p)
+        crore = 1e7
         out.update(
             p_success=p, expected_life_years=expected_ly, expected_cost_usd=expected_cost,
             cost_per_life_year_if_works=mean_cost / mean_ly if mean_ly > 0 else None,
             expected_cost_per_expected_life_year=(expected_cost / expected_ly
-                                                  if expected_ly > 0 else None))
+                                                  if expected_ly > 0 else None),
+            expected_cost_inr=expected_inr,
+            inr_per_life_year_if_works=mean_inr / mean_ly if mean_ly > 0 else None,
+            expected_inr_per_expected_life_year=(expected_inr / expected_ly
+                                                 if expected_ly > 0 else None),
+            life_years_per_crore_if_works=mean_ly * crore / mean_inr if mean_inr > 0 else None,
+            expected_life_years_per_crore=(expected_ly * crore / expected_inr
+                                           if expected_inr > 0 else None))
         return out
 
 
@@ -91,7 +105,7 @@ class Run:
     deaths_baseline: float          # all-cause deaths a year in the places
     pm25_before: float              # population-weighted, µg/m³
     shares: np.ndarray              # share of the full effect realised in each year
-    usd_per_unit: float             # dollars per unit of the cost currency
+    usd_per_unit: float             # dollars per 2025 rupee
     fallback_states: list[str]
     unavailable: dict[str, str]     # curves asked for that could not run, with why
     deaths_model: float = 0.0       # all-cause deaths a year before reconciliation to the SRS
@@ -202,10 +216,12 @@ def run(iv: Intervention, map_name: str = "aqli", curves: list[str] | None = Non
 
     q = _rng(seed, 0).random(n)
     median_q = np.full(n, 0.5)
-    usd = intervention.usd_per(iv.cost_currency, iv.cost_year)
+    usd = prices.usd_per_base_inr()
     cost_rng = _rng(seed, 1)
-    cost_usd = (iv.cost_once.sample(cost_rng, n)
-                + iv.cost_annual.sample(cost_rng, n) * iv.duration_years) * usd
+    cost_inr = prices.to_base_inr(
+        iv.cost_once.sample(cost_rng, n) + iv.cost_annual.sample(cost_rng, n) * iv.duration_years,
+        iv.cost_currency, iv.cost_year)
+    cost_usd = cost_inr * usd
     shares = realised_shares(iv)
     years = shares.sum()
 
@@ -222,7 +238,7 @@ def run(iv: Intervention, map_name: str = "aqli", curves: list[str] | None = Non
         total = sum(var.values())
         per_curve[curve.name] = CurveRun(
             curve=curve, life_years=joint.yll * years, deaths_postponed=joint.deaths * years,
-            e0_change_years=joint.e0_change, cost_usd=cost_usd, pm25_after=joint.pm25_after,
+            e0_change_years=joint.e0_change, cost_inr=cost_inr, cost_usd=cost_usd, pm25_after=joint.pm25_after,
             p_success=iv.p_success, cost_share_only_on_success=iv.cost_share_only_on_success,
             spread={k: v / total if total > 0 else 0.0 for k, v in var.items()},
             widths={k: _width(v) for k, v in alone.items()})
