@@ -152,9 +152,10 @@ Written while building `home_purifiers`, `school_purifiers`, `n95_winter` and `s
 - **How many people would wear a free N95 every time they go out.** `n95_winter` has no wear or adherence figure; it is folded into the
   odds as a judgement. Would settle it: an Indian or Chinese study of sustained mask wear among people given masks free during pollution
   episodes (wear diaries or sensors), not one-off surveys.
-- **Children's share of air-pollution deaths, for school measures.** Not a missing input but a gap in the engine: an exposure measure's
-  covered people are given the city's all-age death rates, so `school_purifiers`, which covers only children, has its life-years
-  overstated. Would settle it: letting an exposure measure name the ages it covers.
+- **Children's share of air-pollution deaths, for school measures.** Closed by commit 5a39e2d: an exposure measure can name the
+  ages it covers (`[exposure] ages`), and `school_purifiers` (ages 5-19) is now scored with that group's own death rates and costed
+  for that group alone. Still open: `n95_winter` (outdoor workers) names no age group, so it uses all-age death rates. Would settle
+  it: an age split of Bengaluru's outdoor workers (PLFS tables by age and occupation), read at source.
 
 ## Regional measures: published source-receptor results not usable (2026-11-27)
 
@@ -172,7 +173,7 @@ flagged "sector from every origin, not only the named states".
   ch. 13, https://www.ncbi.nlm.nih.gov/books/NBK525204/). Not read: PNAS returned 403, Europe PMC's full text (PMC7865184) returned a
   server error twice, and NCBI Bookshelf served a bot check. Whether it or its data release gives the PM2.5 change by receiving
   district is not known. Would settle it: the paper's SI and data release, read.
-  **Update (Task 11, 2026-11-27):** the paper and its SI Appendix were read from co-author Guttikunda's site (urbanemissions.info).
+  **Update (2026-11-27):** the paper and its SI Appendix were read from co-author Guttikunda's site (urbanemissions.info).
   The SI gives the PM2.5 the 2018 plants add by STATE (Table S2), not by district; that is now
   data/receptor_power_cropper2021.csv (each district takes its state's figure) and fgd_scrubbers uses it. The gridded results are in
   the data release, openICPSR project 130404 (doi 10.3886/E130404V1, cited in the paper's Data Availability), which served a
@@ -181,7 +182,7 @@ flagged "sector from every origin, not only the named states".
 - **A power-only gridded field.** McDuffie's ENEcoal (used for receptor_energy_coal.csv) is "Energy Production (coal combustion only)",
   which the README says also holds fuel production and transformation, so it is wider than power plants. A power-plant-only zero-out
   run (GBD MAPS India stays local-only here) would replace it.
-- **Lan et al. 2022's supplementary files (Task 11, 2026-11-27).** All twelve were downloaded from the Nature page and opened
+- **Lan et al. 2022's supplementary files (2026-11-27).** All twelve were downloaded from the Nature page and opened
   (Supplementary Tables 1-11 as xlsx, the SI PDF). Every exposure table has the one India-wide receptor: Table 2 and 3 by source state,
   Table 9 the source-state contributions to India's exposure for 2015-19 (Punjab 4.0 of 7.7 µg/m³ in 2019). None gives a receiving
   district. Table 9's source-state shares are what the stubble measures use to take Punjab's (and Haryana's) part of the McDuffie
@@ -222,7 +223,7 @@ flagged "sector from every origin, not only the named states".
   claimed (which the Indian Express found began before the seeding), clouds one day in ten, and Rs 20-30 crore for a winter. Would
   settle it: the trial report submitted to the Delhi Environment Department, or the parliamentary answers on its cost.
 
-## Measures kept to one city: the per-city source that would widen each (plan D Task 5, 2026-11-27)
+## Measures kept to one city: the per-city source that would widen each (2026-11-27)
 
 A measure goes beyond its one city only when none of its numbers is that city's: the cut a fraction of a cause's share (or an
 exposure's hours and cut) read from a source not about the city alone, the cost per person, household or unit at a price not tied

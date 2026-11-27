@@ -14,7 +14,7 @@ what can be learned about Bengaluru's air before ranking anything across cities:
    with what each can and cannot see (outside air, secondary particles).
 3. **What it does to health.** Deaths and life-years today on every curve, and what a few
    round changes (e.g. to 20, to the national standard, to WHO's 5) would buy.
-4. **What could work, and what it would buy.** Measures from the measure library (plan C) that
+4. **What could work, and what it would buy.** Measures from the measure library that
    apply to Bengaluru, each scored on every curve with cost per life-year where the cost is
    known.
 
@@ -25,8 +25,8 @@ shown, never averaged away.
 
 - One city first; the other cities follow later with the same machinery.
 - An HTML page to start with, in four chapters in the order above.
-- Chapter 4 uses the same measure files as the 50-city ranking (plan C writes Bengaluru's
-  measures first), so nothing is built twice.
+- Chapter 4 uses the same measure files as the 50-city ranking (Bengaluru's
+  measures were written first), so nothing is built twice.
 
 ## Modelling calls (not yet reviewed)
 
@@ -34,10 +34,10 @@ shown, never averaged away.
   rebuilt and every number traces to the tool or a cited source. No hand-typed numbers.
 - Ground truth uses the CPCB hourly compilation already used by `diwali/` (all stations in
   Bengaluru, 2016-2025), with each station's coverage shown.
-- Chapters 1-3 can be built before plan C finishes; chapter 4 says plainly which measures are
+- Chapters 1-3 can be built before the measure library is finished; chapter 4 says plainly which measures are
   not yet in the library.
 
 ## Not in scope
 
-Other cities; a ranking across cities (plan D); illness (only deaths and life-years, as in the
+Other cities; a ranking across cities (built separately, `airhealth rank`); illness (only deaths and life-years, as in the
 rest of the tool); a public web page on dogl.uk (later).

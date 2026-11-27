@@ -79,7 +79,7 @@ def test_bengaluru_exposure_measure_is_sourced(mid):
 
 @pytest.mark.parametrize("mid", BENGALURU_EXPOSURE)
 def test_exposure_odds_say_how_they_compare_and_why(mid):
-    """Lower odds for exposure measures are a guideline, not a rule (controller ruling): each
+    """Lower odds for exposure measures are a guideline, not a rule (a ruling of 2026-11-27): each
     basis must say how it compares with the air measures and speak to adoption or use."""
     basis = measures.library()[mid].p_success_basis.lower()
     assert basis
@@ -128,7 +128,7 @@ def test_regional_measure_is_sourced(mid):
 
 @pytest.mark.parametrize("mid", STUBBLE)
 def test_stubble_measures_carry_the_fallback_flag(mid):
-    """The stubble table is a stand-in for a published source-receptor result (Task 10), about
+    """The stubble table is a stand-in for a published source-receptor result, about
     14 times smaller than Lan et al. 2022's national figure: every result says so."""
     m = measures.library()[mid]
     assert m.region.receptor == "receptor_stubble.csv"
@@ -247,7 +247,7 @@ def test_school_purifiers_reach_children_only():
     assert "age_group" in {f.code for f in s.flags}
 
 
-# ---- Measures for every city where their numbers transfer (plan D Task 5) ----
+# ---- Measures for every city where their numbers transfer ----
 # Rule: a measure is widened only when (a) its cut (or exposure hours and cut) is read from a
 # source not about its one city alone, (b) its cost is per person, household or unit at a price
 # not tied to that city's contract or budget, with no count of that city's units, and (c) its

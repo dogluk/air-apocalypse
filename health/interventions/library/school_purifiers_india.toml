@@ -25,7 +25,7 @@ p_success_basis = "judgement: the same as Bengaluru's school purifiers (school_p
 placeholders = []
 
 notes = """
-The general variant of school_purifiers (Bengaluru), for the other 49 cities (plan D, 2026-11-27).
+The general variant of school_purifiers (Bengaluru), for the other 49 cities (2026-11-27).
 The measure is the same: every classroom gets a HEPA purifier, run by the teacher during lessons
 with doors and windows shut, for five years (a design choice). Only children in class breathe
 less, and only during school hours.

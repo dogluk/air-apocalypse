@@ -533,7 +533,7 @@ def india(*, map_name="acag_total", curves=None, n=2000, seed=0, discount=simula
     causes.known_cities(), sorted. progress(city) is called before each city is scored.
 
     Speed: timed 2026-11-27 on the maintainer's laptop, india(n=500) over all 50 cities and the
-    real library (21 measures, 4 regional), the eight curves open with IHME files present:
+    real library (21 measures at the time, 4 regional), the eight curves open with IHME files present:
     564 s. 518 s of it is the four whole-reach runs (score.region, once each); the 50 cities
     take 45 s together. The sensitivity reruns should reuse the reaches, not rerun them.
     """

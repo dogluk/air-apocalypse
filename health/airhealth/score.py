@@ -535,8 +535,9 @@ def region(measure: str, *, map_name: str = "acag_total", curves: list[str] | No
     Speed: one run is one steady-state calculation per district per curve (three per curve for
     the spread). Timed 2026-11-27 on the maintainer's laptop: receptor_stubble.csv (735 districts),
     n = 1000, the eight curves open with IHME files present: 136 s, over the two minutes the plan
-    allowed (n = 100 took 128 s, so the time is per-district work, not draws). Left for plan D to
-    decide; no district is dropped to make it faster.
+    allowed (n = 100 took 128 s, so the time is per-district work, not draws). Accepted for the
+    ranking (rank.india runs it once per regional measure); no district is dropped to make it
+    faster.
 
     monthly_curves: a regional change is a delta, and month by month applies to percent changes
     only, so the Score is not_scored and nothing is run. library: as in city()."""

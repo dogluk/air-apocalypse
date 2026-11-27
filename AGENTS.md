@@ -89,8 +89,11 @@ Not solid, and you should say so when you use a result:
   `airhealth score --region ID` score them on every curve, in life-years per crore of 2025
   rupees. Read the flags: `partial_cost` (the cost leaves part out), `upper_bound_all_origins`,
   `receptor_fallback` (the regional tables are stand-ins), `long_shot`, `placeholder`,
-  `odds_judgement`. Known gaps: the regional source-receptor tables are fallbacks, and exposure
-  measures for a sub-group (school purifiers, masks for workers) use everyone's death rates. See "Measures" in `health/README.md` and the
+  `odds_judgement`. Known gaps: the regional source-receptor tables are fallbacks (the crop-burning
+  one is about 14 times smaller than Lan et al. 2022's national figure, so stubble measures are likely
+  understated; it is not scaled, by rule 5), and masks for workers (`n95_winter`) use all-age death
+  rates, because the file names no age group (school purifiers name theirs, `ages = [5, 19]`, and are
+  scored with that group's own death rates). See "Measures" in `health/README.md` and the
   design: [`docs/specs/2026-11-12-intervention-ranking-design.md`](docs/specs/2026-11-12-intervention-ranking-design.md).
 
 ## Open work, roughly smallest first
@@ -118,10 +121,11 @@ check.
 4. **Reproduce GBD's India count.** Download GBD 2023's household air pollution estimates
    (GHDx record 594794; no login needed for that file), apply GBD's split between outdoor
    air and cooking smoke, and see how much of the gap above it explains.
-5. **The ranking** (the large one): `airhealth rank` over the library, all-India and per city.
-   "Next, in order" in `docs/STATUS.md`. Talk to the maintainer before starting. A smaller step
-   is one more library measure from `health/interventions/library/_template.toml`, or closing
-   one of its leads in `health/data/MISSING.md`.
+5. **Make the ranking firmer.** `airhealth rank` exists (all-India and per city, one table per
+   curve, with `--sensitivity`); its weakest inputs are the regional source-receptor tables, which
+   are stand-ins (see `health/data/MISSING.md`, "Regional measures"). Replace one with a published
+   district-level result, or write one more library measure from
+   `health/interventions/library/_template.toml`, or close one of its leads in MISSING.md.
 
 Other gaps nobody has worked on are in `lit/gaps.md` (G2 to G7).
 
