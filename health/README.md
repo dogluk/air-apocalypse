@@ -551,6 +551,24 @@ curves, studies or maps.
   time and run in `--jobs` processes (default: every CPU). `--write` adds
   `sensitivity_<place>.json/.csv`.
 
+### Static files for a website
+
+```
+cd health
+../.venv/bin/python scripts/export_site_data.py            # every city with a rank output, plus Bengaluru's score
+../.venv/bin/python scripts/export_site_data.py --city Agra --n 500   # one city, ranked now if it has no output
+```
+
+Writes compact JSON into `health/out/site/` (git-ignored; never committed) that a web page can
+read without running the model: `ranking/<city>.json` (one table per curve), `score/bengaluru.json`
+(every measure on every curve; `--skip-score` leaves it out), `sensitivity/<place>.json` (the
+research lists, if `rank PLACE --sensitivity --write` was run), and `index.json`. Every file is
+`{generated, commit, sources, data}`: when it was written, the commit of the code, and a sentence
+saying what it was made from. A ranking is read from `out/rank/rank_<city>.json` when that
+exists (`airhealth rank CITY --write`); otherwise it runs for that city alone and scores only the
+city measures, so regional measures (stubble, power plants) have no ratio; `--with-regions` adds
+the whole-region run, which takes minutes. The long per-row audit trail is left out of these files.
+
 ## Writing an intervention file
 
 Copy `interventions/_template.toml`; every field is explained there. A mistake is reported
@@ -905,6 +923,6 @@ data_local/       IHME files, never committed (git-ignored); read by airhealth/i
 interventions/    the template and four examples
 benchmarks/       cases.toml, run.py, README.md (generated)
 charts/           charts drawn by the commands above
-scripts/          the scripts that build data/ from the sources
+scripts/          the scripts that build data/ from the sources, and export_site_data.py
 tests/            pytest
 ```
