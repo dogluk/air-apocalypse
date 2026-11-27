@@ -192,9 +192,9 @@ def _footer(maps, fallback: list[str], unavailable: dict[str, str], notes=()) ->
     by_reason = defaultdict(list)
     for name, reason in unavailable.items():
         by_reason[reason].append(name)
-    for reason, names in by_reason.items():
-        parts.append(f"Not run: {', '.join(names)}: {reason}.")
-    return " ".join(parts)
+    # Curves that did not run go on their own line, so a reader can tell five rows from eight.
+    skipped = [f"Not run: {', '.join(names)}: {reason}." for reason, names in by_reason.items()]
+    return "\n".join(x for x in [" ".join(parts), *skipped] if x)
 
 
 def table(impacts: list[Impact], unavailable: dict[str, str] | None = None,

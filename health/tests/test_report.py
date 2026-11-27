@@ -120,3 +120,9 @@ def test_sig_never_prints_negative_zero():
 def test_borrowed_evidence_has_a_code_and_a_legend_line():
     assert report.FLAG_CODES["borrowed_evidence"] == "BE"
     assert "BE" in report.FLAG_LEGEND and "another place" in report.FLAG_LEGEND["BE"]
+
+
+def test_curves_not_run_get_their_own_line():
+    # A reader must tell five rows from eight: skipped curves are named on a line of their own.
+    text = report._footer([], [], {"gbd2019": "need IHME files", "gbd2023": "need IHME files"})
+    assert text.splitlines()[-1] == "Not run: gbd2019, gbd2023: need IHME files."
