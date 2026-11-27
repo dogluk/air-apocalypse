@@ -14,7 +14,8 @@ cities = ["Delhi", "Mumbai", "Kolkata", "Chennai", "Hyderabad", "Ahmedabad", "Pu
           "Coimbatore", "Dehradun", "Indore", "Kanpur", "Kochi", "Ludhiana", "Nagpur", "Patna",
           "Raipur-Durg-Bhilai", "Ranchi"]
 
-evidence_from = "Delhi (and field studies worldwide)"   # where the numbers come from, when not this city
+evidence_from = ["Delhi"]
+evidence_note = "and field studies worldwide"   # where the numbers come from, when not this city
 start_year = 2027
 ramp_years = 0
 duration_years = 5

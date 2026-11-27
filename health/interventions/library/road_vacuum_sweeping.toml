@@ -5,7 +5,7 @@ scope = "city"
 who_reaches = "everyone in Bengaluru, through the outdoor air"
 cities = ["Bengaluru"]
 
-evidence_from = "Delhi-NCR"   # where the numbers come from, when not this city
+evidence_from = ["Delhi-NCR"]   # where the numbers come from, when not this city
 start_year = 2027
 ramp_years = 0
 duration_years = 7          # the length of the Greater Bengaluru Authority's rental contract

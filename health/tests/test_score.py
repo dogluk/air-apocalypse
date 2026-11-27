@@ -313,20 +313,58 @@ def test_region_is_not_scored_month_by_month():
 
 # ---- borrowed evidence: a measure whose numbers come from a study of another place ----
 
-def _with_evidence_from(tmp_path, value):
+def _with_evidence_from(tmp_path, value, note=None):
     text = (FIXTURES / "air_dust.toml").read_text()
-    text = text.replace('cities = "all"\n', f'cities = "all"\nevidence_from = "{value}"\n', 1)
+    extra = f'evidence_note = "{note}"\n' if note else ""
+    text = text.replace('cities = "all"\n',
+                        f'cities = "all"\nevidence_from = {json.dumps(value)}\n{extra}', 1)
     (tmp_path / "borrowed.toml").write_text(text)
     return measures.load(tmp_path / "borrowed.toml")
 
 
 def test_evidence_from_is_read_and_defaults_to_nothing(tmp_path):
-    assert fx("air_dust").evidence_from == ""
-    assert _with_evidence_from(tmp_path, "Delhi-NCR").evidence_from == "Delhi-NCR"
+    assert fx("air_dust").evidence_from == () and fx("air_dust").evidence_note == ""
+    assert _with_evidence_from(tmp_path, ["Delhi-NCR"]).evidence_from == ("Delhi-NCR",)
+    assert _with_evidence_from(tmp_path, "Delhi-NCR").evidence_from == ("Delhi-NCR",)   # one name
+    m = _with_evidence_from(tmp_path, ["Delhi", "Ludhiana"], "and field studies worldwide")
+    assert m.evidence_from == ("Delhi", "Ludhiana")
+    assert m.evidence_note == "and field studies worldwide"
+
+
+def test_evidence_from_must_be_a_list_of_names(tmp_path):
+    with pytest.raises(measures.Invalid, match="evidence_from"):
+        _with_evidence_from(tmp_path, [])
+    with pytest.raises(measures.Invalid, match="evidence_from"):
+        _with_evidence_from(tmp_path, ["Delhi", "delhi"])
+
+
+@pytest.mark.parametrize("evidence, place, borrowed", [
+    (["Delhi-NCR"], "Delhi", False),
+    (["Delhi-NCR"], "Bengaluru", True),
+    (["Delhi-NCR", "Ludhiana"], "Ludhiana", False),     # "Delhi-NCR and Ludhiana" as one string
+    (["Delhi-NCR", "Ludhiana"], "Delhi", False),        # missed the NCR with the old "and"
+    (["Delhi-NCR", "Ludhiana"], "Amritsar", True),
+    (["Delhi"], "Delhi", False),                        # purifiers: "(and field studies ...)"
+    (["Delhi"], "Bengaluru", True),
+    (["Dhaka", "Delhi"], "Delhi", False),
+    (["Punjab"], "Ludhiana", False),                    # its state
+    (["Delhi Cantonment"], "Delhi", True),              # not a prefix match
+])
+def test_borrowed_evidence_matches_whole_place_names(tmp_path, evidence, place, borrowed):
+    m = _with_evidence_from(tmp_path, evidence)
+    *_, flags, _ = score.compile(m, place, study=None)
+    assert ("borrowed_evidence" in codes(flags)) is borrowed
+
+
+def test_borrowed_evidence_sentence_names_the_places_and_the_note(tmp_path):
+    m = _with_evidence_from(tmp_path, ["Dhaka", "Delhi"], "and field studies worldwide")
+    *_, flags, _ = score.compile(m, "Bengaluru", study="apna_2015")
+    text = [f.text for f in flags if f.code == "borrowed_evidence"][0]
+    assert "Dhaka and Delhi (and field studies worldwide), not from Bengaluru" in text
 
 
 def test_borrowed_evidence_flag_names_both_places(tmp_path):
-    m = _with_evidence_from(tmp_path, "Delhi-NCR")
+    m = _with_evidence_from(tmp_path, ["Delhi-NCR"])
     *_, flags, _ = score.compile(m, "Bengaluru", study="apna_2015")
     f = [f for f in flags if f.code == "borrowed_evidence"]
     assert len(f) == 1 and "Delhi-NCR" in f[0].text and "Bengaluru" in f[0].text

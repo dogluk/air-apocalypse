@@ -5,7 +5,8 @@ scope = "city"
 who_reaches = "households in the city that accept a free purifier, while it is running"
 cities = "all"
 
-evidence_from = "Dhaka and Delhi (and field studies worldwide)"   # where the numbers come from, when not this city
+evidence_from = ["Dhaka", "Delhi"]
+evidence_note = "and field studies worldwide"   # where the numbers come from, when not this city
 start_year = 2027
 ramp_years = 0
 duration_years = 5

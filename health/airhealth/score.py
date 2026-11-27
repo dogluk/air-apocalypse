@@ -135,11 +135,34 @@ def _months_of(text: str) -> tuple[int, ...]:
     return ALL_MONTHS if text == "1-12" else tuple(sorted(int(m) for m in text.split(",")))
 
 
-def _is_evidence_place(evidence_from: str, place: places.Place) -> bool:
-    """True when the evidence is from this place itself ("Delhi", or a region named for it,
-    "Delhi-NCR")."""
-    a, b = evidence_from.strip().lower(), place.name.lower()
-    return a == b or a.startswith(b + "-")
+# Named regions a measure's evidence can come from, and the places in them. National Capital
+# Region: only Delhi is among the fifty cities; the others are districts (data/places.csv).
+REGIONS = {"delhi ncr": ("Delhi", "Gurugram", "Faridabad", "Ghaziabad")}
+
+
+def _is_evidence_place(evidence_from, place: places.Place) -> bool:
+    """True when the place is one the evidence comes from. evidence_from is a list of place
+    names (a plain string is a list of one); a name matches the place itself or its state, by
+    whole name (never as a prefix: "Delhi" does not match "Delhi Cantonment"), and a named
+    region (REGIONS, e.g. "Delhi-NCR") matches each place in it."""
+    names = [evidence_from] if isinstance(evidence_from, str) else list(evidence_from)
+    mine = {places.norm(place.name)}
+    if place.state:
+        mine.add(places.norm(place.state))
+    for name in names:
+        key = places.norm(name)
+        if key in mine or any(places.norm(p) == places.norm(place.name)
+                              for p in REGIONS.get(key, ())):
+            return True
+    return False
+
+
+def _evidence_sentence(m: Measure) -> str:
+    """The places the evidence comes from, in words: "Delhi-NCR and Ludhiana (and field studies
+    worldwide)"."""
+    names = list(m.evidence_from)
+    where = names[0] if len(names) == 1 else ", ".join(names[:-1]) + " and " + names[-1]
+    return f"{where} ({m.evidence_note})" if m.evidence_note else where
 
 
 def _fixed_flags(m: Measure, place: places.Place | None) -> list[Flag]:
@@ -181,7 +204,7 @@ def _fixed_flags(m: Measure, place: places.Place | None) -> list[Flag]:
         out.append(Flag("partial_cost", m.cost.partial))
     if m.evidence_from and place is not None and not _is_evidence_place(m.evidence_from, place):
         out.append(Flag("borrowed_evidence", f"Some of the evidence for this measure comes from "
-                                             f"{m.evidence_from}, not from {place.name}; the "
+                                             f"{_evidence_sentence(m)}, not from {place.name}; the "
                                              "measure's notes say which numbers."))
     shape = months.shape(place) if place is not None else None
     if shape is not None and shape.borrowed:

@@ -5,7 +5,7 @@ scope = "city"
 who_reaches = "everyone in the city, through the outdoor air"
 cities = "all"
 
-evidence_from = "Delhi-NCR"   # where the numbers come from, when not this city
+evidence_from = ["Delhi-NCR"]   # where the numbers come from, when not this city
 start_year = 2027
 ramp_years = 3
 duration_years = 10

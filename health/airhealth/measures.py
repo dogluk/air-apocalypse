@@ -47,7 +47,7 @@ TARGETABLE = tuple(c for c in causes.HARMONISED if c not in NOT_TARGETABLE)
 
 TOP_KEYS = ("name", "kind", "scope", "who_reaches", "cities", "min_share_pct", "start_year",
             "ramp_years", "duration_years", "lag", "p_success", "p_success_basis", "long_shot",
-            "placeholders", "notes", "evidence_from", "targets", "exposure", "region", "cost", "evidence")
+            "placeholders", "notes", "evidence_from", "evidence_note", "targets", "exposure", "region", "cost", "evidence")
 TARGET_KEYS = ("cause", "cut", "months")
 EXPOSURE_KEYS = ("covered", "hours", "cut", "months", "ages")
 REGION_KEYS = ("receptor", "cut")
@@ -161,8 +161,11 @@ class Measure:
     evidence: tuple[Evidence, ...]
     placeholders: tuple[str, ...]
     notes: str
-    evidence_from: str = ""          # a place whose study the numbers come from ("" = the
-                                     # measure's own place); flags borrowed_evidence elsewhere
+    evidence_from: tuple[str, ...] = ()   # the places whose studies the numbers come from (()
+                                          # = the measure's own place); flags borrowed_evidence
+                                          # in a city that is none of them (score.evidence_places)
+    evidence_note: str = ""          # free text for the flag sentence, e.g. "and field studies
+                                     # worldwide"; never used to decide whether the flag shows
 
     def numbers(self) -> list[str]:
         """Dotted names of every number in the file that the evidence rule covers.
@@ -189,6 +192,22 @@ def _text(value, field: str, *, required: bool = True) -> str:
     if not isinstance(value, str) or not value.strip():
         raise Invalid(f"{field}: must be a non-empty string, got {value!r}")
     return value.strip()
+
+
+def _evidence_places(value) -> tuple[str, ...]:
+    """evidence_from: a list of place names, e.g. ["Delhi-NCR", "Ludhiana"] (one name as a plain
+    string is read as a list of one)."""
+    if value is None:
+        return ()
+    if isinstance(value, str):
+        value = [value]
+    if (not isinstance(value, list) or not value
+            or not all(isinstance(v, str) and v.strip() for v in value)):
+        raise Invalid('evidence_from: must be a list of place names, e.g. ["Delhi-NCR", '
+                      f'"Ludhiana"], got {value!r}')
+    if len({v.strip().lower() for v in value}) != len(value):
+        raise Invalid("evidence_from: a place is listed twice")
+    return tuple(v.strip() for v in value)
 
 
 def _table(value, field: str, keys: tuple[str, ...]) -> dict:
@@ -546,8 +565,10 @@ def parse(t: dict, measure_id: str) -> Measure:
         p_success_basis=basis.strip(), long_shot=long_shot, targets=targets, exposure=exposure,
         region=region, cost=cost,
         evidence=_evidence(t.get("evidence")), placeholders=_placeholders(t.get("placeholders")),
-        notes=notes.strip(), evidence_from=_text(t.get("evidence_from"), "evidence_from",
-                                                 required=False))
+        notes=notes.strip(), evidence_from=_evidence_places(t.get("evidence_from")),
+        evidence_note=_text(t.get("evidence_note"), "evidence_note", required=False))
+    if m.evidence_note and not m.evidence_from:
+        raise Invalid("evidence_note: needs evidence_from (the places it adds to)")
     _evidence_rule(m)
     return m
 
