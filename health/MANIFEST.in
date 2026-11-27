@@ -1,0 +1,4 @@
+graft data
+graft interventions
+prune data_local
+global-exclude *.pyc

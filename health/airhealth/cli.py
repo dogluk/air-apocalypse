@@ -675,7 +675,7 @@ def _parser() -> argparse.ArgumentParser:
                     help="discount rate in percent a year (default 3)")
     rk.add_argument("--monthly-curves", action="store_true", help=MONTHLY_HELP)
     rk.add_argument("--csv", metavar="PATH", help="also write the rows, with their sources, as CSV")
-    rk.add_argument("--write", nargs="?", const=str(paths.HEALTH / "out" / "rank"), default=None,
+    rk.add_argument("--write", nargs="?", const=str(paths.OUT / "rank"), default=None,
                     metavar="DIR", help="write rank_india.json/.csv and one pair per city "
                     "(default health/out/rank/; not committed); with --sensitivity, "
                     "sensitivity_<place>.json/.csv")

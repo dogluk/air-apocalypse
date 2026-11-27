@@ -30,7 +30,7 @@ from .inputs import Sources
 MAPS = ("acag_total", "aqli", "cpcb", "gbd2023")
 BURDEN_MAP = "cpcb"
 TOP = 3
-OUT = paths.HEALTH / "out"
+OUT = paths.OUT
 
 
 def _top(r: rank.Ranking, curve: str, k: int, comparable: bool) -> list[str]:

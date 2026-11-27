@@ -23,7 +23,7 @@ from .inputs import DEMOGRAPHIC, REGISTRY, Sources
 PAGE = Path(__file__).with_name("dashboard.html")
 SHAPES = paths.DATA / "districts.geojson"     # scripts/build_district_shapes.py
 SHAPE_AGE = 60
-OUT = paths.HEALTH / "out" / "rank"      # written by `airhealth rank --write`
+OUT = paths.OUT / "rank"      # written by `airhealth rank --write`
 DASH_N = 500          # draws for a city computed on demand (stated on the page)
 STATE_MAPS = ("aqli", "acag_total", "gbd2019", "gbd2023")   # compared in the exposure table
 
