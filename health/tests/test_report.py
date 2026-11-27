@@ -81,3 +81,19 @@ def test_no_stubble_note_without_a_stubble_row():
     r = _ranking({C1: [_row("a", 5.0), _row("b", 3.0, ("receptor_fallback",))]})
     assert report.STUBBLE_NOTE not in report.rank_table(r)
     assert report.stubble_note([]) == ""
+
+
+def test_regional_group_heading_says_the_cost_is_the_whole_reach():
+    r = _ranking({C1: [_row("a", 5.0), _row("reg", 9.0, scope="region", reach="Bengaluru (region)")]})
+    text = report.rank_table(r)
+    head = text[text.index("Regional measures"):]
+    assert "cost column is the whole reach's" in head.splitlines()[0]
+
+
+def test_measures_listed_apart_on_any_curve_are_listed():
+    # a measure not ranked on the second curve only must still be listed with its reason
+    from dataclasses import replace
+    late = replace(_row("late", 4.0), status="not_scored", reason="it was not run on the curve c2")
+    r = _ranking({C1: [_row("a", 5.0), _row("late", 4.0)], C2: [_row("a", 5.0), late]})
+    text = report.rank_table(r)
+    assert "late (not_scored): it was not run on the curve c2" in text

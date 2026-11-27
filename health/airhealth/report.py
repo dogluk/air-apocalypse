@@ -887,12 +887,17 @@ def rank_table(r) -> str:
             lines += _curve_table(city_rows, False) if city_rows else ["  No city measure is ranked."]
             if region_rows:
                 lines += ["", "Regional measures. Their ratio is over their whole reach, and most of their "
-                          "benefit falls outside this city; their life-years here are only this city's part.",
+                          "benefit falls outside this city; their life-years here are only this city's part, "
+                          "and their cost column is the whole reach's.",
                           *_curve_table(region_rows, True)]
         legend_gaps += [(curve, x) for x in t.rows if x.curve_gap]
 
-    first = next(iter(r.tables.values()), None)
-    rest = [x for x in (first.rows if first else ()) if x.rank is None and not x.curve_gap]
+    rest, seen = [], set()          # every curve's, each measure once (its first curve's reason)
+    for t in r.tables.values():
+        for x in t.rows:
+            if x.rank is None and not x.curve_gap and x.measure not in seen:
+                seen.add(x.measure)
+                rest.append(x)
     for status, title in (("pays_for_itself", "Pays for itself (no rank)"),
                           ("no_cost", "No cost given (no rank)")):
         group = [x for x in rest if x.status == status]
