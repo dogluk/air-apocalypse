@@ -437,3 +437,47 @@ def test_settings_for_makes_several_other_seeds_by_default():
     assert ids == ["seed:1", "seed:2", "seed:3"]
     assert [s.id for s in sensitivity.settings_for("Bengaluru", ["seed"], seeds=1)] == ["seed:1"]
     assert {s.unit for s in sensitivity.settings_for("Bengaluru", ["seed"])} == {"seed"}
+
+
+def test_scaled_receptors_cap_a_district_at_its_own_pm25(tmp_path):
+    (tmp_path / "receptor_x.csv").write_text(
+        "district,state,delta_pm25_full\nFatehabad,Haryana,-2.78\nLudhiana,Punjab,-0.1\n"
+        "Gurugram,Haryana,0\n")
+    have = sensitivity.district_pm25("acag_total")
+    tmp, info = sensitivity.scaled_receptors(tmp_path, "receptor_x.csv", 40.0, "acag_total")
+    try:
+        t = pd.read_csv(tmp / "receptor_x.csv").set_index("district")
+    finally:
+        import shutil
+        shutil.rmtree(tmp, ignore_errors=True)
+    # 40 x 2.78 = 111 is more than Fatehabad has: it is cut back to all of it
+    assert t.loc["Fatehabad", "delta_pm25_full"] == pytest.approx(-have[("Haryana", "Fatehabad")])
+    assert t.loc["Ludhiana", "delta_pm25_full"] == pytest.approx(-4.0)       # 40 x 0.1: fine
+    assert t.loc["Gurugram", "delta_pm25_full"] == 0                           # stays 0
+    assert info["capped"] == 1 and info["districts"] == 2 and info["no_pm25"] == 0
+    assert info["capped_names"] == ["Fatehabad, Haryana (district)"]
+    assert "1 of 2 districts capped" in sensitivity.cap_sentence(info)
+
+
+def test_scaled_receptors_without_a_map_cap_nothing(tmp_path):
+    (tmp_path / "receptor_x.csv").write_text("district,state,delta_pm25_full\n"
+                                              "Fatehabad,Haryana,-2.78\n")
+    tmp, info = sensitivity.scaled_receptors(tmp_path, "receptor_x.csv", 40.0)
+    try:
+        t = pd.read_csv(tmp / "receptor_x.csv")
+    finally:
+        import shutil
+        shutil.rmtree(tmp, ignore_errors=True)
+    assert t.delta_pm25_full.iloc[0] == pytest.approx(-111.2) and info["capped"] == 0
+    assert "no district's change was capped" in sensitivity.cap_sentence(info)
+
+
+def test_stubble_whatif_reports_how_many_districts_were_capped(tmp_path):
+    folder = _whatif_folder(tmp_path)
+    s = sensitivity.run("Bengaluru", inputs=["odds"], folder=folder, n=20, curves=[CURVE],
+                        whatifs=("stubble_lan2022",), seeds=1)
+    stub = s.whatifs[0]
+    assert {"map", "districts", "capped", "no_pm25"} <= set(stub["capped"])
+    assert stub["capped"]["map"] == "acag_total"
+    assert "districts capped" in stub["basis"] and "population-weighted" not in stub["basis"]
+    assert "past its own PM2.5" in stub["label"]

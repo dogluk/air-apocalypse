@@ -587,7 +587,8 @@ curves, studies or maps.
   **labelled what-ifs** run beside the default (`--whatifs`, default both; `none` for none) and
   change nothing else: `whatif:stubble_lan2022` scales the crop-burning source-receptor table up to
   Lan et al. 2022's national figure (the factor is computed from the two figures in the table's
-  fallback note), and `whatif:full_cost` replaces each partial cost that has a sourced
+  fallback note; no district's scaled change goes past its own PM2.5 on the map used, and the
+  output says how many were capped), and `whatif:full_cost` replaces each partial cost that has a sourced
   `[cost.full]` range in its measure file with that range (and with its low and high ends). Each
   reports where its measures land, among all and among comparable measures, on every curve.
   `--n` defaults to 500 here; the whole-reach runs of the regional measures dominate the

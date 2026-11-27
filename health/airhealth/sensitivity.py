@@ -98,7 +98,8 @@ STUBBLE_RECEPTOR = "receptor_stubble.csv"
 WHATIF_LABELS = {
     "stubble_lan2022": ("the crop-burning source-receptor table scaled up to Lan et al. 2022's "
                         "national figure (the factor is the ratio of the two India-wide "
-                        "population-weighted figures in the table's own fallback note)"),
+                        "figures in the table's own fallback note, the same for every district, "
+                        "and no district's change is taken past its own PM2.5 on the map used)"),
     "full_cost": ("full costs, from each measure's sourced [cost.full] range, in place of the "
                   "partial costs (whole range; and fixed at its low and its high end)"),
 }
@@ -515,16 +516,60 @@ def stubble_factor() -> tuple[float, float, float]:
     return big / small, small, big
 
 
-def scaled_receptors(folder: Path, name: str, factor: float) -> Path:
-    """A new temporary folder holding `name` with every delta times `factor`, beside copies of
-    the other receptor files in `folder` (so measure files that read them still find them)."""
+def district_pm25(map_name: str) -> dict[tuple[str, str], float]:
+    """(state, district) -> annual PM2.5 (µg/m³) on a district map, as the map's own table has
+    it. ValueError if the map has no district values."""
+    from . import places
+    t = exposure.cells(places.resolve("India", kind="country"), map_name)
+    return {(r.state, r.unit): float(r.pm25) for r in t.itertuples()}
+
+
+def scaled_receptors(folder: Path, name: str, factor: float,
+                     map_name: str | None = None) -> tuple[Path, dict]:
+    """(a new temporary folder, what was capped). The folder holds `name` with every delta times
+    `factor`, beside copies of the other receptor files in `folder` (so measure files that read
+    them still find them). With map_name, a scaled change is capped at the district's own annual
+    PM2.5 on that map: removing a source cannot take out more PM2.5 than there is. The report:
+    districts (with a change), capped (how many were cut back), capped_names (up to five, the
+    largest scaled change first), no_pm25 (districts the map has no value for; left as scaled,
+    not as zero), and map (None when no map was given: nothing capped)."""
     tmp = Path(tempfile.mkdtemp(prefix="airhealth_whatif_"))
     for f in Path(folder).glob("receptor_*.csv"):
         shutil.copy(f, tmp / f.name)
     t = measures.receptor(name, folder)
-    t = t[list(measures.RECEPTOR_COLUMNS)].assign(delta_pm25_full=t.delta_pm25_full * factor)
+    scaled = t.delta_pm25_full * factor
+    info = dict(map=map_name, districts=int((t.delta_pm25_full != 0).sum()), capped=0,
+                capped_names=[], no_pm25=0)
+    if map_name is not None:
+        have = district_pm25(map_name)
+        over = []
+        for i, r in t.iterrows():
+            p = measures.district(r.district, r.state)
+            ambient = have.get((p.state, p.name))
+            if ambient is None:
+                info["no_pm25"] += int(r.delta_pm25_full != 0)
+            elif -scaled[i] > ambient:
+                over.append((-scaled[i], r.label))
+                scaled[i] = -ambient
+        info["capped"] = len(over)
+        info["capped_names"] = [lab for _, lab in sorted(over, reverse=True)[:5]]
+    t = t[list(measures.RECEPTOR_COLUMNS)].assign(delta_pm25_full=scaled)
     t.to_csv(tmp / name, index=False)
-    return tmp
+    return tmp, info
+
+
+def cap_sentence(c: dict) -> str:
+    """The cap in words, from scaled_receptors' report."""
+    if c["map"] is None:
+        return "no map was given, so no district's change was capped"
+    out = (f"each district's scaled change is capped at its own PM2.5 on the {c['map']} map "
+           f"(a cut cannot remove more than there is): {c['capped']} of {c['districts']} "
+           "districts capped")
+    if c["capped_names"]:
+        out += f" (largest: {', '.join(c['capped_names'])})"
+    if c["no_pm25"]:
+        out += f"; {c['no_pm25']} districts have no PM2.5 on that map and were not capped"
+    return out
 
 
 def full_cost_library(lib: dict, end: str = "range") -> dict:
@@ -755,7 +800,7 @@ def run(place: str = "India", *, inputs: Sequence[str] = INPUTS, map_name="acag_
             factor, small, big = stubble_factor()
             entry.update(factor=factor, basis=(
                 f"factor {big:g} / {small:g} = {factor:.3g}: Lan et al. 2022's India-wide "
-                f"population-weighted PM2.5 from crop burning ({big:g} µg/m³) over the table's own "
+                f"PM2.5 from crop burning ({big:g} µg/m³) over the table's own "
                 f"({small:g} µg/m³), both from {STUBBLE_RECEPTOR}'s fallback note in "
                 "data/sources.toml"))
             ids = [m for m, x in lib.items()
@@ -765,11 +810,13 @@ def run(place: str = "India", *, inputs: Sequence[str] = INPUTS, map_name="acag_
             if not ids:
                 entry["skipped"] = f"no measure scored here reads {STUBBLE_RECEPTOR}"
             else:
-                tmp = scaled_receptors(folder, STUBBLE_RECEPTOR, factor)
+                tmp, capped = scaled_receptors(folder, STUBBLE_RECEPTOR, factor, map_name)
                 try:
                     r = rerun(ids, folder_=tmp)
                 finally:
                     shutil.rmtree(tmp, ignore_errors=True)
+                entry["capped"] = capped
+                entry["basis"] += "; " + cap_sentence(capped)
                 entry["measures"] = ids
                 entry["rows"] = whatif_rows(base, ids, "default") + whatif_rows(r, ids, "whatif")
         else:
