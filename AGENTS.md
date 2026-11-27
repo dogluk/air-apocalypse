@@ -113,9 +113,18 @@ Not solid, and you should say so when you use a result:
   scored with that group's own death rates). See "Measures" in `health/README.md` and the
   design: [`docs/specs/2026-11-12-intervention-ranking-design.md`](docs/specs/2026-11-12-intervention-ranking-design.md).
 
-## Open work, roughly smallest first
+## Open work
 
-Each of these is one sitting. Say in your write-up what you read and what you could not
+**The full list is [`docs/open-work.md`](docs/open-work.md)** (also `docs/open-work.json`): every open
+item with a stable id (`OW-NNN`), the question, where to read it, the file it lands in, the check that
+proves it, and its size, ordered by how much it could move the ranking. Claim one by its id. The source
+of truth is [`health/open_work.toml`](health/open_work.toml); regenerate the two documents with
+`cd health && PYTHONPATH=. ../.venv/bin/python scripts/open_work.py` (add `--sensitivity PATH` for another
+sensitivity run). The rules to quote in your write-up:
+
+> No number enters code or data unless you read it at its source, and you record where (table, figure, page). Never average curves, studies or maps; show them side by side. A source that does not report something has not reported zero. Never tune an input to close a gap with a published figure.
+
+The short list below is the same work, roughly smallest first. Each of these is one sitting. Say in your write-up what you read and what you could not
 check.
 
 1. **Close one gap in `health/data/MISSING.md`.** Three good ones:

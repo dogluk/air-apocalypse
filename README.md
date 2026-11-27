@@ -49,6 +49,7 @@ physics permits it, kills most of them quickly. The survivors are mostly about
 If you are a model, or a person arriving cold, start with [`AGENTS.md`](AGENTS.md): how to
 get it running in a minute, the rules (the first is that no number goes in unless it was read
 at its source), what is not yet solid, and a list of open work sized for one sitting.
+The full list, each item with a stable id you can claim, is [`docs/open-work.md`](docs/open-work.md).
 
 ## Licence
 
