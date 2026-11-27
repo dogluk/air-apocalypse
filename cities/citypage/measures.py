@@ -319,7 +319,8 @@ def _score_block(s: score.Score, labels: dict[str, str], study_label: str | None
                      f"{_range(first['cost_inr'], _inr)}.</p>")
         prom = _prominent(s)
         if prom:
-            h.append(f'<div class="caveats"><p><b>Read the ratios below with these:</b></p>'
+            what = "figures" if s.scope == "region" else "ratios"
+            h.append(f'<div class="caveats"><p><b>Read the {what} below with these:</b></p>'
                      f"<ul>{_flag_items(prom)}</ul></div>")
         cap = f"{s.name}" + (f", {study_label}" if study_label else "") + ", every curve"
         h.append(_curve_table(s, labels, cap))
