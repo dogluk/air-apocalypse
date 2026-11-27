@@ -96,3 +96,13 @@ def test_build_on_synthetic_parquet(tmp_path):
     assert jb.pm25 == pytest.approx(30.1, abs=0.1)
     # the one hour of negative NO2 readings at A is dropped, not averaged in
     assert ja.share_no2 == pytest.approx(743 / 744, abs=0.001)
+
+
+def test_the_eleven_big_cities_are_covered():
+    t = _detail()
+    s = pd.read_csv(paths.DATA / "cpcb_station_month.csv")
+    eleven = {"Delhi", "Mumbai", "Kolkata", "Bengaluru", "Chennai", "Hyderabad", "Ahmedabad",
+              "Pune", "Surat", "Jaipur", "Lucknow"}
+    assert set(t.city) == eleven and set(s.city) == eleven
+    for c in eleven:
+        assert t[t.city == c].n_pm25.sum() > 0, c

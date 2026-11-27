@@ -253,8 +253,8 @@ dropped; runs of >= 8 identical consecutive 15-minute values at one station and 
 stuck-sensor rule); PM10 > 2000 is dropped (the existing PM10 rule). No cross-checks between pollutants and no upper
 limit on the gases, so a fault that is neither stuck nor <= 0 stays in: read the gas columns as the monitors report them.
 Unlike monthly_cpcb.csv there is no 75% coverage rule here: every city-month with any value has its 24 rows, and n_X
-shows how many days stand behind each value. Cities in the file: Bengaluru only (the 2016-2025 files; the script takes
---city for others and then replaces the file with the cities named).
+shows how many days stand behind each value. Cities in the file: Delhi, Mumbai, Kolkata, Bengaluru, Chennai, Hyderabad, Ahmedabad, Pune, Surat, Jaipur, Lucknow
+(the 2016-2025 files; the script takes --city and replaces the file with exactly the cities named).
 """
 
 ["cpcb_station_month.csv"]
@@ -273,7 +273,7 @@ decimals; 0 where the station never reports it). One row per station-month with 
 cpcb_city_month_hour.csv (PM2.5: the annual table's; other pollutants: values <= 0, runs of >= 8 identical 15-minute
 values and PM10 > 2000 dropped; modelling call, not yet reviewed). A station-hour is valid if any of its four 15-minute
 readings survives QC. Stations of a city with any share_pm25 > 0 in a year number the `stations` of exposure_cpcb.csv
-(tested). Cities in the file: Bengaluru only.
+(tested). Cities in the file: the same eleven as cpcb_city_month_hour.csv.
 """
 
 ["cities.csv"]
