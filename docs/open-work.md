@@ -10,7 +10,7 @@ Say in your write-up what you read and what you could not check. [AGENTS.md](../
 
 ## How this list is ordered
 
-Order: by the noise-robust count of curves whose top 5 changes when the inputs an item touches are moved (largest over those inputs; a noise-robust curve is one where a measure outside the swaps of the other random seeds that run made (1 other seed in this run) enters or leaves and moves further than those seeds move it), taken from the sensitivity run for Bengaluru generated 2026-11-27 (file: `health/out/rank/sensitivity_bengaluru.json`). The run may be stale: re-run it after the library or data change, then regenerate this list. Ties go to the weaker evidence, then the smaller item. Items that touch nothing in that city's run count as 0.
+Order: by the noise-robust count of curves whose top 5 changes when the inputs an item touches are moved (largest over those inputs; a noise-robust curve is one where a measure outside the swaps of the other random seeds that run made (3 other seeds in this run) enters or leaves and moves further than those seeds move it), taken from the sensitivity run for Bengaluru generated 2026-11-28 (file: `health/out/rank/sensitivity_bengaluru.json`). The run may be stale: re-run it after the library or data change, then regenerate this list. Ties go to the weaker evidence, then the smaller item. Items that touch nothing in that city's run count as 0.
 
 65 open items. Kinds: desk lookup, data build, model build, fieldwork, review. Size: one sitting, or bigger.
 
@@ -91,7 +91,7 @@ Order: by the noise-robust count of curves whose top 5 changes when the inputs a
 - Check: Measure-file validation passes; rank --sensitivity re-run: effect:road_paving changes the top 5 on seven curves in the last run.
 - Affects: measure:road_paving, measure:road_vacuum_sweeping, measure:construction_dust_controls
 - Weakest evidence it replaces: judgement
-- Priority (#6): effect:road_paving: changes the top 5 on 7 curves (noise-robust); then evidence weakness (judgement), size (bigger)
+- Priority (#6): effect:road_paving: changes the top 5 on 5 curves (noise-robust); then evidence weakness (judgement), size (bigger)
 - Origin: model flag: evidence_from Delhi-NCR; top of the research list
 
 ### OW-065: Odds that road paving holds: how long the gain lasts
@@ -104,7 +104,7 @@ Order: by the noise-robust count of curves whose top 5 changes when the inputs a
 - Check: Measure-file validation passes with the basis citing an [[evidence]] entry; re-run rank --sensitivity and read break_even_odds.
 - Affects: measure:road_paving
 - Weakest evidence it replaces: judgement
-- Priority (#7): effect:road_paving: changes the top 5 on 7 curves (noise-robust); then evidence weakness (judgement), size (bigger)
+- Priority (#7): effect:road_paving: changes the top 5 on 5 curves (noise-robust); then evidence weakness (judgement), size (bigger)
 - Origin: model flag: judgement odds on a top-5 measure
 
 ### OW-040: Road dust against construction dust per city, and each city's road length and contracts
@@ -117,7 +117,7 @@ Order: by the noise-robust count of curves whose top 5 changes when the inputs a
 - Check: Measure-file validation passes for each new file; rank <city> lists the measures.
 - Affects: measure:road_paving, measure:road_vacuum_sweeping, measure:construction_dust_controls
 - Weakest evidence it replaces: none flagged
-- Priority (#8): effect:road_paving: changes the top 5 on 7 curves (noise-robust); then evidence weakness (none flagged), size (bigger)
+- Priority (#8): effect:road_paving: changes the top 5 on 5 curves (noise-robust); then evidence weakness (none flagged), size (bigger)
 - Origin: MISSING.md: Measures kept to one city: road_paving, road_vacuum_sweeping, construction_dust_controls
 
 ### OW-026: Cropper et al. 2021 gridded data release for coal power plants
@@ -130,7 +130,7 @@ Order: by the noise-robust count of curves whose top 5 changes when the inputs a
 - Check: test_library's Cropper receptor test (state figure) is replaced by one checking the district values against the paper's state totals; rank --sensitivity re-run shows fgd_scrubbers' change.
 - Affects: table:receptor_power_cropper2021.csv, measure:fgd_scrubbers
 - Weakest evidence it replaces: receptor fallback
-- Priority (#9): effect:fgd_scrubbers: changes the top 5 on 2 curves (noise-robust); then evidence weakness (receptor fallback), size (bigger)
+- Priority (#9): effect:fgd_scrubbers: changes the top 5 on 4 curves (noise-robust); then evidence weakness (receptor fallback), size (bigger)
 - Origin: MISSING.md: Regional measures: Coal power plants (Cropper et al. 2021); model flag: receptor fallback (state-level)
 
 ### OW-012: Kulkarni et al. 2020: year simulated and figure behind the 20%

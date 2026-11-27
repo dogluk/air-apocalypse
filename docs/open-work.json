@@ -4,9 +4,9 @@
   "sensitivity": {
     "file": "health/out/rank/sensitivity_bengaluru.json",
     "place": "Bengaluru",
-    "generated": "2026-11-27",
+    "generated": "2026-11-28",
     "top": 5,
-    "seeds": 1,
+    "seeds": 3,
     "count": "noise-robust"
   },
   "closed": [],
@@ -179,10 +179,10 @@
         "model flag: evidence_from Delhi-NCR; top of the research list"
       ],
       "priority": {
-        "count": 7,
+        "count": 5,
         "count_kind": "noise-robust",
         "unit": "effect:road_paving",
-        "basis": "effect:road_paving: changes the top 5 on 7 curves (noise-robust); then evidence weakness (judgement), size (bigger)",
+        "basis": "effect:road_paving: changes the top 5 on 5 curves (noise-robust); then evidence weakness (judgement), size (bigger)",
         "order": 6
       }
     },
@@ -206,10 +206,10 @@
         "model flag: judgement odds on a top-5 measure"
       ],
       "priority": {
-        "count": 7,
+        "count": 5,
         "count_kind": "noise-robust",
         "unit": "effect:road_paving",
-        "basis": "effect:road_paving: changes the top 5 on 7 curves (noise-robust); then evidence weakness (judgement), size (bigger)",
+        "basis": "effect:road_paving: changes the top 5 on 5 curves (noise-robust); then evidence weakness (judgement), size (bigger)",
         "order": 7
       }
     },
@@ -235,10 +235,10 @@
         "MISSING.md: Measures kept to one city: road_paving, road_vacuum_sweeping, construction_dust_controls"
       ],
       "priority": {
-        "count": 7,
+        "count": 5,
         "count_kind": "noise-robust",
         "unit": "effect:road_paving",
-        "basis": "effect:road_paving: changes the top 5 on 7 curves (noise-robust); then evidence weakness (none flagged), size (bigger)",
+        "basis": "effect:road_paving: changes the top 5 on 5 curves (noise-robust); then evidence weakness (none flagged), size (bigger)",
         "order": 8
       }
     },
@@ -265,10 +265,10 @@
         "model flag: receptor fallback (state-level)"
       ],
       "priority": {
-        "count": 2,
+        "count": 4,
         "count_kind": "noise-robust",
         "unit": "effect:fgd_scrubbers",
-        "basis": "effect:fgd_scrubbers: changes the top 5 on 2 curves (noise-robust); then evidence weakness (receptor fallback), size (bigger)",
+        "basis": "effect:fgd_scrubbers: changes the top 5 on 4 curves (noise-robust); then evidence weakness (receptor fallback), size (bigger)",
         "order": 9
       }
     },
