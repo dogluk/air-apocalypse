@@ -15,17 +15,20 @@ from .measures import _sig
 
 
 def _toll(city: str) -> str:
-    rows = [(r["deaths_averted"], r["curve"], m) for m in burden._maps()
+    rows = [(r["deaths_averted"], r["curve"], m, bool(r["deaths_derived"])) for m in burden._maps()
             for r in burden.burden(city, m)["rows"]
             if r["deaths_averted"] is not None and math.isfinite(r["deaths_averted"])]
     if not rows:
         return "No curve gave a death toll for this city."
     lo, hi = min(rows), max(rows)
     n_curves, n_maps = len({r[1] for r in rows}), len({r[2] for r in rows})
-    return (f"PM2.5 is behind {fmt(lo[0])} to {fmt(hi[0])} deaths a year in {city}, "
+    star = lambda row: " *" if row[3] else ""       # the chapter tables' mark, same footnote
+    note = f" {burden.STAR}" if lo[3] or hi[3] else ""
+    return (f"PM2.5 is behind {fmt(lo[0])}{star(lo)} to {fmt(hi[0])}{star(hi)} deaths a year in {city}, "
             f"depending on the risk curve and the map: lowest on {names.curve(lo[1])} with the "
             f"{names.exposure_map(lo[2])}, highest on {names.curve(hi[1])} with the "
-            f"{names.exposure_map(hi[2])} ({n_curves} curves and {n_maps} maps tried, none preferred).")
+            f"{names.exposure_map(hi[2])} ({n_curves} curves and {n_maps} maps tried, none preferred)."
+            + note)
 
 
 def _target(key_start: str):

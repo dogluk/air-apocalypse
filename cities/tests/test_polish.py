@@ -144,7 +144,7 @@ def test_findings_block_is_at_the_top_with_a_few_lines(built):
 
 def test_findings_numbers_are_the_computed_ones(built):
     ls = findings.lines("Bengaluru", built.entries)
-    text = " ".join(ls)
+    text = " ".join(ls).replace(" *", "")          # the derived-deaths mark is tested apart
     rows = [r["deaths_averted"] for m in burden._maps() for r in burden.burden("Bengaluru", m)["rows"]]
     assert f"{min(rows):,.0f} to {max(rows):,.0f}" in text
     lv = [burden.level("Bengaluru", m)[0] for m in burden._maps()]
@@ -213,3 +213,29 @@ def test_narrow_chart_stacks_its_legend_and_labels_above_rows():
     ys = [float(v) for v in re.findall(r'<circle class="f\d" cx="18" cy="([\d.]+)"', narrow)]
     assert len(ys) == 2 and ys[1] > ys[0]                    # one legend row under the other
     assert re.search(r'<text class="lab" x="14" y="[\d.]+">Jaganathan', narrow)   # label above
+
+
+def _fake_burden(rows):
+    return lambda city, m: {"rows": [dict(curve=c, deaths_averted=d, deaths_derived=x)
+                                     for c, d, x in rows]}
+
+
+def test_findings_headline_marks_a_derived_end_and_carries_the_footnote(monkeypatch):
+    monkeypatch.setattr(burden, "_maps", lambda: ["acag_total"])
+    monkeypatch.setattr(burden, "burden", _fake_burden(
+        [("gemm_ncd_lri", 1000.0, True), ("gemm_5cod", 2000.0, False)]))
+    text = findings._toll("Bengaluru")
+    assert "1,000 * to 2,000 deaths" in text         # the lowest is derived, the highest is not
+    assert burden.STAR in text
+    monkeypatch.setattr(burden, "burden", _fake_burden(
+        [("gemm_ncd_lri", 1000.0, False), ("gemm_5cod", 2000.0, True)]))
+    text = findings._toll("Bengaluru")
+    assert "1,000 to 2,000 * deaths" in text and burden.STAR in text
+
+
+def test_findings_headline_has_no_marker_when_no_end_is_derived(monkeypatch):
+    monkeypatch.setattr(burden, "_maps", lambda: ["acag_total"])
+    monkeypatch.setattr(burden, "burden", _fake_burden(
+        [("gemm_ncd_lri", 1000.0, False), ("gemm_5cod", 2000.0, False), ("gemm_5cod", 1500.0, True)]))
+    text = findings._toll("Bengaluru")
+    assert "*" not in text and burden.STAR not in text     # the derived row is in the middle
