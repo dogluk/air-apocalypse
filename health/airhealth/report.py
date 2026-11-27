@@ -844,7 +844,7 @@ STUBBLE_TABLE = "receptor_stubble.csv"
 # et al. 2022's 6.7 µg/m³); tests/test_report.py checks the two still agree.
 STUBBLE_NOTE = ("Read the crop-burning measures with care: the crop-burning smoke table they stand "
                 "on is a stand-in about 14 times smaller than Lan et al. 2022's national figure, "
-                "so measures marked RF on it are likely undervalued by about that much. It is not "
+                "so measures marked RF on it are likely understated (by how much is not computed). It is not "
                 "scaled to close the gap, by the project's rule.")
 
 

@@ -67,7 +67,7 @@ def test_stubble_gap_is_stated_at_the_top_when_a_row_stands_on_the_stubble_table
     r = _ranking({C1: [_row("a", 5.0), _stubble()]})
     text = report.rank_table(r)
     assert report.STUBBLE_NOTE in "\n".join(text.splitlines()[:3])
-    assert "not scaled" in report.STUBBLE_NOTE and "undervalued" in report.STUBBLE_NOTE
+    assert "not scaled" in report.STUBBLE_NOTE and "understated" in report.STUBBLE_NOTE
     # the "about 14 times" is the receptor table's own fallback sentence, read at source
     assert "about 14 times smaller than Lan et al. 2022" in score.receptor_basis(
         "receptor_stubble.csv", key="fallback")
