@@ -132,3 +132,97 @@ def test_meta_inputs_come_from_the_registry():
     assert names[:3] == ["population", "death_rates", "deaths"]
     deaths = m["inputs"][2]
     assert [s["name"] for s in deaths["sources"]] == ["srs", "model", "unwpp"] and deaths["default"] == "srs"
+
+
+# --- the ranking tab ----------------------------------------------------------------------
+
+def _without_region_reasons(tables):
+    """The page leaves regional measures unscored with its own reason; the CLI scores them."""
+    return {c: [{**r, "reason": "" if r["scope"] == "region" else r["reason"]} for r in t["rows"]]
+            for c, t in tables.items()}
+
+
+def _no_reach(*a, **k):
+    raise ValueError("stub: whole-reach scoring is not run in tests")
+
+
+def test_rank_result_matches_cli_on_the_city_measures(capsys, monkeypatch, tmp_path):
+    monkeypatch.setattr(dashboard.score, "region", _no_reach)
+    r = dashboard.rank_result({"place": "Bengaluru", "n": "100", "curves": "gemm_ncd_lri"}, out=tmp_path)
+    c = _cli(capsys, "rank", "Bengaluru", "--n", "100", "--curves", "gemm_ncd_lri")
+    assert _without_region_reasons(r["tables"]) == _without_region_reasons(c["tables"])
+    assert r["spread"] == c["spread"]
+    assert r["source"] == "computed now, 100 draws"
+    region = [x for x in r["tables"]["gemm_ncd_lri"]["rows"]
+              if x["scope"] == "region" and x["status"] == "not_scored"]
+    assert region and all("airhealth rank --write" in x["reason"] for x in region)
+
+
+def test_rank_result_never_scores_a_whole_reach(monkeypatch, tmp_path):
+    def boom(*a, **k):
+        raise AssertionError("a page load started whole-reach scoring")
+    monkeypatch.setattr(dashboard.score, "region", boom)
+    dashboard.rank_result({"place": "Bengaluru", "n": "50", "curves": "gemm_ncd_lri"}, out=tmp_path)
+
+
+def test_india_without_a_written_file_says_how(tmp_path):
+    with pytest.raises(ValueError, match="airhealth rank --write"):
+        dashboard.rank_result({"place": "India"}, out=tmp_path)
+
+
+def test_india_reads_the_written_file(tmp_path):
+    (tmp_path / "rank_india.json").write_text(json.dumps({"place": "India", "tables": {}}))
+    r = dashboard.rank_result({"place": "India"}, out=tmp_path)
+    assert r["source"].startswith("file rank_india.json, written ")
+    assert r["sensitivity_file"] is False and r["legend"]["flags"]
+
+
+def test_a_city_file_is_read_when_no_draws_or_curves_are_asked_for(tmp_path):
+    (tmp_path / "rank_bengaluru.json").write_text(json.dumps({"place": "Bengaluru", "tables": {}}))
+    r = dashboard.rank_result({"place": "bengaluru"}, out=tmp_path)
+    assert r["source"].startswith("file rank_bengaluru.json")
+
+
+def test_unknown_place_is_a_value_error(tmp_path):
+    for bad in ("Atlantis", "../etc", ""):
+        with pytest.raises(ValueError):
+            dashboard.rank_result({"place": bad}, out=tmp_path)
+
+
+def test_sensitivity_result_reads_its_file_or_names_the_command(tmp_path):
+    with pytest.raises(ValueError, match="airhealth rank Bengaluru --sensitivity --write"):
+        dashboard.sensitivity_result({"place": "Bengaluru"}, out=tmp_path)
+    (tmp_path / "sensitivity_india.json").write_text(json.dumps({"place": "India", "research": []}))
+    assert dashboard.sensitivity_result({"place": "India"}, out=tmp_path)["source"].startswith(
+        "file sensitivity_india.json")
+
+
+def test_api_rank_route(monkeypatch):
+    import threading
+    import urllib.error
+    import urllib.request
+    from http.server import ThreadingHTTPServer
+    monkeypatch.setattr(dashboard.score, "region", _no_reach)
+    server = ThreadingHTTPServer(("127.0.0.1", 0), dashboard.Handler)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    base = f"http://127.0.0.1:{server.server_address[1]}"
+    try:
+        with urllib.request.urlopen(f"{base}/api/rank?place=Bengaluru&n=50&curves=gemm_ncd_lri") as f:
+            body = json.load(f)
+            assert f.status == 200 and list(body["tables"]) == ["gemm_ncd_lri"]
+        with pytest.raises(urllib.error.HTTPError) as e:
+            urllib.request.urlopen(f"{base}/api/sensitivity?place=Atlantis")
+        assert e.value.code == 400
+    finally:
+        server.shutdown()
+        server.server_close()
+
+
+def test_page_has_the_ranking_tab():
+    html = dashboard.PAGE.read_text()
+    assert 'id="tab-ranking"' in html and 'id="view-ranking"' in html
+
+
+def test_meta_lists_the_ranking_cities():
+    m = dashboard.meta()
+    assert len(m["rank_cities"]) == 50 and m["rank_dash_n"] == dashboard.DASH_N

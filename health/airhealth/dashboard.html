@@ -73,6 +73,29 @@ td.l, th.l { text-align: left; }
 .mapwrap path.s { fill: none; stroke: var(--ink3); stroke-width: .6; pointer-events: none; }
 .mapwrap path.sel { fill: none; stroke: var(--ink); stroke-width: 2; pointer-events: none; }
 .sw { display: inline-block; width: 14px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+
+.tabs { display: flex; gap: 4px; margin: 0 0 14px; border-bottom: 1px solid var(--line); }
+.tabs button { border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: transparent; color: var(--ink2); padding: 8px 14px; }
+.tabs button[aria-selected=true] { color: var(--ink); border-bottom-color: var(--ink); font-weight: 600; }
+[hidden] { display: none !important; }
+.rkctl { position: static; margin-bottom: 16px; }
+#rkBody { display: grid; gap: 16px; }
+.controls label.chk { flex-direction: row; align-items: center; gap: 6px; max-width: 340px; }
+td.hl, th.hl { background: var(--band); }
+tr.rk { cursor: pointer; }
+tr.rk:hover td, tr.rk.open td { background: var(--grid); }
+.mk { font-size: 11px; font-weight: 600; border: 1px solid var(--ink3); border-radius: 4px; padding: 0 4px; color: var(--ink2); white-space: nowrap; }
+.dim { color: var(--ink3); font-size: 12px; font-weight: 400; }
+h2.gap { margin-top: 18px; }
+.trailbox { font-size: 13px; line-height: 1.5; }
+.trailbox > div { margin: 6px 0; max-width: 120ch; }
+.trailbox ul { margin: 4px 0 4px 18px; padding: 0; }
+table.mini { width: auto; }
+table.mini td, table.mini th { padding: 2px 10px 2px 0; border-bottom: 0; }
+code { font-size: 12px; background: var(--grid); padding: 0 4px; border-radius: 3px; }
+details { margin: 2px 0; }
+summary { cursor: pointer; }
+a { color: var(--s1); }
 </style>
 </head>
 <body>
@@ -80,6 +103,12 @@ td.l, th.l { text-align: left; }
   <h1>airhealth</h1>
   <p class="sub">What a change in PM2.5 does to deaths and life expectancy in an Indian place, on every risk
   curve the tool can run. Every number comes from the same functions as the command line. Local page; nothing is sent anywhere.</p>
+
+  <div class="tabs" role="tablist">
+    <button id="tab-main" role="tab" aria-selected="true">Change in PM2.5</button>
+    <button id="tab-ranking" role="tab" aria-selected="false">Ranking</button>
+  </div>
+  <div id="view-main">
 
   <div class="card controls" id="controls">
     <label>Place <select id="place"></select></label>
@@ -154,6 +183,39 @@ td.l, th.l { text-align: left; }
       <p class="sub">Each row is an input. "Switch" is the command-line flag that changes its source; "none" means the
       source is fixed in code for now.</p>
       <div class="scroll"><table id="inputs"></table></div>
+    </div>
+  </div>
+  </div><!-- /view-main -->
+
+  <div id="view-ranking" role="tabpanel" hidden>
+    <p class="sub">The measure library ranked by expected life-years per crore (1 crore = 10 million rupees, 2025
+    rupees). Each measure is ranked on its own; benefits never add up. Ranks are shown on every risk curve side by
+    side and never averaged, because which curve is right is not settled. Read from the files
+    <code>airhealth rank --write</code> leaves in <code>health/out/rank/</code>; a page load never scores a regional measure.</p>
+
+    <div class="card controls rkctl" id="rkControls">
+      <label>Place <select id="rkPlace"></select></label>
+      <label>Risk curve <select id="rkCurve"></select></label>
+      <label>Draws, for a city computed now
+        <span class="pair"><input type="number" id="rkN" min="10" step="50" placeholder="from file">
+        <button id="rkGo" title="Score this city's own measures now with this many draws (regional measures are left out)">Compute now</button></span></label>
+      <label class="chk"><input type="checkbox" id="rkComp"> Comparable measures only (leave out partial costs) in the research list</label>
+    </div>
+
+    <div id="rkErr" class="err"></div>
+    <div id="rkBody">
+      <div class="card" id="rkHead"></div>
+      <div class="card grid-card"><h2>Rank on each curve</h2>
+        <p class="sub">1 = most life-years per crore. A dash means no rank on that curve (hover for the reason). The chosen curve is shaded.
+        No single curve is the answer; PC marks a measure whose cost is partial, so its ratio flatters it.</p>
+        <div class="scroll"><table id="rkGrid"></table></div><div class="foot" id="rkGridFoot"></div></div>
+      <div class="card"><h2 id="rkTableTitle">Ranked</h2>
+        <p class="sub" id="rkTableSub"></p>
+        <div class="scroll"><table id="rkTable"></table></div>
+        <div id="rkRegional"></div>
+        <div id="rkApart"></div>
+        <div class="foot" id="rkFoot"></div></div>
+      <div class="card" id="rkSens"></div>
     </div>
   </div>
 </main>
@@ -455,6 +517,210 @@ async function init() {
   seg("metric", v => { metric = v; if (RES) draw(); });
   load();
 }
+// ---- ranking tab ------------------------------------------------------------------------
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const DASHC = "—";
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+let RK = null, RKS = null, rkCurve = null, rkReady = false, rkTick = 0;
+const flagCode = f => (RK.legend.flags.find(x => x.flag === f) || {}).code || f;
+const flagSentence = f => { const x = RK.legend.flags.find(y => y.flag === f); return x ? `${x.code}: ${x.text}.` : f; };
+const dist = d => !d ? DASHC : d.kind === "fixed" ? fmt.sig(d.p5) :
+  `${d.kind} ${fmt.sig(d.p5)}–${fmt.sig(d.p95)}` + (d.mode != null ? `, mode ${fmt.sig(d.mode)}` : "");
+const lyr = l => l ? `${fmt.sig(l.median)} (${fmt.sig(l.p5)}–${fmt.sig(l.p95)})` : DASHC;
+const monthsText = ms => ms.length === 12 ? "all year" : ms.map(m => MONTHS[m - 1]).join(", ");
+const marks = r => ["partial_cost", "upper_bound_all_origins"].filter(f => r.flags.includes(f)).map(f => f === "partial_cost" ? "PC" : "UB");
+const ratio = r => r.expected_ly_per_crore == null ? DASHC :
+  fmt.sig(r.expected_ly_per_crore) + (marks(r).length ? ` <span class="mk">${marks(r).join("/")}</span>` : "");
+const flagsCell = r => [...new Set(r.flags.map(flagCode))].map(c =>
+  `<span class="mk" title="${esc((RK.legend.flags.find(x => x.code === c) || {}).text || c)}">${esc(c)}</span>`).join(" ") || DASHC;
+
+function trailHtml(r) {
+  const t = r.trail || {}, out = [];
+  const li = (k, v) => `<li><b>${k}</b> ${v}</li>`;
+  out.push(`<div><b>Who it reaches.</b> ${esc(r.who_reaches)}. <b>Reach:</b> ${esc(r.reach)}.</div>`);
+  if (r.reason) out.push(`<div><b>Why it has no rank.</b> ${esc(r.reason)}</div>`);
+  if (r.curve_gap) out.push(`<div><b>Not ranked on this curve.</b> ${esc(r.curve_gap)}.</div>`);
+  if (t.shares && Object.keys(t.shares).length) {
+    const rows = Object.entries(t.shares).map(([c, v]) => {
+      const flat = v.every(x => x === v[0]);
+      return `<tr><td class="l">${esc(c)}</td><td class="l">${flat ? v[0] + "% all year" : v.map((x, i) => MONTHS[i] + " " + x + "%").join(", ")}</td></tr>`;
+    }).join("");
+    const by = {};
+    Object.entries(t.share_basis || {}).forEach(([m, w]) => (by[w] = by[w] || []).push(+m));
+    const basis = Object.entries(by).map(([w, ms]) => `${esc(w)} (${monthsText(ms.sort((a, b) => a - b))})`).join("; ");
+    out.push(`<div><b>Causes of the city's PM2.5</b> (share of the total, from the study and season: ${basis || DASHC})</div>` +
+      `<div class="scroll"><table class="mini">${rows}</table></div>`);
+  }
+  if (t.cuts && t.cuts.length) out.push(`<div><b>Cuts</b> (5th–95th percentile of the cut in the cause's share)<ul>` +
+    t.cuts.map(c => li(esc(c.cause), `${monthsText(c.months)}: ${c.p5}–${c.p95} (${esc(c.kind)})`)).join("") + `</ul></div>`);
+  if (t.exposure) out.push(`<div><b>Exposure</b><ul>` +
+    li("covered", dist(t.exposure.covered)) + li("hours", dist(t.exposure.hours)) + li("cut", dist(t.exposure.cut)) +
+    li("months", monthsText(t.exposure.months || [])) + li("ages", (t.exposure.ages || []).join("–")) + `</ul></div>`);
+  if (t.region) out.push(`<div><b>Whole reach</b> receptor table ${esc(t.region.receptor)}; ${fmt.int(t.region.districts)} districts, ` +
+    `population ${fmt.int(t.region.population)}; cut ${dist(t.region.cut)}.</div>`);
+  if (t.cities) out.push(`<div><b>City by city</b></div><div class="scroll"><table class="mini"><tr><th class="l">city</th><th class="l">status</th><th class="l">study</th><th>life-years if it works (mean)</th><th>cost, ₹ crore (mean)</th></tr>` +
+    t.cities.map(c => `<tr><td class="l">${esc(c.city)}</td><td class="l">${esc(c.status)}</td><td class="l">${esc(c.study || DASHC)}</td>` +
+      `<td>${c.mean_life_years == null ? DASHC : fmt.sig(c.mean_life_years)}</td><td>${c.mean_cost_inr == null ? DASHC : fmt.sig(c.mean_cost_inr / 1e7)}</td></tr>`).join("") + `</table></div>`);
+  if (t.cost) out.push(`<div><b>Cost</b><ul>` + li("driver", `${esc(t.cost.driver)}, count ${fmt.sig(t.cost.units_count)}${t.cost.unit ? " (" + esc(t.cost.unit) + ")" : ""}`) +
+    li("once", dist(t.cost.once)) + li("each year", dist(t.cost.annual)) +
+    li("2025-rupee basis", esc(t.cost.cost_in_2025_rupees_basis)) + `</ul></div>`);
+  out.push(`<div><b>Odds of working: ${100 * r.p_success}%.</b> ${esc(r.p_success_basis)}</div>`);
+  if (t.evidence && t.evidence.length) out.push(`<div><b>Where the numbers come from</b> (${esc(RK.legend.evidence)})<ul>` +
+    t.evidence.map(e => `<li><b>${esc((e.fields || []).join(", "))}</b> [${esc(e.key)}] ` +
+      `${e.url ? `<a href="${esc(e.url)}" target="_blank" rel="noopener">${esc(e.source)}</a>` : esc(e.source)}. ` +
+      `<i>${esc(e.locator)}</i>${e.derivation ? " " + esc(e.derivation) : ""}</li>`).join("") + `</ul></div>`);
+  if (r.flags.length) out.push(`<div><b>Flags</b><ul>` + [...new Set(r.flags)].map(f => `<li>${esc(flagSentence(f))}</li>`).join("") + `</ul></div>`);
+  return out.join("");
+}
+
+function rankTable(host, rows, withReach) {
+  const head = ["rank", "measure", ...(withReach ? ["reach"] : []), "expected life-years per crore", "per crore if it works",
+    "rank if works", "life-years if it works (median, p5–p95)", "cost, ₹ crore (mean)", "odds", "comparable rank", "flags"];
+  const n = head.length;
+  host.innerHTML = `<thead><tr>${head.map((h, i) => `<th class="${i === 1 || (withReach && i === 2) ? "l" : ""}">${h}</th>`).join("")}</tr></thead><tbody>` +
+    rows.map((r, i) => `<tr class="rk" data-k="${esc(host.id)}${i}" tabindex="0" title="Open the trail behind this row"><td>${r.rank}</td>` +
+      `<td class="l"><b>${esc(r.name)}</b><div class="dim">${esc(r.measure)}</div></td>` +
+      (withReach ? `<td class="l">${esc(r.reach)}</td>` : "") +
+      `<td>${ratio(r)}</td><td>${r.ly_per_crore_if_works == null ? DASHC : fmt.sig(r.ly_per_crore_if_works)}</td>` +
+      `<td>${r.rank_if_works ?? DASHC}</td><td>${lyr(r.life_years)}</td>` +
+      `<td>${r.mean_cost_inr == null ? DASHC : fmt.sig(r.mean_cost_inr / 1e7)}</td><td>${100 * r.p_success}%</td>` +
+      `<td>${r.rank_comparable ?? '<span class="mk">PC</span>'}</td><td class="l">${flagsCell(r)}</td></tr>` +
+      `<tr class="trail" hidden data-for="${esc(host.id)}${i}"><td colspan="${n}" class="l trailbox">${trailHtml(r)}</td></tr>`).join("") + `</tbody>`;
+}
+
+function gridHtml(host) {
+  const curves = Object.keys(RK.tables);
+  const info = {};
+  curves.forEach(c => RK.tables[c].rows.forEach(r => { (info[r.measure] = info[r.measure] || { row: r, gap: {} }); if (r.curve_gap) info[r.measure].gap[c] = r.curve_gap; }));
+  const sp = RK.spread.filter(d => d.best != null).sort((a, b) => a.best - b.best || a.worst - b.worst || a.measure.localeCompare(b.measure));
+  const hl = c => c === rkCurve ? ' class="hl"' : "";
+  host.innerHTML = `<thead><tr><th class="l">measure</th><th class="l">reach</th>` +
+    curves.map(c => `<th${hl(c)} title="${esc(RK.tables[c].label)}">${esc(short(c))}</th>`).join("") +
+    `<th>best–worst</th><th>comparable</th><th class="l"></th></tr></thead><tbody>` +
+    sp.map(d => {
+      const i = info[d.measure];
+      const comp = !d.comparable ? '<span class="mk">PC</span>' : d.comparable_best === d.comparable_worst ? d.comparable_best : `${d.comparable_best}–${d.comparable_worst}`;
+      return `<tr><td class="l"><b>${esc(i.row.name)}</b><div class="dim">${esc(d.measure)}</div></td><td class="l">${esc(i.row.reach)}</td>` +
+        curves.map(c => `<td${hl(c)}${d.ranks[c] == null ? ` title="${esc(i.gap[c] || "not ranked on this curve")}"` : ""}>${d.ranks[c] ?? DASHC}</td>`).join("") +
+        `<td>${d.best}–${d.worst}</td><td>${comp}</td><td class="l">${d.disagree ? '<span class="mk">curves disagree</span>' : ""}</td></tr>`;
+    }).join("") + `</tbody>`;
+  if (!sp.length) host.innerHTML = "<tr><td class='l'>No measure is ranked on any curve.</td></tr>";
+  const gaps = [];
+  curves.forEach(c => RK.tables[c].rows.filter(r => r.curve_gap).forEach(r => gaps.push(`${esc(r.measure)} on ${esc(short(c))}: ${esc(r.curve_gap)}`)));
+  $("rkGridFoot").innerHTML = gaps.length ? `A dash means no rank on that curve:<br>${gaps.join("<br>")}` : "";
+}
+
+function drawRank() {
+  const place = RK.place, india = place.startsWith("India");
+  const t = RK.tables[rkCurve];
+  const ctx = RK.context;
+  $("rkHead").innerHTML = `<h2>${esc(india ? "India: the fifty cities, and each regional measure's whole reach" : place)}</h2>` +
+    `<p class="sub"><b>Source:</b> ${esc(RK.source)}. <b>Defaults:</b> map ${esc(ctx.map)}; study ${esc(ctx.study || "none")}; ` +
+    `deaths ${esc(ctx.deaths || "default")}; discount ${100 * ctx.discount}% a year; ${fmt.int(ctx.n)} draws, seed ${ctx.seed}. ` +
+    `A city computed on this page uses ${fmt.int(RK.dash_n)} draws unless you set them.</p>` +
+    (RK.source.startsWith("computed now") ? `<div class="warn">Computed now from this city's own measures. Regional measures need their whole reach scored (about two minutes each) and are shown as not scored; <code>airhealth rank --write</code> writes the full ranking.</div>` : "");
+  gridHtml($("rkGrid"));
+  $("rkTableTitle").textContent = `Ranked on ${short(rkCurve)}`;
+  $("rkTableSub").textContent = t.label + ". Click a row for its trail. PC beside a ratio: the cost leaves out part of what the measure costs, so the ratio flatters it. UB: shares include air blown in from outside, an upper bound.";
+  const ranked = t.rows.filter(r => r.rank != null);
+  const cityRows = india ? ranked : ranked.filter(r => r.scope !== "region");
+  const regRows = india ? [] : ranked.filter(r => r.scope === "region");
+  if (cityRows.length) rankTable($("rkTable"), cityRows, india); else $("rkTable").innerHTML = "<tr><td class='l'>No measure is ranked on this curve.</td></tr>";
+  if (regRows.length) {
+    $("rkRegional").innerHTML = `<h2 class="gap">Regional measures</h2><p class="sub">Their ratio is over their whole reach, and most of their benefit falls outside this city; their life-years here are only this city's part.</p><div class="scroll"><table id="rkReg"></table></div>`;
+    rankTable($("rkReg"), regRows, true);
+  } else $("rkRegional").innerHTML = "";
+  const rest = t.rows.filter(r => r.rank == null && !r.curve_gap);
+  const group = (title, rs, fn) => rs.length ? `<h2 class="gap">${title}</h2><ul>${rs.map(fn).join("")}</ul>` : "";
+  const detail = r => `<details><summary><b>${esc(r.name)}</b> <span class="dim">${esc(r.measure)}</span></summary><div class="trailbox">${trailHtml(r)}</div></details>`;
+  $("rkApart").innerHTML =
+    group("Pays for itself (no rank)", rest.filter(r => r.status === "pays_for_itself"), r => `<li>${detail(r)}${esc(r.reach)}; life-years if it works ${lyr(r.life_years)}; ${esc(r.reason)}</li>`) +
+    group("No cost given (no rank)", rest.filter(r => r.status === "no_cost"), r => `<li>${detail(r)}${esc(r.reach)}; life-years if it works ${lyr(r.life_years)}; ${esc(r.reason)}</li>`) +
+    group("Not ranked (why)", rest.filter(r => !["pays_for_itself", "no_cost"].includes(r.status)), r => `<li>${detail(r)}<i>${esc(r.status)}</i>: ${esc(r.reason)}</li>`);
+  $("rkFoot").innerHTML = "<b>Assumptions.</b><ul>" + RK.assumptions.map(a => `<li>${esc(a)}</li>`).join("") + "</ul>" +
+    (ctx.curves_unavailable ? "Curves not run: " + Object.entries(ctx.curves_unavailable).map(([k, v]) => `${esc(k)}: ${esc(v)}`).join("; ") + "." : "");
+  drawSens();
+}
+
+function drawSens() {
+  const host = $("rkSens");
+  if (!RKS) {
+    const p = RK.place.startsWith("India") ? "" : RK.place + " ";
+    host.innerHTML = `<h2>What would reorder the ranking</h2><p class="sub">No sensitivity file for this place. Produce it with <code>airhealth rank ${esc(p)}--sensitivity --write</code>.</p>`;
+    return;
+  }
+  const comp = $("rkComp").checked, tail = comp ? "_comparable" : "";
+  const curves = Object.keys(RKS.base.tables);
+  const names = {};
+  curves.forEach(c => RKS.base.tables[c].rows.forEach(r => names[r.measure] = r.name));
+  const list = x => x && x.length ? x.map(m => esc(names[m] || m)).join(", ") : DASHC;
+  const res = (RKS["research" + tail] || []).filter(x => x.unit === "seed" || x.curves_top_changed || x.within_noise || (x.drops_out || []).length);
+  const quiet = (RKS["research" + tail] || []).filter(x => !(x.unit === "seed" || x.curves_top_changed || x.within_noise || (x.drops_out || []).length)).map(x => x.unit);
+  const st = RKS["stability" + tail] || [], cell = {}, first = {};
+  st.forEach(x => { (cell[x.measure] = cell[x.measure] || {})[x.curve] = `${x.base_rank ?? DASHC} (${x.best}–${x.worst})` + (x.drops_out ? ` out ${x.drops_out}` : "");
+    if (x.base_rank != null) first[x.measure] = Math.min(first[x.measure] ?? 1e6, x.base_rank); });
+  const order = Object.keys(cell).sort((a, b) => (first[a] ?? 1e6) - (first[b] ?? 1e6) || a.localeCompare(b));
+  host.innerHTML = `<h2>What would reorder the top ${RKS.top}</h2>` +
+    `<p class="sub"><b>Source:</b> ${esc(RKS.source)}. Each research unit is one input moved from the stated defaults, one at a time; this is a swing, not a value-of-information figure.` +
+    `${comp ? " Among comparable measures only." : ""}</p>` +
+    `<div class="scroll"><table><thead><tr><th class="l">research unit</th><th>curves where the top changes</th><th class="l">on curves</th><th class="l">enter</th><th class="l">leave</th><th>largest move</th><th>within noise only</th><th class="l">drops out of the top</th></tr></thead><tbody>` +
+    (res.length ? res.map(x => `<tr><td class="l">${esc(x.unit)}${x.unit === "seed" ? " (noise floor)" : ""}</td><td>${x.curves_top_changed} of ${curves.length}</td>` +
+      `<td class="l">${(x.curves || []).map(c => esc(short(c))).join(", ") || DASHC}</td><td class="l">${list(x.enter)}</td><td class="l">${list(x.leave)}</td>` +
+      `<td>${x.max_abs_delta == null ? DASHC : x.max_abs_delta}</td><td>${x.within_noise || ""}</td><td class="l">${list(x.drops_out)}</td></tr>`).join("") :
+      `<tr><td class="l" colspan="8">No setting changes the top.</td></tr>`) + `</tbody></table></div>` +
+    (quiet.length ? `<div class="foot">No change to the top on any curve: ${quiet.map(esc).join(", ")}.</div>` : "") +
+    `<h2 class="gap">Each measure's rank range</h2><p class="sub">Rank by default (best–worst across the moved settings), on each curve. Never averaged across curves.</p>` +
+    `<div class="scroll"><table><thead><tr><th class="l">measure</th>${curves.map(c => `<th${c === rkCurve ? ' class="hl"' : ""}>${esc(short(c))}</th>`).join("")}</tr></thead><tbody>` +
+    order.map(m => `<tr><td class="l"><b>${esc(names[m] || m)}</b></td>${curves.map(c => `<td${c === rkCurve ? ' class="hl"' : ""}>${cell[m][c] ?? DASHC}</td>`).join("")}</tr>`).join("") + `</tbody></table></div>` +
+    `<div class="foot">${(RKS.notes || []).map(esc).join("<br>")}</div>`;
+}
+
+async function loadRank(extra) {
+  const my = ++rkTick, place = $("rkPlace").value, q = new URLSearchParams({ place });
+  if (extra && $("rkN").value) q.set("n", $("rkN").value);
+  $("rkErr").textContent = ""; $("rkBody").style.opacity = .5;
+  const r = await fetch("/api/rank?" + q), j = await r.json();
+  if (my !== rkTick) return;
+  $("rkBody").style.opacity = 1;
+  if (!r.ok) { $("rkErr").textContent = j.error; $("rkBody").hidden = true; return; }
+  $("rkBody").hidden = false; RK = j; RKS = null;
+  const curves = Object.keys(j.tables);
+  $("rkCurve").innerHTML = curves.map(c => `<option value="${c}" title="${esc(j.tables[c].label)}">${esc(short(c))}</option>`).join("");
+  rkCurve = curves.includes(rkCurve) ? rkCurve : (curves.includes("gemm_ncd_lri") ? "gemm_ncd_lri" : curves[0]);
+  $("rkCurve").value = rkCurve;
+  $("rkGo").disabled = place === "India";
+  if (j.sensitivity_file) {
+    const s = await fetch("/api/sensitivity?place=" + encodeURIComponent(place));
+    if (my !== rkTick) return;
+    if (s.ok) RKS = await s.json();
+  }
+  if (curves.length) drawRank(); else $("rkErr").textContent = "No curve ran.";
+}
+
+function showTab(which) {
+  $("view-main").hidden = which !== "main"; $("view-ranking").hidden = which !== "ranking";
+  $("tab-main").setAttribute("aria-selected", which === "main"); $("tab-ranking").setAttribute("aria-selected", which === "ranking");
+  if (which === "ranking" && !rkReady) {
+    rkReady = true;
+    $("rkPlace").innerHTML = `<option value="India">India</option>` + META.rank_cities.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join("");
+    $("rkN").placeholder = "from file (" + META.rank_dash_n + " if none)";
+    $("rkPlace").addEventListener("change", () => { $("rkN").value = ""; loadRank(false); });
+    $("rkCurve").addEventListener("change", () => { rkCurve = $("rkCurve").value; drawRank(); });
+    $("rkGo").addEventListener("click", () => { if (!$("rkN").value) $("rkN").value = META.rank_dash_n; loadRank(true); });
+    $("rkComp").addEventListener("change", () => { if (RK) drawSens(); });
+    const toggle = ev => {
+      const tr = ev.target.closest("tr.rk"); if (!tr || ev.target.closest("a")) return;
+      const d = document.querySelector(`tr.trail[data-for="${tr.dataset.k}"]`); d.hidden = !d.hidden;
+      tr.classList.toggle("open", !d.hidden);
+    };
+    $("view-ranking").addEventListener("click", toggle);
+    $("view-ranking").addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " ") { if (ev.target.matches("tr.rk")) { ev.preventDefault(); toggle(ev); } } });
+    loadRank(false);
+  }
+}
+$("tab-main").addEventListener("click", () => showTab("main"));
+$("tab-ranking").addEventListener("click", () => showTab("ranking"));
+
 init();
 </script>
 </body>
