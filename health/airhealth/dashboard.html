@@ -664,11 +664,11 @@ function drawSens() {
   host.innerHTML = `<h2>What would reorder the top ${RKS.top}</h2>` +
     `<p class="sub"><b>Source:</b> ${esc(RKS.source)}. Each research unit is one input moved from the stated defaults, one at a time; this is a swing, not a value-of-information figure.` +
     `${comp ? " Among comparable measures only." : ""}</p>` +
-    `<div class="scroll"><table><thead><tr><th class="l">research unit</th><th>curves where the top changes</th><th class="l">on curves</th><th class="l">enter</th><th class="l">leave</th><th>largest move</th><th>within noise only</th><th class="l">drops out of the top</th></tr></thead><tbody>` +
-    (res.length ? res.map(x => `<tr><td class="l">${esc(x.unit)}${x.unit === "seed" ? " (noise floor)" : ""}</td><td>${x.curves_top_changed} of ${curves.length}</td>` +
+    `<div class="scroll"><table><thead><tr><th class="l">research unit</th><th>beyond the seed's own swaps</th><th>curves where the top changes</th><th class="l">on curves</th><th class="l">enter</th><th class="l">leave</th><th>largest move</th><th>within noise only</th><th class="l">drops out of the top</th></tr></thead><tbody>` +
+    (res.length ? res.map(x => `<tr><td class="l">${esc(x.unit)}${x.unit === "seed" ? " (noise floor)" : ""}</td><td>${x.unit === "seed" || x.noise_robust == null ? DASHC : x.noise_robust + " of " + curves.length}</td><td>${x.curves_top_changed} of ${curves.length}</td>` +
       `<td class="l">${(x.curves || []).map(c => esc(short(c))).join(", ") || DASHC}</td><td class="l">${list(x.enter)}</td><td class="l">${list(x.leave)}</td>` +
       `<td>${x.max_abs_delta == null ? DASHC : x.max_abs_delta}</td><td>${x.within_noise || ""}</td><td class="l">${list(x.drops_out)}</td></tr>`).join("") :
-      `<tr><td class="l" colspan="8">No setting changes the top.</td></tr>`) + `</tbody></table></div>` +
+      `<tr><td class="l" colspan="9">No setting changes the top.</td></tr>`) + `</tbody></table></div>` +
     (quiet.length ? `<div class="foot">No change to the top on any curve: ${quiet.map(esc).join(", ")}.</div>` : "") +
     `<h2 class="gap">Each measure's rank range</h2><p class="sub">Rank by default (best–worst across the moved settings), on each curve. Never averaged across curves.</p>` +
     `<div class="scroll"><table><thead><tr><th class="l">measure</th>${curves.map(c => `<th${c === rkCurve ? ' class="hl"' : ""}>${esc(short(c))}</th>`).join("")}</tr></thead><tbody>` +

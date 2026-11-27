@@ -956,21 +956,28 @@ def _names(xs) -> str:
 def _research_block(s, comparable: bool) -> list[str]:
     res = s.research(comparable)
     n_curves = len(s._curves())
-    head = ("research unit", f"curves where the top {s.top} changes", "on curves", "enter", "leave",
-            "largest move", "within noise only", "drops out of the top")
+    head = ("research unit", "beyond the seed's own swaps", f"curves where the top {s.top} changes",
+            "on curves", "enter", "leave", "largest move", "within noise only",
+            "drops out of the top")
     rows, quiet = [], []
     for x in res.itertuples():
         if x.unit != "seed" and not (x.curves_top_changed or x.within_noise or x.drops_out):
             quiet.append(x.unit)
             continue
         unit = x.unit + (" (noise floor)" if x.unit == "seed" else "")
-        rows.append((unit, f"{x.curves_top_changed} of {n_curves}", _names(x.curves),
+        rows.append((unit, DASH if x.unit == "seed" else f"{x.noise_robust} of {n_curves}",
+                     f"{x.curves_top_changed} of {n_curves}", _names(x.curves),
                      _names(x.enter), _names(x.leave),
                      DASH if _nan(x.max_abs_delta) else f"{x.max_abs_delta:g}",
                      str(x.within_noise) if x.within_noise else "", _names(x.drops_out)))
     out = _columns(head, rows) if rows else ["  No setting changes the top."]
     if quiet:
         out.append(f"  No change to the top {s.top} on any curve: {', '.join(sorted(quiet))}.")
+    flips = {c: v for c, v in s.noise_sets(comparable).items() if v}
+    if flips:
+        out.append("  The seed alone swaps these in and out of the top (a curve counts as 'beyond "
+                   "the seed's own swaps' only when a measure outside them enters or leaves): "
+                   + "; ".join(f"{c}: {_names(v)}" for c, v in flips.items()) + ".")
     return out
 
 
@@ -1043,7 +1050,9 @@ def sensitivity_table(s) -> str:
         lines += ["", f"1. What would reorder the top {s.top}, {among(c)}: the research list. A "
                   "unit is one input, one measure's effect or cost range, or one city's study; a "
                   "curve counts when one of its settings changes which measures make the top by "
-                  "more than another random seed does.", *_research_block(s, c)]
+                  "more than another random seed does; 'beyond the seed's own swaps' counts it "
+                  "only when the change is not one the seed alone makes (the list is sorted by "
+                  "that count).", *_research_block(s, c)]
     for c in alls:
         lines += ["", f"2. Rank on each curve by default, {among(c)}, and (best-worst) across every "
                   f"setting; outN: not ranked under N settings; {DASH} first: not ranked by default.",

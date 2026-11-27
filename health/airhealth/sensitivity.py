@@ -20,6 +20,10 @@ measure that drops out (it cannot be scored under that setting; e.g. regional me
 month-by-month curves, which apply to percent changes only) is counted as dropping out, and does
 not shift the others' ranks. A move is "within noise" when it is no larger than the move the seed
 setting (another random seed, nothing else changed) gives the same measure on the same curve.
+The research list counts each unit twice: raw (a curve counts when the top changes by more than
+the seed moves those measures) and noise-robust (a curve counts only when a measure the seed alone
+never swaps in or out of the top enters or leaves it: two measures the draws cannot tell apart,
+swapped, are noise however far the setting moves them). It is sorted by the noise-robust count.
 Delta is the rank under the setting minus the rank by default: + is down the table, - is up.
 
 Everything is shown twice: among all ranked measures, and among the comparable ones only (those
@@ -221,40 +225,66 @@ class Swing:
                                  delta=float(x.delta), within_noise=bool(biggest <= noise)))
         return pd.DataFrame(rows, columns=cols)
 
+    def _top_change(self, g: pd.DataFrame, comparable: bool) -> tuple[set, set, pd.DataFrame]:
+        """(entered, left, both) for one setting on one curve: the measures that enter and leave
+        the top `top`, counted among the measures ranked under both (`both`)."""
+        r, b = _cols(comparable)
+        both = g[g[r].notna() & g[b].notna()]
+        base_top = set(both.sort_values(b).measure[: self.top])
+        set_top = set(both.sort_values(r).measure[: self.top])
+        return set_top - base_top, base_top - set_top, both
+
+    def noise_sets(self, comparable: bool = False) -> dict[str, list[str]]:
+        """curve -> the measures whose place in the top `top` the seed setting(s) alone flip
+        (enter or leave): ties the random draws cannot tell apart, e.g. two measures whose
+        ratios sit within each other's noise. Empty lists when there is no seed setting."""
+        d = self.deltas(comparable)
+        inputs = self._inputs()
+        out = {c: set() for c in self._curves()}
+        for sid in (s.id for s in self.settings if inputs[s.id] == "seed"):
+            for c in out:
+                e, lv, _ = self._top_change(d[(d.setting == sid) & (d.curve == c)], comparable)
+                out[c] |= e | lv
+        return {c: sorted(v) for c, v in out.items()}
+
     def research(self, comparable: bool = False) -> pd.DataFrame:
-        """unit, curves_top_changed, curves, enter, leave, max_abs_delta, within_noise, drops_out:
-        for each research unit, the curves on which one of its settings changes which measures
-        make the top `top` (among the measures ranked under both), the measures that enter and
-        leave, the largest |delta| it gives anyone, the curves where the top changed only within
-        seed noise (not counted), and measures in the default top that drop out under it. Sorted
-        by curves_top_changed, then max_abs_delta, descending; the seed is last, as the noise
-        floor."""
-        cols = ["unit", "curves_top_changed", "curves", "enter", "leave", "max_abs_delta",
-                "within_noise", "drops_out"]
+        """unit, noise_robust, curves_noise_robust, curves_top_changed, curves, enter, leave,
+        max_abs_delta, within_noise, drops_out: for each research unit, the curves on which one
+        of its settings changes which measures make the top `top` (among the measures ranked
+        under both), the measures that enter and leave, the largest |delta| it gives anyone, the
+        curves where the top changed only within seed noise (not counted), and measures in the
+        default top that drop out under it.
+
+        Two counts. curves_top_changed (raw): a curve counts when some measure entering or
+        leaving moves further than the seed moves it. noise_robust: a curve counts only when
+        the change is one the seed alone never makes, that is, some measure entering or leaving
+        is outside the seed's own flips on that curve (noise_sets). Without a seed setting the
+        two are equal, and a noise-robust curve is always a raw one. Sorted by noise_robust, then the raw count, then max_abs_delta,
+        descending; the seed is last, as the noise floor."""
+        cols = ["unit", "noise_robust", "curves_noise_robust", "curves_top_changed", "curves",
+                "enter", "leave", "max_abs_delta", "within_noise", "drops_out"]
         if not len(self.ranks):
             return pd.DataFrame(columns=cols)
         r, b = _cols(comparable)
         d = self.deltas(comparable)
         units, inputs = self._units(), self._inputs()
         seed = self._seed(d)
+        noise = {c: set(v) for c, v in self.noise_sets(comparable).items()}
         has_seed = any(v == "seed" for v in inputs.values())
         order = list(dict.fromkeys(units[s.id] for s in self.settings))
         rows = []
         for u in order:
             ids = [s.id for s in self.settings if s.unit == u]
             is_seed = all(inputs[i] == "seed" for i in ids)
-            changed, quiet, enter, leave, drops = [], [], set(), set(), set()
+            changed, quiet, robust, enter, leave, drops = [], [], [], set(), set(), set()
             sub = d[d.setting.isin(ids)]
             big = sub.delta.abs().max() if sub.delta.notna().any() else 0.0
             for c in self._curves():
-                hit = noisy = False
+                hit = noisy = firm = False
                 for i in ids:
                     g = sub[(sub.setting == i) & (sub.curve == c)]
-                    both = g[g[r].notna() & g[b].notna()]
-                    base_top = set(both.sort_values(b).measure[: self.top])
-                    set_top = set(both.sort_values(r).measure[: self.top])
+                    e, lv, both = self._top_change(g, comparable)
                     drops |= set(g[(g[b] <= self.top) & g[r].isna()].measure)
-                    e, lv = set_top - base_top, base_top - set_top
                     if not (e or lv):
                         continue
                     moved = both[both.measure.isin(e | lv)]
@@ -267,18 +297,23 @@ class Swing:
                         leave |= lv
                     else:
                         noisy = True
+                    if real and not is_seed and (e | lv) - noise.get(c, set()):
+                        firm = True
                 if hit:
                     changed.append(c)
                 elif noisy:
                     quiet.append(c)
-            rows.append(dict(unit=u, curves_top_changed=len(changed), curves=changed,
+                if firm:
+                    robust.append(c)
+            rows.append(dict(unit=u, noise_robust=len(robust), curves_noise_robust=robust,
+                             curves_top_changed=len(changed), curves=changed,
                              enter=sorted(enter), leave=sorted(leave),
                              max_abs_delta=None if pd.isna(big) else float(big),
                              within_noise=len(quiet), drops_out=sorted(drops), _seed=is_seed))
         out = pd.DataFrame(rows, columns=[*cols, "_seed"])
         out["_d"] = out.max_abs_delta.fillna(-1)
-        out = out.sort_values(["_seed", "curves_top_changed", "_d", "unit"],
-                              ascending=[True, False, False, True])
+        out = out.sort_values(["_seed", "noise_robust", "curves_top_changed", "_d", "unit"],
+                              ascending=[True, False, False, False, True])
         return out.drop(columns=["_seed", "_d"]).reset_index(drop=True)
 
     def break_even_odds(self, comparable: bool = False) -> pd.DataFrame:
@@ -674,6 +709,7 @@ def to_json(s: Swing) -> dict:
         out["stability" + tail] = _records(s.stability(comparable))
         out["movers" + tail] = _records(s.movers(comparable))
         out["research" + tail] = _records(s.research(comparable))
+        out["noise_sets" + tail] = s.noise_sets(comparable)
         out["break_even_odds" + tail] = _records(s.break_even_odds(comparable))
     out["skipped"] = dict(s.skipped or {})
     out["notes"] = notes(s)

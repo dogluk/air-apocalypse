@@ -242,3 +242,49 @@ def test_cli_sensitivity_write(tmp_path, capsys):
 
 def test_cli_rejects_sensitivity_flags_without_it(capsys):
     assert main(["rank", "Bengaluru", "--library", str(FIXTURES), "--top", "3"]) == 1
+
+
+def test_noise_robust_research_ignores_swaps_the_seed_also_makes():
+    """The seed swaps e and f (ranks 5, 6) on both curves. A setting whose only change to the
+    top is that swap is raw-counted (its move is bigger than the seed's) but not noise-robust;
+    one that brings g (7) into the top is both."""
+    seed = Setting("seed:1", "seed", "another seed")
+    cost_a = Setting("cost:a:low", "cost", "a's cost low")
+    cost_b = Setting("cost:b:low", "cost", "b's cost low")
+    rows = []
+    for c in ("c1", "c2"):
+        for i, m in enumerate("abcdefg", 1):
+            swap = {"e": 6, "f": 5}.get(m, i)
+            rows.append((m, c, "seed:1", swap, i))
+            rows.append((m, c, "cost:b:low",
+                         {"e": 7, "f": 5, "g": 6}.get(m, i) if c == "c1" else swap, i))
+            rows.append((m, c, "cost:a:low",
+                         {"e": 7, "g": 5, "f": 6}.get(m, i) if c == "c1" else i, i))
+    s = _swing(rows, [cost_a, cost_b, seed])
+    assert s.noise_sets() == {"c1": ["e", "f"], "c2": ["e", "f"]}
+    res = s.research().set_index("unit")
+    assert res.loc["cost:b", "curves_top_changed"] == 1     # e moves 2, more than the seed's 1
+    assert res.loc["cost:b", "noise_robust"] == 0           # but the swap is e for f only
+    assert res.loc["cost:b", "curves_noise_robust"] == []
+    assert res.loc["cost:a", "noise_robust"] == 1           # g enters: the seed never does that
+    assert res.loc["cost:a", "curves_noise_robust"] == ["c1"]
+    assert res.loc["seed", "noise_robust"] == 0
+    assert list(res.index) == ["cost:a", "cost:b", "seed"]  # sorted by the robust count
+
+
+def test_noise_robust_equals_raw_without_a_seed_setting():
+    cost = Setting("cost:a:low", "cost", "a's cost low")
+    rows = [(m, "c1", "cost:a:low", {"e": 6, "f": 5}.get(m, i), i)
+            for i, m in enumerate("abcdef", 1)]
+    res = _swing(rows, [cost]).research().set_index("unit")
+    assert res.loc["cost:a", "noise_robust"] == res.loc["cost:a", "curves_top_changed"] == 1
+
+
+def test_sensitivity_json_and_text_carry_noise_robust():
+    s = sensitivity.run("Bengaluru", inputs=["map", "seed"], folder=FIXTURES, n=30,
+                        curves=[CURVE])
+    out = sensitivity.to_json(s)
+    assert {"noise_robust", "curves_noise_robust"} <= set(out["research"][0])
+    assert set(out["noise_sets"]) == {CURVE} and "noise_sets_comparable" in out
+    from airhealth import report
+    assert "beyond the seed's own swaps" in report.sensitivity_table(s)
