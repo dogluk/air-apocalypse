@@ -9,7 +9,9 @@ from citypage import measures
 from citypage.measures import MeasureFile, find, render, score_all
 
 LIB = library.LIBRARY
-FIXTURE = ("lpg_refill_subsidy", "road_paving", "school_purifiers", "smog_tower")
+FIXTURE = ("lpg_refill_subsidy", "road_paving", "school_purifiers", "smog_tower",
+           "fgd_scrubbers", "stubble_pes_upfront")
+REGIONAL = ("fgd_scrubbers", "stubble_pes_upfront")
 N = 200
 
 
@@ -118,10 +120,72 @@ def test_exposure_change_is_labelled_for_the_covered(page):
     assert "city average" in page
 
 
-def test_assumptions_and_engine_limit_are_printed(page):
+def test_assumptions_are_printed_without_the_fixed_age_caveat(page):
     for a in score.ASSUMPTIONS:
         assert html_.escape(a) in page
-    assert "overstated" in page
+    # the engine now scores an age group with its own death rates (exposure.ages); the old
+    # bullet saying it used the whole city's mix must not come back
+    assert "overstated" not in page
+    assert "whole city's mix of ages" not in page
+    assert "Only people aged 5-19 are reached" in page           # the engine's age_group flag
+
+
+def _section(page, name):
+    """The HTML of one measure's block: from its heading to the next h3."""
+    at = page.index(f">{html_.escape(name)}</h3>")
+    end = page.find("<h3", at)
+    return page[at:end if end > 0 else len(page)]
+
+
+def _row(block, curve):
+    m = re.search(rf"<tr><td>{curve}[^<]*</td>.*?</tr>", block)
+    assert m, curve
+    return m.group(0)
+
+
+def test_a_curve_that_cannot_see_the_age_group_shows_a_dash_and_why(page):
+    name = library.load(LIB / "school_purifiers.toml").name
+    block = _section(page, name)
+    run, _ = curves.select()
+    gap = [c.name for c in run if c.min_age > 19]
+    seen = [c.name for c in run if c.min_age <= 19]
+    assert gap and seen
+    for c in gap:
+        row = _row(block, c)
+        assert "does not cover ages 5-19" in row and "starts at age" in row
+        assert "<td class=num>0</td>" not in row and "—" in row
+    for c in seen:
+        assert "does not cover" not in _row(block, c)
+    # the chart leaves the dot off and says why, under the chart
+    assert "do not cover the ages" in page[:page.index("<h3>Each measure</h3>")]
+    for c in gap:
+        assert c in page[:page.index("<h3>Each measure</h3>")]
+
+
+def test_regional_measures_have_their_own_group(page):
+    head = "Measures that act on a whole region"
+    assert f"<h3>{head}" in page
+    each = page[page.index("<h3>Each measure</h3>"):]
+    cut = each.index(f"<h3>{head}")
+    for i in REGIONAL:
+        name = library.load(LIB / f"{i}.toml").name
+        assert each.index(html_.escape(name)) > cut           # in their own group, last
+        block = _section(page, name)
+        assert "whole reach" in block and "falls outside" in block
+        assert "Cost:" in block and "Rs " not in block       # no cost or ratio from the city part
+    # the stand-in table's own warning, in plain words, beside the numbers
+    fallback = score.receptor_basis("receptor_stubble.csv", key="fallback")
+    assert fallback and html_.escape(fallback) in _section(
+        page, library.load(LIB / "stubble_pes_upfront.toml").name)
+    # not on the ratio charts, and not listed there as "no ratio" either
+    glance = page[page.index("All measures at a glance"):page.index("<h3>Each measure</h3>")]
+    for i in REGIONAL:
+        assert html_.escape(library.load(LIB / f"{i}.toml").name) not in glance
+
+
+def test_find_keeps_region_measures(tmp_path):
+    _copy(tmp_path, "road_paving", "fgd_scrubbers")
+    assert [m.path.stem for m in find("Bengaluru", tmp_path)] == ["fgd_scrubbers", "road_paving"]
 
 
 def test_no_ranking_no_average(page):

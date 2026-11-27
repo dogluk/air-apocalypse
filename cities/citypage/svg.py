@@ -29,7 +29,8 @@ def _ok(v) -> bool:
 
 
 def nice_ticks(lo: float, hi: float, n: int = 5) -> list[float]:
-    """4-6 round steps covering [lo, hi]."""
+    """4-7 round steps covering [lo, hi]: the first tick is at or below lo and the last at or
+    above hi, so every value is inside the axis."""
     if hi <= lo:
         hi = lo + 1
     raw = (hi - lo) / n
@@ -37,7 +38,7 @@ def nice_ticks(lo: float, hi: float, n: int = 5) -> list[float]:
     step = next((m * mag for m in (1, 2, 2.5, 5, 10) if m * mag >= raw), 10 * mag)
     t = math.floor(lo / step) * step
     out = []
-    while t <= hi + step * 1e-9:
+    while not out or out[-1] < hi - step * 1e-9:
         out.append(round(t, 10))
         t += step
     return out
@@ -47,8 +48,15 @@ def _tick(v: float) -> str:
     return f"{v:g}"
 
 
+CLOSE = "</svg></div>"
+
+
 def _open(width, height, title):
-    return (f'<svg viewBox="0 0 {width} {height}" width="{width}" role="img" '
+    """Every chart sits in a div.chart: at phone width it keeps a readable minimum width (600 px,
+    or its own width if smaller) and scrolls sideways inside that box (page CSS) instead of
+    shrinking its text to a few pixels."""
+    return (f'<div class="chart"><svg viewBox="0 0 {width} {height}" width="{width}" '
+            f'style="min-width:{min(width, 600)}px" role="img" '
             f'aria-label="{esc(title)}" xmlns="http://www.w3.org/2000/svg"><title>{esc(title)}</title>'
             f'<text class="ttl" x="0" y="14">{esc(title)}</text>')
 
@@ -110,7 +118,7 @@ def line_chart(series: list[Series], *, title: str, x_label: str, y_label: str,
                     last = (x, y)
         if last:
             o.append(f'<text class="lab" x="{px(last[0]) + 6:.1f}" y="{py(last[1]) + 4:.1f}">{esc(s.name)}</text>')
-    o.append("</svg>")
+    o.append(CLOSE)
     return "".join(o)
 
 
@@ -148,7 +156,7 @@ def heatmap(row_labels: list[str], col_labels: list[str], values: list[list[floa
                          f'style="fill:color-mix(in srgb, var(--s0) {pct}%, var(--band))"/>'
                          f'<text class="cellink{" on" if f > 0.55 else ""}" x="{x + cw / 2 - .5}" y="{y + 15}" '
                          f'text-anchor="middle">{esc(txt)}</text></g>')
-    o.append("</svg>")
+    o.append(CLOSE)
     return "".join(o)
 
 
@@ -189,7 +197,7 @@ def dot_rows(row_labels: list[str], groups: list[tuple[str, list[float | None]]]
     for g, (gname, _) in enumerate(groups):
         o.append(f'<circle class="f{g % 8}" cx="{width - R + 14}" cy="{T + 8 + 16 * g}" r="4"/>'
                  f'<text class="lab" x="{width - R + 24}" y="{T + 12 + 16 * g}">{esc(gname)}</text>')
-    o.append("</svg>")
+    o.append(CLOSE)
     return "".join(o)
 
 
@@ -222,5 +230,5 @@ def stacked_bars(col_labels: list[str], part_labels: list[str], values: list[lis
     for p, pl in enumerate(part_labels):
         o.append(f'<rect class="f{p % 8}" x="{width - R + 8}" y="{T + 16 * p}" width="10" height="10"/>'
                  f'<text class="lab" x="{width - R + 24}" y="{T + 9 + 16 * p}">{esc(pl)}</text>')
-    o.append("</svg>")
+    o.append(CLOSE)
     return "".join(o)

@@ -147,6 +147,9 @@ def _curve_gap(s: score.Score, curve: str) -> str:
     return ""
 
 
+curve_gap = _curve_gap   # public name: the city page (cities/citypage/measures.py) uses the same test
+
+
 def _row(s: score.Score, curve: str, reach: str, regional: score.Score | None = None,
          regional_missing: str = "") -> Row:
     """One measure's row on one curve, read from its Score (and, for a regional measure scored

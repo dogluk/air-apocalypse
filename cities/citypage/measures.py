@@ -1,9 +1,9 @@
 """Chapter 4: what could work, and what it would buy. Bengaluru's measures from the library.
 
 The seam: this chapter reads only the measure library (health/interventions/library/*.toml,
-airhealth.measures) and the scoring engine (airhealth.score: city(), Score, Flag, STATUSES,
-ASSUMPTIONS). It does not reach into the engine's internals; if the Score fields change, this
-module changes with them.
+airhealth.measures), the scoring engine (airhealth.score: city(), Score, Flag, STATUSES,
+ASSUMPTIONS) and the ranking's curve-gap test (airhealth.rank.curve_gap). It does not reach
+into the engine's internals; if the Score fields change, this module changes with them.
 
 Rules it keeps:
   - Every causes study of the city is its own column: an air measure is scored once per study
@@ -13,6 +13,11 @@ Rules it keeps:
     the middle one. Measures are listed in library order (file name), never sorted by a number.
   - Every flag the engine attaches is printed in plain words, and the ones that change how far a
     ratio can be trusted sit right beside it.
+  - A curve that does not cover the ages a measure reaches (rank.curve_gap) shows "—" and the
+    reason, never 0: not ranked is not "no effect".
+  - A regional measure (it acts on a source spread over several states) is shown in its own
+    group with the part of its life-years that reaches the city. Its cost and ratio belong to
+    its whole reach, so they are not given here.
   - A file that cannot be read, or a measure that cannot be run, is listed with its error, never
     dropped quietly.
 """
@@ -25,19 +30,25 @@ import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from airhealth import causes, curves, exposure, score
+from airhealth import causes, curves, exposure, rank, score
 from airhealth import measures as library
 
 from .page import Section, esc, fmt, table
-from .svg import _open, _tick
+from .svg import CLOSE, _open, _tick
 
 MAP = "acag_total"            # the ranking's default exposure map
 
 # Flags that bear on how far the ratio can be trusted: shown in a box right beside it.
-PROMINENT = ("partial_cost", "upper_bound_all_origins", "long_shot", "placeholder",
-             "odds_judgement", "evidence_S", "evidence_R")
+PROMINENT = ("receptor_fallback", "partial_cost", "upper_bound_all_origins", "long_shot",
+             "placeholder", "odds_judgement", "evidence_S", "evidence_R")
 
 PARTIAL_HEAD = "Costs that leave things out"
+REGIONAL_HEAD = "Measures that act on a whole region"
+REGIONAL_BASIS = ("This measure acts on a source spread over several states, and most of its "
+                  "benefit falls outside the city. The figures here are only the part of its "
+                  "life-years that reaches the city. Its cost and its life-years per crore belong "
+                  "to its whole reach (every district it changes), so they are not given on this "
+                  "page; the ranking gives them (airhealth score --region {id}).")
 
 STATUS_WORDS = {
     "scored": "scored",
@@ -52,6 +63,8 @@ KIND_WORDS = {
     "exposure": ("exposure measure: cuts what some people breathe; the outdoor air is "
                  "unchanged"),
 }
+REGIONAL_WORDS = ("regional air measure: cuts a source spread over several states, which "
+                  "cleans the outdoor air across a wide region, this city included")
 
 
 @dataclass(frozen=True)
@@ -89,8 +102,10 @@ def _raw_applies(path: Path, city: str) -> tuple[bool, str | None]:
 
 def find(city: str, folder: Path | None = None) -> list[MeasureFile]:
     """Every measure file in `folder` (default: the library) that applies to the city, in file
-    name order, skipping names that start with "_" (the template). A file that fails to load is
-    kept, with its one-line error, if its raw `cities` names the city or "all"."""
+    name order, skipping names that start with "_" (the template). A regional measure (scope
+    "region", no `cities`) is kept: the engine scores the part of it that reaches the city. A
+    file that fails to load is kept, with its one-line error, if its raw `cities` names the city
+    or "all" (or is absent, as in a regional file)."""
     folder = Path(folder) if folder is not None else library.LIBRARY
     out = []
     for p in sorted(folder.glob("*.toml")):
@@ -103,7 +118,7 @@ def find(city: str, folder: Path | None = None) -> list[MeasureFile]:
             if applies:
                 out.append(MeasureFile(p, name, _one_line(e)))
             continue
-        if m.cities is None or city in m.cities:
+        if m.cities is None or m.scope == "region" or city in m.cities:
             out.append(MeasureFile(p, m.name, None))
     return out
 
@@ -218,7 +233,7 @@ def log_dots(rows: list[str], curve_names: list[str], values: list[list[float | 
         o.append(f'<circle class="f{c % 8}" cx="{width - R + 14}" cy="{T + 8 + 16 * c}" r="4"/>'
                  f'<text class="lab" x="{width - R + 24}" y="{T + 12 + 16 * c}">'
                  f'{esc(name)}</text>')
-    o.append("</svg>")
+    o.append(CLOSE)
     return "".join(o)
 
 
@@ -240,12 +255,33 @@ def _others(s: score.Score):
     return [f for f in s.flags if f.code not in PROMINENT]
 
 
+def _gap_words(s: score.Score, curve: str) -> str:
+    """'' when the curve covers the measure's ages; else a short plain reason for a table cell."""
+    if not rank.curve_gap(s, curve):
+        return ""
+    ages = s.trail["exposure"]["ages"]
+    min_age = s.run.per_curve[curve].curve.min_age
+    return (f"this curve does not cover ages {ages[0]}-{ages[1]}: it starts at age {min_age}, "
+            "so it says nothing about them (not zero)")
+
+
 def _curve_table(s: score.Score, labels: dict[str, str], caption: str) -> str:
+    if s.scope == "region":
+        head = ["Curve", "Life-years in the city if it works, median (5% to 95%)",
+                "Deaths postponed in the city if it works, median (5% to 95%)",
+                "Expected life-years in the city"]
+        rows = [[name, _range(d["life_years"]), _range(d["deaths_postponed"]),
+                 fmt(d["expected_life_years"])] for name, d in s.per_curve.items()]
+        return table(head, rows, caption=caption, numeric=(1, 2, 3))
     head = ["Curve", "Life-years if it works, median (5% to 95%)",
             "Deaths postponed if it works, median (5% to 95%)",
             "Life-years per crore if it works", "Expected life-years per crore"]
     rows = []
     for name, d in s.per_curve.items():
+        gap = _gap_words(s, name)
+        if gap:
+            rows.append([f"{name} ({gap})", "—", "—", "—", "—"])
+            continue
         rows.append([name, _range(d["life_years"]),
                      _range(d["deaths_postponed"]),
                      _sig(d["life_years_per_crore_if_works"]),
@@ -263,13 +299,20 @@ def _score_block(s: score.Score, labels: dict[str, str], study_label: str | None
         if s.kind == "exposure":
             where = ("in what the covered people breathe (not the city average; everyone else "
                      "breathes the same air as before)")
+        elif s.scope == "region":
+            where = ("in the city average (the yearly mean, weighted by where people live), "
+                     "from the part of the measure that reaches the city")
         else:
             where = "in the city average (the yearly mean, weighted by where people live)"
         h.append(f"<p>PM2.5 change if it works, {where}: {_pm(s.pm25_change['median'])} µg/m³ "
                  f"({_pm(s.pm25_change['p5'])} to {_pm(s.pm25_change['p95'])}).</p>")
     if s.per_curve:
         first = next(iter(s.per_curve.values()))
-        if s.status == "no_cost":
+        if s.scope == "region":
+            h.append(f"<p>{esc(REGIONAL_BASIS.format(id=s.measure))}</p>"
+                     "<p>Cost: belongs to the whole region the measure reaches, not to this "
+                     "city, so it is not given here.</p>")
+        elif s.status == "no_cost":
             h.append("<p>Cost: not known (the file gives none).</p>")
         else:
             h.append(f"<p>Cost over its years, in the funder's 2025 rupees, discounted: "
@@ -293,11 +336,14 @@ def _study_label(st: str | None) -> str | None:
     return None if st is None else f"On study {st}"
 
 
+def _kind_words(s: score.Score) -> str:
+    return REGIONAL_WORDS if s.scope == "region" else KIND_WORDS.get(s.kind, s.kind)
+
+
 def _measure_block(e: Entry, labels: dict[str, str]) -> str:
     first = next(iter(e.scores.values()))
     h = [f'<h3 id="m-{esc(e.file.path.stem)}">{esc(first.name)}</h3>',
-         f'<p class="note">{esc(e.file.path.name)}: {esc(KIND_WORDS.get(first.kind, first.kind))}.'
-         f"</p>",
+         f'<p class="note">{esc(e.file.path.name)}: {esc(_kind_words(first))}.</p>',
          f"<p><b>Who it reaches:</b> {esc(first.who_reaches)}.</p>",
          f"<p><b>Odds that it works:</b> {first.p_success:.0%}. "
          f"<b>Basis:</b> {esc(first.p_success_basis)}.</p>"]
@@ -306,22 +352,32 @@ def _measure_block(e: Entry, labels: dict[str, str]) -> str:
     return "".join(h)
 
 
-def _chart(entries: list[Entry], key, curve_names: list[str], title: str) -> tuple[str, list[str]]:
-    rows, vals, left_out = [], [], []
+def _chart(entries: list[Entry], key, curve_names: list[str],
+           title: str) -> tuple[str, list[str], list[str]]:
+    """(chart, measures left off it with why, dots left off with why). A curve that does not
+    cover a measure's ages gets no dot (rank.curve_gap), and the note under the chart says so."""
+    rows, vals, left_out, gaps = [], [], [], []
     for e in entries:
         s = e.scores.get(key)
         if s is None:
             continue
-        v = [s.per_curve.get(c, {}).get("expected_life_years_per_crore") for c in curve_names]
+        gap = [c for c in curve_names if rank.curve_gap(s, c)]
+        v = [None if c in gap else s.per_curve.get(c, {}).get("expected_life_years_per_crore")
+             for c in curve_names]
+        if gap:
+            ages = s.trail["exposure"]["ages"]
+            gaps.append(f"{s.name}: no dot for {', '.join(gap)}, because these curves do not "
+                        f"cover the ages it reaches ({ages[0]}-{ages[1]}); they start at an "
+                        "older age, which is not the same as no effect")
         if any(x is not None and x > 0 for x in v):
             rows.append(s.name)
             vals.append(v)
         else:
             left_out.append(f"{s.name} ({STATUS_WORDS[s.status]})")
     if not rows:
-        return "", left_out
+        return "", left_out, gaps
     return log_dots(rows, curve_names, vals, title=title,
-                    x_label="expected life-years per crore (log scale)"), left_out
+                    x_label="expected life-years per crore (log scale)"), left_out, gaps
 
 
 def _empty(city: str) -> str:
@@ -396,20 +452,17 @@ def render(city: str, folder: Path | None = None, n: int = 2000, seed: int = 0) 
     h.append(f'<p class="note">{esc(line)}</p>')
 
     h.append("<h3>What the scores assume</h3><ul>"
-             + "".join(f"<li>{esc(a)}</li>" for a in score.ASSUMPTIONS)
-             + "<li>An exposure measure that reaches only part of the city is scored as if the "
-               "people it covers had the whole city's mix of ages and death rates: the engine "
-               "spreads them across ages like everyone else. For a measure that reaches only "
-               "children, such as purifiers in classrooms, the life-years are therefore likely "
-               "overstated, because most deaths from PM2.5 are in adults.</li></ul>")
+             + "".join(f"<li>{esc(a)}</li>" for a in score.ASSUMPTIONS) + "</ul>")
 
     h.append("<h3>All measures at a glance</h3>")
     h.append("<p>One row per measure, in library order (by file name), not sorted by any number. "
              "Each dot is one curve's expected life-years per crore; the line runs from the "
              "lowest curve to the highest. The scale is logarithmic: each step to the right is "
              "ten times more. Caveats for each measure are with its own table below.</p>")
-    full = [e for e in ok if not _partial(e)]
-    part = [e for e in ok if _partial(e)]
+    regional = [e for e in ok if next(iter(e.scores.values())).scope == "region"]
+    local = [e for e in ok if e not in regional]
+    full = [e for e in local if not _partial(e)]
+    part = [e for e in local if _partial(e)]
     if part:
         h.append("<p>The measures listed under <b>" + PARTIAL_HEAD + "</b> carry a cost that "
                  "leaves out something real, so their ratios are not comparable with the "
@@ -420,8 +473,11 @@ def render(city: str, folder: Path | None = None, n: int = 2000, seed: int = 0) 
         keys = [(st, f"{city}: air measures on study {st}") for st in studies]
         keys.append((None, f"{city}: exposure measures (no study needed)"))
         for key, title in keys:
-            chart, left_out = _chart(group, key, curve_names, title)
+            chart, left_out, gaps = _chart(group, key, curve_names, title)
             out.append(chart)
+            if gaps:
+                out.append(f'<p class="note">Dots left off the chart "{esc(title)}": '
+                           f"{esc('; '.join(gaps))}.</p>")
             if left_out:
                 out.append(f'<p class="note">Not on the chart "{esc(title)}", because it has no '
                            f"ratio: {esc('; '.join(left_out))}.</p>")
@@ -432,6 +488,9 @@ def render(city: str, folder: Path | None = None, n: int = 2000, seed: int = 0) 
                  "things out, so the ratios are not comparable with each other or with the "
                  "measures above.</p>")
         h.append(charts(part))
+    if regional:
+        h.append(f"<p>The measures under <b>{REGIONAL_HEAD}</b> are not on these charts: their "
+                 "cost and ratio belong to their whole reach, not to this city.</p>")
 
     h.append("<h3>Each measure</h3>")
     for e in full:
@@ -442,6 +501,16 @@ def render(city: str, folder: Path | None = None, n: int = 2000, seed: int = 0) 
                  "with other measures' and are listed after the fully costed ones, in library "
                  "order.</p>")
         for e in part:
+            h.append(_measure_block(e, labels))
+    if regional:
+        h.append(f"<h3>{REGIONAL_HEAD}</h3><p>These measures cut a source spread over several "
+                 "states (coal power plants, crop burning in the north-west), so the city gets "
+                 "only part of what they do, and most of their benefit falls outside it. Each "
+                 "is shown with the part of its life-years that reaches the city, from a "
+                 "source-receptor table (a table of how much one source changes each "
+                 "district's PM2.5). Their cost and life-years per crore belong to their whole "
+                 "reach and are not given here. In library order.</p>")
+        for e in regional:
             h.append(_measure_block(e, labels))
     h.append(_broken(entries))
     return Section("measures", "What could work, and what it would buy", "".join(h))
