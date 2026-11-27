@@ -68,6 +68,15 @@ All free, no API keys.
 | Boundary-layer height, wind, rain, humidity, hourly | ERA5 reanalysis via the [Open-Meteo](https://open-meteo.com) archive API | CC BY 4.0 |
 | Fire detections | [NASA FIRMS](https://firms.modaps.eosdis.nasa.gov) MODIS, India yearly archive | public |
 
+Licence of each committed file in `data/` (licence audit, 2026-11-27; the licences are the sources' own, as listed above):
+
+| File | Made from | Licence |
+|---|---|---|
+| `city_hourly.parquet`, `nightday.parquet`, `effects.csv`, `summary.csv`, `trend_cityyear.csv`, `tempo_hourly.csv`, `tempo_daily.csv` (tempo = rhythm of the week, built from CPCB hourly PM2.5, not from the NASA TEMPO satellite), `health_*.csv` | CPCB compilation, with ERA5 weather and FIRMS fires as regression inputs | ODbL 1.0 (share-alike inherited from the CPCB compilation; the ERA5 and FIRMS terms below also apply to the parts made from them) |
+| `weather_era5.parquet` | ERA5 reanalysis via the Open-Meteo archive API | CC BY 4.0 (as stated above) |
+| `fires_daily.parquet` | NASA FIRMS MODIS detections, counted per day and region | public (as stated above) |
+| `trends/*.json` (Google Trends search interest, 392 cached responses) | Google Trends | **not settled**: Google Trends publishes no open licence for reuse; see `health/data/MISSING.md`, "Licences" |
+
 ## How the data was cleaned
 
 1. **Timestamps are IST, not UTC.** The compiled parquets label CPCB's Indian wall-clock times as UTC

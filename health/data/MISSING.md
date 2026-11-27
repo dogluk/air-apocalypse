@@ -270,3 +270,24 @@ that blocks it. What would widen each (leads, not checked):
   ratio.** The general variant uses India's (70.4%; 25). UDISE+ 2023-24 Tables 2.2 and 5.1 give both per state, and the UDISE+
   district files per district; a city file with its own figures would replace the general one for that city.
 - **`winter_cloud_seeding` (Delhi):** nothing in it was measured outside Delhi's October 2025 trials; it stays in Delhi.
+
+## Licences: files whose licence is not settled (audit, 2026-11-27)
+
+Checked: every file in `health/data/` has a `licence` line in `sources.toml` (36 entries, one per file; the one entry
+with no file, `mcduffie2021_supp_data_1.xlsx`, is the McDuffie download the build script keeps outside the repo). The files
+under `diwali/data/` are covered by the licence table in `diwali/README.md` (CPCB compilation ODbL; ERA5 CC BY 4.0; FIRMS
+public). `cities/` holds no data file: the Bengaluru page is generated, its numbers come from the data above, and its fonts
+are the OFL-licensed ones in `fonts/`. IHME files are never committed; only results derived from them appear, and none is
+in `health/data/`. APnA and McDuffie are CC BY 4.0 (`causes.csv`, `apna_source_apportionment.csv`, the two receptor tables).
+
+Not settled:
+
+- `diwali/data/trends/*.json` (392 cached Google Trends responses, `diwali/pull_trends.py`). Wanted: the terms under which
+  Google Trends data may be redistributed. Tried: nothing beyond the repository's own notes, which give no licence;
+  `lit/reading.md` says only that the endpoint used is internal and the official API is in alpha. Would settle it: Google's
+  Trends terms of service or a written answer from Google. Until then the cached JSON is a redistribution of unlicensed
+  data; the derived `trend_cityyear.csv` (effect sizes, no raw series) is the safer thing to keep.
+- `health/charts/*.png` (seven chart images made by the model from the data above). No licence line of their own. The
+  inputs are CC BY / ODbL; the repository's MIT/ODbL line in the README is the only statement covering them.
+- Several `health/data` entries record "no licence stated" for Government of India documents (SRS, projections, census
+  tables) and rely on reproducing facts with attribution. That is stated, not unclear, but it is not a licence grant.
