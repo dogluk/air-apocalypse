@@ -1,6 +1,6 @@
 # Where this stands
 
-Last updated 2026-11-28. New to the repo? Read [`../AGENTS.md`](../AGENTS.md) first.
+Last updated 2026-11-27. New to the repo? Read [`../AGENTS.md`](../AGENTS.md) first.
 
 ## In short
 
@@ -26,7 +26,7 @@ comes from (`origin`: inside the city, from anywhere, or a geographic split).
 `airhealth causes Kanpur` shows them side by side. A second pass re-read ~230 rows at source
 and found no wrong number.
 
-**Measures and ranking (built 2026-11-28).** A library of 22 measures
+**Measures and ranking (built 2026-11-27).** A library of 22 measures
 (`health/interventions/library/`), each number read at source or flagged; `airhealth score CITY`
 scores them on every curve and every source study; `airhealth rank` ranks them per city and for
 all India (never averaging curves); `airhealth rank --sensitivity` shows which inputs reorder the
