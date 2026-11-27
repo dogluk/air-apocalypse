@@ -362,3 +362,10 @@ def test_household_driver_with_ages_is_invalid(tmp_path):
     assert t["cost"]["driver"] == "household"
     with pytest.raises(intervention.Invalid, match=r"^exposure\.ages: households"):
         measures.load(write(tmp_path, t))
+
+
+def test_cost_full_is_refused_beside_a_once_cost(tmp_path):
+    t = _with_full(FULL)
+    t["cost"]["once"] = 5000000
+    with pytest.raises(measures.Invalid, match=r"^cost\.full: the full-cost what-if has no once"):
+        measures.load(write(tmp_path, t))

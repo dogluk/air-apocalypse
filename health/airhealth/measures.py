@@ -362,6 +362,10 @@ def _cost(value) -> Cost:
         if not partial:
             raise Invalid("cost.full: only for a partial cost; give cost.partial first, saying "
                           "what the default cost leaves out")
+        if once != Dist.fixed(0.0):
+            raise Invalid("cost.full: the full-cost what-if has no once cost (full_cost_library "
+                          "sets it to 0), so a measure with a cost.once cannot give [cost.full]; "
+                          "put its capital cost in the range or leave cost.full out")
         full = _full_cost(t["full"])
     return Cost(driver, once, annual, units, unit, net["society_net_once"],
                 net["society_net_annual"], currency, year, share, partial, full)

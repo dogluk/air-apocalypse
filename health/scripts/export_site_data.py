@@ -20,6 +20,9 @@ the regional measures (stubble, power plants) get no ratio, because that needs a
 run that takes minutes. Pass --with-regions to do that run. Cities: every city with a rank
 output, or --city (repeatable); with neither, Bengaluru. The per-measure "trail" (the long
 audit record behind each row) is left out to keep the files small; the rank outputs keep it.
+
+Repository script, not part of the installed package: the commit it records comes from
+`git rev-parse` run in the checkout, so run it from a clone.
 """
 from __future__ import annotations
 
