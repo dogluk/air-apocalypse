@@ -1,7 +1,10 @@
 """Is a city's top of the table the same whichever way it is computed?
 
-For one city, ranks the measure library once for every exposure map in MAPS (those present) and
-every causes study the city has with a complete split, and reports for each combination:
+For one city, ranks the measure library once for every exposure map in MAPS (those present with
+values for a city; a state-level map is listed as skipped, with its reason) and every causes study
+the city has with a complete split. It reports one overall verdict first (is the top K the same on
+every curve, map and study?, with the distinct tops and where each one occurs) and then, for each
+combination:
 
   - whether the top K (default 3) is the same on every curve: the same measures in the same order
     (same_top), or at least the same measures (same_members); among all ranked measures and among
@@ -41,9 +44,12 @@ def _top(r: rank.Ranking, curve: str, k: int, comparable: bool) -> list[str]:
 
 def top_check(r: rank.Ranking, k: int = TOP, comparable: bool = False) -> dict:
     """{"top": curve -> first k measure ids, "same_top": the same list on every curve,
-    "same_members": the same set on every curve}."""
+    "same_members": the same set on every curve}. With no curves ranked at all, both are None
+    (there is nothing to compare)."""
     top = {c: _top(r, c, k, comparable) for c in r.tables}
     lists = list(top.values())
+    if not lists:
+        return {"top": top, "same_top": None, "same_members": None}
     return {"top": top, "same_top": all(x == lists[0] for x in lists),
             "same_members": all(set(x) == set(lists[0]) for x in lists)}
 
@@ -62,10 +68,29 @@ def moves(r: rank.Ranking) -> dict[str, dict]:
     return out
 
 
-def burden(city: str, map_name: str = BURDEN_MAP) -> dict:
+def overall(combos: list[dict], which: str) -> dict:
+    """The top K across every curve of every (map, study) combination, `which` being "all" or
+    "comparable": {"cells": curves compared, "same_top": one list everywhere, "same_members": one
+    set everywhere, "tops": [{"top": ids, "where": [[map, study, curve], ...]}]} with the distinct
+    ordered tops, most widespread first. None where nothing was ranked. No averaging: it is
+    only a comparison of lists."""
+    cells = [(c["map"], c["study"], cv, ids) for c in combos for cv, ids in c[which]["top"].items()]
+    if not cells:
+        return {"cells": 0, "same_top": None, "same_members": None, "tops": []}
+    groups: dict[tuple, list] = {}
+    for m, st, cv, ids in cells:
+        groups.setdefault(tuple(ids), []).append([m, st, cv])
+    tops = [{"top": list(k), "where": v} for k, v in
+            sorted(groups.items(), key=lambda kv: (-len(kv[1]), list(kv[0])))]
+    sets = {frozenset(k) for k in groups}
+    return {"cells": len(cells), "same_top": len(groups) == 1, "same_members": len(sets) == 1,
+            "tops": tops}
+
+
+def burden(city: str, map_name: str = BURDEN_MAP, names: list[str] | None = None) -> dict:
     """Deaths attributable to PM2.5 above each curve's own floor, per curve, on one map, with the
     curves giving the lowest and highest (no average)."""
-    run, missing = curves_.select()
+    run, missing = curves_.select(names)
     place = places.resolve(city, kind="city")
     deaths = {c.name: float(steady_state(place, c, map_name, Change(to=c.floor),
                                          deaths=Sources()).deaths_averted) for c in run}
@@ -93,13 +118,20 @@ def report(city: str, *, maps: Sequence[str] = MAPS, n: int = 500, seed: int = 0
     studies = _studies(city)
     out = {"city": city, "top": top, "n": n, "seed": seed, "studies": studies,
            "maps": [m for m in maps if exposure.available(m)],
-           "maps_unavailable": [m for m in maps if not exposure.available(m)], "combos": []}
+           "maps_unavailable": [m for m in maps if not exposure.available(m)], "combos": [],
+           "maps_skipped": {}}
     for map_name in out["maps"]:
         s = dict(map_name=map_name, curves=curves, n=n, seed=seed, discount=simulate.DISCOUNT,
                  deaths=None, monthly_curves=False)
         for study in studies:
             say(f"{city}: map {map_name}, study {study}")
-            scores = score.city(city, study=study, folder=folder, library=lib, **s)
+            try:
+                scores = score.city(city, study=study, folder=folder, library=lib, **s)
+            except ValueError as e:
+                if "state-level map" not in str(e):
+                    raise
+                out["maps_skipped"][map_name] = str(e)
+                break
             wanted = [x.measure for x in scores if x.scope == "region" and x.status == "scored"]
             reach, missing = {}, {}
             if map_name in exposure.DISTRICT_MAPS and wanted:
@@ -115,15 +147,19 @@ def report(city: str, *, maps: Sequence[str] = MAPS, n: int = 500, seed: int = 0
             context = rank._context(scores, study, **s)
             r = rank.from_scores(scores, city, context, reach, regional_missing=missing)
             out["combos"].append({"map": map_name, "study": study, "curves": list(r.tables),
+                                  "regional_ranked": map_name in exposure.DISTRICT_MAPS,
                                   "all": top_check(r, top), "comparable": top_check(r, top, True),
                                   "moves": moves(r)})
+    out["maps"] = [m for m in out["maps"] if m not in out["maps_skipped"]]
+    out["overall"] = {"all": overall(out["combos"], "all"),
+                      "comparable": overall(out["combos"], "comparable")}
     largest: dict[str, dict] = {}
     for c in out["combos"]:
         for m, d in c["moves"].items():
             if d["move"] is not None and d["move"] >= largest.get(m, {}).get("move", -1):
                 largest[m] = {"move": d["move"], "map": c["map"], "study": c["study"]}
     out["largest_move"] = dict(sorted(largest.items(), key=lambda x: (-x[1]["move"], x[0])))
-    out["burden"] = burden(city) if exposure.available(BURDEN_MAP) else None
+    out["burden"] = burden(city, names=curves) if exposure.available(BURDEN_MAP) else None
     return out
 
 
@@ -132,11 +168,37 @@ def text(rep: dict) -> str:
     lines = [f"Is the top of {rep['city']}'s table the same whichever way it is computed? "
              f"{rep['n']:,} draws, seed {rep['seed']}. Top {k} on every curve, for each map and "
              "causes study; ranks are never averaged.", ""]
+    ov = rep.get("overall") or {}
+    if ov:
+        lines.append(f"Overall, on every curve, map and study ({len(rep['maps'])} maps, "
+                     f"{len(rep['studies'])} studies):")
+        for label, key in (("all measures", "all"), ("comparable only", "comparable")):
+            o = ov[key]
+            if o["same_top"] is None:
+                lines.append(f"  {label}: nothing was ranked, so there is nothing to compare")
+                continue
+            verdict = ("the same top, in the same order, everywhere" if o["same_top"] else
+                       "the same measures everywhere, but the order differs" if o["same_members"]
+                       else "the top differs")
+            lines.append(f"  {label}: {verdict} ({o['cells']} curve-map-study cells)")
+            if not o["same_top"]:
+                for t in o["tops"]:
+                    maps = sorted({w[0] for w in t["where"]})
+                    lines.append(f"      {', '.join(t['top']) or '—'}: {len(t['where'])} cells, "
+                                 f"maps {', '.join(maps)}")
+        lines.append("")
+    for m, why in (rep.get("maps_skipped") or {}).items():
+        lines.append(f"Map {m} skipped: {why}.")
+    if rep.get("maps_skipped"):
+        lines.append("")
     for c in rep["combos"]:
+        note = "" if c.get("regional_ranked", True) else (
+            " (regional measures are not ranked on this map, so its top comes from a smaller set)")
         for label, part in (("all measures", c["all"]), ("comparable only", c["comparable"])):
-            verdict = ("same, same order" if part["same_top"] else
+            verdict = ("no curves ranked" if part["same_top"] is None else
+                       "same, same order" if part["same_top"] else
                        "same measures, order differs" if part["same_members"] else "differs")
-            lines.append(f"  map {c['map']}, study {c['study']}, {label}: top {k} {verdict}")
+            lines.append(f"  map {c['map']}, study {c['study']}, {label}: top {k} {verdict}{note}")
             if not part["same_top"]:
                 lines += [f"      {cv}: {', '.join(ids) or '—'}" for cv, ids in part["top"].items()]
     lines += ["", "Largest rank move across curves per measure (worst minus best, over every map "

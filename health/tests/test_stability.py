@@ -72,3 +72,51 @@ def test_report_runs_on_fixtures_and_writes(tmp_path):
     assert "Top 3" in text and "cpcb" in text
     paths = stability.write(rep, tmp_path)
     assert {p.name for p in paths} == {"stability_bengaluru.json", "stability_bengaluru.txt"}
+
+
+def test_top_check_with_no_curves_does_not_fail():
+    got = stability.top_check(_ranking({}), 3)
+    assert got == {"top": {}, "same_top": None, "same_members": None}
+
+
+def _combo(m, study, tops):
+    return {"map": m, "study": study, "all": {"top": tops}, "comparable": {"top": tops}}
+
+
+def test_overall_compares_every_curve_map_and_study():
+    same = [_combo("acag_total", "s1", {"c1": ["a", "b"], "c2": ["a", "b"]}),
+            _combo("aqli", "s1", {"c1": ["a", "b"], "c2": ["a", "b"]})]
+    o = stability.overall(same, "all")
+    assert o["same_top"] and o["same_members"] and o["cells"] == 4 and len(o["tops"]) == 1
+    # the top is the same on every curve under each map, but the maps disagree
+    apart = [_combo("acag_total", "s1", {"c1": ["a", "b"], "c2": ["a", "b"]}),
+             _combo("aqli", "s1", {"c1": ["b", "a"], "c2": ["b", "a"]}),
+             _combo("aqli", "s2", {"c1": ["b", "c"]})]
+    o = stability.overall(apart, "all")
+    assert not o["same_top"] and not o["same_members"]
+    assert [t["top"] for t in o["tops"]] == [["a", "b"], ["b", "a"], ["b", "c"]]
+    assert o["tops"][0]["where"] and len(o["tops"][0]["where"]) == 2
+    order = stability.overall(apart[:2], "all")
+    assert not order["same_top"] and order["same_members"]
+    assert stability.overall([], "all") == {"cells": 0, "same_top": None, "same_members": None,
+                                            "tops": []}
+
+
+def test_report_says_the_overall_verdict_first_and_skips_a_state_level_map():
+    rep = stability.report("Bengaluru", maps=("acag_total", "gbd2023"), n=20, curves=[CURVE],
+                           folder=FIXTURES, top=3)
+    assert "gbd2023" in rep["maps_skipped"] and "state-level map" in rep["maps_skipped"]["gbd2023"]
+    assert "gbd2023" not in rep["maps"]
+    assert {c["map"] for c in rep["combos"]} == {"acag_total"}
+    assert set(rep["overall"]) == {"all", "comparable"}
+    text = stability.text(rep)
+    assert text.index("Overall") < text.index("map acag_total")
+    assert "gbd2023 skipped" in text
+
+
+def test_text_notes_that_regional_measures_drop_out_on_a_city_map():
+    rep = stability.report("Bengaluru", maps=("acag_total", "cpcb"), n=20, curves=[CURVE],
+                           folder=FIXTURES, top=3)
+    flags = {c["map"]: c["regional_ranked"] for c in rep["combos"]}
+    assert flags == {"acag_total": True, "cpcb": False}
+    assert "regional measures are not ranked on this map" in stability.text(rep)
