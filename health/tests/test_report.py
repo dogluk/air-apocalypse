@@ -97,3 +97,26 @@ def test_measures_listed_apart_on_any_curve_are_listed():
     r = _ranking({C1: [_row("a", 5.0), _row("late", 4.0)], C2: [_row("a", 5.0), late]})
     text = report.rank_table(r)
     assert "late (not_scored): it was not run on the curve c2" in text
+
+
+# ---- negative zero is never printed ----
+
+def test_a_rounded_negative_zero_prints_as_zero():
+    assert report.zero("-0") == "0" and report.zero("-0.00") == "0.00"
+    assert report.zero("-0.4") == "-0.4" and report.zero("-10") == "-10"
+    assert report.zero("+0.00") == "+0.00" and report.zero("(-0 to 1)") == "(0 to 1)"
+
+
+def test_range_prints_zero_not_minus_zero():
+    d = {"median": 0.2, "p5": -0.3, "p95": 1.0}
+    fmt = lambda x: f"{x:,.0f}"  # noqa: E731
+    assert report._range(d, fmt=fmt) == "0 (0 to 1)"
+
+
+def test_sig_never_prints_negative_zero():
+    assert report._sig(-0.0) == "0"
+
+
+def test_borrowed_evidence_has_a_code_and_a_legend_line():
+    assert report.FLAG_CODES["borrowed_evidence"] == "BE"
+    assert "BE" in report.FLAG_LEGEND and "another place" in report.FLAG_LEGEND["BE"]

@@ -42,6 +42,11 @@ who_reaches = "everyone in the city, through the outdoor air"
 # data/cities.csv, or a list of names exactly as written there, e.g. ["Delhi", "Kanpur"].
 cities = "all"
 
+# Optional, free text: a place (or places) whose study the measure's numbers come from, when
+# the measure is run in other cities too. Every other city's result then carries the flag
+# borrowed_evidence (BE), naming this place. Leave it out when the numbers are the city's own.
+# evidence_from = "Delhi-NCR"
+
 # Optional, air measures in cities only: score only cities where the causes this measure
 # targets make up at least this percent of PM2.5 from inside the city (their share, averaged
 # over the year weighted by days, in the source study chosen for the run). Leave it out to

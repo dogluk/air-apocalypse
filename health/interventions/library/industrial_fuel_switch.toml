@@ -5,6 +5,7 @@ scope = "city"
 who_reaches = "everyone in Amritsar, through the outdoor air"
 cities = ["Amritsar"]
 
+evidence_from = "Delhi-NCR and Ludhiana"   # where the numbers come from, when not this city
 start_year = 2027
 ramp_years = 5
 duration_years = 10

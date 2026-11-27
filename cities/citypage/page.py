@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from functools import lru_cache
 
 from airhealth import paths
+from airhealth.report import zero
 
 SECTION_IDS = ("ground", "sources", "health", "measures")
 
@@ -111,8 +112,13 @@ def table(head: list[str], rows: list[list[str]], *, caption: str | None = None,
 
 
 def fmt(x: float | None, kind: str = "int", missing: str = "no data") -> str:
+    """A number as text; a value that rounds to nothing is 0, never -0."""
     if x is None or (isinstance(x, float) and math.isnan(x)):
         return missing
+    return zero(_fmt(x, kind))
+
+
+def _fmt(x: float, kind: str) -> str:
     if kind == "int":
         return f"{x:,.0f}"
     if kind == "1dp":

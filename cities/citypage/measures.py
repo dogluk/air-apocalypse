@@ -32,6 +32,7 @@ from pathlib import Path
 
 from airhealth import causes, curves, exposure, rank, score
 from airhealth import measures as library
+from airhealth.report import zero
 
 from .page import Section, esc, fmt, table
 from .svg import CLOSE, _open, _tick
@@ -40,7 +41,7 @@ MAP = "acag_total"            # the ranking's default exposure map
 
 # Flags that bear on how far the ratio can be trusted: shown in a box right beside it.
 PROMINENT = ("receptor_fallback", "partial_cost", "upper_bound_all_origins", "long_shot",
-             "placeholder", "odds_judgement", "evidence_S", "evidence_R")
+             "placeholder", "odds_judgement", "evidence_S", "evidence_R", "borrowed_evidence")
 
 PARTIAL_HEAD = "Costs that leave things out"
 REGIONAL_HEAD = "Measures that act on a whole region"
@@ -171,6 +172,8 @@ def _sig(x: float | None) -> str:
 def _inr(x: float | None) -> str:
     if x is None or not math.isfinite(x):
         return "no data"
+    if round(x) == 0:
+        return "Rs 0"
     if abs(x) >= 1e7:
         return f"Rs {x / 1e7:,.1f} crore"
     if abs(x) >= 1e5:
@@ -179,11 +182,11 @@ def _inr(x: float | None) -> str:
 
 
 def _range(d: dict, f=fmt) -> str:
-    return f"{f(d['median'])} ({f(d['p5'])} to {f(d['p95'])})"
+    return zero(f"{f(d['median'])} ({f(d['p5'])} to {f(d['p95'])})")
 
 
 def _pm(x: float) -> str:
-    return f"{x:+.2f}"
+    return zero(f"{x:+.2f}")
 
 
 # ---------------------------------------------------------------- chart

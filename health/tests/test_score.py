@@ -309,3 +309,38 @@ def test_region_is_not_scored_month_by_month():
     s = score.region("air_region", folder=FIXTURES.parent / "library", n=50, curves=CURVE,
                      monthly_curves=True)
     assert s.status == "not_scored" and "percent changes only" in s.reason and s.run is None
+
+
+# ---- borrowed evidence: a measure whose numbers come from a study of another place ----
+
+def _with_evidence_from(tmp_path, value):
+    text = (FIXTURES / "air_dust.toml").read_text()
+    text = text.replace('cities = "all"\n', f'cities = "all"\nevidence_from = "{value}"\n', 1)
+    (tmp_path / "borrowed.toml").write_text(text)
+    return measures.load(tmp_path / "borrowed.toml")
+
+
+def test_evidence_from_is_read_and_defaults_to_nothing(tmp_path):
+    assert fx("air_dust").evidence_from == ""
+    assert _with_evidence_from(tmp_path, "Delhi-NCR").evidence_from == "Delhi-NCR"
+
+
+def test_borrowed_evidence_flag_names_both_places(tmp_path):
+    m = _with_evidence_from(tmp_path, "Delhi-NCR")
+    *_, flags, _ = score.compile(m, "Bengaluru", study="apna_2015")
+    f = [f for f in flags if f.code == "borrowed_evidence"]
+    assert len(f) == 1 and "Delhi-NCR" in f[0].text and "Bengaluru" in f[0].text
+
+
+def test_no_borrowed_evidence_flag_in_the_place_the_evidence_is_from(tmp_path):
+    m = _with_evidence_from(tmp_path, "Delhi-NCR")
+    *_, flags, _ = score.compile(m, "Delhi", study="apna_2015")
+    assert "borrowed_evidence" not in codes(flags)
+    *_, plain, _ = score.compile(fx("air_dust"), "Bengaluru", study="apna_2015")
+    assert "borrowed_evidence" not in codes(plain)
+
+
+def test_library_measures_widened_beyond_their_evidence_carry_the_field():
+    lib = measures.library()
+    for mid in ("old_vehicle_retirement", "home_purifiers", "school_purifiers_india"):
+        assert lib[mid].evidence_from, mid

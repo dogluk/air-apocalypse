@@ -8,6 +8,7 @@ run_table() and run_json() do the same for an intervention run (simulate.Run).
 from __future__ import annotations
 
 import math
+import re
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
@@ -212,8 +213,8 @@ def table(impacts: list[Impact], unavailable: dict[str, str] | None = None,
         name = i.curve.name + (" *" if i.derived else "") + (" †" if _below_floor(i) else "")
         rows.append((name, f"{i.pm25_before:.1f} → {i.pm25_after:.1f}",
                      f"{100 * i.deaths_averted / i.deaths_baseline:.1f}%",
-                     f"{i.deaths_averted:,.0f}", f"{i.e0_after - i.e0_before:+.2f}",
-                     f"{i.yll_averted:,.0f}"))
+                     zero(f"{i.deaths_averted:,.0f}"), zero(f"{i.e0_after - i.e0_before:+.2f}"),
+                     zero(f"{i.yll_averted:,.0f}")))
     widths = [max(len(r[k]) for r in [head, *rows]) for k in range(len(head))]
     fmt = lambda r: "  ".join(r[0].ljust(widths[0]) if k == 0 else r[k].rjust(widths[k])  # noqa: E731
                               for k in range(len(r)))
@@ -266,12 +267,21 @@ def _scaling_json(recs) -> list[dict]:
 NO_INTERVAL = "no published interval"
 
 
+_NEG_ZERO = re.compile(r"(?<![\d.])-(0(?:\.0+)?)(?![\d.])")
+
+
+def zero(text: str) -> str:
+    """A number rounded to nothing prints as 0, never -0 (or -0.00): '(-0 to 1)' becomes
+    '(0 to 1)'. Real negatives ('-0.4', '-10') are untouched; so is a '+0.00'."""
+    return _NEG_ZERO.sub(r"\1", text)
+
+
 def _sig(x: float) -> str:
     """Three significant figures, with thousands separators."""
     if x == 0 or not math.isfinite(x):
-        return f"{x:g}"
+        return f"{abs(x) if x == 0 else x:g}"
     r = round(x, 2 - math.floor(math.log10(abs(x))))
-    return f"{r:,.0f}" if abs(r) >= 100 else f"{r:#.3g}"
+    return zero(f"{r:,.0f}" if abs(r) >= 100 else f"{r:#.3g}")
 
 
 def _usd(x: float) -> str:
@@ -290,9 +300,9 @@ def _range(d: dict, fmt=_sig, interval: str = "published") -> str:
     with a fixed PM2.5 change the value stands alone, and with a sampled one the range is
     labelled as covering the PM2.5 change only. A zero-width range is never printed."""
     if interval == "none" or d["p5"] == d["p95"]:
-        return fmt(d["median"]) + (f" ({NO_INTERVAL})" if interval == "none" else "")
+        return zero(fmt(d["median"])) + (f" ({NO_INTERVAL})" if interval == "none" else "")
     tail = f"; {PM25_ONLY}" if interval == "pm25_change_only" else ""
-    return f"{fmt(d['median'])} ({fmt(d['p5'])} to {fmt(d['p95'])}{tail})"
+    return zero(f"{fmt(d['median'])} ({fmt(d['p5'])} to {fmt(d['p95'])}{tail})")
 
 
 def _interval(r) -> str:
@@ -605,7 +615,7 @@ FLAG_CODES = {"placeholder": "PH", "evidence_S": "ES", "evidence_R": "ER", "odds
               "long_shot": "LS", "not_reported": "NR", "annual_share_flat": "AF",
               "borrowed_shape": "BS", "covered_only": "CO", "regional": "RG",
               "upper_bound_all_origins": "UB", "partial_cost": "PC", "receptor_basis": "RB",
-              "receptor_fallback": "RF", "age_group": "AG"}
+              "receptor_fallback": "RF", "age_group": "AG", "borrowed_evidence": "BE"}
 FLAG_LEGEND = {"PH": "a number is a placeholder", "ES": "a number seen only in a snippet or summary",
                "ER": "a number recalled, not read at the source",
                "OJ": "odds are a judgement", "LS": "long shot",
@@ -619,6 +629,8 @@ FLAG_LEGEND = {"PH": "a number is a placeholder", "ES": "a number seen only in a
                "RB": "what the source-receptor table stands for (its data/sources.toml caveat)",
                "RF": "the source-receptor table is a stand-in (no published one could be used), "
                      "so the result may be far off",
+               "BE": "some of the evidence comes from a study of another place (named in the "
+                     "flag text and the measure's notes)",
                "UB": "shares include air blown in from outside, so an upper bound",
                "PC": "the cost leaves out part of what the measure costs (listed above)"}
 EVIDENCE_LEGEND = "O read at the source; S seen in a snippet or summary; R recalled"
@@ -688,8 +700,9 @@ def score_table(scores: list, context: dict) -> str:
             what = ("what the covered people breathe, the rest unchanged" if s.kind == "exposure"
                     else "population-weighted over the city")
             spread = ("" if d["p5"] == d["p95"]
-                      else f" ({d['p5']:+.2f} to {d['p95']:+.2f})")
-            lines.append(f"  {s.measure}: {d['median']:+.2f}{spread}, {what}")
+                      else zero(f" ({d['p5']:+.2f} to {d['p95']:+.2f})"))
+            med = zero(f"{d['median']:+.2f}")
+            lines.append(f"  {s.measure}: {med}{spread}, {what}")
     other = [s for s in scores if s.reason]
     if other:
         lines += ["", "Why not a plain scored row:"]

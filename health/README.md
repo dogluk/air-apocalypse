@@ -367,7 +367,7 @@ the odds), cost in 2025 rupees (crore, median), life-years per crore if it works
 the odds, and flag codes (PH placeholder, ES/ER evidence seen or recalled, OJ odds are a
 judgement, LS long shot, NR cause not reported, AF whole-year share used for part-year cut, BS
 borrowed month shape, CO covered people only, RG regional, RB what the source-receptor table
-stands for, RF the source-receptor table is a stand-in, UB upper bound, PC the cost leaves out part of what the measure costs, AG one age group reached, counted with its own death rates). A table of PM2.5 change follows; for an exposure
+stands for, RF the source-receptor table is a stand-in, UB upper bound, PC the cost leaves out part of what the measure costs, AG one age group reached, counted with its own death rates, BE some of the evidence comes from a study of another place: set by `evidence_from` in the measure file, and not shown in the place it names). A table of PM2.5 change follows; for an exposure
 measure it is what the covered people breathe. A measure whose source prices only part of it
 (say, the government's enforcement but not what builders spend) says what is left out in
 `cost.partial`; that sentence is printed under the table and carried as flag `partial_cost`. Statuses:

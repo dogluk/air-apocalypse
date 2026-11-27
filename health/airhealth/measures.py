@@ -47,7 +47,7 @@ TARGETABLE = tuple(c for c in causes.HARMONISED if c not in NOT_TARGETABLE)
 
 TOP_KEYS = ("name", "kind", "scope", "who_reaches", "cities", "min_share_pct", "start_year",
             "ramp_years", "duration_years", "lag", "p_success", "p_success_basis", "long_shot",
-            "placeholders", "notes", "targets", "exposure", "region", "cost", "evidence")
+            "placeholders", "notes", "evidence_from", "targets", "exposure", "region", "cost", "evidence")
 TARGET_KEYS = ("cause", "cut", "months")
 EXPOSURE_KEYS = ("covered", "hours", "cut", "months", "ages")
 REGION_KEYS = ("receptor", "cut")
@@ -133,6 +133,8 @@ class Measure:
     evidence: tuple[Evidence, ...]
     placeholders: tuple[str, ...]
     notes: str
+    evidence_from: str = ""          # a place whose study the numbers come from ("" = the
+                                     # measure's own place); flags borrowed_evidence elsewhere
 
     def numbers(self) -> list[str]:
         """Dotted names of every number in the file that the evidence rule covers.
@@ -465,7 +467,8 @@ def parse(t: dict, measure_id: str) -> Measure:
         p_success_basis=basis.strip(), long_shot=long_shot, targets=targets, exposure=exposure,
         region=region, cost=cost,
         evidence=_evidence(t.get("evidence")), placeholders=_placeholders(t.get("placeholders")),
-        notes=notes.strip())
+        notes=notes.strip(), evidence_from=_text(t.get("evidence_from"), "evidence_from",
+                                                 required=False))
     _evidence_rule(m)
     return m
 

@@ -226,3 +226,17 @@ def test_partial_cost_measures_come_last_in_their_own_group(page):
     glance = page[page.index("All measures at a glance"):page.index("<h3>Each measure</h3>")]
     assert glance.index("<h3>" + head) > glance.index("air measures on study")
     assert "not comparable" in page
+
+
+def test_no_negative_zero_in_the_page(page):
+    import re
+    assert not re.search(r"(?<![\d.])-0(?:\.0+)?(?![\d.])", re.sub(r"<[^>]+>", " ", page))
+
+
+def test_borrowed_evidence_is_shown_in_plain_words(page):
+    assert "comes from Delhi-NCR, not from Bengaluru" in html_.unescape(page)
+
+
+def test_page_range_formatting_has_no_negative_zero():
+    from citypage.measures import _range
+    assert _range({"median": 0.2, "p5": -0.3, "p95": 1.0}) == "0 (0 to 1)"

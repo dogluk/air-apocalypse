@@ -93,7 +93,9 @@ class Flag:
     """A caveat printed with a result. code is stable, one of: "placeholder", "evidence_S",
     "evidence_R", "odds_judgement", "long_shot", "not_reported", "annual_share_flat",
     "borrowed_shape", "covered_only", "regional", "receptor_basis", "receptor_fallback",
-    "upper_bound_all_origins", "partial_cost", "age_group". age_group: an exposure measure that
+    "upper_bound_all_origins", "partial_cost", "age_group", "borrowed_evidence".
+    borrowed_evidence: the measure file names (evidence_from) a place whose study its numbers
+    come from, and this is not that place. age_group: an exposure measure that
     reaches one age group, whose deaths and life-years use that group's own death rates and
     whose per-person cost counts only that group. receptor_fallback: the measure's source-receptor
     table is a stand-in built because no published source-receptor result could be used (its
@@ -133,6 +135,13 @@ def _months_of(text: str) -> tuple[int, ...]:
     return ALL_MONTHS if text == "1-12" else tuple(sorted(int(m) for m in text.split(",")))
 
 
+def _is_evidence_place(evidence_from: str, place: places.Place) -> bool:
+    """True when the evidence is from this place itself ("Delhi", or a region named for it,
+    "Delhi-NCR")."""
+    a, b = evidence_from.strip().lower(), place.name.lower()
+    return a == b or a.startswith(b + "-")
+
+
 def _fixed_flags(m: Measure, place: places.Place | None) -> list[Flag]:
     """The flags that depend on the measure and the place, not on the study (place None: a
     region's whole reach, which has no month-by-month shape)."""
@@ -170,6 +179,10 @@ def _fixed_flags(m: Measure, place: places.Place | None) -> list[Flag]:
                                          "death rates are used."))
     if m.cost is not None and m.cost.partial:
         out.append(Flag("partial_cost", m.cost.partial))
+    if m.evidence_from and place is not None and not _is_evidence_place(m.evidence_from, place):
+        out.append(Flag("borrowed_evidence", f"Some of the evidence for this measure comes from "
+                                             f"{m.evidence_from}, not from {place.name}; the "
+                                             "measure's notes say which numbers."))
     shape = months.shape(place) if place is not None else None
     if shape is not None and shape.borrowed:
         out.append(Flag("borrowed_shape", f"{place.name} has no month-by-month PM2.5 record of "
