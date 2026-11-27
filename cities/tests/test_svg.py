@@ -12,7 +12,7 @@ def test_svgs_parse_and_use_no_literal_colours():
               svg.dot_rows(["r1", "r2"], [("g", [1.0, None])], title="t", x_label="x"),
               svg.dot_rows(["r1"], [("g", [1.0])], title="t", x_label="x", lo=[[0.5]], hi=[[1.5]]),
               svg.stacked_bars(["c"], ["p1", "p2"], [[30.0], [None]], title="t")):
-        ET.fromstring(s)                                  # well-formed XML
+        ET.fromstring(f"<r>{s}</r>")                      # well-formed XML (a wide and a narrow chart)
         assert not re.search(r'(fill|stroke)="#', s)      # colours only via classes
         assert "<title>" in s and 'role="img"' in s
 
@@ -24,7 +24,7 @@ def test_heatmap_marks_missing_cells():
 
 def test_stacked_bars_not_padded():
     s = svg.stacked_bars(["c"], ["p1", "p2"], [[30.0], [None]], title="t")
-    assert s.count("<rect") == 1 + 2  # one bar part, two legend swatches
+    assert s.count("<rect") == 2 * (1 + 2)  # per drawing (wide, narrow): one bar part, two swatches
 
 
 def test_nice_ticks_4_to_6():
@@ -54,6 +54,7 @@ def test_charts_cover_their_data():
 
 
 def test_charts_scale_to_a_phone():
-    # wrapped so they can scroll sideways on a narrow screen instead of shrinking the text
+    # each chart is drawn twice, for a wide screen and for a phone; the page CSS shows one
     s = svg.dot_rows(["r"], [("g", [1.0])], title="t", x_label="x")
-    assert s.startswith('<div class="chart">') and s.endswith("</svg></div>")
+    assert s.startswith('<div class="chart wide">') and s.endswith("</svg></div>")
+    assert s.count('<div class="chart narrow">') == 1 and 'viewBox="0 0 360 ' in s

@@ -64,7 +64,9 @@ caption{{text-align:left;color:var(--ink2);padding-bottom:.4rem}}
 th,td{{padding:.3rem .6rem;border-bottom:1px solid var(--grid);text-align:left;vertical-align:top}}
 th{{font-weight:600;color:var(--ink2)}}
 td.num,th.num{{text-align:right;font-variant-numeric:tabular-nums}}
-.chart{{overflow-x:auto;margin:1rem 0}}
+.chart{{overflow-x:auto;margin:1rem 0}} .chart.narrow{{display:none}}
+@media (max-width:600px){{.chart.wide{{display:none}} .chart.narrow{{display:block}}}}
+svg .sm{{font-size:10px}}
 svg{{display:block;max-width:100%;height:auto;font-family:inherit}}
 svg text{{fill:var(--ink2);font-size:11px}}
 svg .ttl{{fill:var(--ink);font-family:'Young Serif',Georgia,serif;font-size:14px}}
