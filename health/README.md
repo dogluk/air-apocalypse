@@ -60,6 +60,38 @@ air alone. That has not been shown with numbers yet (see "The IHME tier" below a
 `IHME_DOWNLOADS.md`). No air pollution specialist has reviewed the method yet either; the
 calls made along the way are listed under "Known limitations" so that one can.
 
+## Run it with no clone
+
+One line, on a machine with [uv](https://docs.astral.sh/uv/) installed:
+
+```
+uvx --from 'git+https://github.com/dogluk/air-apocalypse#subdirectory=health' airhealth burden Bengaluru
+```
+
+The same works for `airhealth causes Bengaluru`, `airhealth score Bengaluru` and any other
+command. The first run downloads the code and its libraries (numpy, pandas, scipy, matplotlib,
+pyarrow), so it takes under a minute; later runs start in about three seconds.
+
+The data, the measure library and the fonts are packed inside the installed package, so nothing
+else is needed. The five open curves work as they do in a checkout. The three IHME curves
+report themselves unavailable, because IHME's files are not shared; to use them, put the files
+in a folder and set `AIRHEALTH_LOCAL` to that folder. Commands that write files (`chart`,
+`rank --write`) put them under `airhealth_out/` in the folder you run from.
+
+Without uv:
+
+```
+pipx run --spec 'git+https://github.com/dogluk/air-apocalypse#subdirectory=health' airhealth burden Bengaluru
+```
+
+```
+python3 -m venv .venv
+.venv/bin/pip install 'git+https://github.com/dogluk/air-apocalypse#subdirectory=health'
+.venv/bin/airhealth burden Bengaluru
+```
+
+Or clone and install it editable, which is what you want for changing the code (next section).
+
 ## Install
 
 ```

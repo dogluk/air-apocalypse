@@ -9,6 +9,18 @@ Read this file first. It is short, and it holds the rules that are easy to break
 
 ## Your first three moves
 
+**0. Just want to run it?** No clone needed (needs [uv](https://docs.astral.sh/uv/)):
+
+```
+uvx --from 'git+https://github.com/dogluk/air-apocalypse#subdirectory=health' airhealth burden Bengaluru
+```
+
+Without uv: `pipx run --spec 'git+https://github.com/dogluk/air-apocalypse#subdirectory=health' airhealth burden Bengaluru`,
+or `python3 -m venv .venv && .venv/bin/pip install 'git+https://github.com/dogluk/air-apocalypse#subdirectory=health'`
+then `.venv/bin/airhealth burden Bengaluru`, or clone and `pip install -e "health[dev]"` (move 1) to change the code.
+The installed package carries its own data, measure library and fonts (built from `health/setup.py`); the
+IHME curves stay unavailable unless `AIRHEALTH_LOCAL` points at a folder of IHME files.
+
 **1. Get it running (the install takes about fifteen seconds, the tests about three minutes).**
 
 ```
