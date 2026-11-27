@@ -10,7 +10,9 @@ Rules it keeps:
     (score.city(..., study=s)) and the results are never combined. Exposure measures do not use
     a study and are scored once.
   - Every curve that ran is shown; nothing is averaged across curves and no value is picked as
-    the middle one. Measures are listed in library order (file name), never sorted by a number.
+    the middle one. Measures are listed by their worst (lowest) expected life-years per crore
+    across the curves, highest first: an order no single curve decides (see `ordered`). Measures
+    with no ratio come last, in library order.
   - Every flag the engine attaches is printed in plain words, and the ones that change how far a
     ratio can be trusted sit right beside it.
   - A curve that does not cover the ages a measure reaches (rank.curve_gap) shows "—" and the
@@ -34,8 +36,9 @@ from airhealth import causes, curves, exposure, rank, score
 from airhealth import measures as library
 from airhealth.report import zero
 
+from . import names
 from .page import Section, esc, fmt, table
-from .svg import CLOSE, _open, _tick
+from .svg import CLOSE, LH, NARROW_W, _clip, _extra, _legend_below, _open, _tick, both
 
 MAP = "acag_total"            # the ranking's default exposure map
 
@@ -189,6 +192,65 @@ def _pm(x: float) -> str:
     return zero(f"{x:+.2f}")
 
 
+# ---------------------------------------------------------------- order
+
+def _first_run(ok: list[Entry]):
+    runs = [s.run for e in ok for s in e.scores.values() if s.run is not None]
+    return runs[0] if runs else None
+
+
+def curve_names_of(entries: list[Entry], fallback: list[str]) -> list[str]:
+    run = _first_run([e for e in entries if e.scores])
+    return list(run.per_curve) if run else list(fallback)
+
+
+ALL_STUDIES = object()      # "look across every study of the measure"
+ORDER_LINE = ("Order: each measure's worst (lowest) expected life-years per crore across the "
+              "curves, highest first, with any curve that does not cover the measure's ages left "
+              "out of that lowest (in a chart: the curves on its study; in the lists below: the "
+              "curves and studies). Measures with no ratio come last, in library order.")
+
+
+def ratios(s: score.Score, curve_names: list[str]) -> dict[str, float]:
+    """Expected life-years per crore on each curve that covers the measure's ages and gave a
+    number. A curve with a gap is left out (not zero); so is a missing value."""
+    out = {}
+    for c in curve_names:
+        if c not in s.per_curve or rank.curve_gap(s, c):
+            continue
+        v = s.per_curve[c].get("expected_life_years_per_crore")
+        if v is not None and math.isfinite(v):
+            out[c] = v
+    return out
+
+
+def worst(scores: list[score.Score], curve_names: list[str]) -> float | None:
+    vals = [v for s in scores for v in ratios(s, curve_names).values()]
+    return min(vals) if vals else None
+
+
+def ordered(entries: list[Entry], curve_names: list[str], key=ALL_STUDIES) -> list[Entry]:
+    """Highest worst-case ratio first; entries with no ratio keep library order, after them."""
+    ranked, rest = [], []
+    for i, e in enumerate(entries):
+        ss = list(e.scores.values()) if key is ALL_STUDIES else \
+            ([e.scores[key]] if key in e.scores else [])
+        w = worst(ss, curve_names)
+        (rest if w is None else ranked).append((w, i, e))
+    ranked.sort(key=lambda t: (-t[0], t[1]))
+    return [e for _, _, e in ranked + rest]
+
+
+def groups(entries: list[Entry], curve_names: list[str]):
+    """(fully costed, partial-cost, regional), the first two ordered, the last in library order."""
+    ok = [e for e in entries if e.scores]
+    regional = [e for e in ok if next(iter(e.scores.values())).scope == "region"]
+    local = [e for e in ok if e not in regional]
+    full = ordered([e for e in local if not _partial(e)], curve_names)
+    part = ordered([e for e in local if _partial(e)], curve_names)
+    return full, part, regional
+
+
 # ---------------------------------------------------------------- chart
 
 def _short(s: str, k: int = 44) -> str:
@@ -198,10 +260,19 @@ def _short(s: str, k: int = 44) -> str:
 def log_dots(rows: list[str], curve_names: list[str], values: list[list[float | None]], *,
              title: str, x_label: str) -> str:
     """One row per measure; one dot per curve (values[row][curve]) on a log scale, joined by a
-    thin line from the lowest curve to the highest. No middle value is drawn."""
-    L, R, T, rh, width = 270, 170, 34, 24, 720
+    thin line from the lowest curve to the highest. No middle value is drawn. Drawn twice, wide
+    and for a phone (the label above its row, the legend underneath)."""
+    return both(lambda n: _log_dots(rows, curve_names, values, title, x_label, n))
+
+
+def _log_dots(rows, curve_names, values, title, x_label, narrow):
+    L, R, T, rh, width = 270, 200, 34, 24, 720
+    if narrow:
+        L, R, rh, width = 14, 26, 38, NARROW_W
+    T += _extra(title, width)
     bottom = T + rh * len(rows)
-    height = max(bottom, T + 16 * len(curve_names)) + 40
+    height = (bottom + 44 + LH * len(curve_names) + 8) if narrow else \
+        max(bottom, T + 16 * len(curve_names)) + 40
     pos = [v for r in values for v in r if v is not None and v > 0]
     lo_e = math.floor(math.log10(min(pos))) if pos else 0
     hi_e = math.ceil(math.log10(max(pos))) if pos else 1
@@ -211,7 +282,7 @@ def log_dots(rows: list[str], curve_names: list[str], values: list[list[float | 
     def px(v):
         return L + (math.log10(v) - lo_e) / (hi_e - lo_e) * (width - L - R)
 
-    o = [_open(width, height, title)]
+    o = [_open(width, height, title, narrow)]
     for e in range(lo_e, hi_e + 1):
         t = 10.0 ** e
         o.append(f'<line class="grid" x1="{px(t):.1f}" x2="{px(t):.1f}" y1="{T - 4}" '
@@ -220,9 +291,14 @@ def log_dots(rows: list[str], curve_names: list[str], values: list[list[float | 
     o.append(f'<text x="{(L + width - R) / 2:.0f}" y="{bottom + 30}" '
              f'text-anchor="middle">{esc(x_label)}</text>')
     for i, (label, vals) in enumerate(zip(rows, values)):
-        cy = T + rh * i + rh / 2
-        o.append(f'<text class="lab" x="{L - 8}" y="{cy + 4:.1f}" text-anchor="end">'
-                 f'<title>{esc(label)}</title>{esc(_short(label))}</text>')
+        if narrow:
+            cy = T + rh * i + 26
+            o.append(f'<text class="lab" x="{L}" y="{T + rh * i + 12}">'
+                     f'<title>{esc(label)}</title>{esc(_clip(label, 50))}</text>')
+        else:
+            cy = T + rh * i + rh / 2
+            o.append(f'<text class="lab" x="{L - 8}" y="{cy + 4:.1f}" text-anchor="end">'
+                     f'<title>{esc(label)}</title>{esc(_short(label))}</text>')
         ok = [v for v in vals if v is not None and v > 0]
         if len(ok) > 1:
             o.append(f'<line class="axis" x1="{px(min(ok)):.1f}" x2="{px(max(ok)):.1f}" '
@@ -232,10 +308,13 @@ def log_dots(rows: list[str], curve_names: list[str], values: list[list[float | 
                 o.append(f'<circle class="f{c % 8}" cx="{px(v):.1f}" cy="{cy:.1f}" r="4">'
                          f'<title>{esc(label)}, {esc(curve_names[c])}: {esc(_sig(v))}</title>'
                          f'</circle>')
-    for c, name in enumerate(curve_names):
-        o.append(f'<circle class="f{c % 8}" cx="{width - R + 14}" cy="{T + 8 + 16 * c}" r="4"/>'
-                 f'<text class="lab" x="{width - R + 24}" y="{T + 12 + 16 * c}">'
-                 f'{esc(name)}</text>')
+    if narrow:
+        _legend_below(o, [(f"f{c % 8}", n) for c, n in enumerate(curve_names)], bottom + 44, width)
+    else:
+        for c, name in enumerate(curve_names):
+            o.append(f'<circle class="f{c % 8}" cx="{width - R + 14}" cy="{T + 8 + 16 * c}" r="4"/>'
+                     f'<text class="lab" x="{width - R + 24}" y="{T + 12 + 16 * c}">'
+                     f'{esc(name)}</text>')
     o.append(CLOSE)
     return "".join(o)
 
@@ -273,7 +352,7 @@ def _curve_table(s: score.Score, labels: dict[str, str], caption: str) -> str:
         head = ["Curve", "Life-years in the city if it works, median (5% to 95%)",
                 "Deaths postponed in the city if it works, median (5% to 95%)",
                 "Expected life-years in the city"]
-        rows = [[name, _range(d["life_years"]), _range(d["deaths_postponed"]),
+        rows = [[names.curve(name), _range(d["life_years"]), _range(d["deaths_postponed"]),
                  fmt(d["expected_life_years"])] for name, d in s.per_curve.items()]
         return table(head, rows, caption=caption, numeric=(1, 2, 3))
     head = ["Curve", "Life-years if it works, median (5% to 95%)",
@@ -283,9 +362,9 @@ def _curve_table(s: score.Score, labels: dict[str, str], caption: str) -> str:
     for name, d in s.per_curve.items():
         gap = _gap_words(s, name)
         if gap:
-            rows.append([f"{name} ({gap})", "—", "—", "—", "—"])
+            rows.append([f"{names.curve(name)} ({gap})", "—", "—", "—", "—"])
             continue
-        rows.append([name, _range(d["life_years"]),
+        rows.append([names.curve(name), _range(d["life_years"]),
                      _range(d["deaths_postponed"]),
                      _sig(d["life_years_per_crore_if_works"]),
                      _sig(d["expected_life_years_per_crore"])])
@@ -337,7 +416,7 @@ def _score_block(s: score.Score, labels: dict[str, str], study_label: str | None
 
 
 def _study_label(st: str | None) -> str | None:
-    return None if st is None else f"On study {st}"
+    return None if st is None else f"On {names.study(st)}"
 
 
 def _kind_words(s: score.Score) -> str:
@@ -361,7 +440,7 @@ def _chart(entries: list[Entry], key, curve_names: list[str],
     """(chart, measures left off it with why, dots left off with why). A curve that does not
     cover a measure's ages gets no dot (rank.curve_gap), and the note under the chart says so."""
     rows, vals, left_out, gaps = [], [], [], []
-    for e in entries:
+    for e in ordered(entries, curve_names, key):
         s = e.scores.get(key)
         if s is None:
             continue
@@ -370,7 +449,7 @@ def _chart(entries: list[Entry], key, curve_names: list[str],
              for c in curve_names]
         if gap:
             ages = s.trail["exposure"]["ages"]
-            gaps.append(f"{s.name}: no dot for {', '.join(gap)}, because these curves do not "
+            gaps.append(f"{s.name}: no dot for {', '.join(names.curve(c) for c in gap)}, because these curves do not "
                         f"cover the ages it reaches ({ages[0]}-{ages[1]}); they start at an "
                         "older age, which is not the same as no effect")
         if any(x is not None and x > 0 for x in v):
@@ -380,7 +459,7 @@ def _chart(entries: list[Entry], key, curve_names: list[str],
             left_out.append(f"{s.name} ({STATUS_WORDS[s.status]})")
     if not rows:
         return "", left_out, gaps
-    return log_dots(rows, curve_names, vals, title=title,
+    return log_dots(rows, [names.curve(c) for c in curve_names], vals, title=title,
                     x_label="expected life-years per crore (log scale)"), left_out, gaps
 
 
@@ -401,8 +480,12 @@ def _broken(entries: list[Entry]) -> str:
             f"be read or scored, so they have no numbers here:</p><ul>{items}</ul>")
 
 
-def render(city: str, folder: Path | None = None, n: int = 2000, seed: int = 0) -> Section:
-    entries = score_all(city, folder, n=n, seed=seed)
+def render(city: str, folder: Path | None = None, n: int = 2000, seed: int = 0,
+           entries: list[Entry] | None = None) -> Section:
+    """entries: already-scored measures (score_all), so the page's findings block and this
+    chapter read the same runs; None scores them here."""
+    if entries is None:
+        entries = score_all(city, folder, n=n, seed=seed)
     ran, missing = curves.select()
     labels = {c.name: c.label for c in ran}
     ok = [e for e in entries if e.scores]
@@ -411,9 +494,8 @@ def render(city: str, folder: Path | None = None, n: int = 2000, seed: int = 0) 
                        _empty(city) + _broken(entries))
 
     studies = causes.studies(city)
-    runs = [s.run for e in ok for s in e.scores.values() if s.run is not None]
-    first_run = runs[0] if runs else None
-    curve_names = list(first_run.per_curve) if first_run else [c.name for c in ran]
+    first_run = _first_run(ok)
+    curve_names = curve_names_of(ok, [c.name for c in ran])
     h = []
 
     h.append(
@@ -438,18 +520,20 @@ def render(city: str, folder: Path | None = None, n: int = 2000, seed: int = 0) 
         level = (f", where {esc(city)}'s PM2.5, weighted by where people live, is "
                  f"{first_run.pm25_before:.1f} µg/m³ in {first_run.year}")
         h.append(
-            f"<p>Every measure is scored on one exposure map, <b>{esc(MAP)}</b> "
+            f"<p>Every measure is scored on one exposure map, the <b>{esc(names.exposure_map(MAP))}</b> "
             f"({esc(exposure.LABELS[MAP])}){level}. Chapter 1's ground monitors read the city's "
             "air differently, and chapter 3 shows the maps side by side; this chapter uses the "
             "map the ranking across cities uses.</p>")
     h.append(
         f"<p>Air measures are scored on every source study of {esc(city)} that splits PM2.5 by "
-        f"cause ({esc(', '.join(studies)) if studies else 'none'}), each on its own; the studies "
+        f"cause ({esc(', '.join(names.study(s) for s in studies)) if studies else 'none'}), each on its own; the studies "
         "disagree, and their results are never combined. Exposure measures do not depend on a "
         "study and are scored once.</p>")
-    line = "Curves used: " + "; ".join(f"{c} ({labels.get(c, c)})" for c in curve_names) + "."
+    line = "Curves used: " + "; ".join(f"{names.curve(c)} ({c}; {labels.get(c, c)})"
+                                       for c in curve_names) + "."
     if missing:
-        line += " Not run: " + "; ".join(f"{k} ({why})" for k, why in missing.items()) + "."
+        line += " Not run: " + "; ".join(f"{names.curve(k)} ({k}): {why}"
+                                         for k, why in missing.items()) + "."
     if first_run:
         line += (f" {first_run.n:,} runs per curve, seed {first_run.seed}, life-years and costs "
                  f"discounted at {first_run.discount:.0%} a year.")
@@ -459,14 +543,11 @@ def render(city: str, folder: Path | None = None, n: int = 2000, seed: int = 0) 
              + "".join(f"<li>{esc(a)}</li>" for a in score.ASSUMPTIONS) + "</ul>")
 
     h.append("<h3>All measures at a glance</h3>")
-    h.append("<p>One row per measure, in library order (by file name), not sorted by any number. "
-             "Each dot is one curve's expected life-years per crore; the line runs from the "
-             "lowest curve to the highest. The scale is logarithmic: each step to the right is "
-             "ten times more. Caveats for each measure are with its own table below.</p>")
-    regional = [e for e in ok if next(iter(e.scores.values())).scope == "region"]
-    local = [e for e in ok if e not in regional]
-    full = [e for e in local if not _partial(e)]
-    part = [e for e in local if _partial(e)]
+    h.append("<p>One row per measure. Each dot is one curve's expected life-years per crore; the "
+             "line runs from the lowest curve to the highest. The scale is logarithmic: each "
+             "step to the right is ten times more. Caveats for each measure are with its own "
+             f"table below.</p><p>{esc(ORDER_LINE)}</p>")
+    full, part, regional = groups(entries, curve_names)
     if part:
         h.append("<p>The measures listed under <b>" + PARTIAL_HEAD + "</b> carry a cost that "
                  "leaves out something real, so their ratios are not comparable with the "
@@ -474,7 +555,7 @@ def render(city: str, folder: Path | None = None, n: int = 2000, seed: int = 0) 
 
     def charts(group):
         out = []
-        keys = [(st, f"{city}: air measures on study {st}") for st in studies]
+        keys = [(st, f"{city}: air measures on study {names.study(st)}") for st in studies]
         keys.append((None, f"{city}: exposure measures (no study needed)"))
         for key, title in keys:
             chart, left_out, gaps = _chart(group, key, curve_names, title)
@@ -496,14 +577,14 @@ def render(city: str, folder: Path | None = None, n: int = 2000, seed: int = 0) 
         h.append(f"<p>The measures under <b>{REGIONAL_HEAD}</b> are not on these charts: their "
                  "cost and ratio belong to their whole reach, not to this city.</p>")
 
-    h.append("<h3>Each measure</h3>")
+    h.append("<h3>Each measure</h3><p class=\"note\">In the order stated above.</p>")
     for e in full:
         h.append(_measure_block(e, labels))
     if part:
         h.append(f"<h3>{PARTIAL_HEAD}</h3><p>Each measure here has a cost that leaves out "
                  "something real (its own caveat says what), so its ratios are not comparable "
-                 "with other measures' and are listed after the fully costed ones, in library "
-                 "order.</p>")
+                 "with other measures' and are listed after the fully costed ones, in the same "
+                 "order as above.</p>")
         for e in part:
             h.append(_measure_block(e, labels))
     if regional:

@@ -12,7 +12,7 @@ from airhealth import curves, exposure, paths, places, report
 from airhealth.impact import Change, steady_state
 from airhealth.inputs import Sources
 
-from . import svg
+from . import names, svg
 from .page import Section, esc, fmt, table
 
 MAPS: tuple[str, ...] = ("cpcb", "aqli", "acag_total")
@@ -79,7 +79,7 @@ def change_to(city: str, map_name: str, target: float) -> dict | None:
 def _row_cells(r: dict) -> list[str]:
     star = " *" if r["deaths_derived"] else ""
     dag = " †" if r["below_floor"] else ""
-    return [f"{r['label']} ({r['curve']}){star}{dag}",
+    return [f"{names.curve(r['curve'])}{star}{dag}",
             f"{r['pm25_before']:.1f} → {r['pm25_after']:.1f}",
             fmt(r["share_of_deaths_averted"], "pct"), fmt(r["deaths_averted"]) + star,
             fmt(r["life_expectancy_gain"], "years"), fmt(r["life_years_averted"])]
@@ -114,7 +114,7 @@ def render(city: str) -> Section:
             footers.append(d["footer"])
 
     deaths_all = [r["deaths_averted"] for d in results.values() for r in d["rows"]]
-    pm_text = "; ".join(f"{m} {lv[m][0]:.1f} µg/m³ ({lv[m][1]})" for m in maps)
+    pm_text = "; ".join(f"{names.exposure_map(m)} {lv[m][0]:.1f} µg/m³ ({lv[m][1]})" for m in maps)
     h.append(
         "<p>This chapter turns the air into health. A <b>risk curve</b> is a published estimate "
         "of how much the chance of dying rises as the yearly PM2.5 level rises. An <b>exposure "
@@ -132,28 +132,34 @@ def render(city: str) -> Section:
             "The gap comes from the curves (each was fitted to different studies, some mostly of "
             "cleaner air than India's) and from the maps (they measure the air differently). "
             "No curve or map is picked here, and nothing is averaged.</p>")
-    line = f"Curves used: {', '.join(run)}."
+    line = "Curves used: " + ", ".join(f"{names.curve(c)} ({c})" for c in run) + "."
     if missing:
-        line += " Not run: " + "; ".join(f"{n} ({why})" for n, why in missing.items()) + "."
+        line += " Not run: " + "; ".join(f"{names.curve(n)} ({n}): {why}"
+                                         for n, why in missing.items()) + "."
     h.append(f'<p class="note">{esc(line)}</p>')
+    cl = {c.name: c.label for c in curves.select()[0]}
+    h.append("<details><summary>What each curve is</summary>"
+             + "".join(f"<p><b>{esc(names.curve(c))}</b>: {esc(cl.get(c, c))}.</p>" for c in run)
+             + "</details>")
 
     h.append("<h3>Deaths and life-years attributable, to each curve's own floor</h3>")
     for m in maps:
-        h.append(f"<h4>{esc(m)}: {esc(exposure.LABELS[m])}, {lv[m][1]}</h4>")
+        h.append(f"<h4>{esc(names.exposure_map(m))}: {esc(exposure.LABELS[m])}, {lv[m][1]}</h4>")
         h.append(f"<p>Starting level {lv[m][0]:.1f} µg/m³ in {lv[m][1]}.</p>")
-        h.append(_burden_table(results[m], f"{city}, map {m}: every curve down to its own floor"))
+        h.append(_burden_table(results[m], f"{city}, {names.exposure_map(m)}: every curve down to its own floor"))
         keep(results[m])
 
-    names = [r["curve"] for r in results[maps[0]]["rows"]] if maps else []
+    cnames = [r["curve"] for r in results[maps[0]]["rows"]] if maps else []
 
     def series(key):
-        return [(m, [next((r[key] for r in results[m]["rows"] if r["curve"] == n), None)
-                     for n in names]) for m in maps]
+        return [(names.exposure_map(m),
+                 [next((r[key] for r in results[m]["rows"] if r["curve"] == n), None)
+                  for n in cnames]) for m in maps]
     if maps:
-        h.append(svg.dot_rows(names, series("deaths_averted"),
+        h.append(svg.dot_rows([names.curve(c) for c in cnames], series("deaths_averted"),
                               title=f"{city}: deaths a year attributable to PM2.5, one dot per map",
                               x_label="deaths a year"))
-        h.append(svg.dot_rows(names, series("life_years_averted"),
+        h.append(svg.dot_rows([names.curve(c) for c in cnames], series("life_years_averted"),
                               title=f"{city}: life-years a year lost to PM2.5, one dot per map",
                               x_label="life-years a year"))
 
@@ -170,11 +176,11 @@ def render(city: str) -> Section:
         for m in maps:
             d = change_to(city, m, t.pm25)
             if d is None:
-                h.append(f"<p>Map {esc(m)}: already below {t.pm25:g} µg/m³ on this map "
+                h.append(f"<p>{esc(names.exposure_map(m))}: already below {t.pm25:g} µg/m³ on this map "
                          f"({lv[m][0]:.1f}).</p>")
             else:
-                h.append(f"<p>Map {esc(m)}:</p>")
-                h.append(_burden_table(d, f"{city}, map {m}: down to {t.pm25:g} µg/m³"))
+                h.append(f"<p>{esc(names.exposure_map(m))}:</p>")
+                h.append(_burden_table(d, f"{city}, {names.exposure_map(m)}: down to {t.pm25:g} µg/m³"))
                 keep(d)
     if footers:
         h.append("<h3>How these figures were made</h3><p>The notes below apply to every table "

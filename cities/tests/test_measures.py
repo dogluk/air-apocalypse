@@ -5,7 +5,7 @@ import shutil
 import pytest
 
 from airhealth import causes, curves, measures as library, score
-from citypage import measures
+from citypage import measures, names
 from citypage.measures import MeasureFile, find, render, score_all
 
 LIB = library.LIBRARY
@@ -88,13 +88,13 @@ def test_air_measures_scored_on_every_study_separately(lib):
 
 def test_every_study_and_every_curve_appear(page):
     for st in causes.studies("Bengaluru"):
-        assert st in page
+        assert html_.escape(names.study(st)) in page
     run, missing = curves.select()
     for c in run:
-        assert page.count(c.name) >= 3                     # charts and tables, every measure
+        assert page.count(names.curve(c.name)) >= 3        # charts and tables, every measure
     for name in missing:
         assert name in page                                # named as not run, with why
-    assert "acag_total" in page and "chapter 1" in page.lower()
+    assert "ACAG satellite" in page and "chapter 1" in page.lower()
 
 
 def test_not_scored_and_its_reason_are_shown(page):
@@ -138,7 +138,7 @@ def _section(page, name):
 
 
 def _row(block, curve):
-    m = re.search(rf"<tr><td>{curve}[^<]*</td>.*?</tr>", block)
+    m = re.search(rf"<tr><td>{re.escape(names.curve(curve))}(?: \(|</td>).*?</tr>", block)
     assert m, curve
     return m.group(0)
 
@@ -159,7 +159,7 @@ def test_a_curve_that_cannot_see_the_age_group_shows_a_dash_and_why(page):
     # the chart leaves the dot off and says why, under the chart
     assert "do not cover the ages" in page[:page.index("<h3>Each measure</h3>")]
     for c in gap:
-        assert c in page[:page.index("<h3>Each measure</h3>")]
+        assert names.curve(c) in page[:page.index("<h3>Each measure</h3>")]
 
 
 def test_regional_measures_have_their_own_group(page):
@@ -189,12 +189,8 @@ def test_find_keeps_region_measures(tmp_path):
 
 
 def test_no_ranking_no_average(page):
-    assert "library order" in page
-    full = [library.load(LIB / f"{i}.toml").name for i in ("lpg_refill_subsidy", "road_paving")]
-    part = [library.load(LIB / f"{i}.toml").name for i in ("school_purifiers", "smog_tower")]
-    each = page[page.index("<h3>Each measure</h3>"):]
-    at = [each.index(html_.escape(n)) for n in full + part]
-    assert at == sorted(at)                    # library order inside each group, not by a value
+    # the order is the worst-case ratio across curves (no curve decides it); see test_polish
+    assert html_.escape(measures.ORDER_LINE) in page
     for phrase in ("central estimate", "average of the curves", "best curve", "best measure"):
         assert phrase not in page.lower()
 

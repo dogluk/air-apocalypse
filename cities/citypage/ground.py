@@ -13,7 +13,7 @@ import pandas as pd
 
 from airhealth import exposure, paths, places
 
-from . import svg
+from . import names, svg
 from .page import Section, esc, fmt, table
 
 POLLUTANTS: dict[str, tuple[str, str]] = {
@@ -23,7 +23,6 @@ POLLUTANTS: dict[str, tuple[str, str]] = {
 SEASONS: dict[str, tuple[int, ...]] = {
     "Dec-Feb": (12, 1, 2), "Mar-May": (3, 4, 5), "Jun-Sep": (6, 7, 8, 9), "Oct-Nov": (10, 11)}
 MAP_ORDER = ("cpcb", "aqli", "acag_total")
-MAP_SHORT = {"cpcb": "CPCB monitors", "aqli": "AQLI", "acag_total": "ACAG"}
 AQLI_FIRST_YEAR = 2016      # a choice: the monitors start in 2016, so the satellite line does too
 MONTHS = [calendar.month_abbr[m] for m in range(1, 13)]
 
@@ -231,21 +230,23 @@ def render(city: str) -> Section:
     present = [m for m in MAP_ORDER if m in set(maps['map'])]
     for i, m in enumerate(present):
         d = maps[maps['map'] == m]
-        ser.append(svg.Series(MAP_SHORT[m], [float(y) for y in d.year], list(d.pm25),
+        ser.append(svg.Series(names.exposure_map(m), [float(y) for y in d.year], list(d.pm25),
                               kind="points" if len(d) == 1 else "line", colour=i))
     h.append(svg.line_chart(ser, title=f"{city}: annual mean PM2.5 on each map, µg/m³",
                             x_label="year", y_label="µg/m³",
                             x_ticks=[(y, str(y)) for y in sorted(maps.year.unique())]))
-    labels = "".join(f"<li>{esc(exposure.LABELS[m])}</li>" for m in present)
+    labels = "".join(f"<li><b>{esc(names.exposure_map(m))}</b>: {esc(exposure.LABELS[m])}</li>"
+                     for m in present)
     h.append(f"<p>Each series is its own source, never pooled:</p><ul>{labels}</ul>")
-    h.append("<p>AQLI removes mineral dust and sea salt from the satellite estimate; ACAG keeps "
-             "them; CPCB is the monitors' median across the city's stations. The GBD (Global "
+    h.append("<p>The AQLI satellite map removes mineral dust and sea salt from the satellite estimate; "
+             "the ACAG satellite map keeps them; CPCB monitors is the monitors' median across the "
+             "city's stations. The GBD (Global "
              "Burden of Disease) maps are state-level only, so they have no city value and are "
              "not drawn here.</p>")
     common = sorted(set.intersection(*[set(maps[maps['map'] == m].year) for m in present]))
     if common:
         y = common[-1]
-        vals = ", ".join(f"{MAP_SHORT[m]} "
+        vals = ", ".join(f"{names.exposure_map(m)} "
                          f"{fmt(float(maps[(maps['map'] == m) & (maps.year == y)].pm25.iloc[0]), '1dp')}"
                          for m in present)
         h.append(f"<p>In {y}, the latest year all of them cover, the values were {vals} µg/m³. "

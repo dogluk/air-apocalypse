@@ -11,7 +11,7 @@ import pandas as pd
 from airhealth import causes
 from airhealth.report import months_text
 
-from . import svg
+from . import names, svg
 from .page import Section, esc, fmt, table
 
 PLAIN: dict[str, str] = {
@@ -36,6 +36,7 @@ PLAIN: dict[str, str] = {
 BOOKKEEPING = ("local_all", "outside", "other", "secondary_unassigned", "biomass_unassigned")
 RECEPTOR = ("CMB", "PMF")
 MODELS = ("CAMx", "CMAQ", "GEOS-Chem", "WRF-Chem")
+YEAR_MONTHS = "1-12"      # how causes.csv writes a whole-year study
 LEGEND = "— = the study does not report this source."
 
 
@@ -112,7 +113,7 @@ def blind_spots(col: StudyColumn) -> list[str]:
         if pd.notna(s["outside"]) and "region" in col.origins:
             out.append(f"Everything from beyond the airshed is one lump "
                        f"({fmt(s['outside'], 'pct_points')} outside) with no split by source.")
-    if col.months != "1-12":
+    if col.months != YEAR_MONTHS:
         out.append(f"It covers only {months_text(col.months)}.")
     missing = [PLAIN[k] for k in causes.HARMONISED if pd.isna(s[k]) and k not in BOOKKEEPING]
     if missing:
@@ -121,7 +122,7 @@ def blind_spots(col: StudyColumn) -> list[str]:
 
 
 def _label(c: StudyColumn) -> str:
-    return " ".join(str(x) for x in (c.study.split("_")[0], c.year_sampled or "", c.season) if x != "")
+    return f"{names.study(c.study)}, {c.season}"
 
 
 def _share_table(cols: list[StudyColumn], caption: str) -> str:
@@ -168,7 +169,7 @@ def render(city: str) -> Section:
     if len(part):
         items = "".join(
             f"<li>{esc(PLAIN[r.source_harmonised])}, {esc(months_text(r.months))}: "
-            f"{fmt(r.share_pct, 'pct_points')} ({esc(r.study)})</li>" for r in part.itertuples())
+            f"{fmt(r.share_pct, 'pct_points')} ({esc(names.study(r.study))})</li>" for r in part.itertuples())
         h.append("<h3>Partial estimates</h3><p>One piece of a split, not the whole picture. They "
                  f"are not columns above and can overlap the outside row.</p><ul>{items}</ul>")
     if em:

@@ -3,6 +3,7 @@ import json
 import shutil
 
 from airhealth import cli, exposure, paths, places
+from citypage import names
 from citypage.burden import MAPS, ROUND_TARGET, burden, change_to, curves_status, render, targets
 
 
@@ -28,10 +29,10 @@ def test_target_already_met_is_none():
 def test_every_map_and_curve_has_its_own_row():
     html = render("Bengaluru").html
     for m in MAPS:
-        assert m in html
+        assert names.exposure_map(m) in html
     run, _ = curves_status()
     for c in run:                                           # one row per curve on every map
-        assert html.count(c) >= len(MAPS)
+        assert html.count(names.curve(c)) >= len(MAPS)
 
 
 def test_targets_round_first_then_file_order():

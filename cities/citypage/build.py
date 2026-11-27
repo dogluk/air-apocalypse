@@ -12,7 +12,7 @@ from pathlib import Path
 from airhealth import paths
 from airhealth.provenance import load_sources
 
-from . import burden, ground, measures, origins, svg
+from . import burden, findings, ground, measures, names, origins, svg
 from .page import Section, esc, page
 
 # The committed data files the four chapters read (checked against sources.toml by a test).
@@ -35,8 +35,15 @@ def default_out(city: str) -> Path:
     return REPO / "cities" / _slug(city) / "index.html"
 
 
-def _intro(city: str, build_line: str) -> str:
-    return (
+READINGS = (
+    "Chapters 1 to 3 start from the CPCB monitors, the readings taken on the ground, and show "
+    "the satellite maps beside them. Chapter 4 scores measures on the ACAG satellite map, the "
+    "one the ranking across cities uses: the ranking compares cities, so it needs one map that "
+    "covers every city the same way, and monitors exist for only some of them.")
+
+
+def _intro(city: str, build_line: str, found: str = "") -> str:
+    return found + (
         f"<p>This page follows the air of one city, {esc(city)}, from the ground to what could be "
         "done about it. It is written to understand, not to persuade. Where published sources "
         "disagree, the page shows them side by side and does not average them or pick a winner.</p>"
@@ -48,15 +55,18 @@ def _intro(city: str, build_line: str) -> str:
         "PM2.5 takes, on every published way of turning air into health. <b>4. What could work, and "
         "what it would buy</b>: measures the city could take, with the odds each works and what "
         "it would cost.</p>"
+        f"<p><b>Which air reading each chapter uses.</b> {esc(READINGS)}</p>"
         f'<p class="note">{esc(build_line)}</p>')
 
 
 def _build_line(city: str, n: int, seed: int) -> str:
     run, missing = burden.curves_status()
     ihme = "absent" if any(w == _ihme_reason() for w in missing.values()) else "present"
-    line = f"IHME files: {ihme}. Curves used: {', '.join(run)}."
+    line = (f"IHME files: {ihme}. Curves used: "
+            + ", ".join(f"{names.curve(c)} ({c})" for c in run) + ".")
     if missing:
-        line += " Not run: " + "; ".join(f"{k} ({w})" for k, w in missing.items()) + "."
+        line += " Not run: " + "; ".join(f"{names.curve(k)} ({k}): {w}"
+                                         for k, w in missing.items()) + "."
     return (f"Built from {len(DATA_FILES)} data files listed at the foot of the page. {line} "
             f"Chapter 4: n = {n:,} runs per curve, seed = {seed}. Rebuild with "
             f"PYTHONPATH=health:cities python -m citypage.build --city {city}.")
@@ -92,11 +102,13 @@ def build(city: str = "Bengaluru", out: Path | None = None, n: int = 5000, seed:
           measures_folder: Path | None = None) -> Path:
     out = Path(out) if out is not None else default_out(city)
     svg.reset_ids()
+    entries = measures.score_all(city, measures_folder, n=n, seed=seed)
     sections: list[Section] = [
         ground.render(city), origins.render(city), burden.render(city),
-        measures.render(city, folder=measures_folder, n=n, seed=seed)]
+        measures.render(city, folder=measures_folder, n=n, seed=seed, entries=entries)]
     title = f"{city}: from the air to what could work"
-    html = page(title, _intro(city, _build_line(city, n, seed)), sections, _footer(city))
+    html = page(title, _intro(city, _build_line(city, n, seed), findings.block(city, entries)),
+                sections, _footer(city))
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(html, encoding="utf-8")
     return out
