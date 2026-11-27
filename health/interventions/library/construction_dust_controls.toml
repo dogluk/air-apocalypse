@@ -46,6 +46,62 @@ currency = "INR"
 year = 2021
 partial = "The cost is CSTEP's estimate of the city government's spending to enforce existing dust rules (under Rs 1 crore); it leaves out what builders spend on barriers, water and fogging machines, which has not been found for Bengaluru (data/MISSING.md)."
 
+# The whole cost, for the what-if `full_cost` only (the default ranking keeps the partial cost
+# above, flagged). Enforcement plus builders' compliance on the same footprint as the cut (the
+# area behind CSTEP's construction emissions), from environmental-clearance budgets.
+[cost.full]
+low = 2300000
+high = 134000000
+dist = "lognormal"     # a judgement: the ends are 58 times apart, built from products of ranges
+currency = "INR"
+year = 2022            # the clearance budgets are 2022-23 rupees, CSTEP's 2021; no deflator applied across them
+adds = "What builders spend to comply (barricading, sprinkling, anti-smog guns), on the footprint behind CSTEP's construction emissions, on top of the city's enforcement."
+
+[[cost.full.evidence]]
+fields = ["cost.full.low", "cost.full.high"]
+source = "CSTEP (2022), Emission inventory and pollution reduction strategies for Bengaluru"
+url = "https://web.archive.org/web/2023/https://cstep.in/drupal/sites/default/files/2022-02/EI_Report_Final_04Feb22.pdf"
+locator = "Sec. 3.2.2.5, printed p. 37 (PDF p. 55): construction PM10 2,702 t/yr, PM2.5 450 t/yr from 235 new RERA projects; Table 3.2, printed p. 21 (PDF p. 39): emission factor, disturbed area, PM10 1.2 and PM2.5 0.43 tonnes/acre-month (E = A x d x EF, printed p. 22); Table 5.11, printed p. 93: enforcement '<1' crore"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "Footprint A = E / (EF x 12): PM2.5 450 / 0.43 / 12 = 87 acres = 0.35 km² (low); PM10 2,702 / 1.2 / 12 = 188 acres = 0.76 km² (high). Enforcement: Rs 0.1 crore (low, a judgement, as in [cost]) to Rs 1 crore (high). low = 0.1 + 0.35e6 m² x FAR 1 x Rs 19/m² / 5-year build = 0.1 + 0.13 = Rs 0.23 crore/yr; high = 1 + 0.76e6 x FAR 2.25 x Rs 217/m² / 3-year build = 1 + 12.4 = Rs 13.4 crore/yr. FAR 1 and the 3-5-year build are judgements."
+
+[[cost.full.evidence]]
+fields = ["cost.full.low"]
+source = "Karnataka SEIAA, proceedings of the 212th meeting (5 February 2022), item 212.7.9 (Green Leaf Projects, Anathapura)"
+url = "https://environmentclearance.nic.in/writereaddata/FormB/agenda/0902202292671472212thSEIAAproceedings001_compressed.pdf"
+locator = "item 212.7.9, row 22 'EMP', PDF p. 11-12 (scanned; read by OCR): built-up 23,958.63 m², EMP during construction capital Rs 9.0 lakh, operation Rs 0.8 lakh/yr"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "(9 + 0.8 x 3 years) lakh / 23,959 m² = Rs 48/m² for the whole construction EMP; x 0.40, the dust share of a construction EMP (Haryana clearance, next entry) = Rs 19/m²."
+
+[[cost.full.evidence]]
+fields = ["cost.full.low"]
+source = "SEIAA Haryana, environmental clearance, File SEIAA/HR/2022/141 (issued 13 June 2022)"
+url = "https://haryanarera.gov.in/project/view_uploaded_Document_open/7fd244bf49Mjg2NDg="
+locator = "EMP table, p. 3 of 12: construction-phase dust mitigation (barricading, sprinkling, anti-smog gun) capital Rs 20 lakh, recurring Rs 5 lakh/yr; total construction EMP Rs 50 lakh + 15.5 lakh/yr"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "dust share of the construction EMP: 20 / 50 = 0.40 (capital)."
+
+[[cost.full.evidence]]
+fields = ["cost.full.high"]
+source = "Karnataka SEIAA, minutes of the 240th meeting (2023), item 240.1.1 (Binary Realty, Sompura)"
+url = "https://environmentclearance.nic.in/writereaddata/FormB/agenda/1008202387265611240thseiaafinalMoM.pdf"
+locator = "item 240.1.1, row 22, PDF p. 1-2: built-up 23,848.66 m² (OCR), EMP during construction capital 9.00 + construction 42.79 lakh"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "51.79 lakh / 23,849 m² = Rs 217/m², the whole construction EMP, taken as the ceiling for dust."
+
+[[cost.full.evidence]]
+fields = ["cost.full.high"]
+source = "SEIAA Karnataka, environmental clearance, File SEIAA 123 CON 2025 (22 August 2025)"
+url = "https://rera.karnataka.gov.in/download_jc?DOC_ID=urxFGqgfHnbxVMkQOAnDuw%3D%3D"
+locator = "p. 5: permissible FAR 2.25 (one Bengaluru Urban project); seen in a search snippet only, the PDF was not opened"
+key = "S"
+retrieved = "2026-11-27"
+derivation = "FAR 2.25 turns the high footprint into built-up floor area: 0.76e6 x 2.25 = 1.71 million m²."
+
 [[evidence]]
 fields = ["targets.dust.cut"]
 source = "TERI (2021), Cost effectiveness of interventions for control of air pollution in Delhi"

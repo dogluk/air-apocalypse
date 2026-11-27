@@ -458,8 +458,17 @@ def _cmd_sensitivity(args, india: bool, city, settings: dict) -> None:
 
     def progress(text):
         print(f"airhealth: {text}", file=sys.stderr)
+    whatifs = sensitivity.WHATIFS
+    if args.whatifs is not None:
+        whatifs = tuple(x.strip() for x in args.whatifs.split(",")
+                        if x.strip() and x.strip() != "none")
+        bad = [x for x in whatifs if x not in sensitivity.WHATIFS]
+        if bad:
+            raise ValueError(f"unknown what-if {bad[0]!r}; what-ifs are "
+                             f"{', '.join(sensitivity.WHATIFS)} (or none)")
     swing = sensitivity.run("India" if india else city, inputs=inputs, top=args.top,
-                            study=args.study, jobs=jobs, progress=progress, **settings)
+                            study=args.study, jobs=jobs, progress=progress, whatifs=whatifs,
+                            **settings)
     if args.json:
         print(json.dumps(sensitivity.to_json(swing), indent=2, ensure_ascii=False, allow_nan=False))
     else:
@@ -487,8 +496,9 @@ def cmd_rank(args) -> None:
     combos = _choice(args).combinations()
     if len(combos) > 1:
         raise ValueError("rank takes one source per input; give --use input=source once")
-    if not args.sensitivity and (args.inputs or args.top is not None or args.jobs is not None):
-        raise ValueError("--inputs, --top and --jobs go with --sensitivity")
+    if not args.sensitivity and (args.inputs or args.top is not None or args.jobs is not None
+                                 or args.whatifs is not None):
+        raise ValueError("--inputs, --top, --jobs and --whatifs go with --sensitivity")
     n = args.n if args.n is not None else (500 if args.sensitivity else 2000)
     settings = dict(map_name=args.map or "acag_total", curves=names, n=n, seed=args.seed,
                     discount=args.discount / 100, deaths=combos[0], folder=folder,
@@ -675,6 +685,10 @@ def _parser() -> argparse.ArgumentParser:
                     "each measure's spread of ranks, its biggest mover and break-even odds")
     rk.add_argument("--inputs", metavar="a,b", help="with --sensitivity: which inputs to move "
                     f"(default all: {','.join(sensitivity.INPUTS)})")
+    rk.add_argument("--whatifs", metavar="a,b", default=None,
+                    help="with --sensitivity: labelled what-ifs run beside the default, never "
+                    f"in place of it (default all: {','.join(sensitivity.WHATIFS)}; 'none' for "
+                    "none)")
     rk.add_argument("--top", type=int, default=None, metavar="K",
                     help=f"with --sensitivity: size of the top of the table (default {sensitivity.TOP})")
     rk.add_argument("--jobs", type=int, default=None, metavar="J",

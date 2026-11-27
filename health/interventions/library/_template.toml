@@ -162,6 +162,28 @@ share_only_on_success = 0.0   # optional, 0 to 1; share of the cost spent only i
 #                          # carries it as a flag (partial_cost), so a cheap-looking ratio is
 #                          # read with that in mind. Not a number: the evidence rule ignores it.
 
+# ---- [cost.full]: optional, only with partial; a sourced range for the WHOLE cost ----
+# Never used by the default scoring (the partial cost above stays the default, flagged). The
+# sensitivity run's labelled what-if `full_cost` replaces the cost with this range and reports
+# where the measure would land. Its numbers carry their own sources, below it, and are outside
+# the [[evidence]] rule above.
+# [cost.full]
+# low = 2000000          # required; the whole yearly cost per driver unit (same driver as [cost]),
+# high = 130000000       #   read as the 5th and 95th percentiles; at least 0, low below high
+# dist = "lognormal"     # required; "uniform" or "lognormal" (lognormal needs low above 0)
+# currency = "INR"       # required; "INR" or "USD"
+# year = 2022            # required; the price year (2000-2025)
+# adds = "What builders spend to comply, on top of the city's enforcement."   # required, one sentence
+#
+# [[cost.full.evidence]]  # one or more, the same fields as [[evidence]]; fields are
+# fields = ["cost.full.low", "cost.full.high"]   # cost.full.low and/or cost.full.high, and each
+# source = "Author (year), Title"                # must be backed by at least one entry. A range
+# url = "https://..."                            # built from several sources lists each. A figure
+# locator = "Table 2, p. 4"                      # read in a newspaper report of an official (the
+# key = "O"                                      # primary not reached) is key "S"; the range's key
+# retrieved = "2026-11-28"                       # is its weakest entry's.
+# derivation = "the arithmetic"
+
 # ---- [[evidence]]: one table per source ----
 # fields:     the numbers it backs, by dotted name (each number in exactly one entry)
 # source:     author, year, title

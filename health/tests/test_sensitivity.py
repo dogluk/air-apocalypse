@@ -280,6 +280,106 @@ def test_noise_robust_equals_raw_without_a_seed_setting():
     assert res.loc["cost:a", "noise_robust"] == res.loc["cost:a", "curves_top_changed"] == 1
 
 
+FULL_FIXTURE = """partial = "Fixture: it leaves out part of the cost."
+
+[cost.full]
+low = 200
+high = 2000
+dist = "lognormal"
+currency = "INR"
+year = 2024
+adds = "Fixture: the rest of the cost."
+
+[[cost.full.evidence]]
+fields = ["cost.full.low", "cost.full.high"]
+source = "Fixture"
+url = "https://example.org/fixture"
+locator = "p. 1"
+key = "S"
+retrieved = "2026-11-27"
+"""
+
+
+def _whatif_folder(tmp_path):
+    """The fixtures, with air_region reading a (fixture) receptor_stubble.csv and air_dust given a
+    partial cost and a full-cost range."""
+    for f in FIXTURES.iterdir():
+        text = f.read_text()
+        if f.name == "air_region.toml":
+            text = text.replace('"receptor_fixture.csv"', '"receptor_stubble.csv"').replace(
+                "society_net_annual = -500\n", "").replace(', "cost.society_net_annual"', "")
+        if f.name == "air_dust.toml":
+            text = text.rstrip("\n") + "\n" + FULL_FIXTURE
+        (tmp_path / f.name).write_text(text)
+    (tmp_path / "receptor_stubble.csv").write_text((FIXTURES / "receptor_fixture.csv").read_text())
+    return tmp_path
+
+
+def test_stubble_factor_is_computed_from_the_stored_sentence():
+    factor, small, big = sensitivity.stubble_factor()
+    assert (small, big) == (0.48, 6.7)
+    assert factor == pytest.approx(6.7 / 0.48)
+
+
+def test_whatifs_are_labelled_and_leave_the_default_alone(tmp_path):
+    folder = _whatif_folder(tmp_path)
+    plain = sensitivity.run("Bengaluru", inputs=["odds"], folder=folder, n=20, curves=[CURVE],
+                            whatifs=())
+    s = sensitivity.run("Bengaluru", inputs=["odds"], folder=folder, n=20, curves=[CURVE])
+    assert [w["id"] for w in s.whatifs] == ["whatif:stubble_lan2022", "whatif:full_cost"]
+    assert all(w["note"] == sensitivity.WHATIF_NOTE == "what-if, not the default"
+               for w in s.whatifs)
+    # the default ranking is the same with or without the what-ifs
+    rows = lambda r: [(x.measure, x.rank, x.expected_ly_per_crore) for x in r.tables[CURVE].rows]
+    assert rows(s.base) == rows(plain.base)
+
+    stub = s.whatifs[0]
+    assert stub["measures"] == ["air_region"]
+    assert stub["factor"] == pytest.approx(6.7 / 0.48)
+    got = {(r["measure"], r["variant"]): r for r in stub["rows"]}
+    d, w = got[("air_region", "default")], got[("air_region", "whatif")]
+    assert w["expected_ly_per_crore"] == pytest.approx(d["expected_ly_per_crore"] * 6.7 / 0.48,
+                                                       rel=0.5)
+    assert w["expected_ly_per_crore"] > d["expected_ly_per_crore"]
+
+    full = s.whatifs[1]
+    assert full["measures"] == ["air_dust"]
+    got = {(r["measure"], r["variant"]): r for r in full["rows"]}
+    assert got[("air_dust", "default")]["comparable"] is False
+    assert got[("air_dust", "default")]["rank_comparable"] is None
+    for v in ("whatif", "whatif_low", "whatif_high"):
+        assert got[("air_dust", v)]["comparable"] is True
+        assert got[("air_dust", v)]["rank_comparable"] is not None
+    assert (got[("air_dust", "whatif_high")]["expected_ly_per_crore"]
+            < got[("air_dust", "whatif_low")]["expected_ly_per_crore"])
+    assert full["key"] == {"air_dust": "S"}
+
+
+def test_whatifs_say_why_when_nothing_uses_them():
+    s = sensitivity.run("Bengaluru", inputs=["odds"], folder=FIXTURES, n=20, curves=[CURVE])
+    assert all(w["skipped"] for w in s.whatifs)
+
+
+def test_whatifs_in_json_and_text(tmp_path):
+    s = sensitivity.run("Bengaluru", inputs=["odds"], folder=_whatif_folder(tmp_path), n=20,
+                        curves=[CURVE])
+    out = sensitivity.to_json(s)
+    assert [w["id"] for w in out["whatifs"]] == ["whatif:stubble_lan2022", "whatif:full_cost"]
+    from airhealth import report
+    text = report.sensitivity_table(s)
+    assert "What-ifs (what-if, not the default)" in text
+    assert "whatif:full_cost" in text and "air_dust" in text
+
+
+def test_cli_whatifs_flag(capsys):
+    main(["rank", "Bengaluru", "--library", str(FIXTURES), "--sensitivity", "--inputs", "odds",
+          "--n", "20", "--curves", CURVE, "--json", "--jobs", "1", "--whatifs", "none"])
+    assert json.loads(capsys.readouterr().out)["whatifs"] == []
+    assert main(["rank", "Bengaluru", "--library", str(FIXTURES), "--sensitivity", "--inputs",
+                 "odds", "--whatifs", "magic"]) == 1
+    assert main(["rank", "Bengaluru", "--library", str(FIXTURES), "--whatifs", "full_cost"]) == 1
+
+
 def test_sensitivity_json_and_text_carry_noise_robust():
     s = sensitivity.run("Bengaluru", inputs=["map", "seed"], folder=FIXTURES, n=30,
                         curves=[CURVE])

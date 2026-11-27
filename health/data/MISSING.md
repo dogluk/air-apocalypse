@@ -126,11 +126,16 @@ Written while building the first nine Bengaluru measures (2026-11-27). Each meas
 - **What full door-to-door waste collection would cost Bengaluru.** `waste_collection_burning_ban` uses CSTEP's government cost for the
   policy, "<1" crore (Table 5.11, printed p. 93), which assumes the city's planned treatment capacity exists and leaves out the cost of
   collection reaching every household. Not tried this session: the GBA (formerly BBMP) budget's solid-waste line and the share of households
-  without door-to-door collection. Either would give a real incremental cost.
+  without door-to-door collection. Either would give a real incremental cost. Since 2026-11-27 a `[cost.full]` range (Rs 12.1-114 crore a
+  year) sits in the measure file for the labelled what-if `full_cost` only; its money figures are newspaper reports of officials (key S),
+  so this gap stays open until a primary (GBA/BSWML budget book or tender estimates; the household coverage share) is read.
 - **Compliance cost of construction-dust controls in Bengaluru.** `construction_dust_controls` uses CSTEP's government enforcement cost ("<1"
   crore), the funder's cost, which leaves out builders' spending. TERI gives NCR's (Table 34: water tankers, barriers, anti-smog guns, for
   54.04 sq km under construction in 2020), but Bengaluru's area under construction was not found (CSTEP used 235 RERA projects without giving
-  their area, Sec. 3.2.2.5). Would settle it: the area under active construction in Bengaluru (RERA or building permissions).
+  their area, Sec. 3.2.2.5). Would settle it: the area under active construction in Bengaluru (RERA or building permissions). Since
+  2026-11-27 a `[cost.full]` range (Rs 0.23-13.4 crore a year, from CSTEP's emission factors and three environmental-clearance budgets)
+  sits in the measure file for the labelled what-if `full_cost` only; its high end rests on a floor-area ratio seen only in a snippet
+  (key S), and no Karnataka clearance gives a dust-only line.
 - **Lower ends of CSTEP's "<1 crore" costs.** `construction_dust_controls` and `waste_collection_burning_ban` take Rs 0.1 crore a year as the
   low end, a judgement; CSTEP gives only the upper bound.
 - **Not used: Vital Strategies (2024), Accelerating the health benefits of scaling clean household energy in India.** It costs LPG refill

@@ -981,6 +981,37 @@ def _research_block(s, comparable: bool) -> list[str]:
     return out
 
 
+_VARIANTS = {"default": "default", "whatif": "what-if", "whatif_low": "what-if, low end",
+             "whatif_high": "what-if, high end"}
+
+
+def _whatif_block(s) -> list[str]:
+    out = []
+    for w in s.whatifs:
+        out += [f"  {w['id']} ({w['note']}): {w['label']}."]
+        if w.get("skipped"):
+            out.append(f"    Not run: {w['skipped']}.")
+            continue
+        if w.get("basis"):
+            out.append(f"    {w['basis']}.")
+        for m, f in (w.get("full_cost") or {}).items():
+            out.append(f"    {m}: full cost {f['low']:,.0f} to {f['high']:,.0f} {f['currency']} a "
+                       f"year ({f['year']} prices, {f['dist']}; evidence key "
+                       f"{w['key'][m]}): {f['adds']}")
+        rows = []
+        for r in w["rows"]:
+            def at(rank_, of):
+                return DASH if rank_ is None else f"{rank_}/{of}"
+            e = r["expected_ly_per_crore"]
+            rows.append((r["measure"], r["curve"], _VARIANTS.get(r["variant"], r["variant"]),
+                         at(r["rank"], r["of"]), at(r["rank_comparable"], r["of_comparable"]),
+                         DASH if e is None else f"{e:.3g}"))
+        out += ["    " + x for x in _columns(("measure", "curve", "run", "rank (all)",
+                                               "rank (comparable)",
+                                               "expected life-years per crore"), rows)]
+    return out
+
+
 def _spread_block(s, comparable: bool) -> list[str]:
     st = s.stability(comparable)
     curves_ = s._curves()
@@ -1065,6 +1096,10 @@ def sensitivity_table(s) -> str:
         lines += ["", f"4. Break-even odds, {among(c)}: the odds that it works at which it would "
                   "pass the measure above it / fall below the one below it, on the default "
                   f"ranking ({DASH} at the ends; '{CANNOT}' as it says).", *_odds_block(s, c)]
+    if s.whatifs:
+        lines += ["", "5. What-ifs (what-if, not the default). Each is run beside the default "
+                  "ranking and changes nothing above; rank N/M is N of the M ranked, among all "
+                  "measures and among comparable ones.", *_whatif_block(s)]
     lines += ["", "Settings:", *(f"  {x.id}: {x.label}" for x in s.settings)]
     if s.skipped:
         lines += ["", "Settings that could not be run:",

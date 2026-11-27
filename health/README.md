@@ -547,7 +547,16 @@ curves, studies or maps.
   partial-cost ones set aside). A move no larger than the seed's own is "within noise"; a measure
   that cannot be scored under a setting (regional measures under month-by-month curves) drops out
   and moves nobody. Ranks are never averaged, and this is a swing, not a value-of-information
-  figure. `--n` defaults to 500 here; the whole-reach runs of the regional measures dominate the
+  figure. The research list gives two counts per unit: the raw one, and one **beyond the seed's
+  own swaps** (`noise_robust`), which counts a curve only when a measure that another seed alone
+  never swaps in or out of the top enters or leaves it; the list is sorted by that count. Two
+  **labelled what-ifs** run beside the default (`--whatifs`, default both; `none` for none) and
+  change nothing else: `whatif:stubble_lan2022` scales the crop-burning source-receptor table up to
+  Lan et al. 2022's national figure (the factor is computed from the two figures in the table's
+  fallback note), and `whatif:full_cost` replaces each partial cost that has a sourced
+  `[cost.full]` range in its measure file with that range (and with its low and high ends). Each
+  reports where its measures land, among all and among comparable measures, on every curve.
+  `--n` defaults to 500 here; the whole-reach runs of the regional measures dominate the
   time and run in `--jobs` processes (default: every CPU). `--write` adds
   `sensitivity_<place>.json/.csv`.
 

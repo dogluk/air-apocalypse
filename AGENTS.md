@@ -95,7 +95,8 @@ Not solid, and you should say so when you use a result:
   `receptor_fallback` (the regional tables are stand-ins), `long_shot`, `placeholder`,
   `odds_judgement`. Known gaps: the regional source-receptor tables are fallbacks (the crop-burning
   one is about 14 times smaller than Lan et al. 2022's national figure, so stubble measures are likely
-  understated; it is not scaled, by rule 5), and masks for workers (`n95_winter`) use all-age death
+  understated; it is not scaled, by rule 5, though `rank --sensitivity` shows a labelled what-if,
+  `whatif:stubble_lan2022`, beside the default), and masks for workers (`n95_winter`) use all-age death
   rates, because the file names no age group (school purifiers name theirs, `ages = [5, 19]`, and are
   scored with that group's own death rates). See "Measures" in `health/README.md` and the
   design: [`docs/specs/2026-11-12-intervention-ranking-design.md`](docs/specs/2026-11-12-intervention-ranking-design.md).

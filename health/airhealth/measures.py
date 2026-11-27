@@ -56,7 +56,12 @@ REGION_KEYS = ("receptor", "cut")
 # or 0), when the whole source is removed. Built by scripts/build_receptor.py.
 RECEPTOR_COLUMNS = ("district", "state", "delta_pm25_full")
 COST_KEYS = ("driver", "once", "annual", "units", "unit", "society_net_once",
-             "society_net_annual", "currency", "year", "share_only_on_success", "partial")
+             "society_net_annual", "currency", "year", "share_only_on_success", "partial", "full")
+# [cost.full]: a sourced range for the whole cost of a measure whose [cost] is partial. Never read
+# by the default scoring; sensitivity.py's what-if `full_cost` uses it in place of the annual cost.
+FULL_KEYS = ("low", "high", "dist", "currency", "year", "adds", "evidence")
+FULL_DISTS = ("uniform", "lognormal")
+FULL_FIELDS = ("cost.full.low", "cost.full.high")
 EVIDENCE_FIELDS = ("fields", "source", "url", "locator", "key", "retrieved", "derivation")
 ALL_MONTHS = tuple(range(1, 13))
 
@@ -85,6 +90,28 @@ class Region:
 
 
 @dataclass(frozen=True)
+class FullCost:
+    """The whole yearly cost per driver unit (same driver as [cost]), from low to high (read as
+    the 5th and 95th percentiles of `dist`), in `currency` of `year`. adds: what it adds to the
+    partial cost. key: its weakest evidence (O, then S, then R)."""
+    low: float
+    high: float
+    dist: str
+    currency: str
+    year: int
+    adds: str
+    evidence: tuple["Evidence", ...]
+
+    @property
+    def annual(self) -> Dist:
+        return Dist(self.dist, float(self.low), float(self.high))
+
+    @property
+    def key(self) -> str:
+        return max((e.key for e in self.evidence), key=EVIDENCE_KEYS.index)
+
+
+@dataclass(frozen=True)
 class Cost:
     driver: str                 # person | household | city | unit
     once: Dist                  # per driver unit, at the start (fixed 0 when absent)
@@ -97,6 +124,7 @@ class Cost:
     year: int
     share_only_on_success: float
     partial: str = ""           # what the cost leaves out, one plain sentence ("" = nothing said)
+    full: FullCost | None = None  # a sourced range for the whole cost (what-ifs only)
 
 
 @dataclass(frozen=True)
@@ -310,18 +338,69 @@ def _cost(value) -> Cost:
     if not 0 <= share <= 1:
         raise Invalid(f"cost.share_only_on_success: must be between 0 and 1, got {share:g}")
     partial = _text(t["partial"], "cost.partial") if "partial" in t else ""
+    full = None
+    if "full" in t:
+        if not partial:
+            raise Invalid("cost.full: only for a partial cost; give cost.partial first, saying "
+                          "what the default cost leaves out")
+        full = _full_cost(t["full"])
     return Cost(driver, once, annual, units, unit, net["society_net_once"],
-                net["society_net_annual"], currency, year, share, partial)
+                net["society_net_annual"], currency, year, share, partial, full)
 
 
-def _evidence(value) -> tuple[Evidence, ...]:
+def _full_cost(value) -> FullCost:
+    """[cost.full]: low, high (yearly, per driver unit, at least 0, low below high), dist
+    (uniform or lognormal), currency, year, adds (a sentence) and [[cost.full.evidence]] entries
+    (one or more, each backing low, high or both; both must be backed)."""
+    t = _table(value, "cost.full", FULL_KEYS)
+    for key in ("low", "high", "dist", "currency", "year", "adds", "evidence"):
+        if key not in t:
+            raise Invalid(f"cost.full.{key}: missing; see interventions/library/_template.toml")
+    low, high = _number(t["low"], "cost.full.low"), _number(t["high"], "cost.full.high")
+    if low < 0:
+        raise Invalid(f"cost.full.low: a cost is at least 0, got {low:g}")
+    if not low < high:
+        raise Invalid(f"cost.full.low: must be below cost.full.high ({low:g} vs {high:g})")
+    dist = t["dist"]
+    if dist not in FULL_DISTS:
+        raise Invalid(f"cost.full.dist: must be one of {', '.join(FULL_DISTS)}, got {dist!r}")
+    if dist == "lognormal" and low <= 0:
+        raise Invalid("cost.full.low: a lognormal range needs low above 0")
+    currency = t["currency"]
+    if currency not in CURRENCIES:
+        raise Invalid(f"cost.full.currency: must be one of {', '.join(CURRENCIES)}, "
+                      f"got {currency!r}")
+    year = _integer(t["year"], "cost.full.year")
+    from . import prices
+    try:
+        prices.to_base_inr(1.0, currency, year)
+    except Invalid as e:
+        raise Invalid(f"cost.full.year: {e}") from None
+    adds = _text(t["adds"], "cost.full.adds")
+    evidence = _evidence(t["evidence"], "cost.full.evidence")
+    if not evidence:
+        raise Invalid("cost.full.evidence: give at least one source for the range")
+    backed = set()
+    for i, e in enumerate(evidence):
+        bad = [f for f in e.fields if f not in FULL_FIELDS]
+        if bad:
+            raise Invalid(f"cost.full.evidence[{i + 1}].fields: {bad[0]!r} is not "
+                          f"{' or '.join(FULL_FIELDS)}")
+        backed |= set(e.fields)
+    for f in FULL_FIELDS:
+        if f not in backed:
+            raise Invalid(f"{f}: no [[cost.full.evidence]] entry backs it")
+    return FullCost(low, high, dist, currency, year, adds, evidence)
+
+
+def _evidence(value, prefix: str = "evidence") -> tuple[Evidence, ...]:
     if value is None:
         return ()
     if not isinstance(value, list):
-        raise Invalid("evidence: must be [[evidence]] tables, one per source")
+        raise Invalid(f"{prefix}: must be [[{prefix}]] tables, one per source")
     out = []
     for i, e in enumerate(value):
-        where = f"evidence[{i + 1}]"
+        where = f"{prefix}[{i + 1}]"
         e = _table(e, where, EVIDENCE_FIELDS)
         names = e.get("fields")
         if (not isinstance(names, list) or not names

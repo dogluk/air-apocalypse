@@ -54,6 +54,15 @@ def test_sensitivity_keeps_the_research_lists_and_notes_only(tmp_path):
     assert ex.sensitivity_for("agra", tmp_path) is None
 
 
+def test_sensitivity_keeps_the_whatifs_and_noise_sets(tmp_path):
+    (tmp_path / "sensitivity_bengaluru.json").write_text(json.dumps(
+        {"place": "Bengaluru", "top": 5, "notes": [], "research": [], "research_comparable": [],
+         "noise_sets": {"c": ["a"]}, "whatifs": [{"id": "whatif:full_cost"}]}))
+    out = ex.sensitivity_for("bengaluru", tmp_path)
+    assert out["data"]["whatifs"] == [{"id": "whatif:full_cost"}]
+    assert out["data"]["noise_sets"] == {"c": ["a"]}
+
+
 def test_main_writes_compact_json_and_an_index(tmp_path):
     rank_file(tmp_path, "bengaluru", "Bengaluru")
     (tmp_path / "sensitivity_bengaluru.json").write_text(json.dumps(

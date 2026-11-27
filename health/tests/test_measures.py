@@ -170,6 +170,74 @@ def test_cost_partial_is_read_and_optional(tmp_path):
     assert measures.load(write(tmp_path, t, "n")).cost.partial == ""
 
 
+FULL_EVIDENCE = {"fields": ["cost.full.low", "cost.full.high"], "source": "A report",
+                 "url": "https://example.org/r", "locator": "Table 2, p. 4", "key": "O",
+                 "retrieved": "2026-11-27"}
+FULL = {"low": 2000000, "high": 100000000, "dist": "lognormal", "currency": "INR",
+        "year": 2022, "adds": "What builders spend on barriers and water.",
+        "evidence": [FULL_EVIDENCE]}
+
+
+def _with_full(full: dict) -> dict:
+    t = edited("air_city", {"cost": {**COST, "partial": "It leaves out builders.", "full": full}})
+    t["placeholders"] = ["targets.dust.cut", "targets.waste_burning.cut", "cost.annual"]
+    return t
+
+
+def test_cost_full_is_read_and_optional(tmp_path):
+    m = measures.load(write(tmp_path, _with_full(FULL)))
+    f = m.cost.full
+    assert (f.low, f.high, f.currency, f.year, f.key) == (2000000, 100000000, "INR", 2022, "O")
+    assert f.annual == Dist("lognormal", 2000000, 100000000)
+    assert f.evidence[0].locator == "Table 2, p. 4"
+    assert "cost.full.low" not in m.numbers()        # the default scoring never reads it
+    assert measures.load(FIXTURES / "air_city.toml").cost.full is None
+
+
+def test_cost_full_key_is_its_weakest_evidence(tmp_path):
+    low = {**FULL_EVIDENCE, "fields": ["cost.full.low"]}
+    high = {**FULL_EVIDENCE, "fields": ["cost.full.high"], "key": "S"}
+    m = measures.load(write(tmp_path, _with_full({**FULL, "evidence": [low, high]})))
+    assert m.cost.full.key == "S"
+
+
+@pytest.mark.parametrize("full, field", [
+    ({**FULL, "low": 5e8}, "cost.full.low"),                                   # above high
+    ({**FULL, "low": -1}, "cost.full.low"),
+    ({**FULL, "dist": "normal"}, "cost.full.dist"),
+    ({**FULL, "currency": "EUR"}, "cost.full.currency"),
+    ({**FULL, "year": 1990}, "cost.full.year"),
+    ({**FULL, "adds": " "}, "cost.full.adds"),
+    ({**FULL, "evidence": []}, "cost.full.evidence"),
+    ({**FULL, "evidence": [{**FULL_EVIDENCE, "fields": ["cost.full.low"]}]}, "cost.full.high"),
+    ({**FULL, "evidence": [{**FULL_EVIDENCE, "fields": ["cost.annual"]}]},
+     "cost.full.evidence[1].fields"),
+    ({**FULL, "evidence": [{**FULL_EVIDENCE, "key": "X"}]}, "cost.full.evidence[1].key"),
+    ({**FULL, "cheap": 1}, "cost.full.cheap"),
+])
+def test_bad_cost_full_is_named(tmp_path, full, field):
+    with pytest.raises(measures.Invalid, match=f"^{re.escape(field)}"):
+        measures.load(write(tmp_path, _with_full(full)))
+
+
+def test_cost_full_needs_a_partial_cost(tmp_path):
+    t = _with_full(FULL)
+    del t["cost"]["partial"]
+    with pytest.raises(measures.Invalid, match=r"^cost\.full: only for a partial cost"):
+        measures.load(write(tmp_path, t))
+
+
+def test_library_full_costs_are_sourced():
+    lib = measures.library()
+    for mid in ("construction_dust_controls", "waste_collection_burning_ban"):
+        f = lib[mid].cost.full
+        assert f is not None and f.low < f.high and f.evidence
+        assert all(e.locator and e.url for e in f.evidence)
+        assert lib[mid].cost.partial                     # the default stays the partial cost
+    # the waste figures are newspaper reports of officials: never better than S
+    assert lib["waste_collection_burning_ban"].cost.full.key == "S"
+
+
 def test_absent_or_zero_once_needs_nothing(tmp_path):
     t = edited("air_city", {"cost": {**COST, "once": 0}})
     t["placeholders"] = ["targets.dust.cut", "targets.waste_burning.cut", "cost.annual"]

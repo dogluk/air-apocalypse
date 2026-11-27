@@ -46,6 +46,45 @@ currency = "INR"
 year = 2021
 partial = "The cost is CSTEP's estimate of the city government's spending to enforce the ban (under Rs 1 crore); it leaves out the cost of making door-to-door collection reach every household and of any missing treatment capacity, which has not been found at its source (data/MISSING.md)."
 
+# The whole cost, for the what-if `full_cost` only (the default ranking keeps the partial cost
+# above, flagged): enforcement plus the added cost of collecting the waste now burned. The money
+# figures are newspaper reports of officials (the primary budget documents were not reached), so
+# both ends are key S.
+[cost.full]
+low = 121000000
+high = 1140000000
+dist = "lognormal"     # a judgement: the ends are 9 times apart, from different routes
+currency = "INR"
+year = 2025            # nominal 2025-26 rupees (the 2026 contract figure taken as 2025: the price tables stop at 2025)
+adds = "The added yearly cost of making collection reach the waste now burned, on top of the city's enforcement."
+
+[[cost.full.evidence]]
+fields = ["cost.full.low"]
+source = "New Indian Express, 30 October 2026, 'New waste collection fleet for Bengaluru to cost Rs 4,500 crore' (a minister's cabinet briefing, reported)"
+url = "https://www.newindianexpress.com/cities/bengaluru/2026/Oct/30/new-waste-collection-fleet-for-bengaluru-to-cost-rs-4500-crore"
+locator = "article text: about Rs 598 crore a year now on collection to transport; new 7-year contracts (33 packages) of Rs 4,000-4,500 crore, about Rs 610 crore a year, to improve collection coverage"
+key = "S"
+retrieved = "2026-11-27"
+derivation = "low = enforcement Rs 0.1 crore (a judgement, as in [cost]) + (610 - 598) = Rs 12.1 crore/yr. The new contracts also add capacity, so this is a low end."
+
+[[cost.full.evidence]]
+fields = ["cost.full.high"]
+source = "CSTEP (2022), Emission inventory and pollution reduction strategies for Bengaluru"
+url = "https://web.archive.org/web/2023/https://cstep.in/drupal/sites/default/files/2022-02/EI_Report_Final_04Feb22.pdf"
+locator = "Sec. 3.2.2.4, printed p. 35-36 (PDF p. 53-54): waste burning PM2.5 1,411.5 t/yr; Table 3.2, printed p. 21 (PDF p. 39): emission factor PM2.5 8 g/kg; Table 5.11, printed p. 93: enforcement '<1' crore"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "waste burned = 1,411.5 t / 8 g/kg = 176,400 t/yr (483 t a day). high = enforcement Rs 1 crore + 176,400 t x Rs 6,390/t (next entry) = 1 + 113 = Rs 114 crore/yr."
+
+[[cost.full.evidence]]
+fields = ["cost.full.high"]
+source = "The Hindu, 29 March 2025, 'BSWML to raise Rs 750 crore from user fee', and 13 March 2025, 'State government approves user fee for waste collection' (officials, reported)"
+url = "https://www.thehindu.com/news/cities/bangalore/bwsml-to-raise-750-crore-from-user-fee/article69389589.ece"
+locator = "29 March 2025: BBMP's 2025-26 budget gives Rs 1,400 crore to BSWML; 13 March 2025 (https://www.thehindu.com/news/cities/bangalore/state-government-approves-user-fee-for-waste-collection/article69325223.ece): BSWML collects, transports and disposes of 6,000 tonnes a day"
+key = "S"
+retrieved = "2026-11-27"
+derivation = "all-in cost per tonne = Rs 1,400 crore / (6,000 t x 365) = Rs 6,390/t (includes capital and legacy waste, so an upper figure)."
+
 [[evidence]]
 fields = ["targets.waste_burning.cut"]
 source = "CSTEP (2022), Emission inventory and pollution reduction strategies for Bengaluru"

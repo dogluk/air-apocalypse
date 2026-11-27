@@ -35,7 +35,8 @@ from airhealth import paths, places, rank, score, simulate
 DEFAULT_OUT = paths.HEALTH / "out" / "site"
 DEFAULT_RANK_DIR = paths.HEALTH / "out" / "rank"
 NOT_CITY_FILES = ("india",)
-SENSITIVITY_KEEP = ("place", "top", "notes", "research", "research_comparable")
+SENSITIVITY_KEEP = ("place", "top", "notes", "research", "research_comparable", "noise_sets",
+                    "noise_sets_comparable", "whatifs")
 NO_REGION_RUN = ("its whole reach was not scored: export_site_data.py ran this city alone "
                  "(pass --with-regions to score it)")
 

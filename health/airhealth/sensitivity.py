@@ -45,6 +45,9 @@ setting, month-by-month curves the slowest.
 from __future__ import annotations
 
 import math
+import re
+import shutil
+import tempfile
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, replace
 from pathlib import Path
@@ -81,6 +84,19 @@ NOTE_MONTHLY = ("Under month-by-month curves (monthly_curves) the regional measu
 NOTE_ODDS = ("odds:certain ranks every measure as if it were sure to work (the ratio if it "
              "works); nothing is rerun.")
 
+# Labelled what-ifs: run beside the default, never in place of it, and never part of the research
+# list. Each reports where the measures it touches land, among all and among comparable ones.
+WHATIFS = ("stubble_lan2022", "full_cost")
+WHATIF_NOTE = "what-if, not the default"
+STUBBLE_RECEPTOR = "receptor_stubble.csv"
+WHATIF_LABELS = {
+    "stubble_lan2022": ("the crop-burning source-receptor table scaled up to Lan et al. 2022's "
+                        "national figure (the factor is the ratio of the two India-wide "
+                        "population-weighted figures in the table's own fallback note)"),
+    "full_cost": ("full costs, from each measure's sourced [cost.full] range, in place of the "
+                  "partial costs (whole range; and fixed at its low and its high end)"),
+}
+
 _DEATHS = {"model": "deaths from population x the model's death rates, not scaled to the SRS",
            "unwpp": "deaths scaled band by band to the UN's (WPP) deaths by age"}
 
@@ -116,6 +132,7 @@ class Swing:
                                # base_rank, rank_comparable, base_rank_comparable
     top: int
     skipped: dict | None = None    # setting id -> why it could not be run at all
+    whatifs: tuple = ()            # labelled what-ifs (dicts, see whatif_rows); never defaults
 
     # --- helpers -------------------------------------------------------------------------------
     def _units(self) -> dict[str, str]:
@@ -475,6 +492,65 @@ def settings_for(place: str, inputs: Sequence[str] = INPUTS, folder=measures.LIB
     return out
 
 
+# --- what-ifs ----------------------------------------------------------------------------------
+
+def stubble_factor() -> tuple[float, float, float]:
+    """(factor, table's figure, Lan et al. 2022's figure): read from the "(0.48 against 6.7
+    µg/m³)" in receptor_stubble.csv's fallback sentence in data/sources.toml, so the factor is
+    computed from the stored values, never typed. ValueError if the sentence has no such pair."""
+    sentence = score.receptor_basis(STUBBLE_RECEPTOR, key="fallback")
+    got = re.search(r"\(([\d.]+) against ([\d.]+) µg/m³\)", sentence)
+    if got is None:
+        raise ValueError(f"no '(X against Y µg/m³)' in {STUBBLE_RECEPTOR}'s fallback sentence")
+    small, big = float(got[1]), float(got[2])
+    return big / small, small, big
+
+
+def scaled_receptors(folder: Path, name: str, factor: float) -> Path:
+    """A new temporary folder holding `name` with every delta times `factor`, beside copies of
+    the other receptor files in `folder` (so measure files that read them still find them)."""
+    tmp = Path(tempfile.mkdtemp(prefix="airhealth_whatif_"))
+    for f in Path(folder).glob("receptor_*.csv"):
+        shutil.copy(f, tmp / f.name)
+    t = measures.receptor(name, folder)
+    t = t[list(measures.RECEPTOR_COLUMNS)].assign(delta_pm25_full=t.delta_pm25_full * factor)
+    t.to_csv(tmp / name, index=False)
+    return tmp
+
+
+def full_cost_library(lib: dict, end: str = "range") -> dict:
+    """The library with each measure that has [cost.full] costed by it instead: its annual cost
+    becomes the full range (end "range"), or its low or high end fixed ("low", "high"), in the
+    range's currency and year; no once cost; and no longer partial (so no partial_cost flag)."""
+    out = dict(lib)
+    for mid, m in lib.items():
+        f = m.cost.full if m.cost is not None else None
+        if f is None:
+            continue
+        annual = {"range": f.annual, "low": Dist.fixed(f.low), "high": Dist.fixed(f.high)}[end]
+        out[mid] = replace(m, cost=replace(m.cost, once=Dist.fixed(0.0), annual=annual,
+                                           currency=f.currency, year=f.year, partial="",
+                                           full=None))
+    return out
+
+
+def whatif_rows(r: rank.Ranking, ids: Sequence[str], variant: str) -> list[dict]:
+    """measure, curve, variant, rank, of, rank_comparable, of_comparable, expected_ly_per_crore,
+    comparable, status: where each measure in ids sits on each curve of r (of: how many are
+    ranked)."""
+    out = []
+    for c, t in r.tables.items():
+        n_all = sum(x.rank is not None for x in t.rows)
+        n_comp = sum(x.rank_comparable is not None for x in t.rows)
+        for x in t.rows:
+            if x.measure in ids:
+                out.append(dict(measure=x.measure, curve=c, variant=variant, rank=x.rank, of=n_all,
+                                rank_comparable=x.rank_comparable, of_comparable=n_comp,
+                                expected_ly_per_crore=x.expected_ly_per_crore,
+                                comparable=bool(x.comparable), status=x.status))
+    return out
+
+
 # --- running -----------------------------------------------------------------------------------
 
 _REACHES: dict = {}       # cache: reach key -> Score, or the reason it could not be scored
@@ -550,11 +626,13 @@ def run(place: str = "India", *, inputs: Sequence[str] = INPUTS, map_name="acag_
         curves=None, n: int = 500, seed: int = 0, discount=simulate.DISCOUNT,
         folder=measures.LIBRARY, top: int = TOP, cities: Sequence[str] | None = None,
         progress: Callable[[str], None] | None = None, study: str | None = None, deaths=None,
-        jobs: int = 1) -> Swing:
+        jobs: int = 1, whatifs: Sequence[str] = WHATIFS) -> Swing:
     """Rank `place` (India or a city) by default, then once per setting, and gather the ranks.
     Each city is scored once per setting that changes it, each reach once per setting that
     changes it (cached), and every other Score is the default one. progress(text) reports
-    what is being run. jobs: processes for the whole-reach runs."""
+    what is being run. jobs: processes for the whole-reach runs. whatifs: labelled what-ifs
+    (WHATIFS) run beside the default, reported in Swing.whatifs; they never change the default
+    ranking or the research list."""
     folder = Path(folder)
     say = progress or (lambda text: None)
     india = _is_india(place)
@@ -564,10 +642,10 @@ def run(place: str = "India", *, inputs: Sequence[str] = INPUTS, map_name="acag_
                   deaths=deaths, monthly_curves=False)
     city_study = None if india else study
 
-    def score_city(c, s, ids=None, library=lib, study_=None, fallback=None):
+    def score_city(c, s, ids=None, library=lib, study_=None, fallback=None, folder_=None):
         used = study_ if study_ is not None else city_study
         try:
-            return score.city(c, ids, study=used, folder=folder, library=library, **s)
+            return score.city(c, ids, study=used, folder=folder_ or folder, library=library, **s)
         except (KeyError, ValueError) as e:
             if fallback is None:
                 raise
@@ -630,6 +708,81 @@ def run(place: str = "India", *, inputs: Sequence[str] = INPUTS, map_name="acag_
     base_reach, base_missing = reaches(base_s)
     base = ranking(base_scores, base_reach, base_missing, context)
 
+    def rerun(ids, library=lib, folder_=None, tag=None):
+        """The ranking with the measures in ids rescored (cities and reaches) under another
+        library or receptor folder, everything else the default."""
+        cs = dict(base_scores)
+        for c in names:
+            todo = [x.measure for x in base_scores[c] if x.measure in ids
+                    and x.status != "not_applicable" and not (india and x.scope == "region")]
+            if todo:
+                cs[c] = merge(base_scores[c], score_city(c, base_s, todo, library=library,
+                                                         fallback=base_scores[c],
+                                                         folder_=folder_))
+        reach, missing = dict(base_reach), dict(base_missing)
+        mine = [m for m in regional if m in ids]
+        f = Path(folder_ or folder)
+        _reaches_many([(_key(m, base_s, tag, f), m, base_s, library) for m in mine], f, jobs, say)
+        for m in mine:
+            got = _REACHES[_key(m, base_s, tag, f)]
+            reach.pop(m, None)
+            missing.pop(m, None)
+            if isinstance(got, str):
+                missing[m] = got
+            else:
+                reach[m] = got
+        return ranking(cs, reach, missing, context)
+
+    whatif_out = []
+    for w in whatifs:
+        if w not in WHATIFS:
+            raise ValueError(f"unknown what-if {w!r}; what-ifs are {', '.join(WHATIFS)}")
+        say(f"what-if (not the default): {w}")
+        entry = dict(id=f"whatif:{w}", note=WHATIF_NOTE, label=WHATIF_LABELS[w], measures=[],
+                     skipped=None, rows=[])
+        if w == "stubble_lan2022":
+            factor, small, big = stubble_factor()
+            entry.update(factor=factor, basis=(
+                f"factor {big:g} / {small:g} = {factor:.3g}: Lan et al. 2022's India-wide "
+                f"population-weighted PM2.5 from crop burning ({big:g} µg/m³) over the table's own "
+                f"({small:g} µg/m³), both from {STUBBLE_RECEPTOR}'s fallback note in "
+                "data/sources.toml"))
+            ids = [m for m, x in lib.items()
+                   if x.region is not None and x.region.receptor == STUBBLE_RECEPTOR]
+            ids = [m for m in ids if any(x.measure == m and x.status != "not_applicable"
+                                         for c in names for x in base_scores[c])]
+            if not ids:
+                entry["skipped"] = f"no measure scored here reads {STUBBLE_RECEPTOR}"
+            else:
+                tmp = scaled_receptors(folder, STUBBLE_RECEPTOR, factor)
+                try:
+                    r = rerun(ids, folder_=tmp)
+                finally:
+                    shutil.rmtree(tmp, ignore_errors=True)
+                entry["measures"] = ids
+                entry["rows"] = whatif_rows(base, ids, "default") + whatif_rows(r, ids, "whatif")
+        else:
+            ids = [m for m, x in lib.items() if x.cost is not None and x.cost.full is not None
+                   and any(y.measure == m and y.status != "not_applicable"
+                           for c in names for y in base_scores[c])]
+            if not ids:
+                entry["skipped"] = "no measure scored here has a [cost.full] range"
+            else:
+                entry["measures"] = ids
+                entry["key"] = {m: lib[m].cost.full.key for m in ids}
+                entry["full_cost"] = {m: dict(low=lib[m].cost.full.low, high=lib[m].cost.full.high,
+                                              dist=lib[m].cost.full.dist,
+                                              currency=lib[m].cost.full.currency,
+                                              year=lib[m].cost.full.year,
+                                              adds=lib[m].cost.full.adds) for m in ids}
+                rows = whatif_rows(base, ids, "default")
+                for end, variant in (("range", "whatif"), ("low", "whatif_low"),
+                                     ("high", "whatif_high")):
+                    r = rerun(ids, library=full_cost_library(lib, end), tag=("full_cost", end))
+                    rows += whatif_rows(r, ids, variant)
+                entry["rows"] = rows
+        whatif_out.append(entry)
+
     rows, skipped = [], {}
     air_city = [m for m, x in lib.items() if x.kind == "air" and x.scope == "city"]
     for i, st in enumerate(settings, 1):
@@ -676,7 +829,7 @@ def run(place: str = "India", *, inputs: Sequence[str] = INPUTS, map_name="acag_
     df = df[["measure", "curve", "setting", "rank", "base_rank", "rank_comparable",
              "base_rank_comparable"]]
     return Swing(place=base.place, base=base, settings=tuple(settings), ranks=df, top=top,
-                 skipped=skipped)
+                 skipped=skipped, whatifs=tuple(whatif_out))
 
 
 def notes(s: Swing) -> list[str]:
@@ -698,7 +851,8 @@ def _records(df: pd.DataFrame) -> list[dict]:
 def to_json(s: Swing) -> dict:
     """{"place", "top", "base": rank.to_json(base) without parts, "settings", "ranks",
     "stability", "movers", "research", "break_even_odds", "notes"}, plus the same four views
-    among comparable measures ("*_comparable") and "skipped"."""
+    among comparable measures ("*_comparable"), "noise_sets[_comparable]", "skipped" and
+    "whatifs" (each labelled "what-if, not the default")."""
     base = {k: v for k, v in rank.to_json(s.base).items() if k != "parts"}
     out = {"place": s.place, "top": s.top, "base": base,
            "settings": [{"id": x.id, "input": x.input, "unit": x.unit, "label": x.label}
@@ -712,6 +866,7 @@ def to_json(s: Swing) -> dict:
         out["noise_sets" + tail] = s.noise_sets(comparable)
         out["break_even_odds" + tail] = _records(s.break_even_odds(comparable))
     out["skipped"] = dict(s.skipped or {})
+    out["whatifs"] = [dict(w) for w in s.whatifs]
     out["notes"] = notes(s)
     return score._clean(out)
 
