@@ -16,7 +16,7 @@ from urllib.parse import parse_qs, urlparse
 
 import numpy as np
 
-from . import baseline, causes, curves, exposure, paths, places, rank, report, score
+from . import baseline, causes, curves, exposure, paths, places, rank, report, score, simulate
 from .impact import Change, steady_state
 from .inputs import DEMOGRAPHIC, REGISTRY, Sources
 
@@ -207,12 +207,12 @@ def _city_now(name: str, curves_: list[str] | None, n: int) -> dict:
     """A city ranked now, from its own measures only. A regional measure's ratio needs its whole
     reach scored (about two minutes each), which a page load must not start: those rows show
     as not scored, with the way to get them."""
-    scores = score.city(name, curves=curves_, n=n, seed=0, discount=0.03)
+    scores = score.city(name, curves=curves_, n=n, seed=0, discount=simulate.DISCOUNT)
     wanted = {s.measure for s in scores if s.scope == "region" and s.status == "scored"}
     why = ("its whole reach is not scored on this page (about two minutes per measure); "
            f"`airhealth rank --write` writes it, or run `airhealth rank {name}`")
     context = rank._context(scores, None, map_name="acag_total", curves=curves_, n=n, seed=0,
-                            discount=0.03, deaths=None)
+                            discount=simulate.DISCOUNT, deaths=None)
     return rank.to_json(rank.from_scores(scores, name, context,
                                          regional_missing={m: why for m in wanted}))
 
@@ -240,6 +240,8 @@ def rank_result(q: dict, out: Path = OUT) -> dict:
         res = _city_now(name, names, n)
         res["source"] = f"computed now, {n} draws"
     res["dash_n"] = DASH_N
+    note = report.stubble_note(x for t in res.get("tables", {}).values() for x in t.get("rows", ()))
+    res["notes"] = [note] if note else []
     res["legend"] = rank_legend()
     res["sensitivity_file"] = (Path(out) / f"sensitivity_{slug}.json").exists()
     return res

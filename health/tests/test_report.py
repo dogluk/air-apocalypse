@@ -54,3 +54,30 @@ def test_csv_rows_carry_sources_and_collapse_the_share_basis():
     assert len(rows) == 2 and list(rows[0]) == list(report.CSV_COLUMNS)
     assert rows[0]["evidence"] == "S | L | U | O"
     assert rows[0]["share_basis"] == "apna/annual: months 1-2"
+
+
+def _stubble(mid="pes", scope="region"):
+    from dataclasses import replace
+    r = _row(mid, 2.0, ("receptor_fallback", "regional"), scope=scope, reach="region: 735 districts")
+    return replace(r, trail={**r.trail, "region": {"receptor": "receptor_stubble.csv"}})
+
+
+def test_stubble_gap_is_stated_at_the_top_when_a_row_stands_on_the_stubble_table():
+    from airhealth import score
+    r = _ranking({C1: [_row("a", 5.0), _stubble()]})
+    text = report.rank_table(r)
+    assert report.STUBBLE_NOTE in "\n".join(text.splitlines()[:3])
+    assert "not scaled" in report.STUBBLE_NOTE and "undervalued" in report.STUBBLE_NOTE
+    # the "about 14 times" is the receptor table's own fallback sentence, read at source
+    assert "about 14 times smaller than Lan et al. 2022" in score.receptor_basis(
+        "receptor_stubble.csv", key="fallback")
+    assert "about 14 times smaller than Lan et al. 2022" in report.STUBBLE_NOTE
+    # JSON rows (the dashboard's) give the same answer
+    rows = rank.to_json(r)["tables"][C1]["rows"]
+    assert report.stubble_note(rows) == report.STUBBLE_NOTE
+
+
+def test_no_stubble_note_without_a_stubble_row():
+    r = _ranking({C1: [_row("a", 5.0), _row("b", 3.0, ("receptor_fallback",))]})
+    assert report.STUBBLE_NOTE not in report.rank_table(r)
+    assert report.stubble_note([]) == ""

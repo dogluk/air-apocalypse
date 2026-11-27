@@ -618,6 +618,7 @@ function drawRank() {
     `<p class="sub"><b>Source:</b> ${esc(RK.source)}. <b>Defaults:</b> map ${esc(ctx.map)}; study ${esc(ctx.study || "none")}; ` +
     `deaths ${esc(ctx.deaths || "default")}; discount ${100 * ctx.discount}% a year; ${fmt.int(ctx.n)} draws, seed ${ctx.seed}. ` +
     `A city computed on this page uses ${fmt.int(RK.dash_n)} draws unless you set them.</p>` +
+    (RK.notes || []).map(n => `<div class="warn">${esc(n)}</div>`).join("") +
     (RK.source.startsWith("computed now") ? `<div class="warn">Computed now from this city's own measures. Regional measures need their whole reach scored (about two minutes each) and are shown as not scored; <code>airhealth rank --write</code> writes the full ranking.</div>` : "");
   gridHtml($("rkGrid"));
   $("rkTableTitle").textContent = `Ranked on ${short(rkCurve)}`;

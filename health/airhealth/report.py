@@ -839,6 +839,27 @@ def _curve_table(rows, show_reach: bool) -> list[str]:
     return _columns(tuple(head), body)
 
 
+STUBBLE_TABLE = "receptor_stubble.csv"
+# The "about 14 times" is the table's own fallback sentence in data/sources.toml (0.48 against Lan
+# et al. 2022's 6.7 µg/m³); tests/test_report.py checks the two still agree.
+STUBBLE_NOTE = ("Read the crop-burning measures with care: the crop-burning smoke table they stand "
+                "on is a stand-in about 14 times smaller than Lan et al. 2022's national figure, "
+                "so measures marked RF on it are likely undervalued by about that much. It is not "
+                "scaled to close the gap, by the project's rule.")
+
+
+def stubble_note(rows) -> str:
+    """STUBBLE_NOTE if any row (a rank.Row, or its JSON dict) carries receptor_fallback and stands
+    on the stubble table; "" otherwise."""
+    for x in rows:
+        flags = x.get("flags", ()) if isinstance(x, dict) else x.flags
+        trail = (x.get("trail") if isinstance(x, dict) else x.trail) or {}
+        if "receptor_fallback" in (flags or ()) and \
+                (trail.get("region") or {}).get("receptor") == STUBBLE_TABLE:
+            return STUBBLE_NOTE
+    return ""
+
+
 def rank_table(r) -> str:
     """The ranking as text: the grid of ranks on every curve first, then one table per curve,
     the measures listed apart or not ranked (with why), and a footer of settings, assumptions
@@ -848,6 +869,9 @@ def rank_table(r) -> str:
     india = r.place == INDIA
     lines = [f"Ranking of measures by life-years per crore: {r.place}. Each measure is ranked on its "
              "own; benefits do not add up. 1 crore = 10 million rupees, 2025 rupees."]
+    note = stubble_note(x for t in r.tables.values() for x in t.rows)
+    if note:
+        lines.append(note)
     lines += ["", *_rank_grid(r)]
     legend_gaps = []
     for curve, t in r.tables.items():

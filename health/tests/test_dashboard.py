@@ -226,3 +226,28 @@ def test_page_has_the_ranking_tab():
 def test_meta_lists_the_ranking_cities():
     m = dashboard.meta()
     assert len(m["rank_cities"]) == 50 and m["rank_dash_n"] == dashboard.DASH_N
+
+
+def test_rank_result_carries_the_stubble_note_and_uses_the_engine_discount(monkeypatch, tmp_path):
+    from airhealth import simulate
+    row = {"measure": "pes", "flags": ["receptor_fallback", "regional"],
+           "trail": {"region": {"receptor": "receptor_stubble.csv"}}}
+    (tmp_path / "rank_india.json").write_text(json.dumps(
+        {"place": "India", "tables": {"c": {"rows": [row]}}}))
+    r = dashboard.rank_result({"place": "India"}, out=tmp_path)
+    assert r["notes"] == [dashboard.report.STUBBLE_NOTE]
+    (tmp_path / "rank_india.json").write_text(json.dumps({"place": "India", "tables": {}}))
+    assert dashboard.rank_result({"place": "India"}, out=tmp_path)["notes"] == []
+    assert "RK.notes" in dashboard.PAGE.read_text()             # printed at the top of the tab
+    seen = {}
+
+    def fake_city(name, **kw):
+        seen.update(kw)
+        return []
+    monkeypatch.setattr(dashboard.score, "city", fake_city)
+    monkeypatch.setattr(simulate, "DISCOUNT", 0.05)
+    try:
+        dashboard._city_now("Bengaluru", None, 10)
+    except Exception:
+        pass
+    assert seen.get("discount") == 0.05
