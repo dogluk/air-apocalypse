@@ -122,7 +122,7 @@ of truth is [`health/open_work.toml`](health/open_work.toml); regenerate the two
 `cd health && PYTHONPATH=. ../.venv/bin/python scripts/open_work.py` (add `--sensitivity PATH` for another
 sensitivity run). The rules to quote in your write-up:
 
-> No number enters code or data unless you read it at its source, and you record where (table, figure, page). Never average curves, studies or maps; show them side by side. A source that does not report something has not reported zero. Never tune an input to close a gap with a published figure.
+> No number enters code or data unless you read it at its source, and you record where (table, figure, page). Never average curves, studies or maps; show them side by side. A source that does not report something has not reported zero. Never tune an input to close a gap with a published figure; a labelled what-if run beside an unchanged default, or a spread shown instead of a point, is not tuning.
 
 The short list below is the same work, roughly smallest first. Each of these is one sitting. Say in your write-up what you read and what you could not
 check.

@@ -19,11 +19,14 @@ Rank changes are measured among the measures ranked both by default and under th
 measure that drops out (it cannot be scored under that setting; e.g. regional measures under
 month-by-month curves, which apply to percent changes only) is counted as dropping out, and does
 not shift the others' ranks. A move is "within noise" when it is no larger than the move the seed
-setting (another random seed, nothing else changed) gives the same measure on the same curve.
-The research list counts each unit twice: raw (a curve counts when the top changes by more than
-the seed moves those measures) and noise-robust (a curve counts only when a measure the seed alone
-never swaps in or out of the top enters or leaves it: two measures the draws cannot tell apart,
-swapped, are noise however far the setting moves them). It is sorted by the noise-robust count.
+settings (other random seeds, nothing else changed) give the same measure on the same curve (the
+largest of them). The research list counts each unit twice: raw (a curve counts when the top
+changes by more than the seed moves those measures) and noise-robust (a curve counts only when one
+measure both is outside the seed's flips and moves further than the seeds move it: two measures
+the draws cannot tell apart, swapped, are noise however far the setting moves them). The seed's
+flips are those of the first few other seeds we ran (SEEDS, default 3: seed + 1, + 2, + 3), not of
+every seed there could be; "never swapped by the seeds we ran" is all the evidence offers. It is
+sorted by the noise-robust count.
 Delta is the rank under the setting minus the rank by default: + is down the table, - is up.
 
 Everything is shown twice: among all ranked measures, and among the comparable ones only (those
@@ -61,6 +64,7 @@ from .intervention import Dist
 from .measures import Measure
 
 INPUTS = ("map", "study", "deaths", "discount", "monthly_curves", "effect", "cost", "odds", "seed")
+SEEDS = 3             # how many other seeds make the noise floor (seed + 1 ... seed + SEEDS)
 TOP = 5               # size of "the top of the table" (a display choice, stated in output)
 LOW, HIGH = 0.05, 0.95
 CANNOT = "cannot, even if certain"
@@ -72,7 +76,9 @@ NOTES = (
     "odds). This is a swing, not a value-of-information figure: that would need odds on each input "
     "being right, which nobody has.",
     "Ranks on different curves are shown side by side and never averaged.",
-    "A rank change no larger than the one another random seed gives is within noise.",
+    "A rank change no larger than the largest one the other random seeds we ran give is within "
+    "noise; a measure the seeds we ran never swap across the top line may still be swapped by "
+    "another seed.",
     "Effect and cost low/high are each measure's own 5th and 95th percentiles, from its file.",
 )
 NOTE_COMMON = ("A rank change is counted among the measures ranked both by default and under the "
@@ -247,14 +253,15 @@ class Swing:
         the top `top`, counted among the measures ranked under both (`both`)."""
         r, b = _cols(comparable)
         both = g[g[r].notna() & g[b].notna()]
-        base_top = set(both.sort_values(b).measure[: self.top])
-        set_top = set(both.sort_values(r).measure[: self.top])
+        base_top = set(both.sort_values([b, "measure"]).measure[: self.top])
+        set_top = set(both.sort_values([r, "measure"]).measure[: self.top])
         return set_top - base_top, base_top - set_top, both
 
     def noise_sets(self, comparable: bool = False) -> dict[str, list[str]]:
-        """curve -> the measures whose place in the top `top` the seed setting(s) alone flip
-        (enter or leave): ties the random draws cannot tell apart, e.g. two measures whose
-        ratios sit within each other's noise. Empty lists when there is no seed setting."""
+        """curve -> the measures whose place in the top `top` any of the seed settings (the
+        other seeds we ran) alone flips (enter or leave): ties the random draws cannot tell apart,
+        e.g. two measures whose ratios sit within each other's noise. The union over the seeds,
+        so one lucky seed does not clear a measure. Empty lists when there is no seed setting."""
         d = self.deltas(comparable)
         inputs = self._inputs()
         out = {c: set() for c in self._curves()}
@@ -274,10 +281,11 @@ class Swing:
 
         Two counts. curves_top_changed (raw): a curve counts when some measure entering or
         leaving moves further than the seed moves it. noise_robust: a curve counts only when
-        the change is one the seed alone never makes, that is, some measure entering or leaving
-        is outside the seed's own flips on that curve (noise_sets). Without a seed setting the
-        two are equal, and a noise-robust curve is always a raw one. Sorted by noise_robust, then the raw count, then max_abs_delta,
-        descending; the seed is last, as the noise floor."""
+        one measure that enters or leaves is outside the seeds' own flips on that curve
+        (noise_sets) and also moves further than the seeds move it. Without a seed setting the
+        two are equal, and a noise-robust curve is always a raw one. Sorted by noise_robust,
+        then the raw count, then max_abs_delta, descending; the seed is last, as the noise
+        floor."""
         cols = ["unit", "noise_robust", "curves_noise_robust", "curves_top_changed", "curves",
                 "enter", "leave", "max_abs_delta", "within_noise", "drops_out"]
         if not len(self.ranks):
@@ -305,16 +313,16 @@ class Swing:
                     if not (e or lv):
                         continue
                     moved = both[both.measure.isin(e | lv)]
-                    real = is_seed or not has_seed or any(
-                        abs(x.delta) > (seed.get((x.measure, c)) or 0.0)
-                        for x in moved.itertuples())
+                    beyond = {x.measure for x in moved.itertuples()
+                              if abs(x.delta) > (seed.get((x.measure, c)) or 0.0)}
+                    real = is_seed or not has_seed or bool(beyond)
                     if real:
                         hit = True
                         enter |= e
                         leave |= lv
                     else:
                         noisy = True
-                    if real and not is_seed and (e | lv) - noise.get(c, set()):
+                    if real and not is_seed and (beyond - noise.get(c, set())):
                         firm = True
                 if hit:
                     changed.append(c)
@@ -433,9 +441,9 @@ def _usable_studies(city: str, default: str | None) -> list[str]:
 def settings_for(place: str, inputs: Sequence[str] = INPUTS, folder=measures.LIBRARY, *,
                  map_name: str = "acag_total", deaths=None, discount: float = simulate.DISCOUNT,
                  study: str | None = None, cities: Sequence[str] | None = None,
-                 library: dict | None = None) -> list[Setting]:
+                 library: dict | None = None, seeds: int = SEEDS) -> list[Setting]:
     """Every setting for the inputs asked for (see the module docstring), each moved from the
-    defaults given. A city's study settings are its other studies with a complete split of
+    defaults given. seeds: how many other random seeds make the noise floor (seed + 1 to + seeds). A city's study settings are its other studies with a complete split of
     concentration by cause; India's are each such (city, study). Effect and cost settings are
     made only for measures that can apply to the place and have a range in that group."""
     unknown = [i for i in inputs if i not in INPUTS]
@@ -487,8 +495,9 @@ def settings_for(place: str, inputs: Sequence[str] = INPUTS, folder=measures.LIB
         elif inp == "odds":
             out.append(Setting("odds:certain", "odds", "every measure as if certain to work"))
         elif inp == "seed":
-            out.append(Setting("seed:1", "seed", "another random seed (seed + 1), nothing else "
-                                                 "changed: the noise floor"))
+            for k in range(1, seeds + 1):
+                out.append(Setting(f"seed:{k}", "seed", f"another random seed (seed + {k}), "
+                                                        "nothing else changed: the noise floor"))
     return out
 
 
@@ -626,13 +635,14 @@ def run(place: str = "India", *, inputs: Sequence[str] = INPUTS, map_name="acag_
         curves=None, n: int = 500, seed: int = 0, discount=simulate.DISCOUNT,
         folder=measures.LIBRARY, top: int = TOP, cities: Sequence[str] | None = None,
         progress: Callable[[str], None] | None = None, study: str | None = None, deaths=None,
-        jobs: int = 1, whatifs: Sequence[str] = WHATIFS) -> Swing:
+        jobs: int = 1, whatifs: Sequence[str] = WHATIFS, seeds: int = SEEDS) -> Swing:
     """Rank `place` (India or a city) by default, then once per setting, and gather the ranks.
     Each city is scored once per setting that changes it, each reach once per setting that
     changes it (cached), and every other Score is the default one. progress(text) reports
     what is being run. jobs: processes for the whole-reach runs. whatifs: labelled what-ifs
     (WHATIFS) run beside the default, reported in Swing.whatifs; they never change the default
-    ranking or the research list."""
+    ranking or the research list. seeds: how many other seeds (seed + 1 ... seed + seeds) make the
+    noise floor; each is a full rerun, so 1 is quicker but a thinner floor."""
     folder = Path(folder)
     say = progress or (lambda text: None)
     india = _is_india(place)
@@ -665,7 +675,8 @@ def run(place: str = "India", *, inputs: Sequence[str] = INPUTS, map_name="acag_
         regional = [x.measure for x in base_scores[place]
                     if x.scope == "region" and x.status == "scored"]
     settings = settings_for(place, inputs, folder, map_name=map_name, deaths=deaths,
-                            discount=discount, study=study, cities=names, library=lib)
+                            discount=discount, study=study, cities=names, library=lib,
+                            seeds=seeds)
 
     pinned_libs = {}
     for st in settings:

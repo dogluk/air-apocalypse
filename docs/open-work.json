@@ -1,11 +1,12 @@
 {
-  "rules": "No number enters code or data unless you read it at its source, and you record where (table, figure, page). Never average curves, studies or maps; show them side by side. A source that does not report something has not reported zero. Never tune an input to close a gap with a published figure.",
+  "rules": "No number enters code or data unless you read it at its source, and you record where (table, figure, page). Never average curves, studies or maps; show them side by side. A source that does not report something has not reported zero. Never tune an input to close a gap with a published figure; a labelled what-if run beside an unchanged default, or a spread shown instead of a point, is not tuning.",
   "ordered_by": "noise-robust count of curves whose top changes (see sensitivity), then evidence weakness, then size",
   "sensitivity": {
     "file": "health/out/rank/sensitivity_bengaluru.json",
     "place": "Bengaluru",
     "generated": "2026-11-27",
     "top": 5,
+    "seeds": 1,
     "count": "noise-robust"
   },
   "closed": [],

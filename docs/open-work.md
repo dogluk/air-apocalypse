@@ -4,13 +4,13 @@ Generated from `health/open_work.toml` by `health/scripts/open_work.py`. Do not 
 
 ## Rules (quote these in your write-up)
 
-> No number enters code or data unless you read it at its source, and you record where (table, figure, page). Never average curves, studies or maps; show them side by side. A source that does not report something has not reported zero. Never tune an input to close a gap with a published figure.
+> No number enters code or data unless you read it at its source, and you record where (table, figure, page). Never average curves, studies or maps; show them side by side. A source that does not report something has not reported zero. Never tune an input to close a gap with a published figure; a labelled what-if run beside an unchanged default, or a spread shown instead of a point, is not tuning.
 
 Say in your write-up what you read and what you could not check. [AGENTS.md](../AGENTS.md) has the rest of the rules.
 
 ## How this list is ordered
 
-Order: by how many of the noise-robust curves have their top 5 changed by moving the inputs an item touches (largest over those inputs), taken from the sensitivity run for Bengaluru generated 2026-11-27 (file: `health/out/rank/sensitivity_bengaluru.json`). The run may be stale: re-run it after the library or data change, then regenerate this list. Ties go to the weaker evidence, then the smaller item. Items that touch nothing in that city's run count as 0.
+Order: by the noise-robust count of curves whose top 5 changes when the inputs an item touches are moved (largest over those inputs; a noise-robust curve is one where a measure outside the swaps of the other random seeds that run made (1 other seed in this run) enters or leaves and moves further than those seeds move it), taken from the sensitivity run for Bengaluru generated 2026-11-27 (file: `health/out/rank/sensitivity_bengaluru.json`). The run may be stale: re-run it after the library or data change, then regenerate this list. Ties go to the weaker evidence, then the smaller item. Items that touch nothing in that city's run count as 0.
 
 65 open items. Kinds: desk lookup, data build, model build, fieldwork, review. Size: one sitting, or bigger.
 

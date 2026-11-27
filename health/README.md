@@ -569,19 +569,21 @@ curves, studies or maps.
   defaults one at a time (`sensitivity.INPUTS`: every other map; each of the city's other causes
   studies with a full split, or for India each such city and study; SRS deaths against the model's
   and the UN's; no discounting; curves month by month; each measure's effect and cost ranges at
-  their 5th and 95th percentiles; every measure as if certain to work; another random seed) and the
+  their 5th and 95th percentiles; every measure as if certain to work; three other random seeds, the noise floor) and the
   library is re-ranked. Printed first, the **research list**: for each input (or one measure's
   effect or cost, or one city's study), on how many curves it changes which measures make the top
   K (default 5), and which enter and leave; then each measure's default rank on every curve with
   its best-worst across settings; the input that moves it most on each curve; and **break-even
   odds**, the odds that it works at which it would pass the measure above it or fall below the one
   below. Every block is shown among all measures and again among measures whose cost is whole (the
-  partial-cost ones set aside). A move no larger than the seed's own is "within noise"; a measure
+  partial-cost ones set aside). A move no larger than the largest the other seeds give is "within noise"; a measure
   that cannot be scored under a setting (regional measures under month-by-month curves) drops out
   and moves nobody. Ranks are never averaged, and this is a swing, not a value-of-information
-  figure. The research list gives two counts per unit: the raw one, and one **beyond the seed's
-  own swaps** (`noise_robust`), which counts a curve only when a measure that another seed alone
-  never swaps in or out of the top enters or leaves it; the list is sorted by that count. Two
+  figure. The research list gives two counts per unit: the raw one, and one **beyond the seeds'
+  own swaps** (`noise_robust`), which counts a curve only when a measure that none of the other
+  seeds we ran (seed + 1 to + 3; `seeds=` in `sensitivity.run`) swaps in or out of the top enters
+  or leaves it and moves further than they move it. Another seed might still swap it; three is
+  what we ran. The list is sorted by that count. Two
   **labelled what-ifs** run beside the default (`--whatifs`, default both; `none` for none) and
   change nothing else: `whatif:stubble_lan2022` scales the crop-burning source-receptor table up to
   Lan et al. 2022's national figure (the factor is computed from the two figures in the table's

@@ -387,4 +387,53 @@ def test_sensitivity_json_and_text_carry_noise_robust():
     assert {"noise_robust", "curves_noise_robust"} <= set(out["research"][0])
     assert set(out["noise_sets"]) == {CURVE} and "noise_sets_comparable" in out
     from airhealth import report
-    assert "beyond the seed's own swaps" in report.sensitivity_table(s)
+    assert "beyond the seeds' own swaps" in report.sensitivity_table(s)
+
+
+def _perm(order):
+    return {m: i for i, m in enumerate(order, 1)}
+
+
+def test_noise_robust_is_tied_to_one_measure_outside_the_flips_and_beyond_its_seed_move():
+    """top 2. Two seeds flip a, b and c (union {a, b, c}). Setting x brings c and d into the top 2
+    and takes a and b out. d is outside the flips, but x moves d by 2 and a seed moves d by 2:
+    d is within noise. Every measure x moves beyond the seeds (b, c) is inside the flips. So
+    x counts on the raw rule but is not noise-robust (the old rule called it robust because d is
+    outside the flips, though d's own move is no bigger than the seed's). Setting y brings e in:
+    e is outside the flips and moves 3, which the seeds never do to it: robust."""
+    base = "abcdefg"
+    sets = {"seed:1": "acbefdg",   # a1 c2 b3 e4 f5 d6 g7: c enters, b leaves; d moves 2
+            "seed:2": "bcadefg",   # b1 c2 a3 d4 ...: c enters, a leaves
+            "cost:x:low": "cdabefg",
+            "cost:y:low": "aebcdfg"}
+    rows = []
+    for sid, order in sets.items():
+        pos = _perm(order)
+        rows += [(m, "c1", sid, pos[m], i) for i, m in enumerate(base, 1)]
+    s = _swing(rows, [Setting("seed:1", "seed", "s1"), Setting("seed:2", "seed", "s2"),
+                      Setting("cost:x:low", "cost", "x"), Setting("cost:y:low", "cost", "y")],
+               top=2)
+    assert s.noise_sets() == {"c1": ["a", "b", "c"]}
+    res = s.research().set_index("unit")
+    assert res.loc["cost:x", "curves_top_changed"] == 1
+    assert res.loc["cost:x", "noise_robust"] == 0
+    assert res.loc["cost:y", "noise_robust"] == 1
+    assert res.loc["cost:y", "curves_noise_robust"] == ["c1"]
+
+
+def test_the_noise_floor_is_the_union_over_several_seeds():
+    """One seed leaves a pair alone; another swaps it. The pair is noise, as the union says."""
+    base = "abcdefg"
+    rows = []
+    for sid, order in {"seed:1": base, "seed:2": "abcdfeg"}.items():
+        pos = _perm(order)
+        rows += [(m, "c1", sid, pos[m], i) for i, m in enumerate(base, 1)]
+    s = _swing(rows, [Setting("seed:1", "seed", "s1"), Setting("seed:2", "seed", "s2")], top=5)
+    assert s.noise_sets() == {"c1": ["e", "f"]}
+
+
+def test_settings_for_makes_several_other_seeds_by_default():
+    ids = [s.id for s in sensitivity.settings_for("Bengaluru", ["seed"])]
+    assert ids == ["seed:1", "seed:2", "seed:3"]
+    assert [s.id for s in sensitivity.settings_for("Bengaluru", ["seed"], seeds=1)] == ["seed:1"]
+    assert {s.unit for s in sensitivity.settings_for("Bengaluru", ["seed"])} == {"seed"}

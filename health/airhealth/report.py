@@ -956,7 +956,7 @@ def _names(xs) -> str:
 def _research_block(s, comparable: bool) -> list[str]:
     res = s.research(comparable)
     n_curves = len(s._curves())
-    head = ("research unit", "beyond the seed's own swaps", f"curves where the top {s.top} changes",
+    head = ("research unit", "beyond the seeds' own swaps", f"curves where the top {s.top} changes",
             "on curves", "enter", "leave", "largest move", "within noise only",
             "drops out of the top")
     rows, quiet = [], []
@@ -975,8 +975,10 @@ def _research_block(s, comparable: bool) -> list[str]:
         out.append(f"  No change to the top {s.top} on any curve: {', '.join(sorted(quiet))}.")
     flips = {c: v for c, v in s.noise_sets(comparable).items() if v}
     if flips:
-        out.append("  The seed alone swaps these in and out of the top (a curve counts as 'beyond "
-                   "the seed's own swaps' only when a measure outside them enters or leaves): "
+        out.append("  The other seeds we ran, with nothing else changed, swap these in and out of "
+                   "the top (a curve counts as 'beyond the seeds' own swaps' only when a measure "
+                   "outside them enters or leaves and moves further than the seeds move it; "
+                   "another seed might swap more): "
                    + "; ".join(f"{c}: {_names(v)}" for c, v in flips.items()) + ".")
     return out
 
@@ -1081,16 +1083,16 @@ def sensitivity_table(s) -> str:
         lines += ["", f"1. What would reorder the top {s.top}, {among(c)}: the research list. A "
                   "unit is one input, one measure's effect or cost range, or one city's study; a "
                   "curve counts when one of its settings changes which measures make the top by "
-                  "more than another random seed does; 'beyond the seed's own swaps' counts it "
-                  "only when the change is not one the seed alone makes (the list is sorted by "
-                  "that count).", *_research_block(s, c)]
+                  "more than the other random seeds do; 'beyond the seeds' own swaps' counts it "
+                  "only when a measure the seeds we ran never swap enters or leaves and moves "
+                  "further than they move it (the list is sorted by that count).", *_research_block(s, c)]
     for c in alls:
         lines += ["", f"2. Rank on each curve by default, {among(c)}, and (best-worst) across every "
                   f"setting; outN: not ranked under N settings; {DASH} first: not ranked by default.",
                   *_spread_block(s, c)]
     for c in alls:
         lines += ["", f"3. The input that moves each measure most on each curve, {among(c)} "
-                  "(+ down the table, - up; in brackets: no larger than another seed's move, "
+                  "(+ down the table, - up; in brackets: no larger than the seeds' largest move, "
                   "within noise).", *_movers_block(s, c)]
     for c in alls:
         lines += ["", f"4. Break-even odds, {among(c)}: the odds that it works at which it would "

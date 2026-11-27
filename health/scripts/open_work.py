@@ -12,9 +12,9 @@ file (default health/out/rank/sensitivity_bengaluru.json, written by
 `airhealth rank Bengaluru --sensitivity`, or one given with --sensitivity). Its "research" list
 counts, for each research unit (effect:<measure>, cost:<measure>, study, map, ...), the curves on
 which moving that input changes the top 5 of the table. An item's count is the largest over the
-units its `affects` touch. The noise-robust count (a curve counts only when a measure the random
-seed alone never swaps in or out of the top enters or leaves it) is used when the file has it,
-the raw count otherwise. Ties are broken by how weak the evidence is (placeholder, recalled [R],
+units its `affects` touch. The noise-robust count (a curve counts only when a measure the other random
+seeds we ran never swap in or out of the top enters or leaves it and moves further than the
+seeds move it) is used when the file has it, the raw count otherwise. Ties are broken by how weak the evidence is (placeholder, recalled [R],
 seen in a summary [S], receptor fallback, judgement, partial cost, none) and then by size (one sitting first), then
 by id. With no sensitivity file the order is by weakness and size alone, and the output says so.
 
@@ -45,7 +45,8 @@ OUT_DIR = REPO / "docs"
 RULES = ("No number enters code or data unless you read it at its source, and you record where "
          "(table, figure, page). Never average curves, studies or maps; show them side by side. "
          "A source that does not report something has not reported zero. Never tune an input to "
-         "close a gap with a published figure.")
+         "close a gap with a published figure; a labelled what-if run beside an unchanged default, "
+         "or a spread shown instead of a point, is not tuning.")
 
 KINDS = ("desk lookup", "data build", "model build", "fieldwork", "review")
 SIZES = ("one sitting", "bigger")
@@ -222,6 +223,7 @@ def describe(sens: dict | None, path: str | None = None) -> dict | None:
     kinds = {_count(r)[1] for r in sens.get("research", [])}
     return {"file": path or sens.get("path", ""), "place": sens.get("place", base_place(sens)),
             "generated": sens.get("generated", ""), "top": sens.get("top", 5),
+            "seeds": sum(1 for x in sens.get("settings", []) if x.get("input") == "seed"),
             "count": ("noise-robust" if kinds == {"noise-robust"} else
                       "raw" if kinds <= {"raw"} else "noise-robust where present, else raw")}
 
@@ -274,8 +276,11 @@ def _header(desc: dict | None) -> list[str]:
                 "(placeholder, [R], [S], receptor fallback, judgement, partial cost, none) and then size, not by how "
                 "much an item could move the ranking. Pass `--sensitivity PATH` (a file written by "
                 "`airhealth rank CITY --sensitivity`) to order by that."]
-    return [f"Order: by how many of the {desc['count']} curves have their top {desc['top']} changed "
-            f"by moving the inputs an item touches (largest over those inputs), taken from the "
+    return [f"Order: by the {desc['count']} count of curves whose top {desc['top']} changes when the "
+            f"inputs an item touches are moved (largest over those inputs; a noise-robust curve is "
+            f"one where a measure outside the swaps of the other random seeds that run made "
+            f"({desc.get('seeds', 0)} other seed{'' if desc.get('seeds') == 1 else 's'} in this "
+            f"run) enters or leaves and moves further than those seeds move it), taken from the "
             f"sensitivity run for {desc['place'] or 'one city'} generated {desc['generated']}"
             f" (file: `{desc['file']}`). The run may be stale: re-run it after the library or data "
             f"change, then regenerate this list. Ties go to the weaker evidence, then the smaller "
@@ -313,8 +318,8 @@ def render_md(ordered: list[dict], desc: dict | None, repo: Path = REPO) -> str:
 def render_json(ordered: list[dict], desc: dict | None, repo: Path = REPO,
                 closed: list[str] | None = None) -> str:
     doc = {"rules": RULES,
-           "ordered_by": ("noise-robust count of curves whose top changes (see sensitivity), then "
-                          "evidence weakness, then size" if desc else
+           "ordered_by": (f"{desc['count']} count of curves whose top changes (see sensitivity), "
+                          "then evidence weakness, then size" if desc else
                           "evidence weakness, then size (no sensitivity file)"),
            "sensitivity": desc,
            "closed": closed or [],
