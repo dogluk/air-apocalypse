@@ -1,4 +1,4 @@
-"""Chapter 4: what could work, and what it would buy. Bengaluru's measures from the library.
+"""Chapter 4: what could work, and what it would buy. One city's measures from the library.
 
 The seam: this chapter reads only the measure library (health/interventions/library/*.toml,
 airhealth.measures), the scoring engine (airhealth.score: city(), Score, Flag, STATUSES,
@@ -22,6 +22,10 @@ Rules it keeps:
     its whole reach, so they are not given here.
   - A file that cannot be read, or a measure that cannot be run, is listed with its error, never
     dropped quietly.
+  - The chapter says how many library measures apply to the city and why the rest do not: the
+    library is written from single-city evidence, so a measure applies only where its file names
+    the city (or says it fits every city) or where it acts on a whole region (applicability).
+  - A chart with no rows is never drawn: one sentence names it instead (no_chart_sentence).
 """
 from __future__ import annotations
 
@@ -29,6 +33,7 @@ import math
 import os
 import tempfile
 import tomllib
+from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -153,6 +158,87 @@ def score_all(city: str, folder: Path | None = None, n: int = 2000, seed: int = 
             except Exception as ex:                # shown as "could not run", never dropped
                 e.scores, e.error = {}, f"{type(ex).__name__}: {_one_line(ex)}"
     return entries
+
+
+# ---------------------------------------------------------------- applicability
+
+def _meta(path: Path) -> tuple[str, tuple[str, ...] | None, str]:
+    """(name, the cities its file names or None for every city, scope) of one measure file, read
+    from the raw TOML when the file does not load, so that a broken file is still counted."""
+    try:
+        m = library.load(path)
+        return m.name, (None if m.cities is None else tuple(m.cities)), m.scope
+    except Exception:
+        try:
+            raw = tomllib.loads(path.read_text())
+        except (tomllib.TOMLDecodeError, OSError, UnicodeDecodeError):
+            return path.stem, None, "city"
+        cities = raw.get("cities")
+        name = raw.get("name") if isinstance(raw.get("name"), str) else path.stem
+        return (name, tuple(cities) if isinstance(cities, list) else None,
+                raw.get("scope") if isinstance(raw.get("scope"), str) else "city")
+
+
+def library_size(folder: Path | None = None) -> int:
+    folder = Path(folder) if folder is not None else library.LIBRARY
+    return len([p for p in folder.glob("*.toml") if not p.name.startswith("_")])
+
+
+def applicability(city: str, folder: Path | None = None) -> tuple[int, int, str]:
+    """(measures that apply, measures in the library, the plain-words paragraph). A measure applies
+    where its file names the city or says every city, or where it is regional (find())."""
+    folder = Path(folder) if folder is not None else library.LIBRARY
+    files = [p for p in sorted(folder.glob("*.toml")) if not p.name.startswith("_")]
+    own, wide, regional = [], [], []
+    elsewhere: Counter[str] = Counter()
+    several = 0
+    for p in files:
+        name, cities, scope = _meta(p)
+        if scope == "region":
+            regional.append(name)
+        elif cities is None or city in cities:
+            (own if cities is not None and len(cities) == 1 else wide).append(name)
+        elif len(cities) == 1:
+            elsewhere[cities[0]] += 1
+        else:
+            several += 1
+    k, total = len(own) + len(wide) + len(regional), len(files)
+    h = [f"<p><b>{k} of the {total} library measures apply to {esc(city)}.</b> The library is "
+         "written from single-city evidence: each measure file takes one city's costs, who the "
+         "measure reaches and the odds it works from sources about that place, and names the "
+         "cities it is written for. A measure applies here only if its file names "
+         f"{esc(city)} or says it fits every city, or if it acts on a whole region that "
+         "includes the city. Carrying a measure to a city its file does not name would mean "
+         "inventing its numbers, and this page does not.</p>"]
+    parts = []
+    parts.append(f"written for {esc(city)}: {esc('; '.join(own))}" if own else
+                 f"none is written for {esc(city)} alone")
+    if wide:
+        parts.append("written for several cities or for all of them, so applied here with "
+                     "whatever evidence they borrow from elsewhere (each says which): "
+                     + esc("; ".join(wide)))
+    if regional:
+        parts.append("acting on a whole region: " + esc("; ".join(regional)))
+    h.append("<p>Of the measures that apply: " + "; ".join(parts) + ".</p>")
+    rest = total - k
+    if rest:
+        bits = []
+        if elsewhere:
+            n = sum(elsewhere.values())
+            bits.append(f"{n} {'is' if n == 1 else 'are'} written for one other city each ("
+                        + ", ".join(f"{esc(c)} {v}" for c, v in sorted(elsewhere.items())) + ")")
+        if several:
+            bits.append(f"{several} {'is' if several == 1 else 'are'} written for a list of "
+                        f"cities that does not include {esc(city)}")
+        h.append(f"<p>The other {rest} do not apply. {'; '.join(bits)}.</p>")
+    return k, total, "".join(h)
+
+
+def no_chart_sentence(titles: list[str]) -> str:
+    """One sentence in place of the charts that would have had no rows."""
+    return ("<p class=\"note\">Not drawn, because no measure of that kind has anything to show: "
+            + esc("; ".join(titles)) + ". There is no measure to chart there, which is different "
+            "from a measure that does nothing.</p>")
 
 
 # ---------------------------------------------------------------- formatting
@@ -430,8 +516,18 @@ def _measure_block(e: Entry, labels: dict[str, str]) -> str:
          f"<p><b>Who it reaches:</b> {esc(first.who_reaches)}.</p>",
          f"<p><b>Odds that it works:</b> {first.p_success:.0%}. "
          f"<b>Basis:</b> {esc(first.p_success_basis)}.</p>"]
+    unscored: dict[tuple[str, str], list[tuple[str | None, score.Score]]] = {}
     for st, s in e.scores.items():
-        h.append(_score_block(s, labels, _study_label(st)))
+        if not s.per_curve and s.status != "scored":      # same reason on several studies: once
+            unscored.setdefault((s.status, s.reason), []).append((st, s))
+        else:
+            h.append(_score_block(s, labels, _study_label(st)))
+    for items in unscored.values():
+        if len(items) == 1:
+            h.append(_score_block(items[0][1], labels, _study_label(items[0][0])))
+        else:
+            where = "; ".join(names.study(st) for st, _ in items)
+            h.append(_score_block(items[0][1], labels, f"Not scored on {where}"))
     return "".join(h)
 
 
@@ -449,7 +545,7 @@ def _chart(entries: list[Entry], key, curve_names: list[str],
              for c in curve_names]
         if gap:
             ages = s.trail["exposure"]["ages"]
-            gaps.append(f"{s.name}: no dot for {', '.join(names.curve(c) for c in gap)}, because these curves do not "
+            gaps.append(f"{s.name}: no dot for {'; '.join(names.curve(c) for c in gap)}, because these curves do not "
                         f"cover the ages it reaches ({ages[0]}-{ages[1]}); they start at an "
                         "older age, which is not the same as no effect")
         if any(x is not None and x > 0 for x in v):
@@ -463,8 +559,9 @@ def _chart(entries: list[Entry], key, curve_names: list[str],
                     x_label="expected life-years per crore (log scale)"), left_out, gaps
 
 
-def _empty(city: str) -> str:
-    return (f"<p>{esc(city)}'s measures are not yet in the library. The measure library "
+def _empty(city: str, folder: Path | None = None) -> str:
+    return (applicability(city, folder)[2]
+            + f"<p>{esc(city)}'s measures are not yet in the library. The measure library "
             "(health/interventions/library/, one TOML file per measure) is being written; once "
             f"files that list {esc(city)} under <code>cities</code> exist there, rebuilding this "
             "page scores them on every curve and every source study.</p>")
@@ -491,7 +588,7 @@ def render(city: str, folder: Path | None = None, n: int = 2000, seed: int = 0,
     ok = [e for e in entries if e.scores]
     if not ok:
         return Section("measures", "What could work, and what it would buy",
-                       _empty(city) + _broken(entries))
+                       _empty(city, folder) + _broken(entries))
 
     studies = causes.studies(city)
     first_run = _first_run(ok)
@@ -516,6 +613,8 @@ def render(city: str, folder: Path | None = None, n: int = 2000, seed: int = 0,
         "is life-years gained for every crore (ten million rupees) spent: higher means more "
         "health for the money.</p>")
 
+    h.append(applicability(city, folder)[2])
+
     if first_run:
         level = (f", where {esc(city)}'s PM2.5, weighted by where people live, is "
                  f"{first_run.pm25_before:.1f} µg/m³ in {first_run.year}")
@@ -524,11 +623,23 @@ def render(city: str, folder: Path | None = None, n: int = 2000, seed: int = 0,
             f"({esc(exposure.LABELS[MAP])}){level}. Chapter 1's ground monitors read the city's "
             "air differently, and chapter 3 shows the maps side by side; this chapter uses the "
             "map the ranking across cities uses.</p>")
-    h.append(
-        f"<p>Air measures are scored on every source study of {esc(city)} that splits PM2.5 by "
-        f"cause ({esc(', '.join(names.study(s) for s in studies)) if studies else 'none'}), each on its own; the studies "
-        "disagree, and their results are never combined. Exposure measures do not depend on a "
-        "study and are scored once.</p>")
+    has_air = any(e.scores and next(iter(e.scores.values())).kind == "air"
+                  and next(iter(e.scores.values())).scope == "city" for e in ok)
+    if studies and has_air:
+        h.append(
+            f"<p>Air measures are scored on every source study of {esc(city)} that splits PM2.5 by "
+            f"cause ({esc(', '.join(names.study(s) for s in studies))}), each on its own; the "
+            "studies disagree, and their results are never combined. Exposure measures do not "
+            "depend on a study and are scored once.</p>")
+    elif has_air:
+        h.append(f"<p>There is no source study for {esc(city)}, so its air measures are scored "
+                 "without one, as the engine's notes on each say. Exposure measures do not depend "
+                 "on a study and are scored once.</p>")
+    else:
+        h.append(f"<p>No air measure that cuts one cause inside the city applies to {esc(city)}, "
+                 "so no source study is used in this chapter: the measures here are exposure "
+                 "measures, which do not depend on a study and are scored once, and regional "
+                 "ones.</p>")
     line = "Curves used: " + "; ".join(f"{names.curve(c)} ({c}; {labels.get(c, c)})"
                                        for c in curve_names) + "."
     if missing:
@@ -554,18 +665,27 @@ def render(city: str, folder: Path | None = None, n: int = 2000, seed: int = 0,
                  "others' and sit below them, after every fully costed measure.</p>")
 
     def charts(group):
-        out = []
+        out, empty = [], []
+        left: dict[str, list[str]] = {}          # a measure without a ratio -> the charts it is off
         keys = [(st, f"{city}: air measures on study {names.study(st)}") for st in studies]
         keys.append((None, f"{city}: exposure measures (no study needed)"))
         for key, title in keys:
             chart, left_out, gaps = _chart(group, key, curve_names, title)
-            out.append(chart)
+            if chart:
+                out.append(chart)
+            elif not left_out and not gaps:
+                empty.append(title.split(": ", 1)[-1])
             if gaps:
                 out.append(f'<p class="note">Dots left off the chart "{esc(title)}": '
                            f"{esc('; '.join(gaps))}.</p>")
-            if left_out:
-                out.append(f'<p class="note">Not on the chart "{esc(title)}", because it has no '
-                           f"ratio: {esc('; '.join(left_out))}.</p>")
+            for text in left_out:
+                left.setdefault(text, []).append(
+                    names.study(key) if key else "the exposure measures chart")
+        for text, where in left.items():
+            out.append(f'<p class="note">Not charted, because it has no ratio: {esc(text)}, on '
+                       f"{esc('; '.join(where))}.</p>")
+        if empty:
+            out.append(no_chart_sentence(empty))
         return "".join(out)
     h.append(charts(full))
     if part:

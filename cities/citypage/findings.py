@@ -14,14 +14,23 @@ from .page import esc, fmt
 from .measures import _sig
 
 
-def _toll(city: str) -> str:
+def toll_ends(city: str):
+    """The lowest and the highest death toll over every curve and map, as
+    ((deaths, curve, map, derived), (deaths, curve, map, derived), curves, maps); None if no
+    curve gave one. Nothing is averaged and no end is preferred."""
     rows = [(r["deaths_averted"], r["curve"], m, bool(r["deaths_derived"])) for m in burden._maps()
             for r in burden.burden(city, m)["rows"]
             if r["deaths_averted"] is not None and math.isfinite(r["deaths_averted"])]
     if not rows:
+        return None
+    return min(rows), max(rows), len({r[1] for r in rows}), len({r[2] for r in rows})
+
+
+def _toll(city: str) -> str:
+    ends = toll_ends(city)
+    if ends is None:
         return "No curve gave a death toll for this city."
-    lo, hi = min(rows), max(rows)
-    n_curves, n_maps = len({r[1] for r in rows}), len({r[2] for r in rows})
+    lo, hi, n_curves, n_maps = ends
     star = lambda row: " *" if row[3] else ""       # the chapter tables' mark, same footnote
     note = f" {burden.STAR}" if lo[3] or hi[3] else ""
     return (f"PM2.5 is behind {fmt(lo[0])}{star(lo)} to {fmt(hi[0])}{star(hi)} deaths a year in {city}, "
@@ -119,15 +128,22 @@ def _partial_line(part: list, curve_names: list[str]) -> str:
     return out
 
 
-def lines(city: str, entries: list) -> list[str]:
+def _applies(city: str, folder=None) -> str:
+    k, total, _ = measures.applicability(city, folder)
+    return (f"{k} of the {total} library measures apply to {city}: each measure is written from "
+            f"evidence about one city, so one applies only where its file names the city or it "
+            f"acts on a whole region.")
+
+
+def lines(city: str, entries: list, folder=None) -> list[str]:
     ran, _ = curves.select()
     names_ = measures.curve_names_of(entries, [c.name for c in ran])
     full, part, _regional = measures.groups(entries, names_)
-    out = [_toll(city), _level(city), _sources(city), _first_full(city, full, names_),
-           _partial_line(part, names_)]
+    out = [_toll(city), _level(city), _sources(city), _applies(city, folder),
+           _first_full(city, full, names_), _partial_line(part, names_)]
     return [x for x in out if x]
 
 
-def block(city: str, entries: list) -> str:
-    items = "".join(f"<li>{esc(x)}</li>" for x in lines(city, entries))
+def block(city: str, entries: list, folder=None) -> str:
+    items = "".join(f"<li>{esc(x)}</li>" for x in lines(city, entries, folder))
     return f'<div class="card findings"><h3>What the page finds</h3><ul>{items}</ul></div>'

@@ -25,6 +25,10 @@ SEASONS: dict[str, tuple[int, ...]] = {
 MAP_ORDER = ("cpcb", "aqli", "acag_total")
 AQLI_FIRST_YEAR = 2016      # a choice: the monitors start in 2016, so the satellite line does too
 MONTHS = [calendar.month_abbr[m] for m in range(1, 13)]
+_NO_YEARS = ("<p>No CPCB monitor of {city} has a year with enough PM2.5 data (at least 75% of the "
+             "hours), so there is no yearly line to draw. That is no data, not clean air.</p>")
+_NONE_MONTHS = ("<p>No month of any year has enough PM2.5 data (at least 75% of its hours), so the "
+                "month-by-month map is not drawn. That is no data, not clean air.</p>")
 
 
 @cache
@@ -150,8 +154,6 @@ def render(city: str) -> Section:
     st = station_coverage(city)
     maps = maps_compared(city)
     fp = fingerprints(city)
-    a = ann.set_index("year")
-    hi, lo = a.pm25.idxmax(), a.pm25.idxmin()
     h = []
 
     h.append(
@@ -165,122 +167,163 @@ def render(city: str) -> Section:
 
     # (a) year by year
     h.append("<h3>Year by year</h3>")
-    h.append(svg.line_chart(
-        [_line(ann.year, ann.pm25, "PM2.5")],
-        title=f"{city}: annual mean PM2.5 at CPCB monitors", x_label="year",
-        y_label="µg/m³", x_ticks=[(int(y), str(int(y))) for y in ann.year]))
-    h.append(f"<p>The highest year was {hi} at {fmt(a.pm25[hi], '1dp')} µg/m³ and the lowest "
-             f"{lo} at {fmt(a.pm25[lo], '1dp')} µg/m³. The number of monitors changed over the "
-             f"years (table below), so the line is not one fixed set of places.</p>")
-    h.append(table(["Year", "PM2.5 (µg/m³)", "Monitors", "Share of hours with data"],
-                   [[int(r.year), fmt(r.pm25, "1dp"), int(r.stations), fmt(r.hours_share, "pct")]
-                    for r in ann.itertuples()], numeric=(0, 1, 2, 3)))
+    if ann.empty:
+        h.append(_NO_YEARS.format(city=esc(city)))
+    else:
+        a = ann.set_index("year")
+        hi, lo = a.pm25.idxmax(), a.pm25.idxmin()
+        h.append(svg.line_chart(
+            [_line(ann.year, ann.pm25, "PM2.5")],
+            title=f"{city}: annual mean PM2.5 at CPCB monitors", x_label="year",
+            y_label="µg/m³", x_ticks=[(int(y), str(int(y))) for y in ann.year]))
+        h.append(f"<p>The highest year was {hi} at {fmt(a.pm25[hi], '1dp')} µg/m³ and the lowest "
+                 f"{lo} at {fmt(a.pm25[lo], '1dp')} µg/m³. The number of monitors changed over the "
+                 f"years (table below), so the line is not one fixed set of places.</p>")
+        h.append(table(["Year", "PM2.5 (µg/m³)", "Monitors", "Share of hours with data"],
+                       [[int(r.year), fmt(r.pm25, "1dp"), int(r.stations), fmt(r.hours_share, "pct")]
+                        for r in ann.itertuples()], numeric=(0, 1, 2, 3)))
 
     # (b) month by month
     h.append("<h3>Month by month</h3>")
-    h.append(svg.heatmap([str(int(y)) for y in mby.index], MONTHS, _cells(mby),
-                         title=f"{city}: monthly mean PM2.5, µg/m³",
-                         value_label="µg/m³; hatched = no data"))
     flat = mby.stack()
-    my, mm = flat.idxmax()
-    ly, lm = flat.idxmin()
-    gaps = int(mby.isna().sum().sum())
-    h.append(f"<p>Darker cells are dirtier months. The dirtiest month on record is "
-             f"{calendar.month_name[mm]} {int(my)} ({fmt(flat.max(), '1dp')} µg/m³), the cleanest "
-             f"{calendar.month_name[lm]} {int(ly)} ({fmt(flat.min(), '1dp')} µg/m³). "
-             f"{gaps} month-year cell{'s' if gaps != 1 else ''} "
-             f"{'are' if gaps != 1 else 'is'} hatched: the monitors had data for under 75% of "
-             f"that month's hours, or none, so it is shown as no data, not as zero.</p>")
+    if flat.empty:
+        h.append(_NONE_MONTHS)
+    else:
+        h.append(svg.heatmap([str(int(y)) for y in mby.index], MONTHS, _cells(mby),
+                             title=f"{city}: monthly mean PM2.5, µg/m³",
+                             value_label="µg/m³; hatched = no data"))
+        my, mm = flat.idxmax()
+        ly, lm = flat.idxmin()
+        gaps = int(mby.isna().sum().sum())
+        h.append(f"<p>Darker cells are dirtier months. The dirtiest month on record is "
+                 f"{calendar.month_name[mm]} {int(my)} ({fmt(flat.max(), '1dp')} µg/m³), the cleanest "
+                 f"{calendar.month_name[lm]} {int(ly)} ({fmt(flat.min(), '1dp')} µg/m³). "
+                 f"{gaps} month-year cell{'s' if gaps != 1 else ''} "
+                 f"{'are' if gaps != 1 else 'is'} hatched: the monitors had data for under 75% of "
+                 f"that month's hours, or none, so it is shown as no data, not as zero.</p>")
 
     # (c) hour of day
     h.append("<h3>Hour of day</h3>")
-    ser = [_line(range(24), hour_of_day(city, "pm25", m), s, i)
-           for i, (s, m) in enumerate(SEASONS.items())]
-    h.append(svg.line_chart(ser, title=f"{city}: PM2.5 through the day, by season",
-                            x_label="hour of day (IST)", y_label="µg/m³", x_ticks=_hour_ticks()))
-    parts = []
-    for s, m in SEASONS.items():
-        hh = hour_of_day(city, "pm25", m)
-        parts.append(f"{s}: highest at {int(hh.idxmax()):02d}:00 ({fmt(hh.max(), '1dp')}), lowest at "
-                     f"{int(hh.idxmin()):02d}:00 ({fmt(hh.min(), '1dp')})")
-    h.append("<p>Each line averages every monitor-day in the pooled years for the months of that "
-             "season. The season groupings are a choice made for this chart, not a standard. "
-             + "; ".join(parts) + " (µg/m³).</p>")
+    seasons = [(sn, m) for sn, m in SEASONS.items() if hour_of_day(city, "pm25", m).notna().any()]
+    if not seasons:
+        h.append("<p>No hour of the day has PM2.5 data in any season, so there is no daily "
+                 "shape to draw.</p>")
+    else:
+        ser = [_line(range(24), hour_of_day(city, "pm25", m), sn, i)
+               for i, (sn, m) in enumerate(seasons)]
+        h.append(svg.line_chart(ser, title=f"{city}: PM2.5 through the day, by season",
+                                x_label="hour of day (IST)", y_label="µg/m³", x_ticks=_hour_ticks()))
+        parts = []
+        for sn, m in seasons:
+            hh = hour_of_day(city, "pm25", m)
+            parts.append(f"{sn}: highest at {int(hh.idxmax()):02d}:00 ({fmt(hh.max(), '1dp')}), "
+                         f"lowest at {int(hh.idxmin()):02d}:00 ({fmt(hh.min(), '1dp')})")
+        skipped = [sn for sn in SEASONS if sn not in dict(seasons)]
+        h.append("<p>Each line averages every monitor-day in the pooled years for the months of that "
+                 "season. The season groupings are a choice made for this chart, not a standard. "
+                 + "; ".join(parts) + " (µg/m³)."
+                 + (f" No data for {', '.join(skipped)}." if skipped else "") + "</p>")
 
     # (d) the monitors
     h.append("<h3>The monitors</h3>")
-    h.append(svg.heatmap([_short(n, city) for n in st.index], [str(int(y)) for y in st.columns],
-                         _cells(st, 100),
-                         title=f"{city}: share of each year's hours with valid PM2.5, by monitor",
-                         value_label="% of hours; hatched = no data", fmt_kind="int"))
     n_other = _stations(city).station.nunique() - len(st)
-    per_year = ", ".join(f"{int(y)}: {int(st[y].notna().sum())}" for y in st.columns)
-    h.append(f"<p>Monitors reporting PM2.5 each year: {per_year}. A monitor that was not yet "
-             f"installed, or sent nothing, is hatched; that is not the same as clean air. "
-             f"{n_other} further monitor{'s' if n_other != 1 else ''} in the city's file "
-             f"report other pollutants but no PM2.5, so {'they are' if n_other != 1 else 'it is'} "
-             f"not listed here.</p>")
-    h.append(table(["Monitor", "First year", "Last year", "Mean share of hours, years it reported"],
-                   [[n, int(r.dropna().index.min()), int(r.dropna().index.max()),
-                     fmt(r.mean(), "pct")] for n, r in st.iterrows()], numeric=(1, 2, 3)))
+    if st.empty:
+        h.append(f"<p>No monitor of {esc(city)} reports PM2.5 in the city's file, so there is no "
+                 "monitor map or table. That is no data, not clean air.</p>")
+    else:
+        h.append(svg.heatmap([_short(n, city) for n in st.index], [str(int(y)) for y in st.columns],
+                             _cells(st, 100),
+                             title=f"{city}: share of each year's hours with valid PM2.5, by monitor",
+                             value_label="% of hours; hatched = no data", fmt_kind="int"))
+        per_year = ", ".join(f"{int(y)}: {int(st[y].notna().sum())}" for y in st.columns)
+        h.append(f"<p>Monitors reporting PM2.5 each year: {per_year}. A monitor that was not yet "
+                 f"installed, or sent nothing, is hatched; that is not the same as clean air. "
+                 f"{n_other} further monitor{'s' if n_other != 1 else ''} in the city's file "
+                 f"report other pollutants but no PM2.5, so {'they are' if n_other != 1 else 'it is'} "
+                 f"not listed here.</p>")
+        h.append(table(["Monitor", "First year", "Last year", "Mean share of hours, years it reported"],
+                       [[n, int(r.dropna().index.min()), int(r.dropna().index.max()),
+                         fmt(r.mean(), "pct")] for n, r in st.iterrows()], numeric=(1, 2, 3)))
 
     # (e) satellites against monitors
     h.append("<h3>Satellites against monitors</h3>")
-    ser = []
     present = [m for m in MAP_ORDER if m in set(maps['map'])]
-    for i, m in enumerate(present):
-        d = maps[maps['map'] == m]
-        ser.append(svg.Series(names.exposure_map(m), [float(y) for y in d.year], list(d.pm25),
-                              kind="points" if len(d) == 1 else "line", colour=i))
-    h.append(svg.line_chart(ser, title=f"{city}: annual mean PM2.5 on each map, µg/m³",
-                            x_label="year", y_label="µg/m³",
-                            x_ticks=[(y, str(y)) for y in sorted(maps.year.unique())]))
-    labels = "".join(f"<li><b>{esc(names.exposure_map(m))}</b>: {esc(exposure.LABELS[m])}</li>"
-                     for m in present)
-    h.append(f"<p>Each series is its own source, never pooled:</p><ul>{labels}</ul>")
-    h.append("<p>The AQLI satellite map removes mineral dust and sea salt from the satellite estimate; "
-             "the ACAG satellite map keeps them; CPCB monitors is the monitors' median across the "
-             "city's stations. The GBD (Global "
-             "Burden of Disease) maps are state-level only, so they have no city value and are "
-             "not drawn here.</p>")
-    common = sorted(set.intersection(*[set(maps[maps['map'] == m].year) for m in present]))
-    if common:
-        y = common[-1]
-        vals = ", ".join(f"{names.exposure_map(m)} "
-                         f"{fmt(float(maps[(maps['map'] == m) & (maps.year == y)].pm25.iloc[0]), '1dp')}"
+    if not present:
+        h.append("<p>No map has a value for this city.</p>")
+    else:
+        ser = []
+        for i, m in enumerate(present):
+            d = maps[maps['map'] == m]
+            ser.append(svg.Series(names.exposure_map(m), [float(y) for y in d.year], list(d.pm25),
+                                  kind="points" if len(d) == 1 else "line", colour=i))
+        h.append(svg.line_chart(ser, title=f"{city}: annual mean PM2.5 on each map, µg/m³",
+                                x_label="year", y_label="µg/m³",
+                                x_ticks=[(y, str(y)) for y in sorted(maps.year.unique())]))
+        labels = "".join(f"<li><b>{esc(names.exposure_map(m))}</b>: {esc(exposure.LABELS[m])}</li>"
                          for m in present)
-        h.append(f"<p>In {y}, the latest year all of them cover, the values were {vals} µg/m³. "
-                 f"They are listed, not averaged: the gap between them is itself a finding.</p>")
+        h.append(f"<p>Each series is its own source, never pooled:</p><ul>{labels}</ul>")
+        h.append("<p>The AQLI satellite map removes mineral dust and sea salt from the satellite "
+                 "estimate; the ACAG satellite map keeps them; CPCB monitors is the monitors' median "
+                 "across the city's stations. The GBD (Global Burden of Disease) maps are "
+                 "state-level only, so they have no city value and are not drawn here.</p>")
+        h.append(_map_line(maps, present))
 
     # (f) other pollutants
     h.append("<h3>Other pollutants as fingerprints</h3>")
+    cv = fp["coverage"]
+    have = [p for p in POLLUTANTS if cv.loc[p, "years"] > 0]
+    absent = [p for p in POLLUTANTS if p not in have]
     h.append("<p>The monitors also report four gases. Their readings had only light cleaning "
              "(values at or below zero, and long runs of one stuck value, were dropped), and some "
              "outliers remain, so they are shown as the monitors report them. Each line below is "
              "divided by that pollutant's own average, so 1 means average and the chart shows "
              "<i>shape</i> (when it is high), not level.</p>")
-    cols = list(POLLUTANTS)
-    h.append(svg.line_chart(
-        [_line(fp["month"].index, fp["month"][p], POLLUTANTS[p][0], i) for i, p in enumerate(cols)],
-        title=f"{city}: month of year, relative to each pollutant's own mean",
-        x_label="month", y_label="1 = own average",
-        x_ticks=[(m, MONTHS[m - 1]) for m in range(1, 13)]))
-    h.append(svg.line_chart(
-        [_line(fp["hour"].index, fp["hour"][p], POLLUTANTS[p][0], i) for i, p in enumerate(cols)],
-        title=f"{city}: hour of day, relative to each pollutant's own mean",
-        x_label="hour of day (IST)", y_label="1 = own average", x_ticks=_hour_ticks()))
+    if have:
+        h.append(svg.line_chart(
+            [_line(fp["month"].index, fp["month"][p], POLLUTANTS[p][0], i) for i, p in enumerate(have)],
+            title=f"{city}: month of year, relative to each pollutant's own mean",
+            x_label="month", y_label="1 = own average",
+            x_ticks=[(m, MONTHS[m - 1]) for m in range(1, 13)]))
+        h.append(svg.line_chart(
+            [_line(fp["hour"].index, fp["hour"][p], POLLUTANTS[p][0], i) for i, p in enumerate(have)],
+            title=f"{city}: hour of day, relative to each pollutant's own mean",
+            x_label="hour of day (IST)", y_label="1 = own average", x_ticks=_hour_ticks()))
+    if absent:
+        h.append("<p>" + " ".join(
+            f"{POLLUTANTS[p][0]}: no monitor in the city reported it, so it is not drawn "
+            "(no data, not zero)." for p in absent) + "</p>")
     h.append("<p>What each usually points to: NO₂ and CO come from traffic and burning; SO₂ from "
              "coal, industry and fireworks; O₃ (ozone) is made in sunlight from other gases, so "
              "it peaks in the afternoon. PM10 is the coarser particles (under 10 micrometres), "
              "which include road dust.</p>")
-    cv = fp["coverage"]
     h.append(table(["Pollutant", "Unit", "First year", "Last year", "Years with data",
                     "Monitors that measured it"],
-                   [[POLLUTANTS[p][0], POLLUTANTS[p][1], str(int(r.first_year)),
-                     str(int(r.last_year)), int(r.years), int(r.stations)]
+                   [[POLLUTANTS[p][0], POLLUTANTS[p][1],
+                     str(int(r.first_year)) if r.years else "no data",
+                     str(int(r.last_year)) if r.years else "no data",
+                     int(r.years), int(r.stations)]
                     for p, r in cv.iterrows()],
                    caption="Coverage of each pollutant", numeric=(2, 3, 4, 5)))
     h.append("<p>A city median of any gas mixes monitors that were added, moved or stopped over "
              "the years, so a change in a city's gas level can come from the line-up of "
              "monitors and not from the air.</p>")
     return Section("ground", "The air itself", "".join(h))
+
+
+def _map_line(maps: pd.DataFrame, present: list[str]) -> str:
+    """One sentence putting the maps' values side by side: the latest year all of them cover,
+    or, where no year is common to all, each map's own latest year. Listed, never averaged."""
+    common = sorted(set.intersection(*[set(maps[maps['map'] == m].year) for m in present]))
+
+    def val(m, y):
+        return fmt(float(maps[(maps['map'] == m) & (maps.year == y)].pm25.iloc[0]), '1dp')
+    if common:
+        y = common[-1]
+        vals = ", ".join(f"{names.exposure_map(m)} {val(m, y)}" for m in present)
+        return (f"<p>In {y}, the latest year all of them cover, the values were {vals} µg/m³. "
+                f"They are listed, not averaged: the gap between them is itself a finding.</p>")
+    last = {m: int(maps[maps['map'] == m].year.max()) for m in present}
+    vals = ", ".join(f"{names.exposure_map(m)} {val(m, last[m])} ({last[m]})" for m in present)
+    return (f"<p>No year is covered by every map, so each is given at its own latest year: "
+            f"{vals} µg/m³. They are listed, not averaged, and they are not for the same year, "
+            f"so the gaps between them are not a like-for-like comparison.</p>")

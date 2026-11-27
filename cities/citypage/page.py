@@ -52,6 +52,7 @@ def _css() -> str:
 body{{margin:0;background:var(--bg);color:var(--ink);
  font:16px/1.55 'Instrument Sans','Helvetica Neue',Arial,sans-serif}}
 main{{max-width:46rem;margin:0 auto;padding:2rem 16px 4rem}}
+main.wide{{max-width:70rem}}
 h1,h2,h3{{font-family:'Young Serif',Georgia,serif;font-weight:400;line-height:1.2}}
 h1{{font-size:2.2rem;margin:0 0 .5rem}} h2{{font-size:1.6rem;margin:2.5rem 0 .75rem}}
 h3{{font-size:1.2rem;margin:1.75rem 0 .5rem}}
@@ -89,16 +90,28 @@ footer{{border-top:1px solid var(--grid);margin-top:3rem;padding-top:1rem;color:
 """
 
 
+def _document(title: str, inner: str, main_class: str = "") -> str:
+    cls = f' class="{main_class}"' if main_class else ""
+    return (f'<!doctype html>\n<html lang="en"><head><meta charset="utf-8">'
+            f'<meta name="viewport" content="width=device-width, initial-scale=1">'
+            f'<title>{esc(title)}</title><style>{_css()}</style></head><body><main{cls}>'
+            f'{inner}</main></body></html>\n')
+
+
 def page(title: str, intro_html: str, sections: list[Section], footer_html: str) -> str:
     toc = "".join(f'<li><a href="#ch-{s.id}">{esc(s.title)}</a></li>' for s in sections)
     body = "".join(f'<section id="ch-{s.id}"><h2>{esc(s.title)}</h2>{s.html}</section>'
                    for s in sections)
-    return (f'<!doctype html>\n<html lang="en"><head><meta charset="utf-8">'
-            f'<meta name="viewport" content="width=device-width, initial-scale=1">'
-            f'<title>{esc(title)}</title><style>{_css()}</style></head><body><main>'
-            f'<h1>{esc(title)}</h1>{intro_html}'
-            f'<nav class="contents" aria-label="Contents"><ol>{toc}</ol></nav>'
-            f'{body}<footer>{footer_html}</footer></main></body></html>\n')
+    return _document(title, f'<h1>{esc(title)}</h1>{intro_html}'
+                            f'<nav class="contents" aria-label="Contents"><ol>{toc}</ol></nav>'
+                            f'{body}<footer>{footer_html}</footer>')
+
+
+def index_page(title: str, body_html: str, footer_html: str) -> str:
+    """The cities index: the same shell, fonts and palette as a city page, a wider column for the
+    table, and no chapters."""
+    return _document(title, f'<h1>{esc(title)}</h1>{body_html}<footer>{footer_html}</footer>',
+                     "wide")
 
 
 def table(head: list[str], rows: list[list[str]], *, caption: str | None = None,

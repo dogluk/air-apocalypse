@@ -158,6 +158,17 @@ def render(city: str) -> Section:
          "landed on a filter and works backwards to the likely sources. They answer slightly "
          "different questions and they disagree. They are shown side by side here, not "
          "averaged.</p>"]
+    if not cols:
+        if len(part) or em:
+            h.append(f"<p>No source study gives a complete split of {esc(city)}'s PM2.5 by source, "
+                     "only the pieces below. Not having a complete split is not the same as having "
+                     "no sources: it means nothing published here says how the whole divides.</p>")
+        else:
+            h.append(f"<p>There is no source study for {esc(city)} in the data: none of the "
+                     "published studies read for this repository splits the city's PM2.5 by "
+                     "source. That is not the same as having no sources; it means nothing here "
+                     "says where the particles came from, so air measures cannot be scored on a "
+                     "study in chapter 4.</p>")
     if cols:
         h.append(_share_table(cols, f"Where {city}'s PM2.5 came from, by study and season"))
         h.append(f'<p class="note">{esc(LEGEND)} Shares are % of each study\'s own total.</p>')

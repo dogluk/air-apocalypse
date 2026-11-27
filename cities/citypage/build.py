@@ -12,8 +12,9 @@ from pathlib import Path
 from airhealth import paths
 from airhealth.provenance import load_sources
 
-from . import burden, findings, ground, measures, names, origins, svg
-from .page import Section, esc, page
+from . import burden, findings, ground, index, measures, names, origins, svg
+from .index import CITIES, slug
+from .page import Section, esc, index_page, page
 
 # The committed data files the four chapters read (checked against sources.toml by a test).
 DATA_FILES = (
@@ -27,12 +28,12 @@ DATA_FILES = (
 REPO = paths.REPO
 
 
-def _slug(city: str) -> str:
-    return city.lower().replace(" ", "-")
-
-
 def default_out(city: str) -> Path:
-    return REPO / "cities" / _slug(city) / "index.html"
+    return REPO / "cities" / slug(city) / "index.html"
+
+
+def default_index_out() -> Path:
+    return REPO / "cities" / "index.html"
 
 
 READINGS = (
@@ -43,7 +44,9 @@ READINGS = (
 
 
 def _intro(city: str, build_line: str, found: str = "") -> str:
-    return found + (
+    back = ('<p class="note"><a href="../index.html">All eleven cities</a></p>'
+            if city in CITIES else "")
+    return back + found + (
         f"<p>This page follows the air of one city, {esc(city)}, from the ground to what could be "
         "done about it. It is written to understand, not to persuade. Where published sources "
         "disagree, the page shows them side by side and does not average them or pick a winner.</p>"
@@ -107,21 +110,44 @@ def build(city: str = "Bengaluru", out: Path | None = None, n: int = 5000, seed:
         ground.render(city), origins.render(city), burden.render(city),
         measures.render(city, folder=measures_folder, n=n, seed=seed, entries=entries)]
     title = f"{city}: from the air to what could work"
-    html = page(title, _intro(city, _build_line(city, n, seed), findings.block(city, entries)),
+    html = page(title, _intro(city, _build_line(city, n, seed), findings.block(city, entries, measures_folder)),
                 sections, _footer(city))
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(html, encoding="utf-8")
     return out
 
 
+def build_index(out: Path | None = None, folder: Path | None = None) -> Path:
+    """The cities index (one row per city of CITIES)."""
+    out = Path(out) if out is not None else default_index_out()
+    html = index_page("Eleven cities: the air, what it does, what could work",
+                      index.body(index.rows(folder)),
+                      _footer("") + f'<p class="note">Rebuild with PYTHONPATH=health:cities python -m '
+                      f"citypage.build --all.</p>")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(html, encoding="utf-8")
+    return out
+
+
+def build_all(n: int = 5000, seed: int = 0) -> list[Path]:
+    """Every city page and the index, at the default places."""
+    return [build(c, None, n, seed) for c in CITIES] + [build_index()]
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="python -m citypage.build",
                                  description="Build the one-city HTML page.")
     ap.add_argument("--city", default="Bengaluru")
+    ap.add_argument("--all", action="store_true",
+                    help="build the page of each of the eleven cities and the index (ignores --city/--out)")
     ap.add_argument("--out", type=Path, default=None)
     ap.add_argument("--n", type=int, default=5000, help="Monte Carlo runs per curve (chapter 4)")
     ap.add_argument("--seed", type=int, default=0)
     a = ap.parse_args(argv)
+    if a.all:
+        for p in build_all(a.n, a.seed):
+            print(p)
+        return 0
     print(build(a.city, a.out, a.n, a.seed))
     return 0
 

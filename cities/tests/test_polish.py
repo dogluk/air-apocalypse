@@ -64,12 +64,13 @@ def test_plain_names_match_the_descriptions_they_come_from():
                 assert token.split()[0] in labels[cid], (cid, token)
             for year in re.findall(r"\d{4}", plain):
                 assert year in labels[cid], (cid, year)
-    t = causes.for_city("Bengaluru")
+    t = causes.table()
+    norm = lambda x: re.sub(r"[^a-z0-9]", "", x.lower())
     for sid, plain in names.STUDIES.items():
         year = re.search(r"\d{4}", plain).group(0)
         assert year in sid, sid                      # the year the study's id carries
-        assert plain.split()[0].lower() in sid or plain.split()[0].lower() in \
-            " ".join(t[t.study == sid].institution.str.lower().unique()), sid
+        first = norm(re.split(r"[ (]", plain)[0])
+        assert first in norm(sid) or first in norm(" ".join(t[t.study == sid].institution.unique())), sid
 
 
 def test_no_code_id_in_any_chart_text(built):
