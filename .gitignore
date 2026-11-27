@@ -16,3 +16,5 @@ health/data_local
 docs/private/
 *.egg-info/
 health/out/
+health/build/
+health/dist/
