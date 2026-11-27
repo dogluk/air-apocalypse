@@ -9,7 +9,7 @@ Read this file first. It is short, and it holds the rules that are easy to break
 
 ## Your first three moves
 
-**1. Get it running (about a minute).**
+**1. Get it running (the install takes about fifteen seconds, the tests about three minutes).**
 
 ```
 python3 -m venv .venv
@@ -21,7 +21,11 @@ cd health
 ../.venv/bin/airhealth list curves
 ```
 
-Python 3.11 or newer. Every test should pass. Some tests skip: they need files from IHME
+Python 3.11 or newer (tested on 3.13). For the exact versions the tests passed with, install
+`health/requirements-lock.txt` first: `.venv/bin/pip install -r health/requirements-lock.txt -e health`.
+The health tests take about three minutes; the page tests (`cd ..` to the repository root, then
+`PYTHONPATH=health:cities .venv/bin/python -m pytest cities/tests -q`) about ten seconds.
+Every test should pass. Some tests skip: they need files from IHME
 (the Global Burden of Disease group) that cannot be shared here, and three of the eight
 risk curves are unavailable without them. Everything else works from a fresh clone. Add
 `--json` to any command for the same content as JSON.

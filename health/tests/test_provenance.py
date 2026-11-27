@@ -23,6 +23,8 @@ def test_entry_missing_field_is_reported(tmp_path):
 
 
 def test_local_folder_is_ignored():
+    if not (paths.REPO / ".git").exists():
+        pytest.skip("not a git checkout (a downloaded zip or an export): nothing to ask git")
     r = subprocess.run(
         ["git", "check-ignore", "health/data_local/x.csv"],
         cwd=paths.REPO, capture_output=True,

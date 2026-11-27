@@ -1,0 +1,22 @@
+# Exact versions the tests passed with (macOS arm64, Python 3.13.12, 2026-11-27), from a fresh venv:
+#   python3 -m venv .venv && .venv/bin/pip install -r health/requirements-lock.txt -e health
+# The package itself needs Python 3.11 or newer (pyproject.toml); 3.11 and 3.12 have not been tried.
+# Without this file, 'pip install -e "health[dev]"' takes the newest versions, which also worked.
+contourpy==1.4.0
+cycler==0.12.1
+fonttools==4.69.1
+iniconfig==2.3.1
+kiwisolver==1.5.1
+matplotlib==3.11.2
+numpy==2.5.5
+packaging==26.4
+pandas==3.1.1
+pillow==13.0.0
+pluggy==1.7.0
+pyarrow==26.0.1
+Pygments==2.21.0
+pyparsing==3.3.3
+pytest==9.2.0
+python-dateutil==4.0.0
+scipy==1.18.1
+tzdata==2026.6

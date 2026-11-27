@@ -71,7 +71,9 @@ cd health
 ../.venv/bin/airhealth --help
 ```
 
-Python 3.11 or newer. Everything the commands need is committed under `data/`, with its
+Python 3.11 or newer (tested on 3.13). `requirements-lock.txt` pins the exact versions the tests
+passed with: `.venv/bin/pip install -r health/requirements-lock.txt -e health` (no Docker needed).
+Everything the commands need is committed under `data/`, with its
 source, page and method in `data/sources.toml`. A value that could not be confirmed at its
 source is left out and listed in `data/MISSING.md`. The few sourced numbers that live in
 code instead of a data file (AQLI's 0.98, GEMM's 2.4, the lag shares and so on) are listed
