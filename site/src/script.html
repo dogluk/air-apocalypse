@@ -1,0 +1,52 @@
+<script>
+/* Detail on hover and keyboard focus for the figure rows (data-tip: [[label, value], ...]). */
+(function () {
+  var tip = document.createElement("div");
+  tip.className = "af-tip"; tip.hidden = true; tip.setAttribute("role", "status");
+  document.body.appendChild(tip);
+  function show(row, x, y) {
+    var pairs; try { pairs = JSON.parse(row.dataset.tip); } catch (e) { return; }
+    tip.textContent = "";
+    var head = document.createElement("p"); head.textContent = pairs[0][0] + (pairs[0][1] ? ": " + pairs[0][1] : "");
+    var dl = document.createElement("dl");
+    pairs.slice(1).forEach(function (p) {
+      var long = p[1].length > 60, dt = document.createElement("dt"), dd = document.createElement("dd");
+      dt.textContent = p[0]; dd.textContent = p[1]; if (long) dd.className = "long";
+      dl.appendChild(dt); dl.appendChild(dd);
+    });
+    tip.appendChild(head); tip.appendChild(dl); tip.hidden = false;
+    var r = tip.getBoundingClientRect(), w = innerWidth, h = innerHeight;
+    var left = Math.min(Math.max(12, x + 14), w - r.width - 12);
+    var top = y + 18 + r.height > h ? y - r.height - 12 : y + 18;
+    tip.style.left = left + "px"; tip.style.top = Math.max(8, top) + "px";
+  }
+  function hide() { tip.hidden = true; }
+  document.querySelectorAll(".af [data-tip]").forEach(function (row) {
+    row.addEventListener("mousemove", function (e) { show(row, e.clientX, e.clientY); });
+    row.addEventListener("mouseleave", hide);
+    row.addEventListener("focus", function () { atRow(row); });
+    row.addEventListener("blur", hide);
+  });
+  function atRow(row) { var b = row.getBoundingClientRect(); show(row, b.left + 40, b.bottom - 14); }
+  /* a scroll ends a mouse hover, but a row holding keyboard focus keeps its detail beside it */
+  addEventListener("scroll", function () {
+    var f = document.activeElement;
+    if (f && f.matches && f.matches(".af [data-tip]:focus-visible")) atRow(f); else hide();
+  }, { passive: true });
+  addEventListener("keydown", function (e) { if (e.key === "Escape") hide(); });
+
+  /* copy one line: the button says what to do with it once it is on the clipboard */
+  document.querySelectorAll(".air-copy").forEach(function (b) {
+    var label = b.textContent;
+    b.addEventListener("click", function () {
+      var line = b.closest(".air-line").querySelector("code").textContent;
+      var done = function () {
+        b.textContent = b.dataset.after; b.dataset.done = "";
+        setTimeout(function () { b.textContent = label; delete b.dataset.done; }, 2600);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(line).then(done, function () {});
+      else { var r = document.createRange(); r.selectNodeContents(b.closest(".air-line").querySelector("code")); var s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+    });
+  });
+})();
+</script>
