@@ -75,6 +75,6 @@ ones from dogl.uk commit `99deec1` (branch `airhealth-launch`), made from the sa
 ## Type, icons and third parties
 
 Young Serif and Instrument Sans (SIL Open Font License, `assets/fonts/`, licences beside them; the same fonts
-as the TTFs in `fonts/`, served as WOFF2). The favicon and apple-touch icons are the author's. Google Fonts
+as the TTFs in `fonts/`, served as WOFF2). The icons (two currents of air and the fine particles they carry, in the site's colours) are drawn by `site/make_favicon.py`. Google Fonts
 serves one Kannada glyph subset (the vertical word in the margin); nothing else is loaded from a third party.
 The author link in the header and footer, and "find me" at the foot of the page, point to https://dogl.uk.
