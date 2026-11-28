@@ -1,0 +1,8 @@
+{
+  "title": "air apocalypse",
+  "description": "An open model of India’s air: what PM2.5 does to deaths in fifty cities on eight published risk curves, and what each measure against it buys per rupee.",
+  "run_line": "uvx --from 'git+https://github.com/dogluk/air-apocalypse#subdirectory=health' airhealth burden Bengaluru",
+  "agent_line": "Fetch and follow https://airhealth.dev/start.txt and close one open question in the air-apocalypse model.",
+  "grants_url": "",
+  "spine": "ಗಾಳಿ"
+}

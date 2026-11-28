@@ -1,0 +1,186 @@
+{%- assign a = data.air -%}
+{%- assign m = a.ladder.measures -%}
+{%- assign w = a.whatif -%}
+<p class="air-lede">Bengaluru's government monitors read {{ a.toll.pm25 }} μg/m³ of PM2.5 through {{ a.toll.year }}. That is inside India's standard of 40 and {{ a.toll.who_multiple }} times the WHO guideline of 5. Eight published risk curves turn that number into deaths, and they return between {{ a.toll.min }} and {{ a.toll.max }} a year.</p>
+
+{% include fig/toll.html %}
+
+<p>The figure is one command. The model is a command-line tool, open, with every input’s source beside it.</p>
+
+{% include fig/cli.html %}
+
+<div class="air-cta">
+<div class="air-line"><b>Run it yourself</b><code>{{ page.run_line }}</code><button class="air-copy" type="button" data-after="Copied. Paste into a terminal">Copy one line</button></div>
+<div class="air-line"><b>Hand it to your agent</b><code>{{ page.agent_line }}</code><button class="air-copy" type="button" data-after="Copied. Paste into your agent">Copy one line</button></div>
+</div>
+
+<h2 id="times-apart-on-the-toll-one-order-of-what-to-do">{{ a.toll.fold }} times apart on the toll, one order of what to do</h2>
+
+<p>The model holds {{ a.library.n }} measures against PM2.5. Each has what it would cut, the odds that it works and what it would cost a government or a funder, and each number was read at its source. {{ a.ladder.n_scored }} of them can be scored in Bengaluru.</p>
+
+<p>A curve that counts more deaths counts more for every measure, so the dots slide together and the order holds. The first three places are the same on all eight curves, and no measure moves more than {{ a.ladder.max_span }} places. The gaps between measures are far wider than the gaps between curves: an LPG refill subsidy buys {{ m.lpg_refill_subsidy.lo }} to {{ m.lpg_refill_subsidy.hi }} expected life-years per crore, a smog tower {{ m.smog_tower.lo }} to {{ m.smog_tower.hi }}.</p>
+
+{% include fig/ladder.html %}
+
+<p>The two measures at the top are drawn hollow. The only published cost for each is the city’s enforcement budget, under a crore a year, so their ratios cannot be set beside the rest.
+{%- if w.construction_dust_controls and w.waste_collection_burning_ban %} The pale bands show where each lands once what builders and waste collection would spend is added. Dust controls at construction sites land at rank {{ w.construction_dust_controls.rank }}, at {{ w.construction_dust_controls.lo }} to {{ w.construction_dust_controls.hi }} life-years per crore. Ending open waste burning falls to rank {{ w.waste_collection_burning_ban.rank }}, at {{ w.waste_collection_burning_ban.lo }} to {{ w.waste_collection_burning_ban.hi }}{% if w.waste_collection_burning_ban.rank_worst_end != "" and w.waste_collection_burning_ban.rank_worst_end != w.waste_collection_burning_ban.rank %}, and to rank {{ w.waste_collection_burning_ban.rank_worst_end }} if the cost sits at the top of its range{% endif %}. Those added costs rest partly on clearance budgets and on officials quoted in the press, which is why they are a what-if beside the default and not the default.
+{%- endif %}</p>
+
+<p>Among the {{ a.ladder.n_fully_costed }} measures with a full cost by default, LPG refills come first on every curve and road paving second.</p>
+
+<h2 id="what-changes-the-order">What changes the order</h2>
+{% if a.stability %}
+{% include fig/stability.html %}
+
+<p>{% if a.stability.same_measures_every_combo %}Not the risk curve. On each of {{ a.stability.maps }} exposure maps and on either study of the city’s sources, the three measures that lead are the same on all eight curves.{% else %}On some maps and studies the curves disagree about the top {{ a.stability.top }}; the table says where.{% endif %} The study is another matter. CSTEP’s receptor study does not report waste burning or cooking fuel, so the waste-burning ban and LPG refills cannot be scored on it at all, and a different three lead.</p>
+{% endif %}
+{% include fig/moves.html %}
+
+<p>Which exposure map, which death counts and whether the future is discounted: none of them changes Bengaluru’s top {{ a.moves.top }} on any curve. How much paying farmers and subsidising machines really cuts stubble burning changes it on all eight, and how much paving cuts road dust on {{ a.moves.units["effect:road_paving"].all }}. Among the fully costed measures the order turns on which study of the city’s sources is right. The APnA model and CSTEP’s receptor study disagree enough to move a measure by {{ a.moves.units.study.max_move }} places.</p>
+
+<h2 id="where-the-smoke-goes">Where the smoke goes</h2>
+
+<p>India has no open table of how much PM2.5 a tonne emitted in one district adds in another. For crop burning the model stands on a stand-in, a global model’s source shares multiplied by satellite PM2.5. It puts India’s exposure to crop-burning smoke at {{ a.smoke.ours }} μg/m³. Lan et al. 2022 put it at {{ a.smoke.lan }}.</p>
+
+{% include fig/smoke.html %}
+
+<p>So the model has paying farmers not to burn at {{ a.smoke.model_ratio }} times as good as scrubbers per life, where the working paper behind the payments trial has {{ a.smoke.paper_ratio }}. The table is not scaled to close the gap. Every measure that acts on a whole region is understated until a better one exists.</p>
+
+{% if w.stubble_pes_upfront %}
+<p>As a what-if beside the default, with the table scaled to Lan’s figure, paying farmers not to burn moves from rank {{ m.stubble_pes_upfront.rank }} to {{ w.stubble_pes_upfront.rank }}, at {{ w.stubble_pes_upfront.lo }} to {{ w.stubble_pes_upfront.hi }} life-years per crore.</p>
+{% endif %}
+
+<h2 id="one-city-end-to-end">One city, end to end</h2>
+
+<p><a href="/cities/bengaluru/">Bengaluru, from the air to what could work</a> follows one city from the monitors to the measures: ten years of hourly readings, the satellite maps against the ground, every study of its sources side by side with what each cannot see, deaths on each curve, and each measure with its sources. {% if a.city_pages.size > 1 %}The same page exists for <a href="/cities/">{{ a.city_pages | size }} cities</a>.{% endif %}</p>
+
+{% include fig/day.html %}
+
+<p>On winter evenings the monitors peak at {{ a.day.winter_peak }} μg/m³ at 8 pm, against {{ a.day.winter_low }} at 2 pm. Through the monsoon the day runs between {{ a.day.monsoon_low }} and {{ a.day.monsoon_high }}.</p>
+
+<h2 id="fifty-cities">Fifty cities</h2>
+
+{% include fig/cities.html %}
+
+<p>The same eight curves run over fifty cities, from {{ a.cities.dirtiest }} at {{ a.cities.dirtiest_pm }} μg/m³ to {{ a.cities.cleanest }} at {{ a.cities.cleanest_pm }}. India’s own standard is 40, and {{ a.cities.above_40 }} of the fifty are above it.</p>
+
+<p>The measures do not reach as far as the curves. {{ a.coverage.in_bengaluru_only }} of the {{ a.library.n }} are scored only in Bengaluru, {{ a.coverage.wide | size }} in every city, and {{ a.coverage.regional | size }} act on whole regions. The rest wait on a number for each city that nobody has published.</p>
+
+<h2 id="open-questions">Open questions</h2>
+
+<p>The inputs that reorder the ranking are the ones worth paying to settle.</p>
+
+<ul>
+  <li><strong>Where smoke goes.</strong> An open source-receptor table for India, by district, sector and season. It fixes the {{ a.smoke.fold }}-fold gap above and every regional measure with it.</li>
+  <li><strong>What the top two cost in full.</strong> Ending waste burning and controlling construction dust rank first on an enforcement budget. Someone has to count collection, compliance and treatment.</li>
+  <li><strong>How much the stubble measures cut.</strong> Payments not to burn and subsidised machines, measured at scale against monitors.</li>
+  <li><strong>How much paving and sweeping cut road dust</strong>, measured in an Indian city. The transport and dust effects here are borrowed from Delhi.</li>
+  <li><strong>Which source study is right.</strong> One method, a model and a receptor study side by side, in two seasons, starting with Bengaluru.</li>
+  <li><strong>Counts for the other forty-nine cities.</strong> Most measures are scored in one city because the per-city number they need, generator capacity or kiln counts, has not been published.</li>
+</ul>
+
+{% if a.open_work %}<p>The repository keeps the full list: <a href="/open-work/">{{ a.open_work.n }} open items</a>, each with what to read, the file it lands in and the check that proves it.</p>
+{% endif %}
+{% if page.grants_url %}
+<p>I am putting small grants behind these. <a href="{{ page.grants_url }}">How to apply</a>.</p>
+{% endif %}
+
+<h2 id="run-it">Run it</h2>
+
+<div class="air-run">
+
+  <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>alias airhealth="uvx --from 'git+https://github.com/dogluk/air-apocalypse#subdirectory=health' airhealth"
+airhealth burden Bengaluru          # deaths on every curve, seconds
+airhealth causes Bengaluru          # every source study, side by side
+airhealth score Bengaluru           # each measure, with its flags
+airhealth rank Bengaluru            # the ranking, one table per curve; about a quarter of an hour
+</code></pre></div>  </div>
+
+  <p>To change it, clone it: <code class="language-plaintext highlighter-rouge">git clone https://github.com/dogluk/air-apocalypse</code>, then <code class="language-plaintext highlighter-rouge">pip install -e "health[dev]"</code>.</p>
+
+</div>
+
+<p>The model never averages across curves, studies or maps, and a source a study does not report is not counted as zero. No specialist has reviewed the method yet. Corrections are the most useful thing you can send: <a href="https://github.com/dogluk/air-apocalypse/issues">open an issue</a>.</p>
+
+<h2 id="the-notebook">The notebook</h2>
+
+<p>India’s air kills on the scale that tobacco killed in the twentieth century. The response
+has mostly been theatre: towers that clean a two-hundred-metre radius, aircraft seeding
+clouds that aren’t there.</p>
+
+<p>This is an open notebook for the unglamorous part — measuring what’s actually happening,
+finding the analyses nobody has run, and working out which ambitious bets survive contact
+with arithmetic. Everything is reproducible from free data, and the
+<a href="https://github.com/dogluk/air-apocalypse">code is public</a>.</p>
+
+<h2 id="what-diwali-does-to-the-air">What Diwali does to the air</h2>
+
+<p><img src="/assets/img/diwali-week.png" alt="Hourly PM2.5 through Diwali week, divided by a normal day, across India's ten biggest cities" /></p>
+
+<p>Ten years of hourly government monitor data for India’s ten largest cities, with the things
+that happen at the same time pulled apart: the start of winter smog season, crop-stubble
+smoke, and monsoon rain.</p>
+
+<p>Every city has a real Diwali effect — about <strong>four times normal PM2.5 at midnight</strong>, and
+close to twelve times in Chennai. But the famous post-Diwali smog is <strong>mostly not Diwali</strong>.
+Adjusted for season, weather and fires, the week after is statistically indistinguishable
+from normal everywhere. What looks like a hangover is the smog season arriving on schedule.</p>
+
+<p>Confounding runs in opposite directions across the country. In the north, Diwali lands as
+stubble burning peaks, so a naive comparison <em>overstates</em> it — Delhi falls from +66% to
++32%. In the south, retreating monsoon rain washes the air, so a naive comparison
+<em>understates</em> it: Bengaluru rises from +19% to +35%.</p>
+
+<p>There’s a twist in what people search for. Around Diwali, Indian searches for “air quality
+index” rise <strong>237%</strong> and “air pollution” <strong>36%</strong> — while searches for cough and sore throat
+<strong>don’t move at all</strong>. Burns rise 75%, so the method can see a real effect when one is
+there. Attention spikes; symptoms, at least as search reveals them, don’t.</p>
+
+<p><a href="https://github.com/dogluk/air-apocalypse/tree/main/diwali">Read the full analysis →</a></p>
+
+<h2 id="the-question-behind-all-of-it">The question behind all of it</h2>
+
+<blockquote>
+  <p>concentration ≈ emissions ÷ (mixing height × ventilation)</p>
+</blockquote>
+
+<p>Every intervention attacks one of those three terms, or else gives up on the air and
+protects the lungs directly. Sorting proposals by which term they touch kills most of them
+in a single step.</p>
+
+<p>Two numbers do most of the work. <strong>Delhi’s smog weighs about 150 tonnes</strong> — the entire
+visible apocalypse over thirty million people is a few hundred tonnes of dust, which is why
+scrubbing <em>feels</em> tractable. And <strong>it refills in about a day</strong>. A perfect, free,
+instantaneous scrub of the whole city buys one clean day. That ratio kills smog towers,
+outdoor filtration, and most of what gets announced each November.</p>
+
+<p>Winter cloud seeding fails for a reason worth stating precisely: at fifteen percent
+humidity, condensing <em>every molecule of water</em> in a kilometre-high column over Delhi yields
+<strong>2.6 mm of rain</strong>. Real efficiency is a fraction of that — drizzle, which doesn’t scrub.
+It isn’t a technology limit. The water isn’t there.</p>
+
+<p><a href="https://github.com/dogluk/air-apocalypse/tree/main/bets">The full arithmetic →</a></p>
+
+<h2 id="what-hasnt-been-analysed">What hasn’t been analysed</h2>
+
+<p>The most useful thing here may be a list of questions the data can answer that nobody has
+asked. Six of them, each with a confidence and a note on what would kill it — including
+<strong>whether firecracker bans ever worked</strong> (re-argued in the Supreme Court every autumn on
+almost no evidence, and answerable with a difference-in-differences across states that
+banned at different times), and <strong>how much monitor siting biases every Indian air quality
+number</strong>, including ours.</p>
+
+<p><a href="https://github.com/dogluk/air-apocalypse/blob/main/lit/gaps.md">The gap analysis →</a> ·
+<a href="https://github.com/dogluk/air-apocalypse/blob/main/lit/reading.md">Reading list →</a></p>
+
+<h2 id="work-with-me">Work with me</h2>
+
+<p>This is deliberately open. If you have ground truth India lacks — hospital admissions,
+pharmacy sales, wastewater, ceilometer or radiosonde boundary-layer data — or you want to
+take one of the gaps and run it, I’d like to hear from you. Corrections especially: several
+of the claims here are a single analyst’s work and haven’t been through review.</p>
+
+<p><a href="https://github.com/dogluk/air-apocalypse/issues">Open an issue</a> or
+<a href="https://dogl.uk/about/">find me</a>.</p>
+
+{% include script.html %}

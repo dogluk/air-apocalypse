@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+<!-- search and social tags -->
+<title>{{ page.title }} | airhealth</title>
+<meta property="og:title" content="{{ page.title }}: an open model of India’s air" />
+<meta name="author" content="Akash Kulgod" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="{{ page.description }}" />
+<meta property="og:description" content="{{ page.description }}" />
+<link rel="canonical" href="https://airhealth.dev/" />
+<meta property="og:url" content="https://airhealth.dev/" />
+<meta property="og:site_name" content="airhealth" />
+<meta property="og:image" content="https://airhealth.dev/assets/img/air-apocalypse-ladder.png" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:image" content="https://airhealth.dev/assets/img/air-apocalypse-ladder.png" />
+<meta property="twitter:title" content="{{ page.title }}" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","author":{"@type":"Person","name":"Akash Kulgod"},"description":"{{ page.description }}","headline":"{{ page.title }}","image":"https://airhealth.dev/assets/img/air-apocalypse-ladder.png","url":"https://airhealth.dev/"}
+</script>
+
+
+  <!-- theme before first paint: saved choice, else the system setting -->
+  <script>
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem("theme"); } catch (e) {}
+      if (t !== "light" && t !== "dark") t = window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      document.documentElement.setAttribute("data-theme", t);
+    })();
+  </script>
+  <meta name="theme-color" content="#4A74AA">
+  <link rel="preload" href="/assets/fonts/youngserif.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/instrumentsans-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/assets/airhealth.css"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada:wght@400&display=swap&text=%E0%B2%97%E0%B2%BE%E0%B2%B3%E0%B2%BF"></head><body><header class="site-header" role="banner">
+  <div class="wrapper"><a class="site-brand" href="/" aria-label="airhealth, home"><span class="site-title">airhealth</span></a><nav class="site-nav" aria-label="Site">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger" aria-label="Menu">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px" aria-hidden="true">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/cities/">cities</a><a class="page-link" href="/open-work/">open work</a><a class="page-link" href="/start.txt">for agents</a><a class="page-link" href="https://github.com/dogluk/air-apocalypse">code</a><a class="page-link" href="https://dogl.uk" rel="author">Akash Kulgod</a></div>
+        <button class="theme-toggle" type="button" aria-label="Switch to dark theme" title="Light or dark">
+          <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+          <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.6A8.2 8.2 0 1 1 9.4 4a6.6 6.6 0 0 0 10.6 10.6z"/><circle cx="17.5" cy="5.5" r=".9" fill="currentColor" stroke="none"/></svg>
+        </button>
+      </nav></div>
+  <svg class="ridges" viewBox="0 0 1200 40" preserveAspectRatio="none" aria-hidden="true"><path class="ridge-0" d="M0,40 L0,20.1 L40,29.3 L76,17.0 L125,39.0 L180,24.4 L232,38.8 L269,18.6 L339,38.0 L382,15.6 L456,30.5 L507,10.4 L542,25.8 L587,22.8 L626,34.9 L695,22.3 L753,29.5 L803,16.8 L838,39.0 L880,14.8 L932,34.8 L991,18.2 L1037,26.9 L1101,21.3 L1159,31.3 L1200,40 Z"/><path class="ridge-1" d="M0,40 L0,21.0 L32,29.2 L58,24.4 L104,38.3 L141,28.6 L185,31.6 L225,19.4 L257,32.4 L298,22.6 L335,30.8 L386,23.8 L429,39.3 L473,21.9 L526,31.0 L558,24.8 L601,39.8 L638,27.2 L664,39.4 L710,27.6 L741,35.7 L790,28.1 L826,34.0 L876,20.0 L925,36.9 L960,25.1 L1010,29.5 L1037,27.1 L1067,37.4 L1105,22.5 L1136,40.0 L1171,24.9 L1211,29.5 L1200,40 Z"/><path class="ridge-2" d="M0,40 L0,30.1 L28,36.0 L45,27.7 L77,34.9 L109,30.9 L133,39.4 L162,33.1 L179,38.8 L198,31.3 L215,40.0 L233,32.8 L256,39.9 L290,29.5 L309,38.5 L332,31.1 L350,35.0 L386,30.5 L412,39.5 L430,31.3 L451,35.2 L470,33.3 L505,36.9 L524,30.0 L540,36.9 L576,27.9 L606,38.5 L629,32.4 L661,36.9 L693,31.4 L713,35.3 L749,28.0 L781,35.2 L812,32.0 L839,37.9 L855,33.3 L876,38.5 L906,27.3 L931,34.5 L967,27.3 L990,38.7 L1011,32.2 L1031,36.3 L1065,28.0 L1091,36.2 L1123,32.9 L1152,34.7 L1184,28.6 L1210,39.0 L1200,40 Z"/></svg>
+
+  <script>
+    (function () {
+      var b = document.querySelector(".theme-toggle"), r = document.documentElement;
+      function label() { b.setAttribute("aria-label", r.getAttribute("data-theme") === "dark" ? "Switch to light theme" : "Switch to dark theme"); }
+      label();
+      b.addEventListener("click", function () {
+        var t = r.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        r.setAttribute("data-theme", t);
+        try { localStorage.setItem("theme", t); } catch (e) {}
+        label();
+      });
+    })();
+  </script>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">{{ page.title }}</h1>
+  </header>
+
+  <div class="post-content">
+{{ content }}
+  </div>
+
+</article>
+      </div>
+    </main><div class="spine" aria-hidden="true">{{ page.spine }}</div><footer class="site-footer"><div class="wrapper"><nav class="footer-nav" aria-label="Site"><a href="/cities/">cities</a><a href="/open-work/">open work</a><a href="/start.txt">for agents</a><a href="https://github.com/dogluk/air-apocalypse">code</a></nav><p>An open model by <a href="https://dogl.uk" rel="author">Akash Kulgod</a>. Code MIT, derived data ODbL, figures and writing CC BY 4.0.</p><p class="footer-credit">Type: <a href="https://github.com/noirblancrouge/YoungSerif">Young Serif</a> and <a href="https://github.com/Instrument/instrument-sans">Instrument Sans</a>.</p></div></footer>
+</body>
+
+</html>
