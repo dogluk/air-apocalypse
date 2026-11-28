@@ -1,0 +1,103 @@
+# AIR APOCALYPSE: HOW TO HELP, FOR AN AGENT OR A PERSON
+# Page:   https://airhealth.dev/
+# Source: https://github.com/dogluk/air-apocalypse  (code MIT, derived data ODbL, figures and writing CC BY 4.0)
+
+You were pointed here to close one open question in an open model of India's air.
+The model answers: if PM2.5 in an Indian place goes from A to B, how many deaths a
+year are avoided and how many years of life are gained, on eight published risk
+curves side by side. It then scores measures against that air by expected
+life-years per rupee.
+
+Work in your own clone. Do not push to the main repository; the work comes back
+as a pull request from a fork, or as a patch your user sends.
+
+================================================================================
+1. RUN IT
+================================================================================
+
+To look, no clone needed:
+
+  uvx --from 'git+https://github.com/dogluk/air-apocalypse#subdirectory=health' airhealth burden Bengaluru
+
+  If uvx is missing: pipx run --spec 'git+https://github.com/dogluk/air-apocalypse#subdirectory=health' airhealth burden Bengaluru
+  or a venv:         python3 -m venv /tmp/air && /tmp/air/bin/pip install -q 'git+https://github.com/dogluk/air-apocalypse#subdirectory=health' && /tmp/air/bin/airhealth burden Bengaluru
+
+To change anything, clone:
+
+  git clone https://github.com/dogluk/air-apocalypse && cd air-apocalypse
+  python3 -m venv .venv && .venv/bin/pip install -q -e "health[dev]"
+  cd health
+  ../.venv/bin/airhealth burden Bengaluru     # deaths on every curve, seconds
+  ../.venv/bin/airhealth causes Bengaluru     # every study of its sources, side by side
+  ../.venv/bin/airhealth score Bengaluru      # each measure on each curve, seconds
+  ../.venv/bin/python -m pytest -q            # must pass before and after your change
+
+Do not start with `airhealth rank`: it scores regional measures over hundreds of
+districts and takes about a quarter of an hour.
+
+Python 3.11 or later. Three of the eight curves need IHME files that cannot be
+redistributed; without them the tool runs five curves.
+
+================================================================================
+2. READ THE RULES BEFORE CHANGING ANYTHING
+================================================================================
+
+Read AGENTS.md at the repository root. It is short and it is binding. The rules
+that are broken most often:
+
+  - No number enters code or data unless you read it at its source. A number
+    from memory, a summary, a press report of a paper, or another model's
+    output is not read at its source. Record the source, the URL and the
+    locator (table, page, figure) in health/data/sources.toml or the measure
+    file, the way the existing entries do.
+  - Never average across risk curves, source studies or exposure maps. Show
+    them side by side.
+  - A source a study does not report is "not reported", not zero.
+  - A caveat stays beside the number it qualifies: a partial cost, a stand-in
+    table and a borrowed effect size are flagged, not smoothed over.
+  - If you could not open the source, say so and stop. health/data/MISSING.md
+    is where unfinished lookups are written down. An honest gap is a result.
+
+================================================================================
+3. PICK ONE OPEN QUESTION
+================================================================================
+
+The registry is docs/open-work.md in the repository (docs/open-work.json for a
+machine): open items with stable ids (OW-001 onward; a closed item keeps its
+id and is never reused), each with what to find, where to read it, the file it
+lands in and the check that proves it. Claim one by id. The questions behind them, in the order they move the ranking:
+
+  a. Where smoke goes. India has no open source-receptor table (emissions in
+     one district to PM2.5 in another). The stand-in for crop burning is about
+     14 times smaller than Lan et al. 2022's national figure, so every regional
+     measure is understated. A published district-level result, read at source,
+     replaces health/data/receptor_stubble.csv.
+  b. What the top two measures cost in full. Ending open waste burning and
+     dust controls at construction sites rank first on enforcement budgets
+     alone. Collection, compliance and treatment costs, read at source.
+  c. How much the stubble measures cut: payments not to burn and subsidised
+     machines, measured at scale.
+  d. How much paving and sweeping cut road dust, measured in an Indian city.
+  e. Which study of a city's sources is right, starting with Bengaluru, where
+     the APnA model and CSTEP's receptor study disagree.
+  f. A per-city count that widens a measure beyond one city: installed
+     diesel-generator capacity, brick-kiln counts, bus fleets.
+
+Smaller items a person can close in minutes are listed in health/data/MISSING.md
+(a figure behind a publisher's download block, a parliamentary answer known only
+from press reports).
+
+Take one. Say which one in your first message to your user.
+
+================================================================================
+4. DELIVER
+================================================================================
+
+  - One question, one pull request. State what you read, where (URL and
+    locator), and what changed in the model's output because of it.
+  - Run the tests and the benchmarks (health/benchmarks/). A benchmark that
+    moves is reported with the reason, never tuned back into its band.
+  - If the answer is "this cannot be read at its source", write that into
+    MISSING.md with what you tried. That is a contribution.
+
+Questions and corrections: https://github.com/dogluk/air-apocalypse/issues
