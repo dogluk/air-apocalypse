@@ -7,6 +7,7 @@ measure what is actually happening, find the analyses nobody has run, and work o
 ambitious bets survive contact with arithmetic.
 
 Open notebooks, not a finished argument. Everything here is reproducible from free data.
+Site: [airhealth.dev](https://airhealth.dev) (city pages at [airhealth.dev/cities](https://airhealth.dev/cities/)).
 
 ## Tracks
 

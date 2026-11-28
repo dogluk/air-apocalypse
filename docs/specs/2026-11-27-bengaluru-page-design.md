@@ -40,4 +40,4 @@ shown, never averaged away.
 ## Not in scope
 
 Other cities; a ranking across cities (built separately, `airhealth rank`); illness (only deaths and life-years, as in the
-rest of the tool); a public web page on dogl.uk (later).
+rest of the tool); a public web page (later; now airhealth.dev).
