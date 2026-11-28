@@ -1,0 +1,24 @@
+# Test fixture: an air measure on a region. Every number is a placeholder.
+name = "Fixture: air, region"
+kind = "air"
+scope = "region"
+who_reaches = "everyone downwind of the fields"
+start_year = 2028
+duration_years = 3
+p_success = 0.4
+p_success_basis = "judgement: fixture"
+long_shot = true
+placeholders = ["region.cut", "cost.annual", "cost.units", "cost.society_net_annual"]
+
+[region]
+receptor = "receptor_fixture.csv"
+cut = { dist = "triangular", p5 = 0.1, p95 = 0.5, mode = 0.2 }
+
+[cost]
+driver = "unit"
+annual = 2500
+units = { dist = "normal", p5 = 1e6, p95 = 2e6 }
+unit = "acre"
+society_net_annual = -500
+currency = "INR"
+year = 2024

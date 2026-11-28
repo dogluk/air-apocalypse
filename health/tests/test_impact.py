@@ -346,3 +346,65 @@ def test_city_population_year_is_recorded():
     state = steady_state(resolve("Delhi"), get("loglinear_jaganathan"), "aqli", Change(delta=-10))
     assert (city.population_year, city.year) == (2011, 2023)
     assert (state.population_year, state.year) == (2023, 2023)
+
+
+# --- an age group: only its bands count ---------------------------------------------------
+
+from airhealth import impact, places  # noqa: E402
+
+
+def test_band_mask():
+    assert impact.band_mask((5, 19)).tolist() == [0, 0, 1, 1, 1] + [0] * 14
+    assert impact.band_mask(None).sum() == 19
+    assert impact.band_mask((0, 120)).sum() == 19
+
+
+def test_all_ages_is_the_old_result():
+    p, c = places.resolve("Delhi", kind="state"), curves.get("loglinear_jaganathan")
+    a = impact.steady_state_many(p, c, "aqli", "pct", np.array([-20.0]))
+    b = impact.steady_state_many(p, c, "aqli", "pct", np.array([-20.0]), ages=(0, 120))
+    assert a.yll_averted[0] == pytest.approx(b.yll_averted[0])
+    assert a.deaths_averted[0] == pytest.approx(b.deaths_averted[0])
+
+
+@pytest.mark.parametrize("name", ["loglinear_jaganathan", "gemm_ncd_lri", "aqli"])
+def test_many_matches_reference_for_an_age_group(name):
+    p, c = places.resolve("Delhi", kind="state"), curves.get(name)
+    ref = impact.steady_state(p, c, "aqli", Change(pct=-20), ages=(5, 19))
+    many = impact.steady_state_many(p, c, "aqli", "pct", np.array([-20.0]), ages=(5, 19))
+    assert many.deaths_averted[0] == pytest.approx(ref.deaths_averted, rel=1e-9, abs=1e-12)
+    assert many.yll_averted[0] == pytest.approx(ref.yll_averted, rel=1e-9, abs=1e-12)
+    assert many.population == ref.population and many.e0_before == pytest.approx(ref.e0_before)
+
+
+def test_children_get_nothing_on_an_adult_only_curve():
+    p = places.resolve("Delhi", kind="state")
+    r = impact.steady_state_many(p, curves.get("gemm_ncd_lri"), "aqli", "pct",
+                                 np.array([-20.0]), ages=(5, 19))
+    assert r.deaths_averted[0] == 0 and r.yll_averted[0] == 0
+
+
+def test_age_group_leaves_population_pm25_and_e0_alone():
+    p, c = places.resolve("Delhi", kind="state"), curves.get("loglinear_jaganathan")
+    a = impact.steady_state_many(p, c, "aqli", "pct", np.array([-20.0]))
+    b = impact.steady_state_many(p, c, "aqli", "pct", np.array([-20.0]), ages=(5, 19))
+    assert (a.population, a.deaths_baseline, a.pm25_before) == \
+        (b.population, b.deaths_baseline, b.pm25_before)
+    assert np.allclose(a.e0_after, b.e0_after) and np.allclose(a.pm25_after, b.pm25_after)
+
+
+def test_age_group_is_far_less_than_its_population_share():
+    p, c = places.resolve("Delhi", kind="state"), curves.get("loglinear_jaganathan")
+    whole = impact.steady_state_many(p, c, "aqli", "pct", np.array([-20.0]))
+    kids = impact.steady_state_many(p, c, "aqli", "pct", np.array([-20.0]), ages=(5, 19))
+    share = impact.age_share(p, "aqli", (5, 19))
+    assert 0 < kids.yll_averted[0] < share * whole.yll_averted[0]
+    assert kids.deaths_averted[0] < 0.25 * share * whole.deaths_averted[0]
+
+
+def test_age_share_matches_the_baseline():
+    p = places.resolve("Delhi", kind="state")
+    year = int(exposure.cells(p, "aqli").attrs["year"])
+    pop = baseline.load("Delhi", year).population
+    assert impact.age_share(p, "aqli", (5, 19)) == pytest.approx(pop[2:5].sum() / pop.sum())
+    assert impact.age_share(p, "aqli", None) == 1.0

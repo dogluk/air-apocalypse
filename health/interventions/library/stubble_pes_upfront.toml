@@ -1,0 +1,81 @@
+# Punjab: paying farmers not to burn paddy stubble, with part of the money paid up front.
+name = "Paying Punjab's farmers not to burn stubble, part paid up front"
+kind = "air"
+scope = "region"
+who_reaches = "everyone downwind of Punjab's paddy fields, through the outdoor air"
+
+start_year = 2027
+ramp_years = 1
+duration_years = 5
+lag = "epa20"
+
+p_success = 0.5
+p_success_basis = "judgement: the up-front contract cut burning in a randomised trial of about 1,700 Punjab farmers in one season, but running it for every paddy farmer needs a state agency to enrol millions of plots and check them by satellite, which has not been tried"
+
+placeholders = []
+
+notes = """
+Every paddy farmer in Punjab is offered the contract Jack, Jayachandran, Kala and Pande tested in a
+randomised trial in 2019: Rs 800 per acre for not burning, a quarter or half of it paid up front and
+unconditionally, the rest after a check that the field was cleared without fire.
+
+How much burning it removes: in the trial (working-paper version, Table 3), the up-front contract
+raised the share of farmers who burned none of their plots by 7.7 percentage points (satellite
+measure tuned for overall accuracy) to 11.5 points (tuned to balance the two kinds of error), against
+a control group in which 9.1% and 20.2% burned nothing. So it removed 8.5% to 14.4% of the burning
+among farmers offered it. This is taken to hold for every paddy farmer in Punjab, a judgement: the
+trial enrolled farmers with 12 acres or less, and the published version (AER: Insights 2025) reports
+the compliance effect as 10 points.
+
+Which smoke that is: the source-receptor table (data/receptor_stubble.csv) is ALL crop burning, from
+every origin, so the cut is the share of burning removed times Punjab's share of India's exposure to
+crop-burning smoke, 0.49 to 0.70 in 2015-19 (Lan et al. 2022, Supplementary Table 9). Using one
+India-wide share for every district understates the cut near Punjab and overstates it far away.
+The table itself is a fallback and is about 14 times smaller than Lan et al.'s national figure, so
+the result is likely understated (flag receptor_fallback). The table was not scaled to close that gap.
+
+Cost: what the funder paid per acre offered, averaged over everyone offered (Rs 310.5, Table 6,
+including up-front money to farmers who burned anyway), plus monitoring, which the paper puts at
+less than Rs 100 per acre: Rs 310.5 to 410.5 per acre per year, in 2019 rupees. Acres: Punjab's
+paddy area in 2022, 31.67 lakh hectares (Government of Punjab), 78.3 lakh acres.
+"""
+
+[region]
+receptor = "receptor_stubble.csv"
+cut = { dist = "uniform", p5 = 0.041, p95 = 0.10 }
+
+[cost]
+driver = "unit"
+unit = "acre of paddy in Punjab offered the contract"
+units = 7825827
+annual = { dist = "uniform", p5 = 310.5, p95 = 410.5 }
+currency = "INR"
+year = 2019
+partial = "The cost counts payments to farmers and field checks only, not the agency that would run the scheme statewide."
+
+[[evidence]]
+fields = ["region.cut"]
+source = "Jack BK, Jayachandran S, Kala N, Pande R (2023), Money (Not) to Burn: Payments for Ecosystem Services to Reduce Crop Residue Burning, MIT CEEPR Working Paper 2023-05 (NBER w30690; published AER: Insights 2025, doi 10.1257/aeri.20230431)"
+url = "https://ceepr.mit.edu/wp-content/uploads/2023/02/MIT-CEEPR-WP-2023-05.pdf"
+locator = "Table 3 'Contract Compliance and Not Burning' (printed p. 36, PDF p. 39): Upfront PES effect on Not Burned 0.115 (balanced accuracy) and 0.077 (maximum accuracy); control means 0.202 and 0.091. Punjab's share: Lan R, Eastham SD, Liu T, Norford LK, Barrett SRH (2022), Nat Commun 13:6537, Supplementary Table 9 (file 41467_2022_34093_MOESM11_ESM.xlsx, https://static-content.springer.com/esm/art%3A10.1038%2Fs41467-022-34093-z/MediaObjects/41467_2022_34093_MOESM11_ESM.xlsx), row 'Punjab', 'contribution to annual exposure', whole-year 2015-2019: 0.7, 0.67, 0.49, 0.53, 0.51. Published abstract (aeaweb.org/articles?id=10.1257/aeri.20230431): 'increases compliance by 10 percentage points, which is corroborated by satellite-based burning measurements'."
+key = "O"
+retrieved = "2026-11-27"
+derivation = "Share of burning removed = effect / (1 - control mean): 0.077/0.909 = 0.085 and 0.115/0.798 = 0.144. Times Punjab's share 0.49 to 0.70: p5 = 0.085 x 0.49 = 0.041, p95 = 0.144 x 0.70 = 0.10."
+
+[[evidence]]
+fields = ["cost.annual"]
+source = "Jack BK, Jayachandran S, Kala N, Pande R (2023), Money (Not) to Burn, MIT CEEPR Working Paper 2023-05"
+url = "https://ceepr.mit.edu/wp-content/uploads/2023/02/MIT-CEEPR-WP-2023-05.pdf"
+locator = "Table 6 'Cost Effectiveness' (printed p. 39, PDF p. 42): Upfront PES, Amount Paid per Acre 310.5 (rupees, averaged over farmers offered, including up-front money to those who burned). Section 5 (printed pp. 23-24, PDF p. 26-27): 'Monitoring costs for our program were roughly |300/field or less than |100/acre'. Season: Kharif 2019."
+key = "O"
+retrieved = "2026-11-27"
+derivation = "Rs 310.5 per acre plus monitoring of 0 to 100: p5 = 310.5, p95 = 410.5, rupees of 2019."
+
+[[evidence]]
+fields = ["cost.units"]
+source = "Government of Punjab (May 2023), Action Plan for Control of Burning of Paddy Crop Residue in the State of Punjab, Annexure-A to the Punjab Pollution Control Board's report to the National Green Tribunal in OA 632 of 2023"
+url = "https://www.greentribunal.gov.in/sites/default/files/news_updates/Report%20by%20PPCB%20in%20OA%20No.%20632%20of%202023%20(In%20re%20News%20Item%20published%20in%20The%20Hindu%20dated%2006.10.2023%20titled%20Pollution%20takes%20a%20front%20seat%20as%20Stubble%20Fires%20Spike%20in%20Punjab).pdf"
+locator = "Section 2.0 'Background', table of area under paddy (plan p. 3): 2022, Area under Paddy 31.67 lac ha"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "31.67 lakh ha x 2.4710538 acres per hectare = 7,825,827 acres."

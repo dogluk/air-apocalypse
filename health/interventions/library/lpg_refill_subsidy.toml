@@ -1,0 +1,61 @@
+# Bengaluru: LPG connections and refill subsidies for low-income homes still cooking on wood.
+name = "LPG for Bengaluru homes still cooking on wood"
+kind = "air"
+scope = "city"
+who_reaches = "everyone in Bengaluru, through the outdoor air (smoke from wood fires); the households themselves gain far more indoors, which is not counted here"
+cities = ["Bengaluru"]
+
+start_year = 2027
+ramp_years = 1
+duration_years = 4          # CSTEP's plan, and its cost, run four years
+lag = "epa20"
+
+p_success = 0.5
+p_success_basis = "judgement: connections can be handed out, but in India households given LPG often keep cooking on wood when refills feel dear; a refill subsidy helps but use is the uncertain part"
+
+placeholders = []
+
+notes = """
+New LPG connections (Rs 1,600-2,000 each) and refill subsidies (Rs 200-400 a cylinder) for
+low-income homes, mostly in slums, that still cook on wood (CSTEP's 2022 plan for the Karnataka
+State Pollution Control Board).
+
+Outdoor share only. This scores only the smoke these fires add to the city's outdoor air. The
+much larger gain, to the people breathing the smoke in their own kitchens, is household exposure
+and belongs to the second pass (design spec, "Order" 6); it is not in these numbers.
+
+This is Bengaluru's own evidence: CSTEP puts the cut in domestic emissions at 9-12% (low
+scenario), 20-23% (medium) and 34-37% (high); the low end, middle and high end are used. The
+cost is CSTEP's high-scenario spend by the Food and Civil Supplies Department, Rs 15 crore over
+the plan, the highest of its three scenarios, so it is not understated against the cut.
+
+city-specific: the cut is CSTEP's Bengaluru scenario for domestic emissions and the cost is the Karnataka Food and Civil Supplies Department's Bengaluru budget (Rs 15 crore); another city needs a cut and cost for its own wood-cooking households.
+"""
+
+[[targets]]
+cause = "residential"
+cut = { dist = "triangular", p5 = 0.09, mode = 0.215, p95 = 0.37 }
+
+[cost]
+driver = "city"
+once = 150000000
+currency = "INR"
+year = 2021
+
+[[evidence]]
+fields = ["targets.residential.cut"]
+source = "CSTEP (2022), Emission inventory and pollution reduction strategies for Bengaluru"
+url = "https://web.archive.org/web/2023/https://cstep.in/drupal/sites/default/files/2022-02/EI_Report_Final_04Feb22.pdf"
+locator = "Table 5.7 'Emission reduction scenarios', section B 'Domestic', printed p. 81 (PDF p. 99): 'Emission reduction potential 34-37% | 20-23% | 9-12%' (HER | MER | LER); measures and incentives in Table 5.4, printed p. 80"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "p5 = 0.09 (LER low), mode = 0.215 (MER middle), p95 = 0.37 (HER high)."
+
+[[evidence]]
+fields = ["cost.once"]
+source = "CSTEP (2022), Emission inventory and pollution reduction strategies for Bengaluru"
+url = "https://web.archive.org/web/2023/https://cstep.in/drupal/sites/default/files/2022-02/EI_Report_Final_04Feb22.pdf"
+locator = "Table 5.11 'Economic Comparison (HER vs MER vs LER)', printed p. 93 (PDF p. 111): 'Domestic | FCS (New LPG Connection) | 15 | 10 | 5' crore"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "Rs 15 crore (HER) = 150,000,000, spent at the start. Price year not stated; taken as 2021, the year before publication (February 2022)."

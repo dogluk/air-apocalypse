@@ -6,6 +6,14 @@
   airhealth chart PLACE [PLACE ...] [--map M] [--age A] [--out FILE]
   airhealth run FILE [--map M] [--curves a,b] [--n N] [--seed S] [--charts DIR] [--use ...]
   airhealth causes [CITY] [--study ID] [--season S] [--all]   every study's split of a city's PM2.5
+  airhealth score CITY [--measure ID ...] [--study ID] [--map M] [--curves a,b] [--n N] [--seed S]
+                       [--discount PCT] [--use input=source] [--monthly-curves]
+                                                              the measure library scored in a city
+  airhealth score --region ID [--map M] [--curves a,b] [--n N] ...   a regional measure, whole reach
+  airhealth rank [PLACE] [--study ID] [--map M] [--curves a,b] [--n N] [--seed S] [--discount PCT]
+                 [--use input=source] [--monthly-curves] [--csv PATH] [--write [DIR]]   the library ranked, India or a city
+  airhealth rank [PLACE] --sensitivity [--inputs a,b] [--top K] [--jobs J] ...   what reorders the ranking
+  airhealth measures                               the library: id, name, kind, scope, odds, evidence
   airhealth dashboard [--port 8765] [--no-open]     a local page over the same functions
 
 --use input=source picks a source for population, death_rates or deaths (airhealth list
@@ -24,7 +32,7 @@ import numpy as np
 
 from pathlib import Path
 
-from . import baseline, causes, curves, exposure, intervention, paths, places, provenance, report, simulate
+from . import baseline, causes, curves, exposure, intervention, measures, paths, places, provenance, rank, report, score, sensitivity, simulate
 from .impact import Change, steady_state
 from .inputs import DEMOGRAPHIC, REGISTRY, Choice
 from .places import KINDS
@@ -181,7 +189,7 @@ def cmd_run(args) -> None:
     names = [n.strip() for n in args.curves.split(",") if n.strip()] if args.curves else None
     combos = _choice(args).combinations(base=iv.sources)
     runs = [simulate.run(iv, map_name=map_name, curves=names, n=args.n, seed=args.seed,
-                         deaths=src) for src in combos]
+                         deaths=src, discount=args.discount / 100) for src in combos]
     if len(runs) > 1:
         return _emit_runs(args, runs)
     result = runs[0]
@@ -320,6 +328,229 @@ def cmd_causes(args) -> None:
         print(report.causes_table(city, df, args.all, causes.HARMONISED))
 
 
+def _city_name(text: str) -> str:
+    try:
+        return places.resolve(text, kind="city").name
+    except KeyError:
+        raise ValueError(f"unknown city {text!r}{places._suggest(text.partition(',')[0])}") from None
+
+
+MONTHLY_HELP = ("sensitivity: apply the curves to each month's level instead of the annual "
+                "mean (percent changes only; about twelve times slower)")
+
+
+def cmd_score(args) -> None:
+    folder = Path(args.library) if args.library else measures.LIBRARY
+    lib = measures.library(folder)
+    if args.region:
+        return _score_region(args, folder, lib)
+    if not args.city:
+        raise ValueError("score needs a CITY, or --region ID for a regional measure")
+    city = _city_name(args.city)
+    unknown = [m for m in args.measure or [] if m not in lib]
+    if unknown:
+        raise ValueError(f"no measure {unknown[0]!r}; the library has: "
+                         + (", ".join(lib) or "no measures yet"))
+    if args.study and args.study not in causes.studies(city):
+        raise ValueError(f"{city} has no study {args.study!r}; it has: "
+                         f"{', '.join(causes.studies(city)) or 'none'}")
+    names = [n.strip() for n in args.curves.split(",") if n.strip()] if args.curves else None
+    if names is not None:
+        _curves(args.curves)            # the same one-line error as the other commands
+    combos = _choice(args).combinations()
+    if len(combos) > 1:
+        raise ValueError("score takes one source per input; give --use input=source once")
+    scored = score.city(city, args.measure, study=args.study, map_name=args.map or "acag_total",
+                        curves=names, n=args.n, seed=args.seed, discount=args.discount / 100,
+                        deaths=combos[0], folder=folder, monthly_curves=args.monthly_curves)
+    out = score.to_json(scored, place=city, study=args.study) if args.study else score.to_json(scored)
+    if args.json:
+        print(json.dumps(out, indent=2, ensure_ascii=False, allow_nan=False))
+    else:
+        print(report.score_table(scored, out))
+
+
+def _score_region(args, folder, lib) -> None:
+    if args.city or args.measure or args.study:
+        raise ValueError("--region scores one regional measure over its whole reach; give no "
+                         "CITY, --measure or --study with it")
+    if args.region not in lib:
+        raise ValueError(f"no measure {args.region!r}; the library has: " + (", ".join(lib) or "none"))
+    if lib[args.region].scope != "region":
+        regional = [k for k, m in lib.items() if m.scope == "region"]
+        raise ValueError(f"{args.region} is a city measure (airhealth score CITY); regional "
+                         f"measures: {', '.join(regional) or 'none yet'}")
+    names = [n.strip() for n in args.curves.split(",") if n.strip()] if args.curves else None
+    if names is not None:
+        _curves(args.curves)
+    combos = _choice(args).combinations()
+    if len(combos) > 1:
+        raise ValueError("score takes one source per input; give --use input=source once")
+    s = score.region(args.region, map_name=args.map or "acag_total", curves=names, n=args.n,
+                     seed=args.seed, discount=args.discount / 100, deaths=combos[0], folder=folder,
+                     monthly_curves=args.monthly_curves)
+    out = score.to_json([s], place=s.place)
+    if args.json:
+        print(json.dumps(out, indent=2, ensure_ascii=False, allow_nan=False))
+    else:
+        print(report.score_table([s], out))
+
+
+def _slug(name: str) -> str:
+    return name.lower().replace(" ", "_")
+
+
+def _write_csv(path: Path, ranking) -> None:
+    import csv
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=report.CSV_COLUMNS)
+        w.writeheader()
+        w.writerows(report.rank_csv_rows(ranking))
+
+
+def _write_ranking(folder: Path, ranking) -> list[Path]:
+    """rank_<slug>.json and .csv for the ranking and, for India, for every city from the same run."""
+    named = [("india" if ranking.place == rank.INDIA else _slug(ranking.place), ranking)]
+    named += [(_slug(c), p) for c, p in ranking.parts.items()]
+    folder.mkdir(parents=True, exist_ok=True)
+    out = []
+    for slug, r in named:
+        j, c = folder / f"rank_{slug}.json", folder / f"rank_{slug}.csv"
+        j.write_text(json.dumps(rank.to_json(r), indent=2, ensure_ascii=False, allow_nan=False))
+        _write_csv(c, r)
+        out += [j, c]
+    return out
+
+
+def _sensitivity_csv(path: Path, swing) -> None:
+    import csv
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=sensitivity.CSV_COLUMNS)
+        w.writeheader()
+        w.writerows(sensitivity.csv_rows(swing))
+
+
+def _write_sensitivity(folder: Path, swing) -> list[Path]:
+    """sensitivity_<slug>.json and .csv."""
+    slug = "india" if swing.place == rank.INDIA else _slug(swing.place)
+    folder.mkdir(parents=True, exist_ok=True)
+    j, c = folder / f"sensitivity_{slug}.json", folder / f"sensitivity_{slug}.csv"
+    j.write_text(json.dumps(sensitivity.to_json(swing), indent=2, ensure_ascii=False,
+                            allow_nan=False))
+    _sensitivity_csv(c, swing)
+    return [j, c]
+
+
+def _cmd_sensitivity(args, india: bool, city, settings: dict) -> None:
+    inputs = sensitivity.INPUTS
+    if args.inputs:
+        inputs = tuple(x.strip() for x in args.inputs.split(",") if x.strip())
+        bad = [x for x in inputs if x not in sensitivity.INPUTS]
+        if bad:
+            raise ValueError(f"unknown input {bad[0]!r}; inputs are {', '.join(sensitivity.INPUTS)}")
+    if settings.pop("monthly_curves"):
+        raise ValueError("--monthly-curves is one of the sensitivity's own settings "
+                         "(--inputs monthly_curves); leave it out with --sensitivity")
+    import os
+    jobs = args.jobs if args.jobs is not None else (os.cpu_count() or 1)
+
+    def progress(text):
+        print(f"airhealth: {text}", file=sys.stderr)
+    whatifs = sensitivity.WHATIFS
+    if args.whatifs is not None:
+        whatifs = tuple(x.strip() for x in args.whatifs.split(",")
+                        if x.strip() and x.strip() != "none")
+        bad = [x for x in whatifs if x not in sensitivity.WHATIFS]
+        if bad:
+            raise ValueError(f"unknown what-if {bad[0]!r}; what-ifs are "
+                             f"{', '.join(sensitivity.WHATIFS)} (or none)")
+    swing = sensitivity.run("India" if india else city, inputs=inputs, top=args.top,
+                            study=args.study, jobs=jobs, progress=progress, whatifs=whatifs,
+                            **settings)
+    if args.json:
+        print(json.dumps(sensitivity.to_json(swing), indent=2, ensure_ascii=False, allow_nan=False))
+    else:
+        print(report.sensitivity_table(swing))
+    if args.csv:
+        _sensitivity_csv(Path(args.csv), swing)
+        print(f"airhealth: wrote {args.csv}", file=sys.stderr)
+    if args.write is not None:
+        for path in _write_sensitivity(Path(args.write), swing):
+            print(f"airhealth: wrote {path}", file=sys.stderr)
+
+
+def cmd_rank(args) -> None:
+    folder = Path(args.library) if args.library else measures.LIBRARY
+    india = args.place is None or args.place.strip().lower() in ("india", "all india")
+    if india and args.study:
+        raise ValueError("--study needs a city: it picks one city's causes study")
+    city = None if india else _city_name(args.place)
+    if args.study and args.study not in causes.studies(city):
+        raise ValueError(f"{city} has no study {args.study!r}; it has: "
+                         f"{', '.join(causes.studies(city)) or 'none'}")
+    names = [n.strip() for n in args.curves.split(",") if n.strip()] if args.curves else None
+    if names is not None:
+        _curves(args.curves)
+    combos = _choice(args).combinations()
+    if len(combos) > 1:
+        raise ValueError("rank takes one source per input; give --use input=source once")
+    if not args.sensitivity and (args.inputs or args.top is not None or args.jobs is not None
+                                 or args.whatifs is not None):
+        raise ValueError("--inputs, --top, --jobs and --whatifs go with --sensitivity")
+    n = args.n if args.n is not None else (500 if args.sensitivity else 2000)
+    settings = dict(map_name=args.map or "acag_total", curves=names, n=n, seed=args.seed,
+                    discount=args.discount / 100, deaths=combos[0], folder=folder,
+                    monthly_curves=args.monthly_curves)
+    if args.sensitivity:
+        args.top = sensitivity.TOP if args.top is None else args.top
+        return _cmd_sensitivity(args, india, city, settings)
+    if india:
+        known = sorted(causes.known_cities())
+        done = []
+
+        def progress(c):
+            done.append(c)
+            print(f"airhealth: scoring {c} ({len(done)}/{len(known)})", file=sys.stderr)
+        print("airhealth: scoring each regional measure over its whole reach first; "
+              "this takes minutes", file=sys.stderr)
+        ranking = rank.india(progress=progress, **settings)
+    else:
+        ranking = rank.city(city, study=args.study, **settings)
+    if args.json:
+        print(json.dumps(rank.to_json(ranking), indent=2, ensure_ascii=False, allow_nan=False))
+    else:
+        print(report.rank_table(ranking))
+    if args.csv:
+        _write_csv(Path(args.csv), ranking)
+        print(f"airhealth: wrote {args.csv}", file=sys.stderr)
+    if args.write is not None:
+        for path in _write_ranking(Path(args.write), ranking):
+            print(f"airhealth: wrote {path}", file=sys.stderr)
+
+
+def cmd_measures(args) -> None:
+    folder = Path(args.library) if args.library else measures.LIBRARY
+    lib = measures.library(folder)
+    rows = [dict(id=i, name=m.name, kind=m.kind, scope=m.scope,
+                 cities=list(m.cities) if m.cities else None, who_reaches=m.who_reaches,
+                 p_success=m.p_success, placeholders=len(m.placeholders),
+                 evidence_keys=sorted({e.key for e in m.evidence})) for i, m in lib.items()]
+    if args.json:
+        print(json.dumps(rows, indent=2, ensure_ascii=False))
+        return
+    if not rows:
+        print(f"No measures in {folder} yet (see interventions/library/_template.toml).")
+        return
+    print("\n".join(report._columns(
+        ("id", "name", "kind", "scope", "cities", "who reaches", "odds", "placeholders", "evidence"),
+        [(r["id"], r["name"], r["kind"], r["scope"], ", ".join(r["cities"] or ["all"]),
+          r["who_reaches"], f"{100 * r['p_success']:g}%", str(r["placeholders"]),
+          ",".join(r["evidence_keys"]) or "-") for r in rows])))
+    print("\nEvidence keys: " + report.EVIDENCE_LEGEND + ".")
+
+
 def cmd_dashboard(args) -> None:
     from . import dashboard  # http.server only when asked for
     dashboard.serve(port=args.port, open_browser=not args.no_open)
@@ -382,6 +613,9 @@ def _parser() -> argparse.ArgumentParser:
     r.add_argument("--curves", help="comma-separated curve names (default: every curve)")
     r.add_argument("--n", type=int, default=5000, help="Monte Carlo draws (default 5000)")
     r.add_argument("--seed", type=int, default=0, help="random seed (default 0)")
+    r.add_argument("--discount", type=float, default=simulate.DISCOUNT * 100, metavar="PCT",
+                   help="discount rate a year for life-years and costs, in percent "
+                   "(default 3; 0 for none)")
     r.add_argument("--charts", metavar="DIR", help="also draw the results and spread charts here")
     deaths_flag(r)
     r.set_defaults(func=cmd_run)
@@ -404,6 +638,69 @@ def _parser() -> argparse.ArgumentParser:
                     "(covers = all) are columns, and partial estimates such as stubble-only shares are "
                     "counted and listed under the table, to keep it readable")
     ca.set_defaults(func=cmd_causes)
+
+    sc = sub.add_parser("score", parents=[shared], help="the measure library scored in one city",
+                        description="Every measure in interventions/library scored in one city: "
+                        "life-years if it works, expected life-years, cost and life-years per crore, "
+                        "on each curve, with the flags that qualify each row. Not a ranking.")
+    sc.add_argument("city", nargs="?", help="one of the fifty cities (leave out with --region)")
+    sc.add_argument("--region", metavar="ID", help="score this regional measure over its whole "
+                    "reach, with its whole cost (the ratio figures for a regional measure)")
+    sc.add_argument("--measure", action="append", metavar="ID", help="only this measure; repeatable")
+    sc.add_argument("--study", help="score air measures on this causes study (default: the city's APnA study)")
+    sc.add_argument("--map", choices=exposure.MAPS, help="exposure map (default: acag_total)")
+    sc.add_argument("--curves", help="comma-separated curve names (default: every curve)")
+    sc.add_argument("--n", type=int, default=2000, help="Monte Carlo draws (default 2000)")
+    sc.add_argument("--seed", type=int, default=0, help="random seed (default 0)")
+    sc.add_argument("--discount", type=float, default=simulate.DISCOUNT * 100, metavar="PCT",
+                    help="discount rate in percent a year (default 3)")
+    sc.add_argument("--monthly-curves", action="store_true", help=MONTHLY_HELP)
+    sc.add_argument("--library", help=argparse.SUPPRESS)
+    deaths_flag(sc)
+    sc.set_defaults(func=cmd_score)
+
+    rk = sub.add_parser("rank", parents=[shared], help="the measure library ranked by life-years per crore",
+                        description="Rank the library by expected life-years per crore of the funder's "
+                        "rupees, for all India (omit PLACE) or one city, one table per curve, with the "
+                        "ranks on every curve side by side first. Measures are ranked one at a time; "
+                        "their benefits do not add up.")
+    rk.add_argument("place", nargs="?", help="India (the default) or one of the fifty cities")
+    rk.add_argument("--study", help="a city only: score air measures on this causes study")
+    rk.add_argument("--map", choices=exposure.MAPS, help="exposure map (default: acag_total)")
+    rk.add_argument("--curves", help="comma-separated curve names (default: every curve)")
+    rk.add_argument("--n", type=int, default=None,
+                    help="Monte Carlo draws (default 2000; 500 with --sensitivity)")
+    rk.add_argument("--seed", type=int, default=0, help="random seed (default 0)")
+    rk.add_argument("--discount", type=float, default=simulate.DISCOUNT * 100, metavar="PCT",
+                    help="discount rate in percent a year (default 3)")
+    rk.add_argument("--monthly-curves", action="store_true", help=MONTHLY_HELP)
+    rk.add_argument("--csv", metavar="PATH", help="also write the rows, with their sources, as CSV")
+    rk.add_argument("--write", nargs="?", const=str(paths.OUT / "rank"), default=None,
+                    metavar="DIR", help="write rank_india.json/.csv and one pair per city "
+                    "(default health/out/rank/; not committed); with --sensitivity, "
+                    "sensitivity_<place>.json/.csv")
+    rk.add_argument("--sensitivity", action="store_true",
+                    help="instead of the ranking: what reorders it. Each input moved from the "
+                    "defaults one at a time; the research list (what would change the top), "
+                    "each measure's spread of ranks, its biggest mover and break-even odds")
+    rk.add_argument("--inputs", metavar="a,b", help="with --sensitivity: which inputs to move "
+                    f"(default all: {','.join(sensitivity.INPUTS)})")
+    rk.add_argument("--whatifs", metavar="a,b", default=None,
+                    help="with --sensitivity: labelled what-ifs run beside the default, never "
+                    f"in place of it (default all: {','.join(sensitivity.WHATIFS)}; 'none' for "
+                    "none)")
+    rk.add_argument("--top", type=int, default=None, metavar="K",
+                    help=f"with --sensitivity: size of the top of the table (default {sensitivity.TOP})")
+    rk.add_argument("--jobs", type=int, default=None, metavar="J",
+                    help="with --sensitivity: processes for the whole-reach runs of regional "
+                    "measures (default: the number of CPUs)")
+    rk.add_argument("--library", help=argparse.SUPPRESS)
+    deaths_flag(rk)
+    rk.set_defaults(func=cmd_rank)
+
+    me = sub.add_parser("measures", parents=[shared], help="the measure library")
+    me.add_argument("--library", help=argparse.SUPPRESS)
+    me.set_defaults(func=cmd_measures)
 
     ls = sub.add_parser("list", parents=[shared], help="curves, maps or places, each with its source")
     ls.add_argument("what", choices=("curves", "maps", "places", "inputs"))

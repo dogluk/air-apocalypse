@@ -1,0 +1,71 @@
+# Amritsar: moving every industry that burns solid or liquid fuel onto piped natural gas.
+name = "Switching Amritsar's industry from coal and oil to natural gas"
+kind = "air"
+scope = "city"
+who_reaches = "everyone in Amritsar, through the outdoor air"
+cities = ["Amritsar"]
+
+evidence_from = ["Delhi-NCR", "Ludhiana"]   # where the numbers come from, when not this city
+start_year = 2027
+ramp_years = 5
+duration_years = 10
+lag = "epa20"
+
+p_success = 0.5
+p_success_basis = "judgement: at the air measures' middle value. Gas burns with almost no particles, so a plant that switches stops nearly all its fuel smoke; but gas costs more than coal or pet-coke, solid-fuel boilers have to be replaced rather than converted (TERI 2021), and the switch needs a gas pipeline to each industrial area, so it happens only with money and enforcement over several years"
+
+placeholders = []
+
+notes = """
+Every industry in Amritsar that burns coal, other solid fuel or oil moves to piped natural gas by
+2032: new gas-fired boilers and furnaces where solid fuel was burned, retrofits where oil was, plus
+the gas connection and safety equipment. This is UNDP's 2025 investment case for Amritsar ("shift of
+industries to cleaner fuel", 100% of industries by 2027; here the five-year roll-out starts in 2027).
+
+How much it cuts: TERI (2021) modelled the same switch for every industry in Delhi-NCR and found it
+removes 99% of the PM2.5 emitted by the industries it covers. That is the upper end. The lower end,
+50%, is a judgement: APnA's industry share for Amritsar (7.3%, base year 2015) counts all industry,
+including process dust and plants already on gas or electricity, which a fuel switch does not touch,
+and no source read splits Amritsar's industrial PM2.5 by fuel. UNDP's own effect (a 20% fall in all of
+Amritsar's PM2.5) is borrowed from a TERI study of Ludhiana and is larger than APnA's whole industry
+share for Amritsar, so it is not used.
+
+Cost: UNDP's estimate of what Amritsar's industries would pay, INR 248.6 million, with no government
+cost listed. It is taken as one total spent at the start, which is the larger reading. UNDP lists the
+equipment, connection and safety costs; whether the change in fuel bills is in the total is not said.
+For Delhi-NCR TERI found the fuel bill dominates: about 9 billion rupees of equipment and connections
+against 80 billion rupees a year more for fuel. If the Amritsar figure leaves fuel out, the true cost
+is several times larger; it is flagged as partial. The price year is not stated; 2023, the first year
+of UNDP's scenario, is taken.
+
+city-specific: the cost (INR 248.6 million) is UNDP's total for Amritsar's industries, and the low cut is a judgement about Amritsar's industry share; another city needs its own cost of switching its industry.
+"""
+
+[[targets]]
+cause = "industry"
+cut = { dist = "uniform", p5 = 0.50, p95 = 0.99 }
+
+[cost]
+driver = "city"
+once = 248600000
+currency = "INR"
+year = 2023
+partial = "It is UNDP's estimate of industry's cost to switch (gas equipment, connection, safety); no government programme cost is listed, and the source does not say whether the higher fuel bill is counted, which for Delhi-NCR TERI found is most of the cost."
+
+[[evidence]]
+fields = ["targets.industry.cut"]
+source = "TERI (2021), Cost effectiveness of interventions for control of air pollution in Delhi"
+url = "https://teriin.org/sites/default/files/2021-12/Cost-effectiveness-of%20-interventions-for-control-of%20-air-pollution-in-Delhi.pdf"
+locator = "Section on industries, text under Figure 19, printed p. 32 (PDF p. 43): 'the maximum reduction in emissions of PM2.5 can be achieved by completely switching solid and liquid fuel to gaseous fuel in industries in NCR, with reduction of 99% in PM2.5 emissions by 2022 with respect to BAU'; Figure 19 is 'w.r.t. sub-sectoral emissions'"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "p95 = 0.99 (TERI, for the industries switched); p5 = 0.50, a judgement for the part of APnA's industry share that is not fuel smoke from plants that would switch (no split by fuel was found for Amritsar)."
+
+[[evidence]]
+fields = ["cost.once"]
+source = "UNDP India (2025), Investment case study for air pollution reduction in Amritsar and Gurugram, India"
+url = "https://www.undp.org/sites/g/files/zskgke326/files/2025-01/final_india_air_pollution_ic_2024_v2_290125.pdf"
+locator = "Table 2 'Estimated cost of interventions (in INR millions)', printed p. 32 (PDF p. 43): 'Shift of industries to cleaner fuel', Amritsar, Individual/Industry column, 248.6 (no government figure); coverage 'Shift of Industries to cleaner fuel 100% ... % of industries shift to gas by 2027' (Annex table, PDF p. 84); method 'Intervention 5: Shift of industries to cleaner fuel', printed p. 79-80 (PDF p. 90-91). TERI 2021 Table 26 (printed p. 51, PDF p. 62) is the Delhi-NCR comparison in the notes."
+key = "O"
+retrieved = "2026-11-27"
+derivation = "INR 248.6 million = 248,600,000, one total for the city. Price year not stated; 2023 taken (the scenario's first year)."

@@ -40,7 +40,7 @@ def check(data_dir: Path | None = None, sources_path: Path | None = None) -> lis
 
 def constants() -> list[dict]:
     """The sourced numbers that live in code, not in data/: name, value, source."""
-    from . import baseline, curves, ihme_curves, lag, lifetable
+    from . import baseline, curves, ihme_curves, lag, lifetable, simulate
     aqli = curves.AQLILinear()
     return [
         dict(name="AQLI: years of life expectancy per 10 µg/m³", value=aqli.years_per_10,
@@ -52,6 +52,8 @@ def constants() -> list[dict]:
         dict(name="EPA 20-year cessation lag: shares in year 1, years 2-5, years 6-20",
              value=(float(lag._EPA20[0]), float(lag._EPA20[1:5].sum()), float(lag._EPA20[5:].sum())),
              source=lag.EPA_SOURCE),
+        dict(name="Discount rate a year, for costs and life-years", value=simulate.DISCOUNT,
+             source=simulate.DISCOUNT_SOURCE),
         dict(name="Infant a0 = intercept + slope × q0",
              value=(lifetable.A0_INTERCEPT, lifetable.A0_SLOPE), source=lifetable.A0_SOURCE),
         dict(name="Age from which deaths are scaled to the SRS crude death rate",

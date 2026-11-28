@@ -312,7 +312,9 @@ def get(name: str) -> Curve:
     raise KeyError(f"unknown curve {name!r}; choose from {', '.join([*curves, *IHME])}")
 
 
-IHME_REASON = "need IHME files in health/data_local/ (see health/IHME_DOWNLOADS.md)"
+IHME_REASON = ("need IHME files: put them in a data_local/ folder and set AIRHEALTH_LOCAL to it "
+               "(see IHME_DOWNLOADS.md in the repo)" if paths.BUNDLED else
+               "need IHME files in health/data_local/ (see health/IHME_DOWNLOADS.md)")
 NOT_BUILT = "IHME files present, but the curve is not built yet"
 
 

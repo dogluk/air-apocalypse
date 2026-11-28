@@ -25,6 +25,12 @@ the cause, state and age (not scaled by death_factor), times 1 − that cause's 
 table's rate in the band loses the averted rate, Σ_c rate_c × (1 − ratio_c), population-
 weighted over the state's units.
 
+An age group (the ages argument, e.g. (5, 19) for schoolchildren): deaths and life-years
+averted count only the bands whose start lies in that range (band_mask); everyone else's
+air is unchanged. Population, deaths_baseline and PM2.5 stay the whole place's, and the life
+expectancy fields still mean "if everyone in the place breathed the change": a measure that
+reaches one age group does not move period life expectancy in a way one figure can show.
+
 Results are steady state: the change in deaths per year and in period life expectancy once
 the new air has been breathed long enough for the full effect, with today's age structure.
 
@@ -51,6 +57,35 @@ from .places import Place
 STARTS = np.array(AGE_STARTS)
 AQLI_EXACT = 64
 AQLI_GRID = 33
+
+
+def band_mask(ages: tuple[int, int] | None) -> np.ndarray:
+    """1.0 for every age band whose start lies in ages[0]..ages[1] (inclusive), else 0; None
+    gives all ones (everyone)."""
+    if ages is None:
+        return np.ones(len(STARTS))
+    lo, hi = ages
+    return ((STARTS >= lo) & (STARTS <= hi)).astype(float)
+
+
+def age_share(place: Place, map_name: str, ages: tuple[int, int] | None,
+              deaths: "str | Sources" = "srs") -> float:
+    """Share of the place's people (the map year's population) in the age bands of `ages`,
+    each exposure unit split by age in its state's proportions (baseline.load), as
+    steady_state() splits it."""
+    if ages is None:
+        return 1.0
+    src = Sources.of(deaths)
+    cells: pd.DataFrame = exposure.cells(place, map_name, None, src.population)
+    year = int(cells.attrs["year"])
+    mask = band_mask(ages)
+    total = in_group = 0.0
+    for state, rows in cells.groupby("state", sort=True).indices.items():
+        b = baseline.load(state, year, sources=src)
+        people = float(cells.population.to_numpy(float)[rows].sum())
+        total += people
+        in_group += people * float((b.population * mask).sum() / b.population.sum())
+    return in_group / total
 
 
 @dataclass(frozen=True)
@@ -140,8 +175,10 @@ class _StateResult:
 
 
 def _state(b: baseline.Baseline, curve: Curve, before: np.ndarray, after: np.ndarray,
-           pop: np.ndarray) -> _StateResult:
-    """One state's units (before, after, pop are per unit) against its baseline."""
+           pop: np.ndarray, ages: tuple[int, int] | None = None) -> _StateResult:
+    """One state's units (before, after, pop are per unit) against its baseline. ages: deaths
+    and life-years averted count only those bands (band_mask)."""
+    mask = band_mask(ages)
     model = np.outer(pop, b.population / b.population.sum()) * b.mx     # unit × band
     deaths = model * b.death_factor
     table = lifetable.life_table(b.mx)
@@ -155,7 +192,7 @@ def _state(b: baseline.Baseline, curve: Curve, before: np.ndarray, after: np.nda
     elif curve.death_scope == "causes":
         lost = _cause_lost(curve, b, before, after)                     # unit × band
         people = model / b.mx
-        averted = (people * lost).sum(axis=0)
+        averted = (people * lost).sum(axis=0) * mask
         e0_after = lifetable.e0(b.mx - np.average(lost, axis=0, weights=pop))
         return _StateResult(
             population=pop.sum(), deaths_model=model.sum(), deaths_baseline=deaths.sum(),
@@ -167,7 +204,7 @@ def _state(b: baseline.Baseline, curve: Curve, before: np.ndarray, after: np.nda
                                                  before.shape) for age in STARTS])
         factor = 1 - scope * (1 - ratio)                                # on all-cause rates
         e0_after = lifetable.e0(b.mx * np.average(factor, axis=0, weights=pop))
-    averted = (deaths * (1 - factor)).sum(axis=0)                       # by band
+    averted = (deaths * (1 - factor)).sum(axis=0) * mask                # by band
     return _StateResult(
         population=pop.sum(), deaths_model=model.sum(), deaths_baseline=deaths.sum(),
         deaths_averted=averted.sum(), yll_averted=(averted * lifetable.ex_at_death(b.mx)).sum(),
@@ -176,12 +213,14 @@ def _state(b: baseline.Baseline, curve: Curve, before: np.ndarray, after: np.nda
 
 def steady_state(place: Place, curve: Curve, map_name: str, change: Change,
                  year: int | None = None, pm25_override: float | None = None,
-                 deaths: "str | Sources" = "srs") -> Impact:
+                 deaths: "str | Sources" = "srs",
+                 ages: tuple[int, int] | None = None) -> Impact:
     """Deaths averted per year and change in life expectancy when `change` is applied to
     every exposure unit of `place` on `map_name`. pm25_override, if given, sets every unit's
     starting concentration (population weights unchanged), e.g. Delhi from 100 to 80.
     deaths: an inputs.Sources, or a deaths basis ("srs", "model", "unwpp") for the defaults
-    with that death count."""
+    with that death count. ages: only people in those age bands breathe the change (see the
+    module docstring); None is everyone."""
     src = Sources.of(deaths)
     cells: pd.DataFrame = exposure.cells(place, map_name, year, src.population)
     year = int(cells.attrs["year"])
@@ -201,7 +240,7 @@ def steady_state(place: Place, curve: Curve, map_name: str, change: Change,
         if b.rates:
             adjs.append(b.rates)
         un = b.un_scaling or un
-        results.append(_state(b, curve, before[rows], after[rows], pop[rows]))
+        results.append(_state(b, curve, before[rows], after[rows], pop[rows], ages))
 
     weights = [r.population for r in results]
     return Impact(
@@ -287,7 +326,7 @@ def _aqli_factors(mx: np.ndarray, gains: np.ndarray, from_age: int) -> np.ndarra
 
 
 def _state_many(b: baseline.Baseline, curve: Curve, before: np.ndarray, after: np.ndarray,
-                pop: np.ndarray) -> dict:
+                pop: np.ndarray, ages: tuple[int, int] | None = None) -> dict:
     """_state for n draws: before (units,), after (n, units)."""
     model = np.outer(pop, b.population / b.population.sum()) * b.mx     # unit × band
     deaths = model * b.death_factor
@@ -321,6 +360,7 @@ def _state_many(b: baseline.Baseline, curve: Curve, before: np.ndarray, after: n
             averted[:, bands] = (g @ deaths[:, bands]) * scope[bands]
             mean_g[:, bands] = (g @ pop / pop.sum())[:, None]
         e0_after = lifetable.e0_many(b.mx * (1 - scope * mean_g))
+    averted = averted * band_mask(ages)                                   # draw × band
     return dict(population=pop.sum(), deaths_model=model.sum(), deaths_baseline=deaths.sum(),
                 deaths_averted=averted.sum(axis=1),
                 yll_averted=averted @ lifetable.ex_at_death(b.mx),
@@ -330,14 +370,20 @@ def _state_many(b: baseline.Baseline, curve: Curve, before: np.ndarray, after: n
 def steady_state_many(place: Place, curve: Curve, map_name: str, kind: str,
                       values: np.ndarray, year: int | None = None,
                       pm25_override: float | None = None,
-                      deaths: "str | Sources" = "srs") -> ImpactDraws:
+                      deaths: "str | Sources" = "srs",
+                      ages: tuple[int, int] | None = None,
+                      level_factor: float = 1.0) -> ImpactDraws:
     """steady_state() for n draws: values[i] is the change (of `kind`: delta, pct or to) in
     draw i, and draw i uses row i of the curve's parameters if the curve came from
-    sample_many(), else the curve as it is."""
+    sample_many(), else the curve as it is. ages: as steady_state(). level_factor: the map's
+    level of every cell times this before the change is applied (a month's shape, for the
+    month-by-month sensitivity); with pm25_override it is a ValueError."""
+    if level_factor != 1.0 and pm25_override is not None:
+        raise ValueError("level_factor cannot be combined with pm25_override")
     src = Sources.of(deaths)
     cells: pd.DataFrame = exposure.cells(place, map_name, year, src.population)
     year = int(cells.attrs["year"])
-    before = cells.pm25.to_numpy(float)
+    before = cells.pm25.to_numpy(float) * level_factor
     if pm25_override is not None:
         before = np.full_like(before, float(pm25_override))
     after = apply_many(kind, values, before)
@@ -353,7 +399,7 @@ def steady_state_many(place: Place, curve: Curve, map_name: str, kind: str,
         if b.rates:
             adjs.append(b.rates)
         un = b.un_scaling or un
-        results.append(_state_many(b, curve, before[rows], after[:, rows], pop[rows]))
+        results.append(_state_many(b, curve, before[rows], after[:, rows], pop[rows], ages))
 
     weights = [r["population"] for r in results]
     return ImpactDraws(

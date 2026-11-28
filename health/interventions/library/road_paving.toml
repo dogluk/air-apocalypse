@@ -1,0 +1,73 @@
+# Bengaluru: wall-to-wall paving of the unpaved edges of arterial and sub-arterial roads.
+name = "Paving the edges of Bengaluru's main roads"
+kind = "air"
+scope = "city"
+who_reaches = "everyone in Bengaluru, through the outdoor air"
+cities = ["Bengaluru"]
+
+evidence_from = ["Delhi-NCR"]   # where the numbers come from, when not this city
+start_year = 2027
+ramp_years = 2
+duration_years = 10
+lag = "epa20"
+
+p_success = 0.6
+p_success_basis = "judgement: paving is ordinary civil work that cities deliver, but the gain fades if edges are dug up again or not repaired"
+
+placeholders = []
+
+notes = """
+The bare earth along road edges is paved from kerb to wall, so traffic lifts less dust.
+
+The cut is borrowed from Delhi-NCR: TERI (2021) found wall-to-wall paving of NCR's arterial and
+sub-arterial roads removes 9% of the PM2.5 emitted as road dust. That 9% is applied to the
+road-dust part of Bengaluru's dust (split with CSTEP's 2022 Bengaluru inventory). The spread
+(half to one and a half times) is a judgement for carrying a Delhi number to Bengaluru.
+
+The cost uses TERI's unit costs (Rs 650 per square metre to build, Rs 50 per square metre to
+repair, 80% of the length paved, a strip 1.5 m wide on sub-arterial and 2.5 m on arterial roads),
+applied to the 1,688 km of arterial and sub-arterial roads the Greater Bengaluru Authority counts
+for its sweeping contract. Repair is taken as yearly (TERI does not say how often). Prices are
+TERI's Delhi rates of 2021.
+
+city-specific: the cut is TERI's NCR effect times the road-dust part of Bengaluru's dust (0.691, CSTEP), and the length paved is Bengaluru's 1,688 km of main roads; TERI's prices per square metre would transfer.
+"""
+
+[[targets]]
+cause = "dust"
+cut = { dist = "triangular", p5 = 0.0311, mode = 0.0622, p95 = 0.0933 }
+
+[cost]
+driver = "unit"
+unit = "km of arterial or sub-arterial road"
+units = 1688
+once = { dist = "uniform", p5 = 780000, p95 = 1300000 }
+annual = { dist = "uniform", p5 = 60000, p95 = 100000 }
+currency = "INR"
+year = 2021
+
+[[evidence]]
+fields = ["targets.dust.cut"]
+source = "TERI (2021), Cost effectiveness of interventions for control of air pollution in Delhi"
+url = "https://teriin.org/sites/default/files/2021-12/Cost-effectiveness-of%20-interventions-for-control-of%20-air-pollution-in-Delhi.pdf"
+locator = "Section 6 'Dust', text under Figure 20, printed p. 33 (PDF p. 44): 'Wall-to-wall paving strategy is estimated to have a reduction of 9% in PM2.5 emissions from road dust in short term by the year 2022 and similar reduction was estimated for 2030 in NCR'"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "road-dust share of Bengaluru's dust x 9%. CSTEP (2022) Bengaluru inventory (https://web.archive.org/web/2023/https://cstep.in/drupal/sites/default/files/2022-02/EI_Report_Final_04Feb22.pdf): road dust 1,005 and construction 450 t/yr PM2.5 (printed pp. 45 and 37); 0.691 x 0.09 = 0.0622 (mode); p5, p95 = 0.5x, 1.5x, a judgement for borrowing an NCR result."
+
+[[evidence]]
+fields = ["cost.once", "cost.annual"]
+source = "TERI (2021), Cost effectiveness of interventions for control of air pollution in Delhi"
+url = "https://teriin.org/sites/default/files/2021-12/Cost-effectiveness-of%20-interventions-for-control-of%20-air-pollution-in-Delhi.pdf"
+locator = "Table 31 'Baseline data and assumptions for wall to wall paving of roads', printed p. 55 (PDF p. 66): 80% of road length paved; width arterial 2.5 m, sub-arterial 1.5 m; Rs 650 per sq m to construct concrete pavement; Rs 50 per sq m repair"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "per km: once = 650 x 0.8 x 1000 m x width = Rs 780,000 (1.5 m) to Rs 1,300,000 (2.5 m); repair = 50 x 0.8 x 1000 x width = Rs 60,000 to Rs 100,000, taken as each year. Price year taken as 2021 (report dated December 2021)."
+
+[[evidence]]
+fields = ["cost.units"]
+source = "Free Press Journal (20 Nov 2025), Karnataka Opposition Slams Govt For Costly Road Sweeper Rental Deal Under GBA"
+url = "https://www.freepressjournal.in/india/karnataka-opposition-slams-govt-for-costly-road-sweeper-rental-deal-under-gba"
+locator = "'GBA officials said that in total, 46 machines will cover 1688 kms of roads'; Deccan Herald the same day says these are 'arterial and sub-arterial roads'"
+key = "O"
+retrieved = "2026-11-27"

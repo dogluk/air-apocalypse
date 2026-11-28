@@ -1,0 +1,238 @@
+import html as html_
+import re
+import shutil
+
+import pytest
+
+from airhealth import causes, curves, measures as library, score
+from citypage import measures, names
+from citypage.measures import MeasureFile, find, render, score_all
+
+LIB = library.LIBRARY
+FIXTURE = ("lpg_refill_subsidy", "road_paving", "school_purifiers", "smog_tower",
+           "fgd_scrubbers", "stubble_pes_upfront")
+REGIONAL = ("fgd_scrubbers", "stubble_pes_upfront")
+N = 200
+
+
+def _copy(folder, *ids):
+    for i in ids:
+        shutil.copy(LIB / f"{i}.toml", folder / f"{i}.toml")
+    return folder
+
+
+@pytest.fixture(scope="module")
+def lib(tmp_path_factory):
+    return _copy(tmp_path_factory.mktemp("lib"), *FIXTURE)
+
+
+@pytest.fixture(scope="module")
+def page(lib):
+    return render("Bengaluru", folder=lib, n=N).html
+
+
+def test_empty_library_says_so(tmp_path):
+    s = render("Bengaluru", folder=tmp_path, n=N)
+    assert s.id == "measures" and "not yet in the library" in s.html
+
+
+def test_finds_bengaluru_files_and_skips_the_template(tmp_path):
+    _copy(tmp_path, "road_paving")
+    shutil.copy(LIB / "_template.toml", tmp_path / "_template.toml")
+    found = find("Bengaluru", tmp_path)
+    assert [m.path.name for m in found] == ["road_paving.toml"]
+    assert found[0] == MeasureFile(tmp_path / "road_paving.toml",
+                                   "Paving the edges of Bengaluru's main roads", None)
+
+
+def test_other_cities_are_ignored(tmp_path):
+    text = (LIB / "road_paving.toml").read_text()
+    (tmp_path / "d.toml").write_text(text.replace('cities = ["Bengaluru"]', 'cities = ["Delhi"]'))
+    assert find("Bengaluru", tmp_path) == []
+
+
+def test_broken_measure_is_listed_not_dropped(tmp_path):
+    _copy(tmp_path, "road_paving")
+    text = (LIB / "road_paving.toml").read_text()
+    (tmp_path / "x.toml").write_text(text.replace("p_success = 0.6", "p_success = 2"))
+    found = {m.path.name: m for m in find("Bengaluru", tmp_path)}
+    assert found["x.toml"].error and "p_success" in found["x.toml"].error
+    assert found["road_paving.toml"].error is None
+    h = render("Bengaluru", folder=tmp_path, n=N).html
+    assert "could not run" in h and "x.toml" in h
+    assert "Paving the edges of Bengaluru" in h            # the good one still runs
+
+
+def test_a_measure_that_fails_to_run_is_listed(tmp_path, monkeypatch):
+    _copy(tmp_path, "road_paving", "school_purifiers")
+    real = score.city
+
+    def flaky(city, ids=None, **kw):
+        if ids == ["road_paving"]:
+            raise RuntimeError("boom in the engine")
+        return real(city, ids, **kw)
+    monkeypatch.setattr(score, "city", flaky)
+    h = render("Bengaluru", folder=tmp_path, n=N).html
+    assert "could not run" in h and "boom in the engine" in h
+    assert "HEPA purifiers in Bengaluru" in h
+
+
+def test_air_measures_scored_on_every_study_separately(lib):
+    got = {e.file.path.stem: e for e in score_all("Bengaluru", folder=lib, n=N)}
+    studies = causes.studies("Bengaluru")
+    assert len(studies) >= 2
+    assert list(got["road_paving"].scores) == studies
+    assert [s.study for s in got["road_paving"].scores.values()] == studies
+    assert list(got["school_purifiers"].scores) == [None]   # exposure: no study needed
+
+
+def test_every_study_and_every_curve_appear(page):
+    for st in causes.studies("Bengaluru"):
+        assert html_.escape(names.study(st)) in page
+    run, missing = curves.select()
+    for c in run:
+        assert page.count(names.curve(c.name)) >= 3        # charts and tables, every measure
+    for name in missing:
+        assert name in page                                # named as not run, with why
+    assert "ACAG satellite" in page and "chapter 1" in page.lower()
+
+
+def test_not_scored_and_its_reason_are_shown(page):
+    # LPG targets household burning, which the CSTEP study does not report
+    assert "not scored" in page
+    assert "does not report residential" in page
+
+
+def test_flags_in_plain_words_beside_the_ratio(page):
+    for code_text in (score.UPPER_BOUND_TEXT,
+                      "This is a long shot",
+                      "are a judgement, not a figure from a cited source",
+                      "not read at the source",
+                      "Only the people it reaches breathe less"):
+        assert html_.escape(code_text) in page
+    partial = library.load(LIB / "school_purifiers.toml").cost.partial
+    assert html_.escape(partial) in page
+    assert 'class="caveats"' in page
+
+
+def test_exposure_change_is_labelled_for_the_covered(page):
+    assert "what the covered people breathe" in page
+    assert "city average" in page
+
+
+def test_assumptions_are_printed_without_the_fixed_age_caveat(page):
+    for a in score.ASSUMPTIONS:
+        assert html_.escape(a) in page
+    # the engine now scores an age group with its own death rates (exposure.ages); the old
+    # bullet saying it used the whole city's mix must not come back
+    assert "overstated" not in page
+    assert "whole city's mix of ages" not in page
+    assert "Only people aged 5-19 are reached" in page           # the engine's age_group flag
+
+
+def _section(page, name):
+    """The HTML of one measure's block: from its heading to the next h3."""
+    at = page.index(f">{html_.escape(name)}</h3>")
+    end = page.find("<h3", at)
+    return page[at:end if end > 0 else len(page)]
+
+
+def _row(block, curve):
+    m = re.search(rf"<tr><td>{re.escape(names.curve(curve))}(?: \(|</td>).*?</tr>", block)
+    assert m, curve
+    return m.group(0)
+
+
+def test_a_curve_that_cannot_see_the_age_group_shows_a_dash_and_why(page):
+    name = library.load(LIB / "school_purifiers.toml").name
+    block = _section(page, name)
+    run, _ = curves.select()
+    gap = [c.name for c in run if c.min_age > 19]
+    seen = [c.name for c in run if c.min_age <= 19]
+    assert gap and seen
+    for c in gap:
+        row = _row(block, c)
+        assert "does not cover ages 5-19" in row and "starts at age" in row
+        assert "<td class=num>0</td>" not in row and "—" in row
+    for c in seen:
+        assert "does not cover" not in _row(block, c)
+    # the chart leaves the dot off and says why, under the chart
+    assert "do not cover the ages" in page[:page.index("<h3>Each measure</h3>")]
+    for c in gap:
+        assert names.curve(c) in page[:page.index("<h3>Each measure</h3>")]
+
+
+def test_regional_measures_have_their_own_group(page):
+    head = "Measures that act on a whole region"
+    assert f"<h3>{head}" in page
+    each = page[page.index("<h3>Each measure</h3>"):]
+    cut = each.index(f"<h3>{head}")
+    for i in REGIONAL:
+        name = library.load(LIB / f"{i}.toml").name
+        assert each.index(html_.escape(name)) > cut           # in their own group, last
+        block = _section(page, name)
+        assert "whole reach" in block and "falls outside" in block
+        assert "Cost:" in block and "Rs " not in block       # no cost or ratio from the city part
+    # the stand-in table's own warning, in plain words, beside the numbers
+    fallback = score.receptor_basis("receptor_stubble.csv", key="fallback")
+    assert fallback and html_.escape(fallback) in _section(
+        page, library.load(LIB / "stubble_pes_upfront.toml").name)
+    # not on the ratio charts, and not listed there as "no ratio" either
+    glance = page[page.index("All measures at a glance"):page.index("<h3>Each measure</h3>")]
+    for i in REGIONAL:
+        assert html_.escape(library.load(LIB / f"{i}.toml").name) not in glance
+
+
+def test_find_keeps_region_measures(tmp_path):
+    _copy(tmp_path, "road_paving", "fgd_scrubbers")
+    assert [m.path.stem for m in find("Bengaluru", tmp_path)] == ["fgd_scrubbers", "road_paving"]
+
+
+def test_no_ranking_no_average(page):
+    # the order is the worst-case ratio across curves (no curve decides it); see test_polish
+    assert html_.escape(measures.ORDER_LINE) in page
+    for phrase in ("central estimate", "average of the curves", "best curve", "best measure"):
+        assert phrase not in page.lower()
+
+
+def test_no_nan_or_none_in_the_page(page):
+    text = re.sub(r"<[^>]+>", " ", page)
+    assert not re.search(r"\bnan\b", text, re.I)
+    assert "None" not in text
+    assert "inf" not in re.findall(r"\b\w+\b", text.lower())
+
+
+def test_curves_not_run_named_without_ihme(no_ihme, tmp_path):
+    _copy(tmp_path, "school_purifiers")
+    h = render("Bengaluru", folder=tmp_path, n=N).html
+    assert "gbd2023" in h and "IHME" in h
+    assert measures.__doc__ and "seam" in measures.__doc__
+
+
+def test_partial_cost_measures_come_last_in_their_own_group(page):
+    head = "Costs that leave things out"
+    assert head in page
+    each = page[page.index("<h3>Each measure</h3>"):]
+    cut = each.index("<h3>" + head)
+    for i in ("lpg_refill_subsidy", "road_paving"):
+        assert each.index(html_.escape(library.load(LIB / f"{i}.toml").name)) < cut
+    for i in ("school_purifiers", "smog_tower"):
+        assert each.index(html_.escape(library.load(LIB / f"{i}.toml").name)) > cut
+    # the glance charts do the same: the group's heading comes after the fully costed charts
+    glance = page[page.index("All measures at a glance"):page.index("<h3>Each measure</h3>")]
+    assert glance.index("<h3>" + head) > glance.index("air measures on study")
+    assert "not comparable" in page
+
+
+def test_no_negative_zero_in_the_page(page):
+    import re
+    assert not re.search(r"(?<![\d.])-0(?:\.0+)?(?![\d.])", re.sub(r"<[^>]+>", " ", page))
+
+
+def test_borrowed_evidence_is_shown_in_plain_words(page):
+    assert "comes from Delhi-NCR, not from Bengaluru" in html_.unescape(page)
+
+
+def test_page_range_formatting_has_no_negative_zero():
+    from citypage.measures import _range
+    assert _range({"median": 0.2, "p5": -0.3, "p95": 1.0}) == "0 (0 to 1)"

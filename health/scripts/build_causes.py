@@ -115,8 +115,15 @@ MCDUFFIE_SECTORS = {
     "Agriculture": ("other", "non-combustion agriculture (fertiliser/livestock NH3 forming secondary ammonium "
                     "salts); not field burning, and not receptor-model 'secondary_unassigned' since it is assigned "
                     "to a sector here"),
-    "Energy Coal": ("industry", "power generation; APnA's industry group includes power plants"),
-    "Energy NonCoal": ("industry", "power generation, oil and gas; same as Energy Coal"),
+    # Not `power`: the paper's energy sector is wider than power plants. Its gridded-results README
+    # (Zenodo record 4739100, the files behind these shares) defines ENEcoal / ENEother as "Energy
+    # Production ... Includes electricity and heat production, fuel production and transformation, oil
+    # and gas fugitive/flaring, and fossil fuel fires"; the paper's Fig. 4d calls it "coal combustion for
+    # energy generation". So it stays `industry` (as in APnA, whose industry group includes power plants)
+    # and McDuffie's `power` is not reported.
+    "Energy Coal": ("industry", "energy production from coal: power and heat plants plus fuel production "
+                    "and transformation (README, Zenodo 4739100); not power alone"),
+    "Energy NonCoal": ("industry", "energy production from oil and gas: as Energy Coal"),
     "Industry Coal": ("industry", ""),
     "Industry NonCoal": ("industry", ""),
     "NonRoad Transport": ("transport", ""),

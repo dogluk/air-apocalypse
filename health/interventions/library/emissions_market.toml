@@ -1,0 +1,79 @@
+# Surat: a market in particulate emissions for every solid-fuel industrial plant (the Surat scheme, scaled up).
+name = "A particulate emissions market for Surat's solid-fuel industry"
+kind = "air"
+scope = "city"
+who_reaches = "everyone in Surat, through the outdoor air"
+cities = ["Surat"]
+
+start_year = 2027
+ramp_years = 1
+duration_years = 10
+lag = "epa20"
+
+p_success = 0.7
+p_success_basis = "judgement: above the air measures' middle value (0.5) because it is the only measure in the library tested in a randomised trial, in this city, run by the regulator that would run it (Greenstone et al. 2025: 99% of plant-periods complied, against 66% under the old rules); held below 0.9 because the trial lasted about a year and the market rests on monitors (CEMS) whose data plants have reasons to corrupt, and a market on bad data stops working (bets/README.md)"
+
+placeholders = []
+
+notes = """
+The Gujarat Pollution Control Board (GPCB) puts all 906 solid-fuel industrial plants in Surat into a
+cap-and-trade market for particulate matter: each plant carries a continuous emissions monitor
+(CEMS), the board caps total emissions, and plants buy and sell permits. Greenstone, Pande, Ryan and
+Sudarshan (QJE 2025) ran this as a randomised trial on 318 large coal-burning plants in Surat
+(2019-21): plants in the market cut their particulate emissions by 20% to 30% against plants left
+under the old inspect-and-fine rules, and the market cut abatement costs by about 11% for the same
+emissions.
+
+How the cut is applied: 20% to 30% of industry's share of Surat's PM2.5. This follows the paper's own
+benefit-cost table (Table VI), which scales its emission cut by the whole industrial share of
+ambient PM2.5 (0.3, from the APnA study, as this tool's apna_2018 share of 31.4% for Surat). That
+assumes the 906 solid-fuel plants are all of industry's PM2.5; plants that burn gas, process dust and
+industry outside the market are not in it, so the cut is probably somewhat too large. The trial's
+cut is relative to plants under the old rules over about a year; whether it holds over ten years is
+part of the odds.
+
+What is already done: GPCB has run the market since 2019 for part of Surat's plants. The APnA shares
+are for 2018, before the market, so this measure counts the whole scheme, not only what is still to
+add; how many of the 906 plants the market covers now was not checked.
+
+Cost: the paper's monitoring cost, US$5,000 per plant a year (an annualised US$12,000 CEMS with a
+four-year life), for all 906 plants. In Surat the plants paid for their own monitors; a funder or
+the regulator paying them is the funder's-rupees reading. Left out: the regulator's cost of running
+the market (staff, the trading platform), which the paper does not give separately, and the change
+in what plants spend to abate, which the paper estimates as a saving of US$648 to US$1,242 per plant
+a year at cuts of 30% and 10%. The price year is not stated; the plant count is from 2022 consent
+records, so 2022 is taken.
+
+city-specific: the number of plants (906) is Surat's solid-fuel plants (GPCB consent records), and the 20-30% cut is the Surat trial's, applied to Surat's industry share; another city needs its own count of solid-fuel plants, and the trial's effect would be borrowed there.
+"""
+
+[[targets]]
+cause = "industry"
+cut = { dist = "uniform", p5 = 0.20, p95 = 0.30 }
+
+[cost]
+driver = "unit"
+unit = "solid-fuel industrial plant in Surat in the market"
+units = 906
+annual = 5000
+currency = "USD"
+year = 2022
+partial = "It counts only the plants' continuous emissions monitors (US$5,000 per plant a year); the regulator's cost of running the market is not given separately in the source, and the plants' change in abatement spending (a saving, in the source) is left out."
+
+[[evidence]]
+fields = ["targets.industry.cut"]
+source = "Greenstone M, Pande R, Ryan N, Sudarshan A (2025), Can Pollution Markets Work in Developing Countries? Experimental Evidence from India, Quarterly Journal of Economics 140(2): 1003-1060, doi 10.1093/qje/qjaf009"
+url = "https://thedocs.worldbank.org/en/doc/43a1279f2bd4fd555add4e7e59b0644b-0050022025/original/CAN-POLLUTION-MARKETS-WORK-IN-DEVELOPING-COUNTRIES.pdf"
+locator = "Abstract, p. 1003, and Introduction, p. 1006 (PDF p. 4): 'the treatment reduced particulate emissions by 20%-30%, relative to control-plant emissions in the command-and-control regime' (footnote 4: the range reflects how emissions are imputed when CEMS did not transmit); Table VI Panel B (p. 1052): 'Industry share 0.3' (Guttikunda et al. 2019) times 'Reduction in industry PM2.5' gives the reduction in ambient PM2.5"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "The emission cut, 0.20 to 0.30, is applied to industry's share of Surat's PM2.5, as the paper's Table VI does."
+
+[[evidence]]
+fields = ["cost.annual", "cost.units"]
+source = "Greenstone M, Pande R, Ryan N, Sudarshan A (2025), Can Pollution Markets Work in Developing Countries? Experimental Evidence from India, QJE 140(2): 1003-1060"
+url = "https://thedocs.worldbank.org/en/doc/43a1279f2bd4fd555add4e7e59b0644b-0050022025/original/CAN-POLLUTION-MARKETS-WORK-IN-DEVELOPING-COUNTRIES.pdf"
+locator = "Table VI 'Benefit-cost analysis of scaled-up ETS in Surat', Panel A (p. 1052, PDF p. 50): '1. Monitoring costs per plant 5,000 $/year'; '3. Total costs = (A1 + A2) x 906'; notes: 'There are 906 plants according to the GPCB consent records ... The number of plants is based on 2022 GPCB consent records. The annualized CEMS costs are based on an assumed system cost of $12,000 with a four-year equipment life and no discounting'; text p. 1054: 'it costs roughly $5,000 per plant-year to set up a monitoring system'"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "annual = US$5,000 per plant; units = 906 plants. Price year not stated; 2022 taken (the year of the consent records)."

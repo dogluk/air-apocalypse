@@ -1,0 +1,67 @@
+# Bengaluru: 2,000 electric buses for BMTC in place of diesel ones.
+name = "2,000 electric buses for Bengaluru (BMTC)"
+kind = "air"
+scope = "city"
+who_reaches = "everyone in Bengaluru, through the outdoor air"
+cities = ["Bengaluru"]
+
+evidence_from = ["Delhi-NCR"]   # where the numbers come from, when not this city
+start_year = 2027
+ramp_years = 4              # CSTEP's roadmap adds 500 a year
+duration_years = 12
+lag = "epa20"
+
+p_success = 0.75
+p_success_basis = "judgement: BMTC is already contracting electric buses by the thousand through central tenders, so delivery is likely; the doubt is whether they replace diesel buses or only add to them"
+
+placeholders = []
+
+notes = """
+BMTC, Bengaluru's bus company, adds 2,000 electric buses in place of diesel ones (the high
+scenario of CSTEP's 2022 plan for the Karnataka State Pollution Control Board).
+
+The cut is partly borrowed. No Bengaluru source found separates buses from other heavy vehicles
+(CSTEP's inventory puts buses in with trucks, 56.5% of tailpipe PM together). So the cut uses
+TERI (2021) for Delhi-NCR: electrifying 25% of buses cut transport's PM2.5 emissions by 6%, and
+100% by 23%, about 0.235 of transport per unit share of the fleet electrified. Times 2,000 of
+BMTC's 6,400 buses (2016) gives the most likely value; the spread (half to one and a half times)
+is a judgement for carrying an NCR result to Bengaluru. NCR's buses run largely on CNG, which may
+make buses a smaller share there than in diesel Bengaluru. The bus share of Bengaluru's transport
+PM2.5 is written up in data/MISSING.md.
+
+The cost is CSTEP's: about Rs 1 crore per bus, the whole purchase, as if paid up front. Under the
+gross-cost contracts BMTC actually uses, it pays per km instead, and the diesel bus it would
+otherwise have bought is not netted off; both make this a high cost. Running costs are left out.
+
+city-specific: the share of the fleet electrified (2,000 of BMTC's 6,400 buses) and the price per bus (CSTEP's Bengaluru plan) are Bengaluru's; another city needs its own bus fleet count and its own bus share of transport PM2.5.
+"""
+
+[[targets]]
+cause = "transport"
+cut = { dist = "triangular", p5 = 0.0367, mode = 0.0734, p95 = 0.110 }
+
+[cost]
+driver = "unit"
+unit = "electric bus"
+units = 2000
+once = 10000000
+currency = "INR"
+year = 2021
+
+[[evidence]]
+fields = ["targets.transport.cut"]
+source = "TERI (2021), Cost effectiveness of interventions for control of air pollution in Delhi"
+url = "https://teriin.org/sites/default/files/2021-12/Cost-effectiveness-of%20-interventions-for-control-of%20-air-pollution-in-Delhi.pdf"
+locator = "Section 6 'Transport', Figure 18 and text, printed p. 31 (PDF p. 42): 'Electrification of buses is expected to result in reduction of 6% and 23% in PM2.5 emissions from transport sector in 2022 and 2030'; the shares electrified, 25% in 2022 and 100% in 2030, are in Table 15 (printed p. 42)"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "per unit share of buses electrified: 0.06 / 0.25 = 0.24 and 0.23 / 1.00 = 0.23, mean 0.235. Share electrified in Bengaluru: 2,000 / 6,400 = 0.3125 (2,000 from CSTEP 2022 Table 5.7, printed p. 81; 6,400 BMTC buses in 2016 from UrbanEmissions.Info (2018), Air quality, emissions and source contributions analysis for the Greater Bengaluru region, p. 10, https://urbanemissions.info/wp-content/uploads/docs/2018-12-UEinfo-APnA-Bengaluru-Web.pdf). Mode = 0.235 x 0.3125 = 0.0734; p5, p95 = 0.5x, 1.5x, a judgement for borrowing an NCR result."
+
+[[evidence]]
+fields = ["cost.once", "cost.units"]
+source = "CSTEP (2022), Emission inventory and pollution reduction strategies for Bengaluru"
+url = "https://web.archive.org/web/2023/https://cstep.in/drupal/sites/default/files/2022-02/EI_Report_Final_04Feb22.pdf"
+locator = "Table 5.3 'Measures considered: transportation sector', printed p. 79 (PDF p. 97): 'Introduction of electric buses | Electric buses will be introduced instead of diesel variants (up to 2000 buses) | 10 million. (approx.)' per vehicle; Table 5.7 (printed p. 81): 'Number of electric buses to be added by 2024: 2,000' (HER)"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "Rs 10,000,000 per bus x 2,000 buses. Price year not stated; taken as 2021, the year before publication (February 2022)."

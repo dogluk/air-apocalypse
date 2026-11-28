@@ -70,7 +70,7 @@ OTHER = (
     Input("timing", "Timing of benefit (intervention files)", "immediate, or EPA 20-year lag", (),
           switch="in the intervention file"),
     Input("causes", "Causes of PM2.5 by city", "apna", (),
-          switch="airhealth causes CITY to see them; chosen per run in the ranking (plan D)",
+          switch="airhealth causes CITY to see them; chosen per run in the ranking",
           pending="the ~45 other NCAP reports on PRANA"),
     Input("fx", "Exchange rate (intervention costs)", "World Bank annual", (), switch="none"),
 )

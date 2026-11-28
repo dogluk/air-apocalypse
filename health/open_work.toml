@@ -1,0 +1,957 @@
+# Open work for airhealth: the source of truth, curated by hand. Read by scripts/open_work.py,
+# which checks it and writes docs/open-work.md and docs/open-work.json (do not edit those).
+#
+# Rules for editing this file:
+#   - An id (OW-NNN) never changes and is never reused. Finished items are not deleted: set
+#     status = "done" and name the commit in `closed_by`; they leave the generated list.
+#   - Add new items at the end with the next number.
+#   - Paths are relative to the repository root. A landing file may be a folder when the work
+#     creates a new file in it.
+#   - affects: "measure:<id>" (a file in health/interventions/library/), "study:<id>" (a study
+#     in health/data/causes.csv) or "table:<file>" (a file in health/data/). Empty means the
+#     work changes no input of the ranking (it adds a curve, a check or a study).
+#   - weakness: the weakest evidence the item would replace, one of: placeholder, R (recalled),
+#     S (seen in a summary or press report), receptor_fallback (a stand-in source-receptor table),
+#     judgement, partial_cost, none.
+#   - size: "one sitting" or "bigger".
+#   - kind: desk lookup, data build, model build, fieldwork or review.
+#   - origin: where the item came from (MISSING.md heading, AGENTS.md, lit/gaps.md, or the
+#     model's own flags), so that nothing falls out of the list unseen.
+
+# ---------------------------------------------------------------- MISSING.md: curves and exposure
+
+[[item]]
+id = "OW-001"
+title = "Burnett et al. 2022 Fusion curve parameters"
+kind = "desk lookup"
+size = "bigger"
+weakness = "none"
+question = "What are the Fusion parameters (theta, alpha, mu, nu, age terms) for IHD, stroke, COPD, lung cancer, LRI and type 2 diabetes?"
+read_at = "Burnett RT et al. 2022, Environ Res 204: 112245, doi 10.1016/j.envres.2021.112245: the parameter tables of the full text (the PDF did not return text to the tools used)."
+lands_in = ["health/data"]
+lands_field = "a new curves_fusion*.csv, with a sources.toml entry; cause-specific, so it needs IHME cause deaths (data_local tier)"
+check = "Provenance test (test_provenance) passes with the new file; a new case in benchmarks/cases.toml reproduces the paper's published relative risks inside its stated band."
+affects = []
+origin = ["MISSING.md: Burnett et al. 2022 Fusion"]
+
+[[item]]
+id = "OW-002"
+title = "Check GEMM NCD+LRI rows against the PNAS SI table"
+kind = "review"
+size = "one sitting"
+weakness = "none"
+question = "Do the twelve rows in curves_gemm_ncd_lri.csv match the SI appendix table of the GEMM paper (PNAS)?"
+read_at = "PNAS SI appendix (pnas.org returned 403; PMC and Europe PMC gave a browser check): open in a real browser and compare against the DataGEMM calculator values now used."
+lands_in = ["health/data/sources.toml"]
+lands_field = "the curves_gemm_ncd_lri.csv entry: locator and a note that the SI table was read"
+check = "Provenance test passes; any row that differs is corrected in curves_gemm_ncd_lri.csv and test_benchmarks (the GEMM India total, PNAS Table 1) still passes."
+affects = ["table:curves_gemm_ncd_lri.csv"]
+origin = ["MISSING.md: GEMM supplementary appendix not read directly"]
+
+[[item]]
+id = "OW-003"
+title = "Published interval for the AQLI coefficient"
+kind = "desk lookup"
+size = "one sitting"
+weakness = "none"
+question = "What interval does Ebenstein et al. 2017 (PNAS 114: 10384) give for its PM10 estimate, and how does AQLI's PM10-to-PM2.5 conversion carry it to the 0.98 years per 10 ug/m3?"
+read_at = "Ebenstein et al. 2017, PNAS 114: 10384-89 (the estimate and its standard error); AQLI methodology page for the conversion."
+lands_in = ["health/airhealth/curves.py"]
+lands_field = "the aqli curve's sample(): an interval in place of returning the curve unchanged, with its source in sources.toml"
+check = "Provenance test lists the new constants with locators; test_curves gains a test that aqli.sample() now varies."
+affects = []
+origin = ["MISSING.md: AQLI coefficient: no published uncertainty"]
+
+[[item]]
+id = "OW-004"
+title = "City populations after Census 2011"
+kind = "data build"
+size = "bigger"
+weakness = "none"
+question = "Is there an official population for each of the 50 urban agglomerations after 2011, or a state-urban-growth scaling that can be labelled as a model?"
+read_at = "Lead: the Technical Group's urban projection tables (state urban growth since 2011); UN World Urbanization Prospects (not an Indian official source). No official city figure found yet."
+lands_in = ["health/data/cities.csv"]
+lands_field = "a population column per year, flagged as a model if scaled"
+check = "Provenance test passes; airhealth rank Bengaluru --sensitivity re-run shows the change in life-years per crore (a city's population scales deaths)."
+affects = ["table:cities.csv"]
+origin = ["MISSING.md: City populations after 2011"]
+
+[[item]]
+id = "OW-005"
+title = "Cause shares for ages 25-29"
+kind = "data build"
+size = "bigger"
+weakness = "none"
+question = "How do deaths from NCD and LRI split inside ages 15-29, so the 25-29 band stops taking the all-15-29 share (the tool's 25-29 deaths are 0.64 of GBD 2015's)?"
+read_at = "Lead: the Million Death Study or IHME cause-by-age data; no SRS table splits 15-29 further."
+lands_in = ["health/data/cause_share_ncd_lri.csv"]
+lands_field = "the 25-29 row (now a copy of 15-29)"
+check = "Provenance test passes; the GEMM-workbook benchmark in test_benchmarks moves toward 1.0 and stays inside its stated band without any value tuned to it."
+affects = ["table:cause_share_ncd_lri.csv"]
+origin = ["MISSING.md: Cause shares for ages 25-29"]
+
+[[item]]
+id = "OW-006"
+title = "GBD 2023 risk-curve information sheet"
+kind = "review"
+size = "one sitting"
+weakness = "none"
+question = "Does IHME's GBD 2023 air pollution information sheet confirm that the 2025-dated relative-risk files are on the ln RR scale?"
+read_at = "GHDx record 594794, IHME_GBD_2023_AIR_POLLUTION_1990_2023_INFO_SHEET_Y2025M12D15.PDF (behind IHME's login)."
+lands_in = ["health/IHME_DOWNLOADS.md"]
+lands_field = "the status paragraph on the scale of the relative-risk files: quote IHME's words and the page"
+check = "Reviewer reads the cited page; test_ihme still passes (the scale is unchanged) or the curve loader is corrected and test_ihme updated."
+affects = []
+origin = ["MISSING.md: GBD 2023 risk-curve information sheet (login)"]
+
+[[item]]
+id = "OW-007"
+title = "GBD all-cause deaths for the same 32 locations"
+kind = "data build"
+size = "one sitting"
+weakness = "none"
+question = "What are GBD's all-cause death counts for the 32 locations, ages and years of Part B?"
+read_at = "GBD Results tool: Cause of death or injury, Deaths, Number, cause All causes, same locations, ages and years as Part B (IHME terms: the file stays in data_local)."
+lands_in = ["health/data_local"]
+lands_field = "a new all-cause deaths file, with the code in airhealth/ihme.py that reads it (a deaths=gbd source)"
+check = "test_ihme gains a test that deaths=gbd loads and sums to the cause-specific deaths within the tabulated ratio; the IHME file is not committed."
+affects = []
+origin = ["MISSING.md: GBD all-cause deaths"]
+
+[[item]]
+id = "OW-008"
+title = "Reproduce GBD 2023's 969,726 India deaths from outdoor PM2.5"
+kind = "model build"
+size = "bigger"
+weakness = "none"
+question = "How much of the gap between GBD's 969,726 and the tool's 1.61 million on GBD's own curve, map and year does GBD's split of one PM2.5 risk between outdoor air and cooking smoke explain?"
+read_at = "GHDx record 594794, Household Air Pollution Estimates [CSV] (no login for that file); GBD 2023 risk-factor appendix for the split method."
+lands_in = ["health/benchmarks/cases.toml", "health/IHME_DOWNLOADS.md"]
+lands_field = "a new benchmark case stating the ratio expected from the split, and the written-up remainder as unexplained"
+check = "Named benchmark band: the new case passes only near the expected ratio (test_benchmarks); the gap is not closed by tuning any input (AGENTS.md rule 5)."
+affects = []
+origin = ["MISSING.md: GBD's attributable deaths for India", "AGENTS.md open work 4", "AGENTS.md: what is not solid (GBD count not reproduced)"]
+
+# ---------------------------------------------------------------- MISSING.md: causes by city
+
+[[item]]
+id = "OW-009"
+title = "Chennai source apportionment: final IIT Madras report"
+kind = "desk lookup"
+size = "one sitting"
+weakness = "none"
+question = "Does the final IIT Madras report for TNPCB/GCC print PM2.5 source-apportionment shares for Chennai?"
+read_at = "Chennai Corporation / TNPCB: final report of IIT Madras (the interim report, 29 pages, prints no shares). Lead: NCAP city action plan pages."
+lands_in = ["health/data/causes.csv"]
+lands_field = "new rows for Chennai (size_fraction PM2.5), each with url, locator and evidence_key O"
+check = "Provenance test and test_causes pass with the new rows; shares for the study sum to at most 100."
+affects = ["table:causes.csv"]
+origin = ["MISSING.md: Causes by city: Chennai"]
+
+[[item]]
+id = "OW-010"
+title = "Ahmedabad PM2.5 source split"
+kind = "desk lookup"
+size = "one sitting"
+weakness = "none"
+question = "Is there a PM2.5 (not unsized PM or PM10) source split for Ahmedabad from GEMI or the NCAP final report?"
+read_at = "GEMI report of 5 Nov 2020 (PRANA file Ahmedabad.pdf, Table 5.1.1 is an emission-inventory split of unsized PM); lead: the NCAP final report or a later GEMI study."
+lands_in = ["health/data/causes.csv"]
+lands_field = "new Ahmedabad rows with size_fraction PM2.5"
+check = "Provenance test and test_causes pass; rows rejected unless size_fraction is PM2.5."
+affects = ["table:causes.csv"]
+origin = ["MISSING.md: Causes by city: Ahmedabad"]
+
+[[item]]
+id = "OW-011"
+title = "Biswal et al. 2025 Fig. 3: which cities lie in which stubble region"
+kind = "fieldwork"
+size = "one sitting"
+weakness = "none"
+question = "In Fig. 3 of Biswal et al. 2025, does Ludhiana, Amritsar or Chandigarh fall inside North Punjab, Southwest Punjab, Central Haryana or Delhi-NCR?"
+read_at = "doi 10.1039/d5ea00052a, Fig. 3 (the region map) on the RSC site, and Table S2 in its supplement. The publisher blocks scripts (HTTP 403); a person must open it in a browser."
+lands_in = ["health/data/causes.csv"]
+lands_field = "rows with boundary = region for each city the map places, using the paper's Sec. 3.4 values for 2022, 2023 and 2024 (already in MISSING.md)"
+check = "Provenance test passes with the figure number in each row's locator; test_causes confirms the new rows read as region, not city, shares."
+affects = ["table:causes.csv"]
+origin = ["MISSING.md: Biswal et al. 2025 regional stubble shares", "MISSING.md: Biswal et al. 2025 Fig. 3 needs a person to open it", "AGENTS.md open work 1"]
+
+[[item]]
+id = "OW-012"
+title = "Kulkarni et al. 2020: year simulated and figure behind the 20%"
+kind = "desk lookup"
+size = "one sitting"
+weakness = "S"
+question = "Which year did Kulkarni et al. 2020 (ES&T 54(8): 4790) simulate, and in which table or figure is the 20% stubble share?"
+read_at = "ACS full text (paywalled); the 20% is read from the abstract only. Lead: institutional access or the authors' preprint."
+lands_in = ["health/data/causes.csv"]
+lands_field = "the kulkarni2020 row: year_sampled (blank now) and locator"
+check = "Provenance test passes; the row's evidence_key stays O only if the figure or table is cited."
+affects = ["table:causes.csv"]
+origin = ["MISSING.md: Kulkarni et al. 2020"]
+
+[[item]]
+id = "OW-013"
+title = "Lok Sabha answer of 10 March 2025: Delhi stubble shares 2020-24"
+kind = "desk lookup"
+size = "one sitting"
+weakness = "S"
+question = "Does the Lok Sabha written answer of 10 March 2025 give DSS season means of 13, 13, 9, 11 and 10.6% for 2020-24, as the Times of India reported?"
+read_at = "The answer text on sansad.in, loksabhadocs.nic.in or eparlib.nic.in (searches there returned only unrelated PIB releases); the press values are in MISSING.md, Leads to confirm."
+lands_in = ["health/data/causes.csv"]
+lands_field = "Delhi stubble rows by year (2020-24), with the answer number and page as locator"
+check = "Provenance test passes; each row cites the answer, not the press report; the leads entry in MISSING.md is struck."
+affects = ["table:causes.csv"]
+origin = ["MISSING.md: Lok Sabha written answer", "MISSING.md: Leads to confirm", "AGENTS.md open work 1"]
+
+[[item]]
+id = "OW-014"
+title = "Nagar and Sharma 2022: Delhi and Kanpur stubble shares"
+kind = "desk lookup"
+size = "one sitting"
+weakness = "S"
+question = "What share of PM2.5 does Nagar and Sharma 2022 (Urban Climate 41: 101084) attribute to crop-residue burning in Delhi and in Kanpur, and for which months?"
+read_at = "ScienceDirect, doi 10.1016/j.uclim.2022.101084 (no abstract returned to the tools used); the press gives Delhi 31% and Kanpur 21% (Hindustan Times, 19 Jan 2022). Read the paper's table."
+lands_in = ["health/data/causes.csv"]
+lands_field = "a Kanpur stubble row (Kanpur has none) and, if wanted, a Delhi row, with table and page"
+check = "Provenance test passes; test_causes passes; Kanpur's agri_burning share is non-NaN."
+affects = ["table:causes.csv"]
+origin = ["MISSING.md: Nagar and Sharma 2022", "MISSING.md: Leads to confirm", "AGENTS.md open work 1"]
+
+[[item]]
+id = "OW-015"
+title = "Unsized PM dispersion results (Mumbai, Maharashtra, Hyderabad, Bengaluru reports)"
+kind = "desk lookup"
+size = "bigger"
+weakness = "none"
+question = "Do the Mumbai (Table 7.1 col. C), Maharashtra, Hyderabad and Bengaluru dispersion results state a PM size, so they can be tabulated as PM2.5?"
+read_at = "The four city reports (NEERI/IIT Bombay, IIT Hyderabad, CSTEP): the model-setup chapters for the pollutant and size cut."
+lands_in = ["health/data/causes.csv"]
+lands_field = "new rows, only where the size cut is PM2.5"
+check = "Provenance test and test_causes pass; no row has size_fraction other than PM2.5."
+affects = ["table:causes.csv"]
+origin = ["MISSING.md: Mumbai AERMOD column and the other dispersion results"]
+
+# ---------------------------------------------------------------- MISSING.md: Bengaluru measures
+
+[[item]]
+id = "OW-016"
+title = "Buses' own share of Bengaluru's transport PM2.5"
+kind = "desk lookup"
+size = "bigger"
+weakness = "none"
+question = "What share of Bengaluru's transport PM2.5 do buses alone emit (BMTC fleet x km x emission factor), so the NCR cut (23%) need not be borrowed?"
+read_at = "Lead: APnA gridded inventory files on Zenodo (Bengaluru), an ICCT or CSTEP bus study. CSTEP 2022 Sec. 3.2.2.8 lumps buses with trucks (56.5%)."
+lands_in = ["health/interventions/library/electric_buses.toml"]
+lands_field = "targets.transport.cut, replacing the evidence_from Delhi-NCR entry"
+check = "Measure-file validation (test_library, airhealth measures) passes; airhealth rank Bengaluru --sensitivity shows electric_buses' rank change."
+affects = ["measure:electric_buses"]
+origin = ["MISSING.md: Buses' share of Bengaluru's transport PM2.5", "model flag: evidence_from Delhi-NCR"]
+
+[[item]]
+id = "OW-017"
+title = "Cost of door-to-door waste collection for Bengaluru, from a primary"
+kind = "desk lookup"
+size = "one sitting"
+weakness = "S"
+question = "What do the GBA/BSWML budget book or tender estimates say the added yearly cost of collection reaching every household is, and what share of households lack door-to-door collection?"
+read_at = "GBA (formerly BBMP) budget, solid-waste line; BSWML tender documents. Now newspaper reports of officials (New Indian Express 30 Oct 2026; The Hindu 29 and 13 March 2025)."
+lands_in = ["health/interventions/library/waste_collection_burning_ban.toml"]
+lands_field = "[cost.full] low and high evidence entries, S to O (the what-if full_cost)"
+check = "Measure-file validation passes with no S key left in cost.full; airhealth rank Bengaluru --sensitivity re-run shows whatif:full_cost moving."
+affects = ["measure:waste_collection_burning_ban"]
+origin = ["MISSING.md: What full door-to-door waste collection would cost Bengaluru", "model flag: [S] numbers; partial cost"]
+
+[[item]]
+id = "OW-018"
+title = "Compliance cost of construction-dust controls in Bengaluru"
+kind = "desk lookup"
+size = "bigger"
+weakness = "S"
+question = "What is the area under active construction in Bengaluru, and what floor-area ratio and dust-only mitigation cost apply (the high end rests on a FAR seen only in a snippet)?"
+read_at = "RERA Karnataka or building-permission data for area under construction; Karnataka SEIAA clearance PDF File SEIAA 123 CON 2025, p. 5 (open it; only a search snippet was seen)."
+lands_in = ["health/interventions/library/construction_dust_controls.toml"]
+lands_field = "[cost.full] high evidence entry (key S to O) and the footprint derivation"
+check = "Measure-file validation passes with no S key left in cost.full; rank --sensitivity re-run shows whatif:full_cost."
+affects = ["measure:construction_dust_controls"]
+origin = ["MISSING.md: Compliance cost of construction-dust controls in Bengaluru", "model flag: [S] number; partial cost"]
+
+[[item]]
+id = "OW-019"
+title = "Lower ends of CSTEP's under-1-crore costs"
+kind = "desk lookup"
+size = "one sitting"
+weakness = "judgement"
+question = "What does enforcement of dust rules and of the waste-burning ban actually cost the city government per year, so Rs 0.1 crore need not stand as a judged low end?"
+read_at = "BBMP/GBA, Karnataka State Pollution Control Board or CSTEP's own working notes for Table 5.11 (printed p. 93 gives only the upper bound, under 1 crore)."
+lands_in = ["health/interventions/library/construction_dust_controls.toml", "health/interventions/library/waste_collection_burning_ban.toml"]
+lands_field = "cost.annual low end in each, and the [cost.full] derivations that reuse it"
+check = "Measure-file validation passes with the low end cited at source; rank --sensitivity re-run: both are top-5 measures, so cost:* moves show in the research list."
+affects = ["measure:construction_dust_controls", "measure:waste_collection_burning_ban"]
+origin = ["MISSING.md: Lower ends of CSTEP's <1 crore costs", "model flag: judgement on the top-ranked measures"]
+
+[[item]]
+id = "OW-020"
+title = "LPG refill subsidy: cost per household from Vital Strategies 2024"
+kind = "desk lookup"
+size = "one sitting"
+weakness = "none"
+question = "What cost per household does Vital Strategies (2024), Accelerating the health benefits of scaling clean household energy in India, give for LPG refill subsidies, and does it agree with CSTEP's Bengaluru figures?"
+read_at = "Vital Strategies 2024 PDF (not opened this session): the cost table or annex for LPG refill subsidy per household and per DALY."
+lands_in = ["health/interventions/library/lpg_refill_subsidy.toml"]
+lands_field = "cost evidence: a second source beside CSTEP's, or a labelled variant file if they differ"
+check = "Measure-file validation passes; if it enters as a range, rank --sensitivity re-run shows lpg_refill_subsidy (top 5 on all eight curves) holds or moves."
+affects = ["measure:lpg_refill_subsidy"]
+origin = ["MISSING.md: Not used: Vital Strategies (2024)"]
+
+[[item]]
+id = "OW-021"
+title = "IIT Bombay's final report on the Connaught Place smog tower"
+kind = "desk lookup"
+size = "one sitting"
+weakness = "S"
+question = "What cut in PM2.5 by distance and direction, and what yearly operating cost, does the IIT Bombay final report (30 Sept 2023) give for the tower?"
+read_at = "The report to DPCC (or the Supreme Court record). Now the Indian Express (26 Oct 2023) and Hindustan Times (10 Nov 2023) accounts: 12-18% within 500 m."
+lands_in = ["health/interventions/library/smog_tower.toml"]
+lands_field = "exposure.cut (key S to O) and cost.annual (the partial cost leaves out land and running cost after year two)"
+check = "Measure-file validation passes with no S key left; the smog_tower long_shot flag test still holds (test_library)."
+affects = ["measure:smog_tower"]
+origin = ["MISSING.md: IIT Bombay's final report", "model flag: [S] number; partial cost"]
+
+[[item]]
+id = "OW-022"
+title = "Bengaluru school enrolment and classrooms from UDISE+ school files"
+kind = "data build"
+size = "one sitting"
+weakness = "judgement"
+question = "What is the total enrolment and the number of classrooms across Bengaluru Urban North and South schools in UDISE+ 2024-25?"
+read_at = "OpenCity dataset bengaluru-urban-udise-2024-25 (https://data.opencity.in/dataset/bengaluru-urban-udise-2024-25): columns enrolment and total_class_rooms. The site's bot check blocked every download tried; use a browser."
+lands_in = ["health/interventions/library/school_purifiers.toml"]
+lands_field = "exposure.covered and the classroom count and class size (now 27-50 from the state ratio and Delhi KV classes)"
+check = "Measure-file validation passes; each new number has a locator; rank --sensitivity re-run shows school_purifiers' change."
+affects = ["measure:school_purifiers"]
+origin = ["MISSING.md: Bengaluru's own school enrolment and classrooms"]
+
+[[item]]
+id = "OW-023"
+title = "Sustained mask wear among people given free N95s"
+kind = "desk lookup"
+size = "one sitting"
+weakness = "judgement"
+question = "In an Indian or Chinese study of people given masks free during pollution episodes, what share wore them every time they went out, by wear diary or sensor?"
+read_at = "Lead: trials with wear diaries or sensors (not one-off surveys); search PubMed for mask adherence in pollution-episode trials."
+lands_in = ["health/interventions/library/n95_winter.toml"]
+lands_field = "p_success_basis and, if the figure fits a model field, exposure.hours (adherence is folded into the odds now)"
+check = "Measure-file validation passes; break-even odds in the rank --sensitivity output show whether the measure's rank changes at the sourced adherence."
+affects = ["measure:n95_winter"]
+origin = ["MISSING.md: How many people would wear a free N95 every time", "model flag: judgement odds"]
+
+[[item]]
+id = "OW-024"
+title = "Age split of Bengaluru's outdoor workers"
+kind = "data build"
+size = "one sitting"
+weakness = "none"
+question = "What are the ages of Bengaluru's outdoor workers (PLFS tables by age and occupation), so n95_winter can name the group it covers?"
+read_at = "PLFS annual report tables by age and occupation for Karnataka urban; read the table and page."
+lands_in = ["health/interventions/library/n95_winter.toml"]
+lands_field = "[exposure] ages (absent now, so all-age death rates are used)"
+check = "Measure-file validation passes (ages in whole bands); test_library's age-group tests cover it; rank --sensitivity re-run shows the change."
+affects = ["measure:n95_winter"]
+origin = ["MISSING.md: Children's share of air-pollution deaths, for school measures (n95_winter part)"]
+
+# ---------------------------------------------------------------- MISSING.md: regional measures
+
+[[item]]
+id = "OW-025"
+title = "A stubble receptor table by receiving district for Punjab and Haryana fires alone"
+kind = "data build"
+size = "bigger"
+weakness = "receptor_fallback"
+question = "What is the change in each receiving district's PM2.5 when Punjab and Haryana crop fires are removed (Lan et al. 2022's forward runs, or a tagged GEOS-Chem or WRF-Chem run), instead of McDuffie's all-origins crop-burning field that is about 14 times smaller than Lan's national figure and reaches Bengaluru?"
+read_at = "Lan et al. 2022, Nat Commun 13:6537: ask the authors for the 23 forward-run difference fields (0.5 x 0.625 degrees); Kulkarni et al. 2020, ES&T 54: 4790 (paywalled) for a tagged run. All twelve Supplementary files give source-state tables only."
+lands_in = ["health/data/receptor_stubble.csv", "health/scripts/build_receptor.py"]
+lands_field = "delta_pm25_full per district; the fallback flag and caveat in sources.toml come off when it is replaced"
+check = "Re-run of airhealth rank --sensitivity: the stubble units leave the research list's top and whatif:stubble_lan2022 is retired; test_library's test_stubble_does_not_reach_bengaluru stops being an expected failure."
+affects = ["table:receptor_stubble.csv", "measure:happy_seeder_subsidy", "measure:punjab_out_of_rice", "measure:stubble_pes_upfront"]
+origin = ["MISSING.md: Regional measures: Stubble (Lan et al. 2022)", "MISSING.md: The stubble table reaches Bengaluru", "MISSING.md: Lan et al. 2022's supplementary files", "AGENTS.md open work 5", "model flag: receptor fallback"]
+
+[[item]]
+id = "OW-026"
+title = "Cropper et al. 2021 gridded data release for coal power plants"
+kind = "data build"
+size = "bigger"
+weakness = "receptor_fallback"
+question = "What is each district's PM2.5 change from the 2018 coal plants in the CAMx difference field (0.25 degrees) of the Cropper et al. 2021 data release, instead of the state figure every district takes now (SI Table S2)?"
+read_at = "openICPSR project 130404 (doi 10.3886/E130404V1): needs a free login and a browser (Cloudflare check blocks scripts); average the field to districts with scripts/build_receptor.py's pixels."
+lands_in = ["health/data/receptor_power_cropper2021.csv", "health/scripts/build_receptor_cropper.py"]
+lands_field = "delta_pm25_full per district (state-level now), and its sources.toml entry"
+check = "test_library's Cropper receptor test (state figure) is replaced by one checking the district values against the paper's state totals; rank --sensitivity re-run shows fgd_scrubbers' change."
+affects = ["table:receptor_power_cropper2021.csv", "measure:fgd_scrubbers"]
+origin = ["MISSING.md: Regional measures: Coal power plants (Cropper et al. 2021)", "model flag: receptor fallback (state-level)"]
+
+[[item]]
+id = "OW-027"
+title = "A power-plant-only gridded field in place of McDuffie's coal energy sector"
+kind = "data build"
+size = "bigger"
+weakness = "receptor_fallback"
+question = "What is the district PM2.5 change from a power-plant-only zero-out run, since McDuffie's ENEcoal also holds fuel production and transformation?"
+read_at = "Lead: a GBD MAPS India run (local-only here) or another published power-only zero-out; no source chosen yet."
+lands_in = ["health/data/receptor_energy_coal.csv"]
+lands_field = "delta_pm25_full per district, or a new receptor_*.csv beside it (the two are never averaged)"
+check = "Provenance test passes with the new file's locator; no measure reads receptor_energy_coal.csv now, so a rank --sensitivity re-run is needed only if one is pointed at it."
+affects = ["table:receptor_energy_coal.csv"]
+origin = ["MISSING.md: A power-only gridded field"]
+
+[[item]]
+id = "OW-028"
+title = "What the Happy Seeder subsidy did to burning"
+kind = "desk lookup"
+size = "bigger"
+weakness = "judgement"
+question = "What share of the Happy Seeder area would otherwise have burned (the file takes a quarter to three quarters), and what are the per-hectare costs of the Happy Seeder against burning (Shyamsundar et al. 2019, Science 365: 536)?"
+read_at = "Shyamsundar et al. 2019 (UC eScholarship copy returned 403; Science paywalled); an evaluation of the CRM scheme against district fire counts and machines delivered."
+lands_in = ["health/interventions/library/happy_seeder_subsidy.toml"]
+lands_field = "region.cut or its coverage factor (the judged quarter-to-three-quarters), and cost evidence"
+check = "Measure-file validation passes with the judged factor sourced; rank --sensitivity re-run shows effect:happy_seeder_subsidy (top-5 change on all eight curves in the last run)."
+affects = ["measure:happy_seeder_subsidy"]
+origin = ["MISSING.md: Happy Seeder (Shyamsundar et al. 2019)", "model flag: judgement; top of the research list"]
+
+# ---------------------------------------------------------------- MISSING.md: industry, kilns, seeding
+
+[[item]]
+id = "OW-029"
+title = "Surat emissions market: plants covered now, and the regulator's running cost"
+kind = "desk lookup"
+size = "one sitting"
+weakness = "partial_cost"
+question = "How many of the 906 solid-fuel plants does the Surat market cover now, and what does GPCB spend to run it (staff, trading platform)?"
+read_at = "GPCB scheme documents or annual report on the Surat market (number of plants, budget). Greenstone et al. 2025 (QJE) trialled 162 of 318 plants in 2019-21."
+lands_in = ["health/interventions/library/emissions_market.toml"]
+lands_field = "cost.units or targets.industry.cut (what is already happening), and cost.annual (regulator's cost; flagged partial now)"
+check = "Measure-file validation passes and partial_cost is lifted only if the regulator's cost is read; test_library's emissions-market test updated."
+affects = ["measure:emissions_market"]
+origin = ["MISSING.md: Surat emissions market", "model flag: partial cost"]
+
+[[item]]
+id = "OW-030"
+title = "Patna: how many brick kilns are already zig-zag"
+kind = "desk lookup"
+size = "bigger"
+weakness = "none"
+question = "How many of the 300 kilns in Patna's airshed are already zig-zag?"
+read_at = "Bihar State Pollution Control Board's kiln register, or a satellite count of zig-zag against fixed-chimney kilns (kiln shapes are visible in imagery). APnA 2017 gives 300 kilns, 9.3% of PM2.5."
+lands_in = ["health/interventions/library/zigzag_kilns.toml"]
+lands_field = "cost.units (kilns left to convert) and targets.brick_kilns.cut"
+check = "Measure-file validation passes; rank --sensitivity re-run shows zigzag_kilns' change; test_library's zigzag test updated."
+affects = ["measure:zigzag_kilns"]
+origin = ["MISSING.md: Patna's brick kilns"]
+
+[[item]]
+id = "OW-031"
+title = "A practices-only brick kiln measure (Brooks et al. 2025)"
+kind = "model build"
+size = "bigger"
+weakness = "none"
+question = "What cut in PM and what cost does a change to how kilns are fired give in Brooks et al. 2025 (Science, doi 10.1126/science.adr7394, a Bangladesh trial), and is it cheaper per life-year than conversion?"
+read_at = "Brooks N et al. 2025, Science, doi 10.1126/science.adr7394: results and cost tables."
+lands_in = ["health/interventions/library"]
+lands_field = "a new measure file from _template.toml (e.g. kiln_practices.toml)"
+check = "Measure-file validation (test_library) passes; airhealth run and rank Patna list it with its flags."
+affects = []
+origin = ["MISSING.md: Brooks N et al. 2025", "AGENTS.md open work 2"]
+
+[[item]]
+id = "OW-032"
+title = "Amritsar: industry's PM2.5 by fuel, and what UNDP's cost includes"
+kind = "desk lookup"
+size = "bigger"
+weakness = "judgement"
+question = "How much of Amritsar's industrial PM2.5 is fuel smoke against process dust (the 50% low cut is a judgement), and does UNDP's INR 248.6 million include the higher gas bill?"
+read_at = "UNDP 2025 literature-and-cost review (available upon request); Punjab Pollution Control Board's count of solid-fuel units in Amritsar with their fuel use. TERI 2021 Table 26 for NCR."
+lands_in = ["health/interventions/library/industrial_fuel_switch.toml"]
+lands_field = "targets.industry.cut low end and cost evidence (partial now)"
+check = "Measure-file validation passes with the judged low end sourced; rank --sensitivity re-run shows the change."
+affects = ["measure:industrial_fuel_switch"]
+origin = ["MISSING.md: Amritsar: industry's PM2.5 by fuel", "model flag: judgement; partial cost; evidence_from Delhi-NCR and Ludhiana"]
+
+[[item]]
+id = "OW-033"
+title = "IIT Kanpur's report on the October 2025 Delhi cloud-seeding trials"
+kind = "desk lookup"
+size = "one sitting"
+weakness = "S"
+question = "What does the trial report submitted to the Delhi Environment Department give for the PM2.5 change, the area covered, and the cost of a winter's seeding?"
+read_at = "The report to Delhi's Environment Department, or the parliamentary answers on its cost. Every number is now press (Hindustan Times, India Today, Indian Express, 28-30 Oct 2025)."
+lands_in = ["health/interventions/library/winter_cloud_seeding.toml"]
+lands_field = "exposure.cut, exposure.hours, exposure.covered and cost.annual: four S entries to O"
+check = "Measure-file validation passes with no S key left; the long_shot and near-zero-odds tests in test_library still hold."
+affects = ["measure:winter_cloud_seeding"]
+origin = ["MISSING.md: IIT Kanpur's report", "model flag: [S] numbers"]
+
+# ---------------------------------------------------------------- MISSING.md: licences
+
+[[item]]
+id = "OW-034"
+status = "done"
+closed_by = "4901ca7"
+title = "Redistribution terms for cached Google Trends responses"
+kind = "review"
+size = "one sitting"
+weakness = "none"
+question = "May the 392 cached Google Trends JSON responses under diwali/data/trends be redistributed?"
+read_at = "Google Trends terms of service, or a written answer from Google. The repository's notes give no licence."
+lands_in = ["diwali/README.md"]
+lands_field = "the licence table row for diwali/data/trends; or remove the JSON and keep trend_cityyear.csv"
+check = "Reviewer reads the cited terms; the diwali licence table names the terms or the files are gone from the tree."
+affects = []
+origin = ["MISSING.md: Licences: diwali/data/trends"]
+
+[[item]]
+id = "OW-035"
+status = "done"
+closed_by = "4901ca7"
+title = "Licence line for the model-made chart images"
+kind = "review"
+size = "one sitting"
+weakness = "none"
+question = "Which licence applies to the seven PNGs in health/charts, given their inputs are CC BY and ODbL?"
+read_at = "The inputs' licences in sources.toml; the repository LICENSE."
+lands_in = ["health/charts"]
+lands_field = "a licence line (README or note) beside the images"
+check = "Reviewer confirms the line matches the inputs' terms; provenance test passes."
+affects = []
+origin = ["MISSING.md: Licences: health/charts/*.png"]
+
+# ---------------------------------------------------------------- MISSING.md: widening measures
+
+[[item]]
+id = "OW-036"
+title = "Diesel generator capacity (kVA) per city"
+kind = "data build"
+size = "bigger"
+weakness = "none"
+question = "What is each city's installed DG-set capacity in kVA, from a city emission inventory or the state board's consent register?"
+read_at = "City emission inventories (CSTEP-style) or state pollution control board consent registers. The cut (CPCB's 70%) and the price per kVA (Haryana 2026) already transfer; only the 2,801,180 kVA is Bengaluru's."
+lands_in = ["health/interventions/library"]
+lands_field = "one file per city, dg_set_replacement_<city>.toml"
+check = "Measure-file validation passes for each new file; rank <city> lists the measure."
+affects = ["measure:dg_set_replacement"]
+origin = ["MISSING.md: Measures kept to one city: dg_set_replacement"]
+
+[[item]]
+id = "OW-037"
+title = "Brick kilns per city airshed"
+kind = "data build"
+size = "bigger"
+weakness = "none"
+question = "How many brick kilns lie in each other city's airshed, and how many are already zig-zag?"
+read_at = "Kiln counts in the other APnA city reports, or a satellite kiln count."
+lands_in = ["health/interventions/library"]
+lands_field = "one file per city, zigzag_kilns_<city>.toml"
+check = "Measure-file validation passes for each new file; rank <city> lists the measure."
+affects = ["measure:zigzag_kilns"]
+origin = ["MISSING.md: Measures kept to one city: zigzag_kilns"]
+
+[[item]]
+id = "OW-038"
+title = "Solid-fuel industrial plants per city (emissions market and fuel switch)"
+kind = "data build"
+size = "bigger"
+weakness = "none"
+question = "How many solid- and liquid-fuel industrial plants does each city have, from the state boards' consent records, and what does switching one to gas cost per plant or per tonne of fuel?"
+read_at = "State pollution control board consent records; TERI 2021 Table 26 gives NCR totals only; UNDP 2025 Table 2 is one total for Amritsar."
+lands_in = ["health/interventions/library"]
+lands_field = "one file per city for emissions_market and industrial_fuel_switch"
+check = "Measure-file validation passes for each new file; rank <city> lists the measure."
+affects = ["measure:emissions_market", "measure:industrial_fuel_switch"]
+origin = ["MISSING.md: Measures kept to one city: emissions_market, industrial_fuel_switch"]
+
+[[item]]
+id = "OW-039"
+title = "Bus fleets, two- and three-wheeler shares and fleets per city"
+kind = "data build"
+size = "bigger"
+weakness = "none"
+question = "What is each city's bus fleet, the bus and two/three-wheeler share of its transport PM, and its registrations, and what national e-bus price (central tenders) replaces CSTEP's Bengaluru plan?"
+read_at = "City bus undertakings' fleet counts; city emission inventories split by vehicle type; VAHAN registrations; central e-bus tender prices."
+lands_in = ["health/interventions/library"]
+lands_field = "one file per city for electric_buses and electric_two_three_wheelers"
+check = "Measure-file validation passes for each new file; rank <city> lists the measures."
+affects = ["measure:electric_buses", "measure:electric_two_three_wheelers"]
+origin = ["MISSING.md: Measures kept to one city: electric_buses, electric_two_three_wheelers"]
+
+[[item]]
+id = "OW-040"
+title = "Road dust against construction dust per city, and each city's road length and contracts"
+kind = "data build"
+size = "bigger"
+weakness = "none"
+question = "How does each city's dust split into road dust and construction, and what are its arterial road length, sweeping contract and enforcement budget?"
+read_at = "City emission inventories that split dust; municipal budgets and contracts. The causes table has one dust share; TERI's NCR prices per square metre transfer."
+lands_in = ["health/interventions/library"]
+lands_field = "one file per city for road_paving, road_vacuum_sweeping and construction_dust_controls"
+check = "Measure-file validation passes for each new file; rank <city> lists the measures."
+affects = ["measure:road_paving", "measure:road_vacuum_sweeping", "measure:construction_dust_controls"]
+origin = ["MISSING.md: Measures kept to one city: road_paving, road_vacuum_sweeping, construction_dust_controls"]
+
+[[item]]
+id = "OW-041"
+title = "LPG and waste-burning cuts and costs not tied to one Bengaluru plan"
+kind = "desk lookup"
+size = "bigger"
+weakness = "none"
+question = "What does an evaluation of LPG refill subsidies say about the effect on wood burning, with a cost per household, and how many households per city cook on wood (Census 2011 houselisting)? What is a per-tonne or per-household cost of full waste collection not tied to one plan?"
+read_at = "An LPG refill-subsidy evaluation (Vital Strategies 2024 is one lead); Census 2011 houselisting tables, fuel used for cooking, per city; municipal waste budgets."
+lands_in = ["health/interventions/library"]
+lands_field = "one file per city for lpg_refill_subsidy and waste_collection_burning_ban"
+check = "Measure-file validation passes for each new file; rank <city> lists the measures."
+affects = ["measure:lpg_refill_subsidy", "measure:waste_collection_burning_ban"]
+origin = ["MISSING.md: Measures kept to one city: lpg_refill_subsidy, waste_collection_burning_ban"]
+
+[[item]]
+id = "OW-042"
+title = "Urban work participation, monthly shape and density per city (masks, smog tower, schools)"
+kind = "data build"
+size = "bigger"
+weakness = "none"
+question = "What are each city's urban work participation (Census 2011 PCA), dirtiest months, population density around a site, share of children in school and pupil-teacher ratio (UDISE+ 2023-24 Tables 2.2 and 5.1)?"
+read_at = "Census 2011 Primary Census Abstract and district handbooks; UDISE+ 2023-24 state tables or district files; airhealth.months for the monthly shape."
+lands_in = ["health/interventions/library"]
+lands_field = "one file per city for n95_winter, smog_tower and school_purifiers"
+check = "Measure-file validation passes for each new file; rank <city> lists the measures."
+affects = ["measure:n95_winter", "measure:smog_tower", "measure:school_purifiers", "measure:school_purifiers_india"]
+origin = ["MISSING.md: Measures kept to one city: n95_winter, smog_tower, school_purifiers"]
+
+# ---------------------------------------------------------------- AGENTS.md and review
+
+[[item]]
+id = "OW-043"
+title = "Write one new intervention file with its size and cost read at source"
+kind = "model build"
+size = "one sitting"
+weakness = "none"
+question = "Which real measure (not yet in the library) has a size and a cost that can be read at a source, and what do the airhealth rank tables say about it?"
+read_at = "Any programme document or evaluation; start from health/interventions/library/_template.toml."
+lands_in = ["health/interventions/library"]
+lands_field = "a new <measure_id>.toml"
+check = "Measure-file validation (test_library, airhealth measures) passes; every number has one evidence entry or is a placeholder; airhealth run shows it."
+affects = []
+origin = ["AGENTS.md open work 2", "AGENTS.md open work 5"]
+
+[[item]]
+id = "OW-044"
+title = "Specialist review of the method and its unreviewed calls"
+kind = "review"
+size = "bigger"
+weakness = "none"
+question = "Does an air pollution epidemiologist agree with the modelling calls listed under Known limitations in health/README.md and at the end of docs/STATUS.md (curves stretched past their evidence, share-times-cut, the lag, the odds)?"
+read_at = "health/README.md, Known limitations; docs/STATUS.md, list of unreviewed calls; docs/specs/2026-11-12-intervention-ranking-design.md."
+lands_in = ["docs/STATUS.md"]
+lands_field = "the unreviewed-calls list: each call marked reviewed (by whom, when) or changed"
+check = "Reviewer's written comments linked from STATUS.md; any code change they cause has a test, and the benchmarks stay inside their bands."
+affects = []
+origin = ["AGENTS.md: what is not solid (no specialist has reviewed the method)"]
+
+# ---------------------------------------------------------------- lit/gaps.md
+
+[[item]]
+id = "OW-045"
+title = "G1: table of firecracker bans by state and year"
+kind = "data build"
+size = "bigger"
+weakness = "none"
+question = "Which state had which firecracker regime (outright ban, green crackers only, no ban) in which Diwali from 2014 to 2024, and what enforcement was reported?"
+read_at = "Supreme Court orders (2017, 2018, 2020, 2021), NGT orders and state notifications; read the order and paragraph for each state-year."
+lands_in = ["diwali/data"]
+lands_field = "a new firecracker_bans.csv, one row per state-year, each with the order and locator"
+check = "Every row has a source and locator, and the table covers every state of the ten Diwali cities for every year in trend_cityyear.csv (a test on the file)."
+affects = []
+origin = ["lit/gaps.md: G1", "AGENTS.md open work 3"]
+
+[[item]]
+id = "OW-046"
+title = "G1: difference-in-differences on the firecracker bans, PM2.5 and SO2"
+kind = "model build"
+size = "bigger"
+weakness = "none"
+question = "Did the Diwali effect in trend_cityyear.csv fall where and when bans came in, and does the SO2 signature weaken too (the firework fingerprint)?"
+read_at = "diwali/data/trend_cityyear.csv (the confounder-adjusted Diwali effect per city and year) and the ban table from OW-045."
+lands_in = ["diwali"]
+lands_field = "a new analysis script and its result table, with a write-up beside the other Diwali results"
+check = "A test that the design recovers a planted effect on simulated data; the result is reported with its intervals, and a null is stated as ambiguous between ineffective bans and weak enforcement."
+affects = []
+origin = ["lit/gaps.md: G1", "AGENTS.md open work 3"]
+
+[[item]]
+id = "OW-047"
+title = "G2: are forecast AQI series for GRAP archived?"
+kind = "desk lookup"
+size = "one sitting"
+weakness = "none"
+question = "Is the AQI forecast that triggers GRAP stages (Stage I at 201, II at 301, III at 401, IV at 450) archived publicly for any past winter?"
+read_at = "CAQM orders and CPCB or IITM forecast archives; the lit/gaps.md G2 note says to check this before committing."
+lands_in = ["lit/gaps.md"]
+lands_field = "a dated line under G2: archived (where, which winters) or closed"
+check = "Reviewer opens the named archive; if it exists, a follow-up item for the fuzzy regression discontinuity is added to open_work.toml."
+affects = []
+origin = ["lit/gaps.md: G2"]
+
+[[item]]
+id = "OW-048"
+title = "G3: a boundary-layer height source that contains aerosol feedback"
+kind = "desk lookup"
+size = "one sitting"
+weakness = "none"
+question = "Is there ceilometer or radiosonde boundary-layer height (IMD launches twice daily from Delhi) for the ten Diwali cities, since ERA5 does not represent aerosol-radiation feedback?"
+read_at = "IMD radiosonde archives; ceilometer networks; the lit/gaps.md G3 note says to resolve this before starting."
+lands_in = ["lit/gaps.md"]
+lands_field = "a dated line under G3: the source and its coverage, or the reframing around what ERA5 can support"
+check = "Reviewer opens the named archive; the Diwali ERA5 analysis is not extended until the line exists."
+affects = []
+origin = ["lit/gaps.md: G3"]
+
+[[item]]
+id = "OW-049"
+title = "G4: how much monitor siting moves the city number"
+kind = "model build"
+size = "bigger"
+weakness = "none"
+question = "Do roadside CAAQMS stations show different levels and a muted Diwali response against background sites, using station coordinates and OpenStreetMap road geometry?"
+read_at = "CAG audit of Delhi CAAQMS (2021, Ch. 2); station coordinates; OpenStreetMap roads; diwali/ station series."
+lands_in = ["diwali"]
+lands_field = "a new analysis script and result table; a line in the city-series note on the cross-station median"
+check = "A test on the siting classifier with fixture coordinates; the result is reported with intervals and compared with the cross-station median the repo already uses."
+affects = []
+origin = ["lit/gaps.md: G4"]
+
+[[item]]
+id = "OW-050"
+title = "G5: the diurnal PM2.5 distribution over the full decade"
+kind = "model build"
+size = "bigger"
+weakness = "none"
+question = "What does the hour-by-hour PM2.5 distribution look like for the ten cities over the full decade, and how much do daily means understate peaky exposure by city?"
+read_at = "diwali/data/hourly.parquet (rebuild with extract.py); diwali/tempo.py already computes it for the festival window."
+lands_in = ["diwali"]
+lands_field = "an extension of tempo.py to the full decade and a result table"
+check = "A test that the decade table reproduces the festival-window numbers already published (4x at midnight, 12x in Chennai) when cut to that window."
+affects = []
+origin = ["lit/gaps.md: G5"]
+
+[[item]]
+id = "OW-051"
+title = "G6: the multi-pollutant source fingerprint beyond Diwali"
+kind = "model build"
+size = "bigger"
+weakness = "none"
+question = "Do the SO2, NO2, CO and PM2.5 ratios at CAAQMS stations identify fires, festivals and industrial episodes continuously, and where does secondary aerosol scramble them?"
+read_at = "CAAQMS 15-minute data for six pollutants across about 500 stations; the Diwali SO2 result (rises 1.25-2.3x in 9 of 11 cities) is the test case."
+lands_in = ["diwali"]
+lands_field = "a new analysis script and result table"
+check = "A test that the ratio method recovers the known Diwali SO2 signature and fails, as expected, on aged regional air."
+affects = []
+origin = ["lit/gaps.md: G6"]
+
+[[item]]
+id = "OW-052"
+title = "G7: what IHME changed in its exposure map between GBD rounds"
+kind = "desk lookup"
+size = "bigger"
+weakness = "none"
+question = "What changed between GBD 2019's population-weighted PM2.5 for India (90.9) and GBD 2023's (53.6 for 2019, 54.1 for 2023), state by state, and how many burden figures still quoted rest on the old map?"
+read_at = "IHME GBD 2023 exposure file (place keys are numbers and the key was not among the downloaded files; see health/IHME_DOWNLOADS.md); GBD 2021 and 2023 methods appendices; Pandey et al. 2021 for the 2019 state values."
+lands_in = ["lit/gaps.md", "health/IHME_DOWNLOADS.md"]
+lands_field = "G7: a state-level comparison of the rounds and the cause of the change; the IHME file stays in data_local"
+check = "The state means for GBD 2023 are computed from the IHME file and printed beside ACAG and AQLI in airhealth compare; a test pins the India figure."
+affects = ["table:exposure_gbd2019.csv", "table:exposure_acag_total.csv", "table:exposure_aqli.csv"]
+origin = ["lit/gaps.md: G7"]
+
+# ---------------------------------------------------------------- model flags: partial costs
+
+[[item]]
+id = "OW-053"
+title = "Happy Seeder: farmers' share of the machine price and the rent they pay"
+kind = "desk lookup"
+size = "one sitting"
+weakness = "partial_cost"
+question = "What share of a Happy Seeder's price do farmers pay (a half, or a fifth) and what rent do they pay to use one?"
+read_at = "Punjab Agriculture Department's CRM scheme guidelines and the Government of Punjab's 2023 action plan."
+lands_in = ["health/interventions/library/happy_seeder_subsidy.toml"]
+lands_field = "cost: a [cost.full] range (the funder's cost counts the government share only), or cost.annual if the funder pays"
+check = "Measure-file validation passes; partial_cost flag lifted or a cost.full range added; rank --sensitivity re-run shows the what-if."
+affects = ["measure:happy_seeder_subsidy"]
+origin = ["model flag: partial cost (happy_seeder_subsidy)"]
+
+[[item]]
+id = "OW-054"
+title = "Home purifiers: electricity, hand-out cost and monitor cost"
+kind = "desk lookup"
+size = "one sitting"
+weakness = "partial_cost"
+question = "What do electricity, running a hand-out and the air-quality monitor (assumed at the upper end of use) add per household for home purifiers?"
+read_at = "Trial cost tables for the purifier field studies already cited in the file; the electricity tariff."
+lands_in = ["health/interventions/library/home_purifiers.toml"]
+lands_field = "cost.annual or a [cost.full] range; the partial_cost note"
+check = "Measure-file validation passes; each added item has a locator; rank --sensitivity re-run."
+affects = ["measure:home_purifiers"]
+origin = ["model flag: partial cost (home_purifiers)"]
+
+[[item]]
+id = "OW-055"
+title = "Masks: cost of handing them out and showing people how to fit them"
+kind = "desk lookup"
+size = "one sitting"
+weakness = "partial_cost"
+question = "What does distribution and fit training cost per person for a mask programme?"
+read_at = "Mask trials and municipal programme costs; find a cost line, not a mask price."
+lands_in = ["health/interventions/library/n95_winter.toml"]
+lands_field = "cost.annual or a [cost.full] range"
+check = "Measure-file validation passes; partial_cost flag lifted or a cost.full range added; rank --sensitivity re-run."
+affects = ["measure:n95_winter"]
+origin = ["model flag: partial cost (n95_winter)"]
+
+[[item]]
+id = "OW-056"
+title = "School purifiers: electricity, installation, upkeep and second machines"
+kind = "desk lookup"
+size = "one sitting"
+weakness = "partial_cost"
+question = "What do electricity, installation, staff time for filters and a second machine in larger classrooms add per classroom?"
+read_at = "The Delhi Kendriya Vidyalaya trial and other school purifier programme costs; UDISE+ classroom areas (see OW-022)."
+lands_in = ["health/interventions/library/school_purifiers.toml", "health/interventions/library/school_purifiers_india.toml"]
+lands_field = "cost.annual or a [cost.full] range, in both files"
+check = "Measure-file validation passes for both; partial_cost lifted or a cost.full range added; rank --sensitivity re-run."
+affects = ["measure:school_purifiers", "measure:school_purifiers_india"]
+origin = ["model flag: partial cost (school purifiers)"]
+
+[[item]]
+id = "OW-057"
+title = "Stubble payments: the cost of the agency that would run the scheme statewide"
+kind = "desk lookup"
+size = "one sitting"
+weakness = "partial_cost"
+question = "What would a state agency enrolling millions of paddy plots and checking them cost per plot or per year (the up-front contract trial counts payments and field checks only)?"
+read_at = "The documents of the randomised up-front payment trial cited in the measure file; Punjab Agriculture Department staffing and budget for the CRM scheme as a comparator."
+lands_in = ["health/interventions/library/stubble_pes_upfront.toml"]
+lands_field = "cost.annual or a [cost.full] range"
+check = "Measure-file validation passes; partial_cost lifted or a cost.full range added; rank --sensitivity re-run (stubble_pes_upfront is top 5 on all eight curves)."
+affects = ["measure:stubble_pes_upfront"]
+origin = ["model flag: partial cost (stubble_pes_upfront)"]
+
+# ---------------------------------------------------------------- model flags: borrowed evidence
+
+[[item]]
+id = "OW-058"
+title = "Bengaluru-specific effect of road paving, sweeping and construction controls"
+kind = "desk lookup"
+size = "bigger"
+weakness = "judgement"
+question = "What effect on PM2.5 have paving, vacuum sweeping and construction controls had in Bengaluru or another Indian city, so TERI's Delhi-NCR effect need not be borrowed (evidence_from)?"
+read_at = "Evaluations of road-dust measures in Indian cities (CSTEP, IIT, CPCB NCAP reports); TERI 2021 is the NCR source now."
+lands_in = ["health/interventions/library/road_paving.toml", "health/interventions/library/road_vacuum_sweeping.toml", "health/interventions/library/construction_dust_controls.toml"]
+lands_field = "targets.dust.cut, replacing the evidence_from Delhi-NCR entry"
+check = "Measure-file validation passes; rank --sensitivity re-run: effect:road_paving changes the top 5 on seven curves in the last run."
+affects = ["measure:road_paving", "measure:road_vacuum_sweeping", "measure:construction_dust_controls"]
+origin = ["model flag: evidence_from Delhi-NCR; top of the research list"]
+
+[[item]]
+id = "OW-059"
+title = "Old vehicle retirement: the share of a city's fleet that is old and registered there"
+kind = "desk lookup"
+size = "bigger"
+weakness = "judgement"
+question = "What share of a city's vehicle PM comes from vehicles old enough to scrap and registered in the city, so the Delhi-NCR figure need not be borrowed?"
+read_at = "VAHAN registrations by age and city; city emission inventories by vehicle age."
+lands_in = ["health/interventions/library/old_vehicle_retirement.toml"]
+lands_field = "targets.transport.cut and the evidence_from entry"
+check = "Measure-file validation passes; rank --sensitivity re-run shows the change."
+affects = ["measure:old_vehicle_retirement"]
+origin = ["model flag: evidence_from Delhi-NCR"]
+
+[[item]]
+id = "OW-060"
+title = "Purifier effect in Indian homes and classrooms (not Dhaka or Delhi alone)"
+kind = "desk lookup"
+size = "bigger"
+weakness = "judgement"
+question = "How many hours a day and what cut in breathed PM2.5 do purifiers give in Indian homes and schools in trials outside Delhi and Dhaka?"
+read_at = "Indian field trials of purifiers, with the hours of use and the indoor reduction."
+lands_in = ["health/interventions/library/home_purifiers.toml", "health/interventions/library/school_purifiers.toml", "health/interventions/library/school_purifiers_india.toml"]
+lands_field = "exposure.hours and exposure.cut, replacing the evidence_from entries"
+check = "Measure-file validation passes; rank --sensitivity re-run shows the change for each."
+affects = ["measure:home_purifiers", "measure:school_purifiers", "measure:school_purifiers_india"]
+origin = ["model flag: evidence_from (Dhaka and Delhi; Delhi)"]
+
+# ---------------------------------------------------------------- model flags: odds on the top five
+
+[[item]]
+id = "OW-061"
+title = "Odds that the waste-burning ban works: what comparable programmes delivered"
+kind = "desk lookup"
+size = "bigger"
+weakness = "judgement"
+question = "In Indian or comparable cities that paired a burning ban with door-to-door collection, what share cut open burning, and by how much?"
+read_at = "Evaluations of Solid Waste Management Rules 2016 enforcement; city audits (CAG, CPCB); the ban has existed since 2016 and burning continues."
+lands_in = ["health/interventions/library/waste_collection_burning_ban.toml"]
+lands_field = "p_success and p_success_basis (judgement now: 0.35)"
+check = "Measure-file validation passes with the basis citing an [[evidence]] entry; re-run airhealth rank Bengaluru --sensitivity and read break_even_odds for the measure on all eight curves."
+affects = ["measure:waste_collection_burning_ban"]
+origin = ["model flag: judgement odds on a top-5 measure"]
+
+[[item]]
+id = "OW-062"
+title = "Odds that construction-dust enforcement works: what comparable programmes delivered"
+kind = "desk lookup"
+size = "bigger"
+weakness = "judgement"
+question = "Where dust rules for construction sites (barriers, sprinkling, covering) have been enforced in Indian cities, how much did site dust fall, and how often were the rules followed?"
+read_at = "CPCB and DPCC audits of construction sites; Delhi's anti-dust campaign reports; TERI 2021."
+lands_in = ["health/interventions/library/construction_dust_controls.toml"]
+lands_field = "p_success and p_success_basis (judgement now: 0.4)"
+check = "Measure-file validation passes with the basis citing an [[evidence]] entry; re-run rank --sensitivity and read break_even_odds."
+affects = ["measure:construction_dust_controls"]
+origin = ["model flag: judgement odds on a top-5 measure"]
+
+[[item]]
+id = "OW-063"
+title = "Odds that LPG refill subsidies displace wood: what the evidence shows"
+kind = "desk lookup"
+size = "bigger"
+weakness = "judgement"
+question = "In India, what share of households given LPG or refill support stopped cooking on wood, and for how long?"
+read_at = "Evaluations of the national LPG connection scheme and refill subsidies (Vital Strategies 2024 is one lead; see OW-020)."
+lands_in = ["health/interventions/library/lpg_refill_subsidy.toml"]
+lands_field = "p_success and p_success_basis (judgement now: 0.5)"
+check = "Measure-file validation passes with the basis citing an [[evidence]] entry; re-run rank --sensitivity and read break_even_odds."
+affects = ["measure:lpg_refill_subsidy"]
+origin = ["model flag: judgement odds on a top-5 measure"]
+
+[[item]]
+id = "OW-064"
+title = "Odds that up-front stubble payments scale statewide"
+kind = "desk lookup"
+size = "bigger"
+weakness = "judgement"
+question = "Beyond the one-season randomised trial, what is known about how an up-front payment contract performs when run for every paddy farmer?"
+read_at = "Follow-up and scale-up reports on the Punjab trial; Punjab government pilots of payments for not burning."
+lands_in = ["health/interventions/library/stubble_pes_upfront.toml"]
+lands_field = "p_success and p_success_basis (judgement now: 0.5)"
+check = "Measure-file validation passes with the basis citing an [[evidence]] entry; re-run rank --sensitivity and read break_even_odds."
+affects = ["measure:stubble_pes_upfront"]
+origin = ["model flag: judgement odds on a top-5 measure"]
+
+[[item]]
+id = "OW-065"
+title = "Odds that road paving holds: how long the gain lasts"
+kind = "desk lookup"
+size = "bigger"
+weakness = "judgement"
+question = "How long does the dust cut from paved road edges last in Indian cities before edges are dug up or left unrepaired?"
+read_at = "Evaluations of road-edge paving (TERI 2021 NCR; CSTEP; Delhi PWD reports)."
+lands_in = ["health/interventions/library/road_paving.toml"]
+lands_field = "p_success and p_success_basis (judgement now: 0.6), and duration_years if the lifetime is sourced"
+check = "Measure-file validation passes with the basis citing an [[evidence]] entry; re-run rank --sensitivity and read break_even_odds."
+affects = ["measure:road_paving"]
+origin = ["model flag: judgement odds on a top-5 measure"]

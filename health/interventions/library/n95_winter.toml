@@ -1,0 +1,90 @@
+# Bengaluru: N95-class masks handed to working people for one winter, worn outdoors and in transit.
+name = "N95 masks for Bengaluru's workers, one winter"
+kind = "exposure"
+scope = "city"
+who_reaches = "working people in Bengaluru, while outdoors or commuting, December to March"
+cities = ["Bengaluru"]
+
+start_year = 2027
+ramp_years = 0
+duration_years = 1
+lag = "epa20"
+
+p_success = 0.2
+p_success_basis = "judgement: well below the air measures' middle value (0.5), the lowest of the exposure measures except the smog tower, because the effect rests entirely on adoption and use: people must wear a tight-fitting mask every time they are outside, and no source was found on how many would; the fit range in `cut` covers poor fit, not masks left in a pocket. In Dalkhola (India) a blinded trial of N95s outdoors plus a purifier at night found no fall in blood pressure with routine use (Yakkali et al. 2025, conference abstract), and no trial shows masks cut deaths"
+
+placeholders = []
+
+notes = """
+The city hands each working person a supply of disposable N95-class masks for the four dirtiest
+months, to wear outdoors and while commuting. The months are chosen from Bengaluru's own monthly
+shape (CPCB 2023-25, airhealth.months): December, January, February and March, each at least 1.29
+times the annual mean (November, at 1.21, is next). One winter only; under the 20-year lag most of
+the benefit still arrives in later years.
+
+How much it cuts: total inward leakage of commercially sold anti-pollution masks worn by
+volunteers in Beijing ranged from 3% to 68% (sitting) across mask types, so a mask removes 32% to
+97% of what the wearer would breathe (Cherrie et al. 2018). Most of the leakage is poor fit.
+
+How long: while commuting, 5-10% of the day for adults in Delhi (Pant et al. 2017); outdoor
+workers (vendors, drivers, delivery) would be more, office workers' indoor time is not covered.
+
+Who: working people, 43.8% of urban Bangalore district's population (Census 2011 work
+participation).
+
+Cost: 3M 9504IN (an FFP2 mask certified to BIS IS 9473, the Indian equivalent class to N95), Rs
+23.49 a mask in a pack of 100 on Amazon India, Rs 43.68 at Moglix. Nine masks per person for the
+winter: one every two weeks, as the Dalkhola trial replaced its mask filters, over the 121 days of
+December to March. 2026 prices are used as 2025 rupees.
+
+city-specific: the share covered (43.83%) is urban Bangalore district's work participation (Census 2011), and the months are Bengaluru's four dirtiest; another city needs its own work participation and its own dirtiest months (cut, hours and price would transfer).
+"""
+
+[exposure]
+covered = 0.4383
+hours = { dist = "uniform", p5 = 0.05, p95 = 0.10 }
+cut = { dist = "uniform", p5 = 0.32, p95 = 0.97 }
+months = [12, 1, 2, 3]
+
+[cost]
+driver = "person"
+once = { dist = "uniform", p5 = 211, p95 = 393 }
+currency = "INR"
+year = 2025
+partial = "It leaves out the cost of handing the masks out and of showing people how to fit them."
+
+[[evidence]]
+fields = ["exposure.cut"]
+source = "Cherrie JW, Apsley A, Cowie H, et al. (2018), Effectiveness of face masks used to protect Beijing residents against particulate air pollution, Occupational and Environmental Medicine 75(6): 446-452"
+url = "https://pubmed.ncbi.nlm.nih.gov/29632130/"
+locator = "Abstract, Results: 'In the volunteer tests, the average total inward leakage (TIL) of BC ranged from 3% to 68% in the sedentary tests and from 7% to 66% in the active tests'"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "cut = 1 - leakage: p5 = 1 - 0.68 = 0.32, p95 = 1 - 0.03 = 0.97 (sedentary range across the four masks tested on volunteers)."
+
+[[evidence]]
+fields = ["exposure.hours"]
+source = "Pant P, Habib G, Marshall JD, Peltier RE (2017), PM2.5 exposure in highly polluted cities: A case study from New Delhi, India, Environmental Research 156: 167-174"
+url = "https://depts.washington.edu/airqual/Marshall_76.pdf"
+locator = "Sec. 3 (results on time-activity), printed p. 170 (PDF p. 4): 'On average, subjects spent between 5–10% of their time in commuting'"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "p5 = 0.05, p95 = 0.10 of the day."
+
+[[evidence]]
+fields = ["exposure.covered"]
+source = "Census of India 2011, District Census Handbook Bangalore, Part XII-B (Village and Town wise Primary Census Abstract)"
+url = "https://censusindia.mha.gov.in/nada/index.php/catalog/585/download/1988/DH_2011_2918_PART_B_DCHB_BANGALORE.pdf"
+locator = "District Primary Census Abstract, printed p. 26 (PDF p. 39): Bangalore District, Urban, total population 8,749,944; printed p. 28 (PDF p. 41): Urban, total workers 3,835,520"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "3,835,520 / 8,749,944 = 0.4383 (main and marginal workers, urban part of the district)."
+
+[[evidence]]
+fields = ["cost.once"]
+source = "Amazon India, 3M 9504IN Disposable Respirator FFP2 (Pack of 100)"
+url = "https://www.amazon.in/9504-Particulare-Respirator-Mask-White/dp/B08R7M7DHL"
+locator = "Product page: '₹2,349.00 ... ₹23.49 per count'; 'BIS Approved'"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "9 masks x per-mask price: p5 = 9 x 23.49 = 211; p95 = 9 x 43.68 = 393, the higher price from Moglix (https://www.moglix.com/3m-9504-in-white-particulate-respirator-pack-of-100/mp/msn2w2tmxl109f, 'Pack of 100 ... ₹4,368'). 9 = 121 days (1 Dec to 31 Mar) / 14, rounded up, from the Dalkhola trial's protocol (ClinicalTrials.gov NCT04854187, arm description: 'Every 2 weeks, the filter of the mask will be replaced'). 2026 prices taken as 2025 rupees."

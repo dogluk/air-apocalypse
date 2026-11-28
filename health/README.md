@@ -60,6 +60,38 @@ air alone. That has not been shown with numbers yet (see "The IHME tier" below a
 `IHME_DOWNLOADS.md`). No air pollution specialist has reviewed the method yet either; the
 calls made along the way are listed under "Known limitations" so that one can.
 
+## Run it with no clone
+
+One line, on a machine with [uv](https://docs.astral.sh/uv/) installed:
+
+```
+uvx --from 'git+https://github.com/dogluk/air-apocalypse#subdirectory=health' airhealth burden Bengaluru
+```
+
+The same works for `airhealth causes Bengaluru`, `airhealth score Bengaluru` and any other
+command. The first run downloads the code and its libraries (numpy, pandas, scipy, matplotlib,
+pyarrow), so it takes under a minute; later runs start in about three seconds.
+
+The data, the measure library and the fonts are packed inside the installed package, so nothing
+else is needed. The five open curves work as they do in a checkout. The three IHME curves
+report themselves unavailable, because IHME's files are not shared; to use them, put the files
+in a folder and set `AIRHEALTH_LOCAL` to that folder. Commands that write files (`chart`,
+`rank --write`) put them under `airhealth_out/` in the folder you run from.
+
+Without uv:
+
+```
+pipx run --spec 'git+https://github.com/dogluk/air-apocalypse#subdirectory=health' airhealth burden Bengaluru
+```
+
+```
+python3 -m venv .venv
+.venv/bin/pip install 'git+https://github.com/dogluk/air-apocalypse#subdirectory=health'
+.venv/bin/airhealth burden Bengaluru
+```
+
+Or clone and install it editable, which is what you want for changing the code (next section).
+
 ## Install
 
 ```
@@ -71,7 +103,9 @@ cd health
 ../.venv/bin/airhealth --help
 ```
 
-Python 3.11 or newer. Everything the commands need is committed under `data/`, with its
+Python 3.11 or newer (tested on 3.13). `requirements-lock.txt` pins the exact versions the tests
+passed with: `.venv/bin/pip install -r health/requirements-lock.txt -e health` (no Docker needed).
+Everything the commands need is committed under `data/`, with its
 source, page and method in `data/sources.toml`. A value that could not be confirmed at its
 source is left out and listed in `data/MISSING.md`. The few sourced numbers that live in
 code instead of a data file (AQLI's 0.98, GEMM's 2.4, the lag shares and so on) are listed
@@ -229,27 +263,27 @@ curve and which map are never drawn: each curve is its own row, and a run uses o
 ```
 $ airhealth run interventions/november_only_delhi.toml
 November-only cut in Delhi
-Delhi (state). 2027-2036: 10 years, no ramp, lag epa20; these deliver 7.0 years of the full effect. Probability it works: 50%.
+Delhi (state). 2027-2036: 10 years, no ramp, lag epa20, counted over 30 years, discounted at 3% a year; these deliver 10.0 years of the full effect, undiscounted. Probability it works: 50%.
 Change: monthly delta: Nov -40 µg/m³; other months 0; annual-mean change -3.29 µg/m³ (PM2.5 88.3 → 85.1, population-weighted; median draw).
 Population 21.5 M; all-cause deaths 99,440 a year (4.6 per 1,000). 5,000 draws, seed 0.
 
 If it works, totals over the run (median, 5-95% range):
 curve                                      life-years                deaths postponed  life exp. at full effect, yrs
 --------------------  -------------------------------  ------------------------------  -----------------------------
-loglinear_jaganathan     383,000 (308,000 to 459,000)       18,500 (14,900 to 22,200)         +0.36 (+0.29 to +0.44)
-loglinear_brown             37,800 (-9,340 to 84,400)           2,120 (-524 to 4,730)         +0.04 (-0.01 to +0.09)
-loglinear_vodonos        281,000 (195,000 to 363,000)       16,900 (11,700 to 21,800)         +0.32 (+0.22 to +0.41)
-gemm_ncd_lri                82,000 (69,600 to 94,600)          4,920 (4,180 to 5,670)         +0.09 (+0.08 to +0.11)
-aqli *                339,000 (no published interval)  16,400 (no published interval)  +0.32 (no published interval)
+loglinear_jaganathan     439,000 (353,000 to 525,000)       26,600 (21,400 to 31,900)         +0.36 (+0.29 to +0.44)
+loglinear_brown            43,300 (-10,700 to 96,600)           3,050 (-754 to 6,810)         +0.04 (-0.01 to +0.09)
+loglinear_vodonos        321,000 (224,000 to 416,000)       24,300 (16,900 to 31,400)         +0.32 (+0.22 to +0.41)
+gemm_ncd_lri               93,900 (79,800 to 108,000)          7,070 (6,010 to 8,160)         +0.09 (+0.08 to +0.11)
+aqli *                389,000 (no published interval)  23,600 (no published interval)  +0.32 (no published interval)
 
-Expected = mean if it works × probability it works (0.5). Cost if it works: $18.2 M ($5.78 M to $61.6 M), 2025 prices, ₹87.16 per $ (World Bank 2025 average), no inflation adjustment; all of it spent whether or not it works.
+Expected = mean if it works × probability it works (0.5). Cost if it works: $16 M ($5.08 M to $54.1 M), in 2025 rupees, ₹87.16 per $ (World Bank 2025 average); all of it spent whether or not it works.
 curve                 expected life-years  cost per life-year if it works  expected cost per expected life-year
 --------------------  -------------------  ------------------------------  ------------------------------------
-loglinear_jaganathan              192,000                           $61.7                                  $123
-loglinear_brown                    18,900                            $624                                $1,250
-loglinear_vodonos                 140,000                           $84.5                                  $169
-gemm_ncd_lri                       41,000                            $288                                  $577
-aqli *                            170,000                           $69.7                                  $139
+loglinear_jaganathan              219,000                           $47.4                                 $94.7
+loglinear_brown                    21,700                            $479                                  $958
+loglinear_vodonos                 160,000                           $64.8                                  $130
+gemm_ncd_lri                       47,000                            $221                                  $442
+aqli *                            194,000                           $53.4                                  $107
   (costs per life-year are ratios of means over the draws)
 
 What drives the spread in life-years within each curve (share of variance, each part sampled alone):
@@ -269,7 +303,7 @@ Across curves, the largest median life-years is 10.1× the smallest.
   aqli: AQLI linear, 0.98 years of life expectancy per 10 µg/m³
   * deaths derived from the life-expectancy change, not a relative risk
 
-Map: aqli 2023 (AQLI 2025 release, districts, satellite PM2.5 with dust and sea salt removed). Life-years = deaths postponed by age × remaining life expectancy at the age of death, at the map year's population and age structure, summed over the intervention's years. Deaths at ages 45 and over scaled by ×0.72 to the SRS crude death rate for Delhi, 2020-24 (4.5 per 1,000); life expectancy is from the unscaled life table. Sources: population by age, projection (default); death rates by age, srs (default); death count, srs (default). Not run: gbd2019, gbd2023, gemm_5cod: need IHME files in health/data_local/ (see health/IHME_DOWNLOADS.md).
+Map: aqli 2023 (AQLI 2025 release, districts, satellite PM2.5 with dust and sea salt removed). Life-years = deaths postponed by age × remaining life expectancy at the age of death, at the map year's population and age structure, summed over the 30-year horizon (the intervention's years and the tail of the lag), discounted at 3% a year. Deaths at ages 45 and over scaled by ×0.72 to the SRS crude death rate for Delhi, 2020-24 (4.5 per 1,000); life expectancy is from the unscaled life table. Sources: population by age, projection (default); death rates by age, srs (default); death count, srs (default). Not run: gbd2019, gbd2023, gemm_5cod: need IHME files in health/data_local/ (see health/IHME_DOWNLOADS.md).
 ```
 
 How to read it:
@@ -283,10 +317,13 @@ How to read it:
 - **Two cost figures.** *Cost per life-year if it works* is mean cost over mean life-years,
   given success. *Expected cost per expected life-year* charges the cost that is spent
   whether or not it works against the life-years you can expect. By default the whole cost
-  is spent either way, so the second is the first divided by the probability. Rupees become
-  dollars at the World Bank's annual average rate for the file's price year
-  (`data/fx_inr_usd.csv`, 2000-2025). There is **no inflation adjustment**: a 2015-price
-  file is reported in 2015 dollars.
+  is spent either way, so the second is the first divided by the probability. All costs are
+  turned into **2025 rupees**: a rupee cost is scaled by how much India's prices rose from the
+  file's price year to 2025 (the World Bank's GDP deflator, `data/gdp_deflator_ind.csv`); a
+  dollar cost is first turned into rupees at the World Bank's annual average rate for its own
+  price year (`data/fx_inr_usd.csv`), then scaled the same way. Years 2000-2025 are covered.
+  Dollars shown are 2025 rupees at the 2025 rate. The JSON also gives rupees per life-year and
+  life-years per crore (1 crore = 10 million rupees).
 - **What drives the spread.** Each part is sampled alone with the other held at its median,
   and its share of the variance is shown. In this file the PM2.5 change is a fixed number,
   so all of the spread within a curve comes from the curve's own published uncertainty.
@@ -310,7 +347,7 @@ How to read it:
 
 Other flags: `--map M` (default: cpcb when every place is a city with ground monitors,
 otherwise aqli), `--curves a,b`, `--n N` draws, `--seed S` (the same seed gives the same
-answer), `--use input=source` (see "Sources" above).
+answer), `--discount PCT` (default 3; 0 for none), `--use input=source` (see "Sources" above).
 
 **How time is counted in this version.** The steady-state effect is computed once per
 draw. Each year of the intervention then realises a share of it. The **ramp** brings the
@@ -318,8 +355,20 @@ change in over `ramp_years` in equal steps. The **cessation lag** is how slowly 
 rate follows the air down: by default the US EPA's 20-year lag (30% of the fall in risk in
 the first year, 50% spread over years 2-5, 20% over years 6-20); `immediate` puts it all in
 year one. Each step of the ramp starts its own lag clock. Deaths postponed and life-years
-are the steady-state figures times the sum of those yearly shares. Years after the
-intervention ends count for nothing, and nothing is discounted. Life-years are deaths
+are the steady-state figures times the sum of those yearly shares.
+
+**The horizon and the tail.** Every measure is counted over the same kind of horizon: its
+duration plus the length of its lag (20 years for `epa20`, nothing extra for `immediate`).
+When the intervention ends the air goes back, which is one more step (minus the full
+level), and that step starts its own lag too, so the benefit still arriving when a measure
+stops keeps arriving. A one-year measure under `epa20` delivers all of one year's effect,
+spread over 21 years; the old accounting stopped at the last year and dropped the rest.
+
+**Discounting.** Life-years and costs are both discounted at 3% a year (the WHO-CHOICE
+base case; the source is in `provenance.constants()`): a life-year in year t counts
+1.03^-t, the one-off cost falls at t = 0 and the annual cost in each year of the
+duration. Deaths postponed are not discounted. `--discount PCT` changes the rate (`--discount 0` for none).
+Life-years are deaths
 postponed × remaining life expectancy at the age of death. People who die in a five-year
 age band die on average half-way through it, so each death is credited with the life
 expectancy of a person alive at that point (in infancy, at the life table's own average age
@@ -327,6 +376,242 @@ of infant death), worked out from the life table's own person-years; the open ba
 and over uses life expectancy at 85. Taking life expectancy at the start of the band
 instead, as an earlier version did, overstates life-years by about 7%. A year-by-year cohort
 run to 2050, with the population ageing, replaces this accounting in the next version.
+
+## Measures: the library, scored city by city
+
+A measure is something a city (or region) could do about its air, written as one TOML file in
+`interventions/library/` (the file name is its id; `_template.toml` is the commented reference
+for the format and must stay valid). An **air** measure cuts causes of PM2.5 (dust, transport,
+...) by a fraction; an **exposure** measure (purifiers, masks) cuts what a covered share of
+people breathe. Each file gives the years, the odds it works (`p_success`, a judgement with its
+basis), the cost per person, household, city or unit, and a `[[evidence]]` entry for every
+number (key O read at the source, S seen in a snippet or summary, R recalled) or the number is
+listed as a `placeholder`.
+
+```
+airhealth measures [--json]            # the library: id, name, kind, scope, cities, odds, placeholders, evidence keys
+airhealth score CITY [--measure ID ...] [--study ID] [--map M] [--curves a,b] [--n N] [--seed S]
+                     [--discount PCT] [--use input=source] [--json]
+airhealth score --region ID [--map M] [--curves a,b] [--n N] [--seed S] [--discount PCT] [--json]
+```
+
+`score` scores each measure in the city and prints one block per curve, in library order (it
+is not a ranking): status, life-years if it works (median, 5-95%), expected life-years (times
+the odds), cost in 2025 rupees (crore, median), life-years per crore if it works and expected,
+the odds, and flag codes (PH placeholder, ES/ER evidence seen or recalled, OJ odds are a
+judgement, LS long shot, NR cause not reported, AF whole-year share used for part-year cut, BS
+borrowed month shape, CO covered people only, RG regional, RB what the source-receptor table
+stands for, RF the source-receptor table is a stand-in, UB upper bound, PC the cost leaves out part of what the measure costs, AG one age group reached, counted with its own death rates, BE some of the evidence comes from a study of another place: set by `evidence_from`, a list of place names in the measure file (with an optional `evidence_note` for the sentence), and not shown in a place it names, its state, or a region it names such as Delhi-NCR). A table of PM2.5 change follows; for an exposure
+measure it is what the covered people breathe. A measure whose source prices only part of it
+(say, the government's enforcement but not what builders spend) says what is left out in
+`cost.partial`; that sentence is printed under the table and carried as flag `partial_cost`. Statuses:
+`scored`, `no_cost` (no cost given; shown, not ranked), `pays_for_itself` (society saves money
+overall; shown apart, no ratios), `not_applicable` (wrong city, or its cause is too small a
+share, or a regional source whose table gives the city no change), `not_scored` (no usable
+study, or a city outside a regional measure's source-receptor table). `--json` prints exactly what
+`score.to_json` returns. Air measures are scored on the city's APnA study unless `--study`
+names another; studies that count air from every origin (CSTEP Bengaluru) are scored too,
+flagged UB as an upper bound, so score each study with its own `--study` call. `--discount` is
+a percent; the default is 3.
+
+A regional measure (stubble, coal power) removes a fraction of a source spread over several
+states. How much each district's PM2.5 falls when the whole source goes is read from a
+source-receptor table, `data/receptor_<name>.csv` (district, state, delta_pm25_full), built by
+`scripts/build_receptor.py`. No published district-level source-receptor result could be used
+yet (see `data/MISSING.md`), so two tables come from McDuffie et al. 2021's gridded sector
+fractions times ACAG PM2.5: `receptor_stubble.csv` (crop-residue burning) and
+`receptor_energy_coal.csv` (coal burned for energy production, wider than power plants alone),
+each a sector from every origin, not only the named states (flag RB). Both are stand-ins, and
+every result on them carries flag RF (`receptor_fallback`) saying so; the stubble one is about 14
+times smaller India-wide than Lan et al. 2022's estimate, so results on it are likely understated.
+A third, `receptor_power_cropper2021.csv` (`scripts/build_receptor_cropper.py`), is the PM2.5 of
+India's 2018 coal power plants from Cropper et al. 2021's model runs, by state, given to each
+district. The library's regional measures: `stubble_pes_upfront`, `happy_seeder_subsidy`,
+`punjab_out_of_rice` (all on the stubble table) and `fgd_scrubbers` (on Cropper's). `score CITY` gives the
+part that reaches the city (life-years, no cost or ratio: the cost belongs to the whole region);
+`score --region ID` scores every district the source reaches, with the measure's whole cost.
+`power` is a cause of its own in `data/causes.csv` only where a study gives power plants their
+own row (TERI's CMAQ runs for Kolkata, Lucknow and Surat); APnA folds them into industry, so a
+city measure cannot target power plants on APnA.
+
+The assumptions printed under every result: share times cut (cutting a cause by x% cuts its
+share of PM2.5 by x%); no chemistry (air is not additive); health only (no climate, crop or
+time benefits, nothing valued in money); life-years and costs counted over the measure's years
+plus the lag tail, discounted at 3% a year; cost is the funder's rupees in 2025 prices.
+
+### What the library holds
+
+Twenty-two measures. Thirteen were written for Bengaluru (the city page's chapter 4 scores
+them), four are regional, and four are written for the one city where their evidence sits. A
+measure runs in every city only where none of its numbers is one city's (its cut, cost per
+person or household, and coverage): two do (`home_purifiers`, `old_vehicle_retirement`), and
+`school_purifiers_india` is Bengaluru's school purifiers with India's school figures in place of
+Karnataka's, for the other 49 cities. Every measure kept to one city names the number that keeps
+it there in a `city-specific:` line in its notes, and data/MISSING.md says what source per city
+would widen it. Odds are the
+probability it works at all, each a judgement with its reason in the file. Evidence: O every
+number read at its source, S some seen only in a press account or summary. "Partial" means the
+cost leaves something out (flag `partial_cost`).
+
+| Measure | Kind | Scope | Where | Odds | | Cost | Evidence |
+|---|---|---|---|---|---|---|---|
+| `road_vacuum_sweeping` | air | city | Bengaluru | 0.5 | | | O |
+| `construction_dust_controls` | air | city | Bengaluru | 0.4 | | partial | O |
+| `road_paving` | air | city | Bengaluru | 0.6 | | | O |
+| `waste_collection_burning_ban` | air | city | Bengaluru | 0.35 | | partial | O |
+| `electric_buses` | air | city | Bengaluru | 0.75 | | | O |
+| `old_vehicle_retirement` | air | city | every city | 0.3 | | | O |
+| `electric_two_three_wheelers` | air | city | Bengaluru | 0.6 | | | O |
+| `dg_set_replacement` | air | city | Bengaluru | 0.4 | | | O |
+| `lpg_refill_subsidy` | air | city | Bengaluru | 0.5 | | | O |
+| `home_purifiers` | exposure | city | every city | 0.3 | | partial | O |
+| `school_purifiers` | exposure | city | Bengaluru | 0.35 | | partial | O |
+| `school_purifiers_india` | exposure | city | the other 49 | 0.35 | | partial | O |
+| `n95_winter` | exposure | city | Bengaluru | 0.2 | | partial | O |
+| `smog_tower` | exposure | city | Bengaluru | 0.1 | long shot | partial | O, S |
+| `stubble_pes_upfront` | air | region | stubble table | 0.5 | | partial | O |
+| `happy_seeder_subsidy` | air | region | stubble table | 0.7 | | partial | O |
+| `punjab_out_of_rice` | air | region | stubble table | 0.3 | | | O |
+| `fgd_scrubbers` | air | region | Cropper power table | 0.6 | | | O |
+| `emissions_market` | air | city | Surat | 0.7 | | partial | O |
+| `zigzag_kilns` | air | city | Patna | 0.5 | | | O |
+| `industrial_fuel_switch` | air | city | Amritsar | 0.5 | | partial | O |
+| `winter_cloud_seeding` | exposure | city | Delhi | 0.02 | long shot | | S |
+
+The last four: the Surat particulate emissions market scaled to all 906 solid-fuel plants, at the
+20-30% cut its randomised trial found (Greenstone et al. 2025); converting Patna's 300 brick kilns
+to zig-zag firing, which pays for itself (the owner earns the conversion back in a season or
+two), so it is listed apart, not ranked; Amritsar's industry onto piped gas (UNDP 2025's cost);
+and winter cloud seeding over Delhi, a long shot scored on what its promoters claim, at odds of 2%
+because the physics is against it (`../bets/README.md`) and the 2025 trials gave no rain.
+
+To run them:
+
+```
+airhealth measures                              # the list above, from the files
+airhealth score Bengaluru                       # every measure that applies to Bengaluru
+airhealth score Bengaluru --study cstep_bengaluru2022_cmb   # the same on another study
+airhealth score Surat --measure emissions_market
+airhealth score --region fgd_scrubbers          # a regional measure over every district it reaches
+```
+
+**Flags a reader must not skip.** They are on every result they apply to, in the text and in
+`--json`:
+
+- `partial_cost` (PC): the source prices only part of the measure (often the government's
+  enforcement, not what firms or households spend). A cheap-looking ratio may be cheap only
+  because of what is left out; the sentence saying what is printed under the table.
+- `upper_bound_all_origins` (UB): the study's shares count air from every origin, so a city
+  measure is credited with cutting air that partly blows in from outside. Read it as a ceiling.
+- `receptor_fallback` (RF): the regional measure's source-receptor table is a stand-in for a
+  published result that could not be used. The stubble table is about 14 times smaller
+  India-wide than Lan et al. 2022's estimate, so the stubble measures are likely understated.
+- `long_shot` (LS): a large effect if it works, low odds that it does.
+- `placeholder` (PH): a number is a stand-in, not an estimate. No library measure has one now;
+  the flag stays for drafts.
+- `odds_judgement` (OJ): the odds are a judgement, not a measurement. Every measure carries it.
+
+**Adding a measure.** Copy `interventions/library/_template.toml` to `<id>.toml`; every field is
+explained in it. Every number needs an `[[evidence]]` entry with its source, link, locator (table,
+page) and key, or a place in `placeholders`; `measures.check_library()` and `tests/test_library.py`
+refuse anything else. Write the lead in `data/MISSING.md` when a source cannot be reached. Then add
+the id to a list in `tests/test_library.py` and run `airhealth score CITY --measure ID`.
+
+**Known gaps.**
+
+- **The regional tables are fallbacks.** No district-level source-receptor result for Punjab's
+  fires could be used, so the stubble measures run on McDuffie et al.'s all-origin crop-burning
+  share (flag RF; it even gives Bengaluru a small change), and Cropper's power-plant table is by
+  state, not district. `data/MISSING.md` lists what would replace them.
+- **Only an age group can be singled out.** An exposure measure that reaches one age group
+  names it (`[exposure] ages = [5, 19]`) and is counted with that group's own death rates (flag
+  AG): school purifiers do, and on curves that start at 25 they give children nothing. A group
+  defined by something other than age cannot be: N95s reach working people, but their covered
+  share is spread over every age, as if it were a slice of the whole city.
+- **Rankings are one measure at a time.** See "Ranking" below.
+
+## Ranking
+
+```
+airhealth rank [PLACE] [--study ID] [--map M] [--curves a,b] [--n N] [--seed S] [--discount PCT]
+               [--use input=source] [--json] [--csv PATH] [--write [DIR]]
+airhealth rank [PLACE] --sensitivity [--inputs a,b] [--top K] [--jobs J] ...
+```
+
+`airhealth rank` orders the library by **expected life-years per crore** of the funder's rupees
+(a crore is 10 million; 2025 rupees), highest first, one table per curve. Expected = the odds it
+works times what it gives if it works, over the expected cost (a cost paid only on success is
+weighted by the odds). Ties break by measure id; "if it works" has its own rank. Measures are
+ranked **one at a time: their benefits do not add up.** Ratios and ranks are never averaged across
+curves, studies or maps.
+
+- **Block 1, the grid.** The first thing printed is each measure's rank on every curve, side by
+  side, with best-worst and a "curves disagree" mark when the rank moves by 3 places or more
+  (`rank.FLIP_PLACES`). A dash means no rank on that curve (a measure for children on a curve that
+  starts at age 25 has no curve to count on; the legend says so).
+- **Then one table per curve**: rank, measure, expected life-years per crore (`PC` beside it when the
+  cost leaves part out, `UB` for an upper bound), the ratio if it works and its rank, life-years if
+  it works (median, p5-p95), cost (mean, ₹ crore), society's net cost, odds, the rank among
+  measures whose cost is whole (`PC` for those that are not), flags. Then measures that pay for
+  themselves, that have no cost given, and those not ranked, with why.
+- **PLACE** is a city (one table of that city's measures; regional measures follow in their own
+  group, because their ratio is over their whole reach and most of their benefit falls outside the
+  city) or `India`/omitted: every city scored on its own study and added up for a measure that
+  applies in several, plus each regional measure over its reach; the reach column is beside the
+  name. It takes minutes (the regional measures dominate); progress goes to stderr.
+- **Output.** `--json` is `rank.to_json`; `--csv PATH` is one row per curve and measure with the
+  sources on each row (`evidence`: source | locator | url | key); `--write [DIR]` (default
+  `health/out/rank/`, git-ignored) writes `rank_india.json/.csv` and a pair for every city from the
+  same run (`rank_<city>.json/.csv`); for a city, only its pair.
+- **What reorders the ranking: `--sensitivity`.** `airhealth rank Bengaluru --sensitivity
+  [--inputs map,study,...] [--top K] [--jobs J]` answers the funder's question (which research
+  would change what to fund?) instead of printing the ranking. Each input is moved from the
+  defaults one at a time (`sensitivity.INPUTS`: every other map; each of the city's other causes
+  studies with a full split, or for India each such city and study; SRS deaths against the model's
+  and the UN's; no discounting; curves month by month; each measure's effect and cost ranges at
+  their 5th and 95th percentiles; every measure as if certain to work; three other random seeds, the noise floor) and the
+  library is re-ranked. Printed first, the **research list**: for each input (or one measure's
+  effect or cost, or one city's study), on how many curves it changes which measures make the top
+  K (default 5), and which enter and leave; then each measure's default rank on every curve with
+  its best-worst across settings; the input that moves it most on each curve; and **break-even
+  odds**, the odds that it works at which it would pass the measure above it or fall below the one
+  below. Every block is shown among all measures and again among measures whose cost is whole (the
+  partial-cost ones set aside). A move no larger than the largest the other seeds give is "within noise"; a measure
+  that cannot be scored under a setting (regional measures under month-by-month curves) drops out
+  and moves nobody. Ranks are never averaged, and this is a swing, not a value-of-information
+  figure. The research list gives two counts per unit: the raw one, and one **beyond the seeds'
+  own swaps** (`noise_robust`), which counts a curve only when a measure that none of the other
+  seeds we ran (seed + 1 to + 3; `seeds=` in `sensitivity.run`) swaps in or out of the top enters
+  or leaves it and moves further than they move it. Another seed might still swap it; three is
+  what we ran. The list is sorted by that count. Two
+  **labelled what-ifs** run beside the default (`--whatifs`, default both; `none` for none) and
+  change nothing else: `whatif:stubble_lan2022` scales the crop-burning source-receptor table up to
+  Lan et al. 2022's national figure (the factor is computed from the two figures in the table's
+  fallback note; no district's scaled change goes past its own PM2.5 on the map used, and the
+  output says how many were capped), and `whatif:full_cost` replaces each partial cost that has a sourced
+  `[cost.full]` range in its measure file with that range (and with its low and high ends). Each
+  reports where its measures land, among all and among comparable measures, on every curve.
+  `--n` defaults to 500 here; the whole-reach runs of the regional measures dominate the
+  time and run in `--jobs` processes (default: every CPU). `--write` adds
+  `sensitivity_<place>.json/.csv`.
+
+### Static files for a website
+
+```
+cd health
+../.venv/bin/python scripts/export_site_data.py            # every city with a rank output, plus Bengaluru's score
+../.venv/bin/python scripts/export_site_data.py --city Agra --n 500   # one city, ranked now if it has no output
+```
+
+Writes compact JSON into `health/out/site/` (git-ignored; never committed) that a web page can
+read without running the model: `ranking/<city>.json` (one table per curve), `score/bengaluru.json`
+(every measure on every curve; `--skip-score` leaves it out), `sensitivity/<place>.json` (the
+research lists, if `rank PLACE --sensitivity --write` was run), and `index.json`. Every file is
+`{generated, commit, sources, data}`: when it was written, the commit of the code, and a sentence
+saying what it was made from. A ranking is read from `out/rank/rank_<city>.json` when that
+exists (`airhealth rank CITY --write`); otherwise it runs for that city alone and scores only the
+city measures, so regional measures (stubble, power plants) have no ratio; `--with-regions` adds
+the whole-region run, which takes minutes. The long per-row audit trail is left out of these files.
 
 ## Writing an intervention file
 
@@ -626,14 +911,16 @@ The two IHME-tier cases skip where the IHME files are absent.
   people at those levels. The tool shows how far apart the curves land; it does not resolve
   it.
 - **Life-years are deaths postponed × remaining life expectancy at the age of death**, at the map year's
-  population and age structure, within the intervention's years, undiscounted. A cohort run
+  population and age structure, over the horizon (the intervention's years and the lag's tail), discounted at 3% a year. A cohort run
   to 2050 replaces this; when it comes, the population after 2036 (the end of the official
   projections) will be a crude extension.
 - **The uncertainty is partial.** Ranges cover the PM2.5 change, the curve's own published
   uncertainty and the cost. They do not cover the choice of curve or map (shown as separate
   results instead), the death rates, the death count or the population. AQLI has no
   published interval, and its row shows none.
-- **Costs are converted at one annual exchange rate and not adjusted for inflation.**
+- **Costs are put in 2025 rupees with India's GDP deflator, and dollars converted at one
+  annual exchange rate for their price year.** Where a source does not state its price year,
+  the measure file says which year was taken.
 - **The IHME-tier curves (gbd2019, gbd2023, gemm_5cod) count IHME's deaths, not the SRS's.**
   Their deaths are the GBD 2023 round's rates by cause, state and age times this tool's
   population, unscaled; their share of deaths divides by the tool's (SRS-scaled) all-cause
@@ -680,6 +967,6 @@ data_local/       IHME files, never committed (git-ignored); read by airhealth/i
 interventions/    the template and four examples
 benchmarks/       cases.toml, run.py, README.md (generated)
 charts/           charts drawn by the commands above
-scripts/          the scripts that build data/ from the sources
+scripts/          the scripts that build data/ from the sources, and export_site_data.py
 tests/            pytest
 ```

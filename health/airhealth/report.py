@@ -8,6 +8,7 @@ run_table() and run_json() do the same for an intervention run (simulate.Run).
 from __future__ import annotations
 
 import math
+import re
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
@@ -191,9 +192,9 @@ def _footer(maps, fallback: list[str], unavailable: dict[str, str], notes=()) ->
     by_reason = defaultdict(list)
     for name, reason in unavailable.items():
         by_reason[reason].append(name)
-    for reason, names in by_reason.items():
-        parts.append(f"Not run: {', '.join(names)}: {reason}.")
-    return " ".join(parts)
+    # Curves that did not run go on their own line, so a reader can tell five rows from eight.
+    skipped = [f"Not run: {', '.join(names)}: {reason}." for reason, names in by_reason.items()]
+    return "\n".join(x for x in [" ".join(parts), *skipped] if x)
 
 
 def table(impacts: list[Impact], unavailable: dict[str, str] | None = None,
@@ -212,8 +213,8 @@ def table(impacts: list[Impact], unavailable: dict[str, str] | None = None,
         name = i.curve.name + (" *" if i.derived else "") + (" †" if _below_floor(i) else "")
         rows.append((name, f"{i.pm25_before:.1f} → {i.pm25_after:.1f}",
                      f"{100 * i.deaths_averted / i.deaths_baseline:.1f}%",
-                     f"{i.deaths_averted:,.0f}", f"{i.e0_after - i.e0_before:+.2f}",
-                     f"{i.yll_averted:,.0f}"))
+                     zero(f"{i.deaths_averted:,.0f}"), zero(f"{i.e0_after - i.e0_before:+.2f}"),
+                     zero(f"{i.yll_averted:,.0f}")))
     widths = [max(len(r[k]) for r in [head, *rows]) for k in range(len(head))]
     fmt = lambda r: "  ".join(r[0].ljust(widths[0]) if k == 0 else r[k].rjust(widths[k])  # noqa: E731
                               for k in range(len(r)))
@@ -266,12 +267,21 @@ def _scaling_json(recs) -> list[dict]:
 NO_INTERVAL = "no published interval"
 
 
+_NEG_ZERO = re.compile(r"(?<![\d.])-(0(?:\.0+)?)(?![\d.])")
+
+
+def zero(text: str) -> str:
+    """A number rounded to nothing prints as 0, never -0 (or -0.00): '(-0 to 1)' becomes
+    '(0 to 1)'. Real negatives ('-0.4', '-10') are untouched; so is a '+0.00'."""
+    return _NEG_ZERO.sub(r"\1", text)
+
+
 def _sig(x: float) -> str:
     """Three significant figures, with thousands separators."""
     if x == 0 or not math.isfinite(x):
-        return f"{x:g}"
+        return f"{abs(x) if x == 0 else x:g}"
     r = round(x, 2 - math.floor(math.log10(abs(x))))
-    return f"{r:,.0f}" if abs(r) >= 100 else f"{r:#.3g}"
+    return zero(f"{r:,.0f}" if abs(r) >= 100 else f"{r:#.3g}")
 
 
 def _usd(x: float) -> str:
@@ -290,9 +300,9 @@ def _range(d: dict, fmt=_sig, interval: str = "published") -> str:
     with a fixed PM2.5 change the value stands alone, and with a sampled one the range is
     labelled as covering the PM2.5 change only. A zero-width range is never printed."""
     if interval == "none" or d["p5"] == d["p95"]:
-        return fmt(d["median"]) + (f" ({NO_INTERVAL})" if interval == "none" else "")
+        return zero(fmt(d["median"])) + (f" ({NO_INTERVAL})" if interval == "none" else "")
     tail = f"; {PM25_ONLY}" if interval == "pm25_change_only" else ""
-    return f"{fmt(d['median'])} ({fmt(d['p5'])} to {fmt(d['p95'])}{tail})"
+    return zero(f"{fmt(d['median'])} ({fmt(d['p5'])} to {fmt(d['p95'])}{tail})")
 
 
 def _interval(r) -> str:
@@ -326,23 +336,25 @@ def change_text(iv) -> str:
     return f"{iv.change_kind} {_dist_text(iv.change, unit)}"
 
 
-def _timing(iv, shares) -> str:
+def _timing(iv, run) -> str:
     ramp = f"ramp {iv.ramp_years} years" if iv.ramp_years else "no ramp"
+    rate = f"discounted at {100 * run.discount:g}% a year" if run.discount else "not discounted"
     return (f"{iv.start_year}-{iv.start_year + iv.duration_years - 1}: {iv.duration_years} years, "
-            f"{ramp}, lag {iv.lag}; these deliver {shares.sum():.1f} years of the full effect")
+            f"{ramp}, lag {iv.lag}, counted over {run.horizon_years} years, {rate}; "
+            f"these deliver {run.shares.sum():.1f} years of the full effect, undiscounted")
 
 
 def _cost_text(run: Run, cost: dict) -> str:
     iv = run.intervention
     if cost["p95"] == 0:
         return "No cost given."
-    rate = ("" if iv.cost_currency == "USD"
-            else f", ₹{1 / run.usd_per_unit:.2f} per $ (World Bank {iv.cost_year} average)")
+    origin = ("" if (iv.cost_currency, iv.cost_year) == ("INR", 2025)
+              else f" (given as {iv.cost_currency} in {iv.cost_year} prices)")
+    rate = f", ₹{1 / run.usd_per_unit:.2f} per $ (World Bank 2025 average)"
     s = iv.cost_share_only_on_success
     spent = ("all of it spent whether or not it works" if s == 0
              else f"{100 * s:.0f}% of it spent only if it works")
-    return (f"Cost if it works: {_range(cost, _usd)}, {iv.cost_year} prices{rate}, no inflation "
-            f"adjustment; {spent}.")
+    return (f"Cost if it works: {_range(cost, _usd)}, in 2025 rupees{origin}{rate}; {spent}.")
 
 
 def run_rows(run: Run) -> list[dict]:
@@ -357,7 +369,12 @@ def run_rows(run: Run) -> list[dict]:
             curve=name, label=r.curve.label, deaths_derived=r.curve.kind == "life_expectancy",
             published_interval=interval == "published", interval=interval,
             life_years=s["life_years"], deaths_postponed=s["deaths_postponed"],
-            e0_change_years=s["e0_change_years"], cost_usd=s["cost_usd"],
+            e0_change_years=s["e0_change_years"], cost_usd=s["cost_usd"], cost_inr=s["cost_inr"],
+            expected_cost_inr=s["expected_cost_inr"],
+            inr_per_life_year_if_works=s["inr_per_life_year_if_works"],
+            expected_inr_per_expected_life_year=s["expected_inr_per_expected_life_year"],
+            life_years_per_crore_if_works=s["life_years_per_crore_if_works"],
+            expected_life_years_per_crore=s["expected_life_years_per_crore"],
             expected_life_years=s["expected_life_years"], expected_cost_usd=s["expected_cost_usd"],
             cost_per_life_year_if_works=s["cost_per_life_year_if_works"],
             expected_cost_per_expected_life_year=s["expected_cost_per_expected_life_year"],
@@ -382,7 +399,7 @@ def _run_heading(run: Run) -> list[str]:
              "population only" if iv.from_level is not None else "population-weighted")
     return [
         iv.name,
-        f"{where}. {_timing(iv, run.shares)}. Probability it works: {100 * iv.p_success:g}%.",
+        f"{where}. {_timing(iv, run)}. Probability it works: {100 * iv.p_success:g}%.",
         f"Change: {change_text(iv)}; annual-mean change {after - run.pm25_before:+.2f} µg/m³ "
         f"(PM2.5 {run.pm25_before:.1f} → {after:.1f}, {start}; median draw).",
         f"Population {run.population / 1e6:,.1f} M; "
@@ -393,7 +410,8 @@ def _run_heading(run: Run) -> list[str]:
 def run_footer(run: Run) -> str:
     notes = ["Life-years = deaths postponed by age × remaining life expectancy at the age of "
              "death, at the map year's population and age structure, summed over the "
-             "intervention's years",
+             f"{run.horizon_years}-year horizon (the intervention's years and the tail of the lag), "
+             + (f"discounted at {100 * run.discount:g}% a year" if run.discount else "not discounted"),
              ihme_note([c.curve for c in run.per_curve.values()], run.year),
              population_note(run.population_year, run.year, run.census_places),
              deaths_note(run.reconciliations, run.deaths_baseline, run.deaths_model,
@@ -474,6 +492,8 @@ def run_json(run: Run) -> dict:
         population_year=run.population_year,
         start_year=iv.start_year, duration_years=iv.duration_years, ramp_years=iv.ramp_years,
         lag=iv.lag, realised_share_by_year=[float(x) for x in run.shares],
+        discount=run.discount, horizon_years=run.horizon_years,
+        monthly_curves=run.monthly_curves,
         cost_currency=iv.cost_currency, cost_year=iv.cost_year, usd_per_unit=run.usd_per_unit,
         cost_share_only_on_success=iv.cost_share_only_on_success,
         rows=run_rows(run), across_curve_spread=across_curve_spread(run),
@@ -587,3 +607,507 @@ def causes_cities(counts: list[tuple[str, int]]) -> str:
     w = max(len(c) for c, _ in counts)
     return "\n".join([*(f"{c.ljust(w)}  {n} {'study' if n == 1 else 'studies'}" for c, n in counts),
                       "", "airhealth causes CITY shows each study's split of a city's PM2.5."])
+
+
+# ---- airhealth score: the measure library scored in one city ----
+
+FLAG_CODES = {"placeholder": "PH", "evidence_S": "ES", "evidence_R": "ER", "odds_judgement": "OJ",
+              "long_shot": "LS", "not_reported": "NR", "annual_share_flat": "AF",
+              "borrowed_shape": "BS", "covered_only": "CO", "regional": "RG",
+              "upper_bound_all_origins": "UB", "partial_cost": "PC", "receptor_basis": "RB",
+              "receptor_fallback": "RF", "age_group": "AG", "borrowed_evidence": "BE"}
+FLAG_LEGEND = {"PH": "a number is a placeholder", "ES": "a number seen only in a snippet or summary",
+               "ER": "a number recalled, not read at the source",
+               "OJ": "odds are a judgement", "LS": "long shot",
+               "NR": "a targeted cause is not reported by the study (not reported is not zero)",
+               "AF": "one whole-year share used for a part-year cut",
+               "BS": "month-by-month shape borrowed from another place",
+               "CO": "only the covered people breathe less",
+               "AG": "only one age group is reached, counted with its own death rates",
+               "RG": "a source spread over states; a city's part has no cost of its own (the "
+                     "cost belongs to the whole region: airhealth score --region ID)",
+               "RB": "what the source-receptor table stands for (its data/sources.toml caveat)",
+               "RF": "the source-receptor table is a stand-in (no published one could be used), "
+                     "so the result may be far off",
+               "BE": "some of the evidence comes from a study of another place (named in the "
+                     "flag text and the measure's notes)",
+               "UB": "shares include air blown in from outside, so an upper bound",
+               "PC": "the cost leaves out part of what the measure costs (listed above)"}
+EVIDENCE_LEGEND = "O read at the source; S seen in a snippet or summary; R recalled"
+
+
+def _flag_codes(flags) -> str:
+    seen = []
+    for f in flags:
+        code = FLAG_CODES.get(f.code, f.code)
+        if code not in seen:
+            seen.append(code)
+    return " ".join(seen) or "-"
+
+
+def _lyr(d: dict) -> str:
+    if d["p5"] == d["p95"]:
+        return _sig(d["median"])
+    return f"{_sig(d['median'])} ({_sig(d['p5'])} to {_sig(d['p95'])})"
+
+
+def _crore(a, b) -> str:
+    return "-" if a is None else f"{_sig(a)} / {_sig(b)}"
+
+
+def score_table(scores: list, context: dict) -> str:
+    """The scored library as text: one block per curve, measures in library order, then the
+    PM2.5 each would change, why any were not a plain scored row, and a footer naming the
+    study, map, shape basis, assumptions and the legends."""
+    from .score import ASSUMPTIONS
+    if not scores:
+        return f"No measures in the library for {context.get('place', 'this city')}."
+    labels = {}
+    for s in scores:
+        if s.run is not None:
+            for name, cr in s.run.per_curve.items():
+                labels.setdefault(name, cr.curve.label)
+    lines = [f"{context['place']}: {len(scores)} measures. Life-years are counted over each "
+             f"measure's years and the tail of the lag, discounted at "
+             f"{100 * context['discount']:g}% a year; cost in 2025 rupees (1 crore = 10 million). "
+             f"{context['n']:,} draws, seed {context['seed']}."]
+    head = ("measure", "status", "life-years if it works", "expected life-years",
+            "cost, ₹ crore median", "life-years per crore: works / expected", "odds", "flags")
+    for name in labels or [None]:
+        lines += ["", f"Curve {name}: {labels[name]}" if name else "No curve was run."]
+        rows = []
+        for s in scores:
+            c = s.per_curve.get(name)
+            odds = f"{100 * s.p_success:g}%"
+            if c is None:
+                rows.append((s.measure, s.status, "-", "-", "-", "-", odds, _flag_codes(s.flags)))
+                continue
+            rows.append((s.measure, s.status, _lyr(c["life_years"]),
+                         _sig(c["expected_life_years"]),
+                         "none given" if s.status == "no_cost"
+                         else "whole region" if c["cost_inr"] is None
+                         else _sig(c["cost_inr"]["median"] / 1e7),
+                         _crore(c["life_years_per_crore_if_works"],
+                                c["expected_life_years_per_crore"]),
+                         odds, _flag_codes(s.flags)))
+        lines += _columns(head, rows)
+
+    ran = [s for s in scores if s.pm25_change is not None]
+    if ran:
+        lines += ["", "PM2.5 change if it works (annual, µg/m³, median and 5-95% range):"]
+        for s in ran:
+            d = s.pm25_change
+            what = ("what the covered people breathe, the rest unchanged" if s.kind == "exposure"
+                    else "population-weighted over the city")
+            spread = ("" if d["p5"] == d["p95"]
+                      else zero(f" ({d['p5']:+.2f} to {d['p95']:+.2f})"))
+            med = zero(f"{d['median']:+.2f}")
+            lines.append(f"  {s.measure}: {med}{spread}, {what}")
+    other = [s for s in scores if s.reason]
+    if other:
+        lines += ["", "Why not a plain scored row:"]
+        lines += [f"  {s.measure} ({s.status}): {s.reason}" for s in other]
+    partial = [(s.measure, f.text) for s in scores for f in s.flags if f.code == "partial_cost"]
+    if partial:
+        lines += ["", "What the cost leaves out (PC):"]
+        lines += [f"  {mid}: {text}" for mid, text in partial]
+
+    study =context.get("study") or next((s.study for s in scores if s.study), None)
+    lines += ["", f"Study: {study}." if study else "Study: none used (no air measure was scored).",
+              f"Map: {context['map']}.",
+              "Shape: " + "; ".join(sorted({s.trail["shape"] for s in scores})) + ".",
+              *("Assumption: " + a for a in ASSUMPTIONS), ""]
+    codes = sorted({FLAG_CODES.get(f.code, f.code) for s in scores for f in s.flags})
+    lines.append("Flags: " + "; ".join(f"{c} {FLAG_LEGEND.get(c, c)}" for c in codes) + "."
+                 if codes else "Flags: none.")
+    lines.append(f"Evidence keys: {EVIDENCE_LEGEND}.")
+    return "\n".join(lines)
+
+
+# ---- airhealth rank: the measure library ranked by life-years per crore ----
+
+CSV_COLUMNS = ("place", "curve", "rank", "rank_if_works", "measure", "name", "status", "reason", "kind",
+               "scope", "reach", "who_reaches", "life_years_median", "life_years_p5", "life_years_p95",
+               "expected_life_years", "cost_inr_mean", "society_net_inr", "ly_per_crore_if_works",
+               "expected_ly_per_crore", "p_success", "p_success_basis", "flags", "curves_best_rank",
+               "curves_worst_rank", "curves_disagree", "map", "study", "share_basis", "cuts", "cost_basis",
+               "evidence")
+DASH = "—"        # a rank a measure does not have on a curve
+
+
+def _months_text(months) -> str:
+    months = sorted(int(m) for m in months)
+    spans = []
+    for m in months:
+        if spans and m == spans[-1][1] + 1:
+            spans[-1][1] = m
+        else:
+            spans.append([m, m])
+    return ",".join(f"{a}-{b}" if a != b else str(a) for a, b in spans)
+
+
+def _share_basis(trail: dict) -> str:
+    """The trail's {month: study/season} collapsed to text: 'apna_2015/annual: months 1-12'."""
+    basis = (trail or {}).get("share_basis") or {}
+    by: dict[str, list] = {}
+    for month, what in basis.items():
+        by.setdefault(str(what), []).append(month)
+    return "; ".join(f"{what}: months {_months_text(ms)}" for what, ms in by.items())
+
+
+def _cuts_text(trail: dict) -> str:
+    return "; ".join(f"{c['cause']} months {_months_text(c['months'])} {c['p5']:g}-{c['p95']:g}"
+                     for c in (trail or {}).get("cuts") or [])
+
+
+def _cost_basis(trail: dict) -> str:
+    c = (trail or {}).get("cost")
+    if not c:
+        return ""
+    return (f"driver {c.get('driver')}; count {c.get('units_count')}; "
+            f"2025-rupee basis: {c.get('cost_in_2025_rupees_basis')}")
+
+
+def _evidence_text(trail: dict) -> str:
+    return " ;; ".join(" | ".join(str(e.get(k, "")) for k in ("source", "locator", "url", "key"))
+                       for e in (trail or {}).get("evidence") or [])
+
+
+def rank_csv_rows(r) -> list[dict]:
+    """One row per curve x measure, with the sources behind every number on each row."""
+    out = []
+    for curve, t in r.tables.items():
+        for x in t.rows:
+            sp = r.spread.get(x.measure, {})
+            ly = x.life_years or {}
+            out.append({
+                "place": r.place, "curve": curve, "rank": x.rank, "rank_if_works": x.rank_if_works,
+                "measure": x.measure, "name": x.name, "status": x.status,
+                "reason": x.reason or x.curve_gap,
+                "kind": x.kind, "scope": x.scope, "reach": x.reach, "who_reaches": x.who_reaches,
+                "life_years_median": ly.get("median"), "life_years_p5": ly.get("p5"),
+                "life_years_p95": ly.get("p95"), "expected_life_years": x.expected_life_years,
+                "cost_inr_mean": x.mean_cost_inr, "society_net_inr": x.society_net_inr,
+                "ly_per_crore_if_works": x.ly_per_crore_if_works,
+                "expected_ly_per_crore": x.expected_ly_per_crore, "p_success": x.p_success,
+                "p_success_basis": x.p_success_basis, "flags": " ".join(x.flags),
+                "curves_best_rank": sp.get("best"), "curves_worst_rank": sp.get("worst"),
+                "curves_disagree": sp.get("disagree"), "map": r.context.get("map"),
+                "study": x.study or r.context.get("study"), "share_basis": _share_basis(x.trail),
+                "cuts": _cuts_text(x.trail), "cost_basis": _cost_basis(x.trail),
+                "evidence": _evidence_text(x.trail)})
+    return out
+
+
+def _ratio(x) -> str:
+    if x.expected_ly_per_crore is None:
+        return DASH
+    marks = [FLAG_CODES[f] for f in ("partial_cost", "upper_bound_all_origins") if f in x.flags]
+    return _sig(x.expected_ly_per_crore) + (" " + "/".join(marks) if marks else "")
+
+
+def _flag_text(flags) -> str:
+    return " ".join(dict.fromkeys(FLAG_CODES.get(f, f) for f in flags)) or "-"
+
+
+def _rank_grid(r) -> list[str]:
+    curves_ = list(r.tables)
+    lines = ["Rank on each curve (1 = most life-years per crore; " + DASH + " = not ranked on that "
+             "curve; read the curves side by side, no one of them is the answer)"]
+    head = ("measure", "reach", *curves_, "best-worst", "comparable", "curves disagree")
+    rows = []
+    ranked = [(m, d) for m, d in r.spread.items() if d["best"] is not None]
+    ranked.sort(key=lambda md: (md[1]["best"], md[1]["worst"], md[0]))
+    for m, d in ranked:
+        ranks = [DASH if d["ranks"].get(c) is None else str(d["ranks"][c]) for c in curves_]
+        row = next(x for t in r.tables.values() for x in t.rows if x.measure == m)
+        if not d["comparable"]:
+            comp = "PC"
+        elif d["comparable_best"] == d["comparable_worst"]:
+            comp = str(d["comparable_best"])
+        else:
+            comp = f"{d['comparable_best']}-{d['comparable_worst']}"
+        rows.append((m, row.reach, *ranks, f"{d['best']}-{d['worst']}", comp,
+                     "curves disagree" if d["disagree"] else ""))
+    if not rows:
+        return lines + ["  No measure is ranked on any curve."]
+    return lines + _columns(head, rows)
+
+
+def _curve_table(rows, show_reach: bool) -> list[str]:
+    head = ["rank", "measure", *(["reach"] if show_reach else []), "expected life-years per crore",
+            "per crore if it works", "rank if works", "life-years if it works (median, p5-p95)",
+            "cost, ₹ crore (mean)", "society's net cost, ₹ crore", "odds", "comparable rank", "flags"]
+    body = []
+    for x in rows:
+        body.append((str(x.rank), x.measure, *([x.reach] if show_reach else []), _ratio(x),
+                     DASH if x.ly_per_crore_if_works is None else _sig(x.ly_per_crore_if_works),
+                     DASH if x.rank_if_works is None else str(x.rank_if_works),
+                     _lyr(x.life_years) if x.life_years else DASH,
+                     DASH if x.mean_cost_inr is None else _sig(x.mean_cost_inr / 1e7),
+                     DASH if x.society_net_inr is None else _sig(x.society_net_inr / 1e7),
+                     f"{100 * x.p_success:g}%",
+                     "PC" if x.rank_comparable is None else str(x.rank_comparable),
+                     _flag_text(x.flags)))
+    return _columns(tuple(head), body)
+
+
+STUBBLE_TABLE = "receptor_stubble.csv"
+# The "about 14 times" is the table's own fallback sentence in data/sources.toml (0.48 against Lan
+# et al. 2022's 6.7 µg/m³); tests/test_report.py checks the two still agree.
+STUBBLE_NOTE = ("Read the crop-burning measures with care: the crop-burning smoke table they stand "
+                "on is a stand-in about 14 times smaller than Lan et al. 2022's national figure, "
+                "so measures marked RF on it are likely understated (by how much is not computed). It is not "
+                "scaled to close the gap, by the project's rule.")
+
+
+def stubble_note(rows) -> str:
+    """STUBBLE_NOTE if any row (a rank.Row, or its JSON dict) carries receptor_fallback and stands
+    on the stubble table; "" otherwise."""
+    for x in rows:
+        flags = x.get("flags", ()) if isinstance(x, dict) else x.flags
+        trail = (x.get("trail") if isinstance(x, dict) else x.trail) or {}
+        if "receptor_fallback" in (flags or ()) and \
+                (trail.get("region") or {}).get("receptor") == STUBBLE_TABLE:
+            return STUBBLE_NOTE
+    return ""
+
+
+def rank_table(r) -> str:
+    """The ranking as text: the grid of ranks on every curve first, then one table per curve,
+    the measures listed apart or not ranked (with why), and a footer of settings, assumptions
+    and legends."""
+    from .rank import INDIA, RANK_ASSUMPTIONS
+    from .score import ASSUMPTIONS
+    india = r.place == INDIA
+    lines = [f"Ranking of measures by life-years per crore: {r.place}. Each measure is ranked on its "
+             "own; benefits do not add up. 1 crore = 10 million rupees, 2025 rupees."]
+    note = stubble_note(x for t in r.tables.values() for x in t.rows)
+    if note:
+        lines.append(note)
+    lines += ["", *_rank_grid(r)]
+    legend_gaps = []
+    for curve, t in r.tables.items():
+        ranked = [x for x in t.rows if x.rank is not None]
+        lines += ["", f"Curve {curve}: {t.curve_label}"]
+        if not ranked:
+            lines.append("  No measure is ranked on this curve.")
+        elif india:
+            lines += _curve_table(ranked, True)
+        else:
+            city_rows = [x for x in ranked if x.scope != "region"]
+            region_rows = [x for x in ranked if x.scope == "region"]
+            lines += _curve_table(city_rows, False) if city_rows else ["  No city measure is ranked."]
+            if region_rows:
+                lines += ["", "Regional measures. Their ratio is over their whole reach, and most of their "
+                          "benefit falls outside this city; their life-years here are only this city's part, "
+                          "and their cost column is the whole reach's.",
+                          *_curve_table(region_rows, True)]
+        legend_gaps += [(curve, x) for x in t.rows if x.curve_gap]
+
+    rest, seen = [], set()          # every curve's, each measure once (its first curve's reason)
+    for t in r.tables.values():
+        for x in t.rows:
+            if x.rank is None and not x.curve_gap and x.measure not in seen:
+                seen.add(x.measure)
+                rest.append(x)
+    for status, title in (("pays_for_itself", "Pays for itself (no rank)"),
+                          ("no_cost", "No cost given (no rank)")):
+        group = [x for x in rest if x.status == status]
+        if group:
+            lines += ["", title + ":"]
+            lines += [f"  {x.measure}: {x.reach}; life-years if it works "
+                      f"{_lyr(x.life_years) if x.life_years else DASH}; {x.reason}" for x in group]
+    others = [x for x in rest if x.status not in ("pays_for_itself", "no_cost")]
+    if others:
+        lines += ["", "Not ranked (why):"]
+        lines += [f"  {x.measure} ({x.status}): {x.reason}" for x in others]
+    if legend_gaps:
+        lines += ["", f"{DASH} in the grid means no rank on that curve:"]
+        lines += [f"  {x.measure} on {c}: {x.curve_gap}" for c, x in legend_gaps]
+
+    ctx = r.context
+    lines += ["", f"Place: {r.place}. Map: {ctx.get('map')}. Study: {ctx.get('study') or 'none'}. "
+              f"Deaths: {ctx.get('deaths') or 'default'}. Discount: {100 * ctx.get('discount', 0):g}% a year. "
+              f"{ctx.get('n'):,} draws, seed {ctx.get('seed')}.",
+              *("Assumption: " + a for a in (*ASSUMPTIONS, *RANK_ASSUMPTIONS))]
+    if ctx.get("curves_unavailable"):
+        lines.append("Curves not run: " + "; ".join(f"{k}: {v}" for k, v in ctx["curves_unavailable"].items()))
+    lines += ["", "PC beside a ratio: the cost leaves out part of what the measure costs, so its ratio is "
+              "flattering; the comparable column ranks without such measures. UB: shares include air blown "
+              "in from outside, an upper bound."]
+    used = sorted({FLAG_CODES.get(f, f) for t in r.tables.values() for x in t.rows for f in x.flags})
+    lines.append("Flags: " + "; ".join(f"{c} {FLAG_LEGEND.get(c, c)}" for c in used) + "."
+                 if used else "Flags: none.")
+    lines.append(f"Evidence keys: {EVIDENCE_LEGEND}.")
+    return "\n".join(lines)
+
+
+# --- sensitivity: what reorders the ranking --------------------------------------------------
+
+def _nan(x) -> bool:
+    return x is None or (isinstance(x, float) and math.isnan(x))
+
+
+def _names(xs) -> str:
+    return ", ".join(xs) if xs else DASH
+
+
+def _research_block(s, comparable: bool) -> list[str]:
+    res = s.research(comparable)
+    n_curves = len(s._curves())
+    head = ("research unit", "beyond the seeds' own swaps", f"curves where the top {s.top} changes",
+            "on curves", "enter", "leave", "largest move", "within noise only",
+            "drops out of the top")
+    rows, quiet = [], []
+    for x in res.itertuples():
+        if x.unit != "seed" and not (x.curves_top_changed or x.within_noise or x.drops_out):
+            quiet.append(x.unit)
+            continue
+        unit = x.unit + (" (noise floor)" if x.unit == "seed" else "")
+        rows.append((unit, DASH if x.unit == "seed" else f"{x.noise_robust} of {n_curves}",
+                     f"{x.curves_top_changed} of {n_curves}", _names(x.curves),
+                     _names(x.enter), _names(x.leave),
+                     DASH if _nan(x.max_abs_delta) else f"{x.max_abs_delta:g}",
+                     str(x.within_noise) if x.within_noise else "", _names(x.drops_out)))
+    out = _columns(head, rows) if rows else ["  No setting changes the top."]
+    if quiet:
+        out.append(f"  No change to the top {s.top} on any curve: {', '.join(sorted(quiet))}.")
+    flips = {c: v for c, v in s.noise_sets(comparable).items() if v}
+    if flips:
+        out.append("  The other seeds we ran, with nothing else changed, swap these in and out of "
+                   "the top (a curve counts as 'beyond the seeds' own swaps' only when a measure "
+                   "outside them enters or leaves and moves further than the seeds move it; "
+                   "another seed might swap more): "
+                   + "; ".join(f"{c}: {_names(v)}" for c, v in flips.items()) + ".")
+    return out
+
+
+_VARIANTS = {"default": "default", "whatif": "what-if", "whatif_low": "what-if, low end",
+             "whatif_high": "what-if, high end"}
+
+
+def _whatif_block(s) -> list[str]:
+    out = []
+    for w in s.whatifs:
+        out += [f"  {w['id']} ({w['note']}): {w['label']}."]
+        if w.get("skipped"):
+            out.append(f"    Not run: {w['skipped']}.")
+            continue
+        if w.get("basis"):
+            out.append(f"    {w['basis']}.")
+        for m, f in (w.get("full_cost") or {}).items():
+            out.append(f"    {m}: full cost {f['low']:,.0f} to {f['high']:,.0f} {f['currency']} a "
+                       f"year ({f['year']} prices, {f['dist']}; evidence key "
+                       f"{w['key'][m]}): {f['adds']}")
+        rows = []
+        for r in w["rows"]:
+            def at(rank_, of):
+                return DASH if rank_ is None else f"{rank_}/{of}"
+            e = r["expected_ly_per_crore"]
+            rows.append((r["measure"], r["curve"], _VARIANTS.get(r["variant"], r["variant"]),
+                         at(r["rank"], r["of"]), at(r["rank_comparable"], r["of_comparable"]),
+                         DASH if e is None else f"{e:.3g}"))
+        out += ["    " + x for x in _columns(("measure", "curve", "run", "rank (all)",
+                                               "rank (comparable)",
+                                               "expected life-years per crore"), rows)]
+    return out
+
+
+def _spread_block(s, comparable: bool) -> list[str]:
+    st = s.stability(comparable)
+    curves_ = s._curves()
+    cells: dict = {}
+    first: dict = {}
+    for x in st.itertuples():
+        base = DASH if _nan(x.base_rank) else str(int(x.base_rank))
+        cell = f"{base} ({x.best}-{x.worst})"
+        if x.drops_out:
+            cell += f" out{x.drops_out}"
+        cells.setdefault(x.measure, {})[x.curve] = cell
+        if not _nan(x.base_rank):
+            first[x.measure] = min(first.get(x.measure, 10 ** 6), x.base_rank)
+    order = sorted(cells, key=lambda m: (first.get(m, 10 ** 6), m))
+    rows = [(m, *(cells[m].get(c, DASH) for c in curves_)) for m in order]
+    return _columns(("measure", *curves_), rows) if rows else ["  No measure is ranked."]
+
+
+def _movers_block(s, comparable: bool) -> list[str]:
+    mv = s.movers(comparable)
+    curves_ = s._curves()
+    cells: dict = {}
+    for x in mv.itertuples():
+        if x.unit is None:
+            text = "none"
+        else:
+            text = f"{x.unit} {x.delta:+g}"
+            if x.within_noise:
+                text = f"({text})"
+        got = cells.setdefault(x.measure, {})
+        got[x.curve] = text if x.curve not in got else got[x.curve] + " | " + text
+    rows = [(m, *(cells[m].get(c, DASH) for c in curves_)) for m in cells]
+    return _columns(("measure", *curves_), rows) if rows else ["  No measure is ranked."]
+
+
+def _odds_block(s, comparable: bool) -> list[str]:
+    be = s.break_even_odds(comparable)
+    curves_ = list(s.base.tables)
+    cells: dict = {}
+    odds: dict = {}
+    for x in be.itertuples():
+        cells.setdefault(x.measure, {})[x.curve] = (f"{x.pass_above or DASH} / "
+                                                    f"{x.fall_below or DASH}")
+        odds[x.measure] = x.p_success
+    rows = [(m, f"{100 * odds[m]:g}%", *(cells[m].get(c, DASH) for c in curves_)) for m in cells]
+    return (_columns(("measure", "odds now", *curves_), rows) if rows
+            else ["  No measure is ranked."])
+
+
+def sensitivity_table(s) -> str:
+    """The sensitivity as text: (1) what would reorder the top K, the research list, first;
+    (2) each measure's default rank on each curve and its range across all settings; (3) the
+    biggest mover per measure per curve, within-noise moves in brackets; (4) break-even odds;
+    (5) the settings, defaults and notes. Blocks 1-4 among all measures, then among comparable
+    ones."""
+    from .sensitivity import CANNOT, notes
+    ctx = s.base.context
+    lines = [f"What reorders the ranking: {s.place}. {len(s.settings)} settings, each moving one "
+             f"input from the defaults; the top of the table is the first {s.top} (a display "
+             "choice). Ranks are never averaged."]
+    alls = (False, True)
+
+    def among(comparable):
+        return ("among comparable measures (costs that leave part out, PC, set aside)"
+                if comparable else "among all ranked measures")
+    for c in alls:
+        lines += ["", f"1. What would reorder the top {s.top}, {among(c)}: the research list. A "
+                  "unit is one input, one measure's effect or cost range, or one city's study; a "
+                  "curve counts when one of its settings changes which measures make the top by "
+                  "more than the other random seeds do; 'beyond the seeds' own swaps' counts it "
+                  "only when a measure the seeds we ran never swap enters or leaves and moves "
+                  "further than they move it (the list is sorted by that count).", *_research_block(s, c)]
+    for c in alls:
+        lines += ["", f"2. Rank on each curve by default, {among(c)}, and (best-worst) across every "
+                  f"setting; outN: not ranked under N settings; {DASH} first: not ranked by default.",
+                  *_spread_block(s, c)]
+    for c in alls:
+        lines += ["", f"3. The input that moves each measure most on each curve, {among(c)} "
+                  "(+ down the table, - up; in brackets: no larger than the seeds' largest move, "
+                  "within noise).", *_movers_block(s, c)]
+    for c in alls:
+        lines += ["", f"4. Break-even odds, {among(c)}: the odds that it works at which it would "
+                  "pass the measure above it / fall below the one below it, on the default "
+                  f"ranking ({DASH} at the ends; '{CANNOT}' as it says).", *_odds_block(s, c)]
+    if s.whatifs:
+        lines += ["", "5. What-ifs (what-if, not the default). Each is run beside the default "
+                  "ranking and changes nothing above; rank N/M is N of the M ranked, among all "
+                  "measures and among comparable ones.", *_whatif_block(s)]
+    lines += ["", "Settings:", *(f"  {x.id}: {x.label}" for x in s.settings)]
+    if s.skipped:
+        lines += ["", "Settings that could not be run:",
+                  *(f"  {k}: {v}" for k, v in s.skipped.items())]
+    lines += ["", f"Defaults: map {ctx.get('map')}; study {ctx.get('study') or 'none'}; deaths "
+              f"{ctx.get('deaths') or 'SRS'}; discount {100 * ctx.get('discount', 0):g}% a year; "
+              f"{ctx.get('n'):,} draws, seed {ctx.get('seed')}.",
+              *("Note: " + t for t in notes(s))]
+    return "\n".join(lines)

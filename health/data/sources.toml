@@ -233,6 +233,49 @@ complete profile among the 50 cities (modelling call: a state's monitors, wherev
 Haryana's are mostly Gurugram, Faridabad and the rest of the NCR). Every monitor is used, not only those of the 50 cities.
 """
 
+["cpcb_city_month_hour.csv"]
+source = "Central Pollution Control Board continuous ambient air quality monitoring stations (CAAQMS), 15-minute data compiled by Vonter/india-cpcb-aqi (parquet releases 2016-2025), as downloaded by diwali/download.sh."
+url = "https://github.com/Vonter/india-cpcb-aqi/releases"
+locator = "diwali/data/raw/cpcb-air-quality-YYYY.parquet (git-ignored), columns City, Station ID, Timestamp, 'PM2.5 (µg/m³)', 'PM10 (µg/m³)', 'NO2 (µg/m³)', 'SO2 (µg/m³)', 'CO (mg/m³)', 'Ozone (µg/m³)'; units as the compilation's data dictionary (DATA.md) states them; CPCB city names from cities.csv, column cpcb_cities."
+retrieved = "2026-11-27"
+licence = "ODbL 1.0 (the compilation); the derived table is shared under ODbL 1.0."
+method = "derived"
+script = "scripts/build_cpcb_city_detail.py"
+notes = """
+Columns: city, year, month (1-12), hour (0-23, IST wall-clock), then for each of pm25, pm10, no2, so2, co, o3 a value X
+and n_X. X = mean over the days of that month of the city's value for that clock hour; the city's value for an hour is
+the median across its stations of station-hour means (the method of exposure_cpcb.csv). n_X = number of days that hour
+had a city value; X is empty where n_X is 0. Units as CPCB publishes them: µg/m³, except co in mg/m³. Weighting X by n_X
+over the 24 hours reproduces monthly_cpcb.csv (tests/test_cpcb_detail.py checks this and exposure_cpcb.csv).
+PM2.5 has exactly the annual table's QC (QC_SQL of scripts/build_exposure_cpcb.py is imported, not copied). PM10, NO2,
+SO2, CO and ozone get light cleaning only (modelling call, not yet reviewed; decided for this table): values <= 0 are
+dropped; runs of >= 8 identical consecutive 15-minute values at one station and pollutant are dropped (the PM2.5
+stuck-sensor rule); PM10 > 2000 is dropped (the existing PM10 rule). No cross-checks between pollutants and no upper
+limit on the gases, so a fault that is neither stuck nor <= 0 stays in: read the gas columns as the monitors report them.
+Unlike monthly_cpcb.csv there is no 75% coverage rule here: every city-month with any value has its 24 rows, and n_X
+shows how many days stand behind each value. Cities in the file: Delhi, Mumbai, Kolkata, Bengaluru, Chennai, Hyderabad, Ahmedabad, Pune, Surat, Jaipur, Lucknow
+(the 2016-2025 files; the script takes --city and replaces the file with exactly the cities named).
+"""
+
+["cpcb_station_month.csv"]
+source = "Central Pollution Control Board continuous ambient air quality monitoring stations (CAAQMS), 15-minute data compiled by Vonter/india-cpcb-aqi (parquet releases 2016-2025), as downloaded by diwali/download.sh."
+url = "https://github.com/Vonter/india-cpcb-aqi/releases"
+locator = "diwali/data/raw/cpcb-air-quality-YYYY.parquet (git-ignored), columns City, Station ID, Station Name, Timestamp, 'PM2.5 (µg/m³)', 'PM10 (µg/m³)', 'NO2 (µg/m³)', 'SO2 (µg/m³)', 'CO (mg/m³)', 'Ozone (µg/m³)'; CPCB city names from cities.csv, column cpcb_cities."
+retrieved = "2026-11-27"
+licence = "ODbL 1.0 (the compilation); the derived table is shared under ODbL 1.0."
+method = "derived"
+script = "scripts/build_cpcb_city_detail.py"
+notes = """
+Columns: city, station_id (the compilation's Station ID), station (its Station Name), year, month (1-12), pm25 (the
+station's mean over its valid PM2.5 station-hours that month, µg/m³; empty if none), share_pm25, share_pm10, share_no2,
+share_so2, share_co, share_o3 (share of the month's calendar hours with a valid station-hour of that pollutant, 0-1, 3
+decimals; 0 where the station never reports it). One row per station-month with a reading of any pollutant. Same QC as
+cpcb_city_month_hour.csv (PM2.5: the annual table's; other pollutants: values <= 0, runs of >= 8 identical 15-minute
+values and PM10 > 2000 dropped; modelling call, not yet reviewed). A station-hour is valid if any of its four 15-minute
+readings survives QC. Stations of a city with any share_pm25 > 0 in a year number the `stations` of exposure_cpcb.csv
+(tested). Cities in the file: the same eleven as cpcb_city_month_hour.csv.
+"""
+
 ["cities.csv"]
 source = "Office of the Registrar General & Census Commissioner, India. Census of India 2011, table A-04 (I): Towns and urban agglomerations classified by population size class in 2011 with variation between 1901 and 2011 - Class I. Airshed names: APnA 50 airsheds (apna_source_apportionment.csv), UrbanEmissions.info, CC BY 4.0."
 url = "https://censusindia.gov.in/nada/index.php/catalog/42876/download/46544"
@@ -357,9 +400,26 @@ script = "scripts/build_fx.py"
 notes = """
 Columns: year, inr_per_usd (rupees per US dollar, annual average of the official rate), written as the API gives them. The
 World Bank takes this series from the IMF's International Financial Statistics. Used by airhealth.simulate to turn an
-intervention's rupee costs into dollars at the rate of its cost.year; a cost.year outside 2000-2025 is rejected. No
-inflation (price-level) adjustment is made: costs stay in the prices of their cost.year. Not cross-checked against the
-RBI reference rate.
+dollar costs into rupees at the rate of their cost.year (airhealth.prices), before the GDP deflator
+(gdp_deflator_ind.csv) brings them to 2025 rupees; a cost.year outside 2000-2025 is rejected. Not cross-checked against
+the RBI reference rate.
+"""
+
+["gdp_deflator_ind.csv"]
+source = "World Bank, World Development Indicators: NY.GDP.DEFL.ZS 'GDP deflator (base year varies by country)', India (World Bank API, source id 2, last updated 2026-11-11)."
+url = "https://api.worldbank.org/v2/country/IND/indicator/NY.GDP.DEFL.ZS?format=json&per_page=100&date=2000:2026"
+page = "https://data.worldbank.org/indicator/NY.GDP.DEFL.ZS?locations=IN"
+sha256 = "03359993bf6900970ceadb76567206771a7d98b9d73ac222d557f5d2daab86c5"
+locator = "API JSON, second element: one record per year, fields date and value; India, 2000-2025 (2026 has no value yet)."
+retrieved = "2026-11-27"
+licence = "CC BY 4.0 (World Bank Open Data terms of use)"
+method = "downloaded"
+script = "scripts/build_deflator.py"
+notes = """
+Columns: year, deflator (India's GDP deflator, an index of prices across the whole economy, written as the API gives them;
+the API's own label is "base year varies by country"). Used only as a ratio of two years, by airhealth.prices, to turn a
+cost in its price year's rupees into 2025 rupees: amount x deflator[2025] / deflator[year]. 2024 = 106.064599179458,
+2025 = 107.097208955348. The SHA-256 is that of the downloaded JSON.
 """
 
 ["srs_crude_death_rate.csv"]
@@ -674,6 +734,12 @@ file; Delhi has no airshed). The 2017 booklet's printed table differs from the Z
 Atlas of Urban Expansion T3 urban extent), origin all_origins; sector map and reasons in scripts/build_causes.py; the 20 shares sum to 100 +/- 0.2.
 The build checks the McDuffie xlsx sha256 against its entry below. Emission shares and concentration shares never share a group (metric column).
 A cause a group does not list is not reported, not zero (causes.shares returns NaN).
+power (added 2026-11-27): electricity generation, only where a study gives power plants a row of their own: TERI Kolkata 2025 CMAQ 'Power'
+(summer, winter), TERI Lucknow 2022 CMAQ 'Power' (five seasons), TERI Surat 2021 CMAQ 'Thermal Power plants' (summer, winter); 9 rows moved
+from industry. Rows that lump the two ('Industry (incl. power plants, ...)' ARAI/TERI Delhi, 'Industry/Power Plant' TERI Surat CMB) stay
+industry. APnA's industry group includes power plants, so APnA's power is NaN. McDuffie's 'Energy Coal' and 'Energy NonCoal' stay industry: the
+README of the paper's gridded results (Zenodo record 4739100, read 2026-11-27) defines the energy sector as 'electricity and heat production,
+fuel production and transformation, oil and gas fugitive/flaring, and fossil fuel fires', which is wider than power plants.
 """
 
 ["causes_transcribed.csv"]
@@ -689,6 +755,8 @@ Sectors and `origin` follow the study type: CMAQ/WRF-Chem sector tables and CMB/
 (local_all = the city's own sources, all sectors). A group with covers = all sums to 100 +/- 2; partial groups (stubble-only, Lucknow monsoon)
 do not. Derived values are marked DERIVED in their locator (Kolkata summer HMC slice = 60 - 12 - 46). Mapping calls (coal and fly ash -> other,
 Kolkata cooking -> residential, transport including DG sets) are stated in the locators; source_raw keeps each report's own words.
+Power plants: a row whose source_raw is power alone ('Power', 'Thermal Power plants') is source_harmonised = power (since 2026-11-27);
+rows lumping industry and power stay industry.
 """
 
 ["mcduffie2021_supp_data_1.xlsx"]
@@ -705,4 +773,126 @@ notes = """
 MOESM5 is Data File 2 (fuel-type contributions) and MOESM6 Data File 3 (2019 exposure); only MOESM4 is used. 17 India areas: 9 are
 among the 50 cities (Jaipur, Ahmedabad, Kanpur, Kolkata, Mumbai, Pune, Hyderabad, Vijayawada, Coimbatore); dropped and counted by the
 build: Belgaum, Hindupur, Jalna, Kozhikode, Malegaon, Parbhani, Singrauli, Sitapur. Delhi is not in the file as a sub-national area.
+"""
+
+["targets.csv"]
+source = "Two annual-mean PM2.5 targets used to frame 'what if the air reached this level': India's National Ambient Air Quality Standards (Central Pollution Control Board notification No. B-29016/20/90/PCI-L, 18 November 2009) and WHO global air quality guidelines 2021 (Table 0.1)."
+url = "https://scclmines.com/env/docs/naaqs-2009.pdf (a copy of the CPCB notification, text read directly); https://iris.who.int/server/api/core/bitstreams/551b515e-2a32-4e1a-a58c-cdaecd395b19/content (WHO IRIS, document 9789240034228)"
+locator = "NAAQS: page 1, table row S. No. 4 (PM2.5), Annual, 40 in both area columns. WHO: Table 0.1, PDF page 19, PM2.5 Annual, AQG level 5. Each row's own locator column says the same."
+retrieved = "2026-11-27"
+licence = "No licence stated (Indian government notification); WHO publication is CC BY-NC-SA 3.0 IGO (stated on the document's copyright page). Only the two values are tabulated, with citation."
+method = "transcribed"
+notes = """
+Both values were read in the documents on 2026-11-27, not typed from memory. The NAAQS copy is hosted by a mining company's environment page (SCCL); the notification text, number and date on it match the CPCB notification. If a CPCB-hosted copy is found, swap the url.
+"""
+
+["city_households.csv"]
+source = "Office of the Registrar General & Census Commissioner, India. Census of India 2011: Primary Census Abstract - Urban Agglomeration (PCA11-UA-00) and Primary Census Abstract at town, village and ward level (PCA TV), district files."
+url = "https://censusindia.gov.in/nada/index.php/catalog/45261/download/48987/PCA11-UA-0000.xlsx"
+catalog = "https://censusindia.gov.in/nada/index.php/catalog/45261"
+sha256 = "c38d96e0d1bd027ab141cd13a14d45f6410e72d90fbff8880941c62afce04c72"
+locator = "PCA-UA workbook (sheet 'Data'): rows with Level 0 (the urban agglomeration's own row, not its towns), column No_HH (number of households), matched by 'UA Name' to each census_name entry printed 'U.A.' in cities.csv; TOT_P (persons) of the same row equals the cities.csv population. Nine entries that cities.csv takes as one town (no UA in table A-04) come from the PCA TV district workbooks, rows Level 'TOWN' with the town code, column No_HH, summed where the town is printed in parts: Jaipur (M Corp.) 800522, 3 parts, Rajasthan Jaipur, catalog 6301; Agartala (M Cl) 801523, West Tripura, 6480; Hubli-Dharwad (M Corp.) 803083, Dharwad, 6753; Kota (M Corp.) 800609, Kota, 6318; Cuddalore (M) 803650, Cuddalore, 6808; Tenali (M) 802982, Guntur, 6739; Greater Visakhapatnam (GVMC) 802947, 7 parts, Visakhapatnam, 6735; Ludhiana (M Corp.) 800196, Ludhiana, 6232; Ambala (M Cl) 800365, Ambala, 6261. Catalog pages and file names are in the script's TOWN_ENTRIES."
+retrieved = "2026-11-27"
+licence = "Government of India publication; no licence stated on the catalog pages. Factual statistics reproduced with attribution."
+method = "derived"
+script = "scripts/build_households.py"
+notes = """
+Columns: city, households, population, census_name. census_name and population are copied from cities.csv; households is the sum of No_HH
+over the ';'-separated census_name entries. The script stops unless the persons it finds in the Census files equal cities.csv's population
+for every one of the 50 cities, so households and population describe the same area. Census 2011 only: no later household count is
+used (the 2011 count is a ratio source for persons per household, not a current number of homes). Persons per household ranges from
+3.67 (Coimbatore) to 6.50 (Gaya).
+PCA TV district workbook sha256 (file name):
+c21e3798aa64dd861106a45423147f3406caf467983290fb75e7cccb0d6266f3 DDW_PCA0812 (Jaipur), 3b766760cca136f8ac5af28bf69e41cc861fba9dd7dae026002eff1b33f21bfd DDW_PCA0829 (Kota),
+beaef684d144a096700b4821e31de4bca26ed14ab084c74659370e2d3fc4858e DDW_PCA1601 (West Tripura), 176b1284e08ff7cb59793ba68d0405ddf47f7f768c1ec1a3c506d4ad385dad0b DDW_PCA2908 (Dharwad),
+8a490aaf8148563f4ec8a9549ef84e86c0ec16ecb93139fd64f7061c4486b00e DDW_PCA3316 (Cuddalore), 0f8796a5ae061b69a29183fb0cca65bf071c361246fbd5e17476321ad489b60d DDW_PCA2817 (Guntur),
+bf8f3a824db52c21bab6a511871a937106af0c660351eab16fb8794668aa0585 DDW_PCA2813 (Visakhapatnam), 894e69f6a4f01b5f92b6d9605deaa94f513469f1065c9313a6cd684a8a394249 DDW_PCA0307 (Ludhiana),
+01f76fee426e400add44ab373112a56342c888af6eaa51142262f215ea5fa0d6 DDW_PCA0602 (Ambala).
+"""
+
+["receptor_stubble.csv"]
+source = "Change in each district's annual-mean PM2.5 (µg/m³) if all agricultural (crop-residue) burning were removed: McDuffie EE et al. 2021, Nature Communications 12:3594, gridded fractional source contributions (GBD-MAPS-Global, Zenodo record 4739100, sector GFEDagburn, 2017, 0.01°), times ACAG V6.GL.02.04 total PM2.5 2023 (the acag_total map), population-weighted to geoBoundaries districts with WorldPop 2023 (the same pixels and districts as exposure_acag_total.csv)."
+url = "https://zenodo.org/records/4739100"
+paper = "https://www.nature.com/articles/s41467-021-23853-y"
+files = """
+GBD-MAPS_Gridded_Fractional_Contributions_GFEDagburn.csv  md5 0548514ad214583517f90b81a0352c33 (Zenodo's checksum; 4,925,012,511 bytes; streamed, only India's box kept)
+GBD-MAPS_Gridded_Fractional_Contributions_LatLon.csv  md5 d494baa4f7a3fe160036b43745b4f9ae (streamed once to check the grid order for India's box)
+ACAG, WorldPop and geoBoundaries files: the sha256s in the exposure_acag_total.csv entry (the build printed the same four).
+"""
+locator = "Zenodo record 4739100 (version 2021_v1, published 2021-06-14), file GBD-MAPS_Gridded_Fractional_Contributions_GFEDagburn.csv: one fractional contribution per line (0.0245 = 2.45%), on the global 0.01° grid of the LatLon file (rows from -89.995, -179.995, longitude fastest; checked for lat 6.005-37.495, lon 68.005-97.495). Sector definition: the record's README, 'GFEDagburn - Agricultural Waste Burning ... (from the GFED fires inventory)'. How a fraction becomes µg/m³: the record's description, 'Multiply the 0.01°x0.01° fractional source contributions by downscaled 0.01°x0.01° resolution PM2.5 mass estimates'; here ACAG 2023 is the PM2.5. How a fraction is made: paper, Methods, Eq. 4-5 (zero-out difference over the sum of the 24 sources' differences)."
+retrieved = "2026-11-27"
+licence = "McDuffie gridded results: CC BY 4.0 (Zenodo record). ACAG: CC BY 4.0. WorldPop: CC BY 4.0. geoBoundaries IND ADM2: ODbL 1.0. The derived table is shared under ODbL 1.0."
+method = "derived"
+script = "scripts/build_receptor.py"
+caveat = "The district changes come from McDuffie et al. 2021's global model share of crop-residue burning (all such burning, from every origin, not only Punjab and Haryana), rescaled so all sources sum to 100%, times 2023 satellite PM2.5; no published district-level source-receptor result for stubble could be used. It is far smaller than Lan et al. 2022's estimate (India-wide population-weighted 0.48 against 6.7 µg/m³), so it is likely an underestimate."
+fallback = "This source-receptor table is a fallback: no published district-level result for stubble smoke could be used, so it is built from a global model's share of all crop burning (McDuffie et al. 2021). Its India-wide figure is about 14 times smaller than Lan et al. 2022's national estimate (0.48 against 6.7 µg/m³), so results on it are likely understated; and because it counts crop fires everywhere, places far from Punjab and Haryana (southern India, for example) get a small change the measure would not bring them."
+notes = """
+Columns: district, state, delta_pm25_full (µg/m³, 0 or below): the change in the district's annual-mean PM2.5 when the whole source is removed.
+735 districts, every district of exposure_acag_total.csv (McDuffie's grid covers all of India, so the study's area is the whole country; no
+district is 0). delta = - sum over populated WorldPop pixels of (pop x ACAG PM2.5 x McDuffie fraction of the 0.01° cell holding the pixel
+centre) / sum(pop). The build checks that the same sums without the fraction reproduce exposure_acag_total.csv's pm25 (largest gap 0.000).
+Built 2026-11-27: India population-weighted change -0.48 µg/m³; largest -2.78 (Fatehabad, Haryana); Delhi's districts about -1.7.
+Why McDuffie and not a published source-receptor table: Lan et al. 2022 (Nat Commun 13:6537), the spec's first choice, is an adjoint study
+with one receptor (India-wide exposure), so it gives source districts' shares of national exposure, not the change in each receiving
+district (data/MISSING.md). For comparison only, Lan et al. 2022 Results: 'From 2003 to 2019 we estimate that the annual mean
+population-weighted PM2.5 exposure due to burning activities in India averaged 6.7 µg m-3' (Europe PMC PMC9663555, read 2026-11-27);
+this table's India mean is 0.48 (McDuffie's 2017 GFED fires). The gap is not explained here, and the two are not averaged.
+The McDuffie fraction is a zero-out difference rescaled so the 24 sources sum to 100% (paper Eq. 4-5), not the raw zero-out change; and it is a
+2017 fraction applied to 2023 PM2.5. The README's GFEDagburn line repeats the waste sector's description ('solid waste disposal ...'); its
+name, the paper's 'Agricultural Waste Burning' and the GFED source say crop burning.
+"""
+
+["receptor_energy_coal.csv"]
+source = "Change in each district's annual-mean PM2.5 (µg/m³) if all coal burned for energy production (power and heat plants, plus fuel production and transformation) were removed: McDuffie EE et al. 2021, Nature Communications 12:3594, gridded fractional source contributions (GBD-MAPS-Global, Zenodo record 4739100, sector ENEcoal, 2017, 0.01°), times ACAG V6.GL.02.04 total PM2.5 2023, population-weighted to geoBoundaries districts with WorldPop 2023 (as exposure_acag_total.csv)."
+url = "https://zenodo.org/records/4739100"
+paper = "https://www.nature.com/articles/s41467-021-23853-y"
+files = """
+GBD-MAPS_Gridded_Fractional_Contributions_ENEcoal.csv  md5 08216fa5ef0b8397efc4960a99f7a228 (Zenodo's checksum; 5,139,572,508 bytes; streamed, only India's box kept)
+GBD-MAPS_Gridded_Fractional_Contributions_LatLon.csv  md5 d494baa4f7a3fe160036b43745b4f9ae (grid order check)
+ACAG, WorldPop and geoBoundaries files: the sha256s in the exposure_acag_total.csv entry.
+"""
+locator = "Zenodo record 4739100 (version 2021_v1), file GBD-MAPS_Gridded_Fractional_Contributions_ENEcoal.csv, same grid and method as receptor_stubble.csv. Sector definition, the record's README: 'ENEcoal - Energy Production (coal combustion only) - Includes electricity and heat production, fuel production and transformation, oil and gas fugitive/flaring, and fossil fuel fires'."
+retrieved = "2026-11-27"
+licence = "McDuffie gridded results: CC BY 4.0 (Zenodo record). ACAG: CC BY 4.0. WorldPop: CC BY 4.0. geoBoundaries IND ADM2: ODbL 1.0. The derived table is shared under ODbL 1.0."
+method = "derived"
+script = "scripts/build_receptor.py"
+caveat = "The district changes come from McDuffie et al. 2021's global model share of coal burned for energy production (power plants plus other coal-fired energy production, from every origin, not only India's plants), rescaled so all sources sum to 100%, times 2023 satellite PM2.5; no published plant-level source-receptor result by district could be used."
+fallback = "This source-receptor table is a fallback: no published district-level result for coal power plants could be used, so it is built from a global model's share of all coal burned for energy production (McDuffie et al. 2021), which is wider than power plants alone."
+notes = """
+Columns and method as receptor_stubble.csv. 735 districts, none 0. Built 2026-11-27: India population-weighted change -3.60 µg/m³; largest
+-8.92 (Raigarh, Chhattisgarh). Not power plants alone: the energy sector also holds fuel production and transformation (README), which is
+why causes.csv keeps McDuffie's energy rows in industry. A coal-power measure scored on it gets the whole sector's change times its cut.
+The spec's first choice, the plant-level work behind Cropper et al. (DCP3 ch. 13; PNAS 2021, doi 10.1073/pnas.2017936118), could not be read
+(data/MISSING.md).
+"""
+
+["cropper2021_state_power_pm25.csv"]
+source = "Cropper M, Cui R, Guttikunda S, Hultman N, Jawahar P, Park Y, Yao X, Song X-P (2021). The mortality impacts of current and planned coal-fired power plants in India. PNAS 118(5): e2017936118, SI Appendix, Table S2"
+url = "https://urbanemissions.info/wp-content/uploads/docs/2021-01-PNAS-India-PP-Health-SI.pdf"
+paper = "https://urbanemissions.info/wp-content/uploads/docs/2021-01-PNAS-India-PP-Health.pdf"
+locator = "SI Appendix, PDF p. 7, 'Table S2. Estimates of Population-Weighted Ambient PM2.5 by State and PM2.5 Attributable to Power Plants (µg/m3)', columns 'Ambient PM2.5 Attributable to Coal-Fired Power Plants': 'in 2018' (pm25_power_2018) and 'in 2018 + planned plants' (pm25_power_2018_plus_planned); 30 states, transcribed by hand in the table's order. Method (paper, p. 1-2 and Methods): CAMx at 0.25° for 365 days of 2018, run 1 without and run 2 with 2018 power-plant emissions; plants assumed to have 99% electrostatic precipitators and low-NOx burners but no flue-gas desulfurisation (paper p. 4); load factor 60.9%."
+retrieved = "2026-11-27"
+licence = "Figures tabulated with a citation; the paper is the authors' (PNAS). The SI is hosted by co-author Guttikunda's Urban Emissions."
+method = "transcribed"
+notes = """
+state uses data/places.csv spellings (here identical to the paper's: state_raw). Ambient PM2.5 columns not transcribed.
+Gridded or district results: the paper's data release, openICPSR project 130404 (doi 10.3886/E130404V1), was behind a Cloudflare
+check from scripts and a browser (2026-11-27), see data/MISSING.md.
+"""
+
+["receptor_power_cropper2021.csv"]
+source = "Change in each district's annual-mean PM2.5 (µg/m³) if India's 2018 coal-fired power plants were removed: the state's population-weighted figure from Cropper et al. 2021 (PNAS 118: e2017936118, SI Appendix Table S2, 'in 2018'), given to every district of the state."
+url = "https://urbanemissions.info/wp-content/uploads/docs/2021-01-PNAS-India-PP-Health-SI.pdf"
+locator = "data/cropper2021_state_power_pm25.csv (its entry gives the table and page); districts per state from data/exposure_acag_total.csv."
+retrieved = "2026-11-27"
+licence = "Derived from figures tabulated with a citation; shared under ODbL 1.0 like the district list."
+method = "derived"
+script = "scripts/build_receptor_cropper.py"
+caveat = "The district changes are Cropper et al. 2021's state averages of the PM2.5 India's 2018 coal power plants add (a chemical transport model run with and without the plants, assuming no sulphur scrubbers), given to every district in the state, so differences inside a state are lost; seven small states and territories the table does not list are left out."
+notes = """
+Columns as receptor_stubble.csv. 720 districts (735 less the 15 of Andaman & Nicobar, Chandigarh, Dadra & Nagar Haveli, Daman & Diu,
+Ladakh, Lakshadweep and Puducherry). Built 2026-11-27: population-weighted change over the 720 districts -4.47 µg/m³; largest -7.59
+(every district of Chhattisgarh). This is power plants alone (the paper's runs add or remove only plant emissions); the alternative
+receptor_energy_coal.csv (McDuffie's coal energy sector, India -3.60) is wider in sector but varies within states. Both are kept;
+they are never averaged. fgd_scrubbers uses this one because scrubbers act on power plants only.
 """

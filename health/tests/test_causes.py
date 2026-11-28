@@ -205,6 +205,22 @@ def test_shares_is_nan_for_unreported_causes():
         causes.shares("Atlantis", "x", "annual")
 
 
+def test_power_rows_are_their_own_cause():
+    t = causes.for_city("Lucknow", "teri_lucknow2022_cmaq")
+    assert "power" in set(t.source_harmonised)
+    assert causes.shares("Lucknow", "teri_lucknow2022_cmaq", t.season.iloc[0])["power"] > 0
+    every = causes.table()
+    assert set(every[every.source_harmonised == "power"].source_raw) == {"Power", "Thermal Power plants"}
+    lumped = every[every.source_raw.str.contains("power", case=False)
+                   & every.source_raw.str.contains("industry", case=False)]
+    assert len(lumped) and set(lumped.source_harmonised) == {"industry"}   # lumped rows stay industry
+
+
+def test_apna_does_not_report_power():
+    assert pd.isna(causes.shares("Bengaluru", "apna_2015", "annual")["power"])
+    assert pd.isna(causes.shares("Kanpur", "mcduffie2021", "annual")["power"])  # energy sector is wider
+
+
 def test_coal_and_fly_ash_is_other():
     t = causes.table()
     f = t[t.source_raw.str.contains("fly ?ash", case=False) & t.study.str.contains("iitk")]

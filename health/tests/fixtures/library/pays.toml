@@ -1,0 +1,22 @@
+# Test fixture: a measure whose society-wide net cost is below zero. Every number is a placeholder.
+name = "Fixture: pays for itself"
+kind = "air"
+scope = "city"
+who_reaches = "everyone in the city"
+cities = "all"
+start_year = 2027
+duration_years = 5
+p_success = 0.5
+p_success_basis = "judgement: fixture"
+placeholders = ["targets.dust.cut", "cost.annual", "cost.society_net_annual"]
+
+[[targets]]
+cause = "dust"
+cut = 0.2
+
+[cost]
+driver = "person"
+annual = 50
+society_net_annual = -200
+currency = "INR"
+year = 2024

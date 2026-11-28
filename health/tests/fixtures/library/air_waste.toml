@@ -1,0 +1,21 @@
+# Test fixture: cuts open waste burning. Every number is a placeholder.
+name = "Fixture: waste burning"
+kind = "air"
+scope = "city"
+who_reaches = "everyone in the city"
+cities = "all"
+start_year = 2027
+duration_years = 5
+p_success = 0.5
+p_success_basis = "judgement: fixture"
+placeholders = ["targets.waste_burning.cut", "cost.annual"]
+
+[[targets]]
+cause = "waste_burning"
+cut = 0.5
+
+[cost]
+driver = "city"
+annual = 1e8
+currency = "INR"
+year = 2024

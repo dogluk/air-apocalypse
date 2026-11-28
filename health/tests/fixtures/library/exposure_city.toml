@@ -1,0 +1,26 @@
+# Test fixture: an exposure measure in cities. Every number is a placeholder.
+name = "Fixture: exposure, city"
+kind = "exposure"
+scope = "city"
+who_reaches = "households that can run a purifier"
+cities = "all"
+start_year = 2027
+duration_years = 5
+lag = "immediate"
+p_success = 0.3
+p_success_basis = "judgement: fixture; no trial shows purifiers cut deaths"
+placeholders = ["exposure.covered", "exposure.hours", "exposure.cut", "cost.once", "cost.annual"]
+
+[exposure]
+covered = { dist = "uniform", p5 = 0.02, p95 = 0.1 }
+hours = 0.4
+cut = { dist = "normal", p5 = 0.3, p95 = 0.6 }
+months = [11, 12, 1]
+
+[cost]
+driver = "household"
+once = 100
+annual = 30
+currency = "USD"
+year = 2022
+share_only_on_success = 0.0

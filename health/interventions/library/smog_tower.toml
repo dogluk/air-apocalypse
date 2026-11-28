@@ -1,0 +1,94 @@
+# Bengaluru: one Connaught Place-style smog tower, run in the dirtiest months. A long shot.
+name = "A smog tower in Bengaluru (long shot)"
+kind = "exposure"
+scope = "city"
+who_reaches = "people living within about 500 m of the tower, while they are there, December to March"
+cities = ["Bengaluru"]
+long_shot = true
+
+start_year = 2027
+ramp_years = 0
+duration_years = 2
+lag = "epa20"
+
+p_success = 0.1
+p_success_basis = "judgement: far below the air measures' middle value (0.5). Nobody has to adopt or use anything, so the odds rest on the machine: Delhi's pollution control committee judged the Connaught Place tower largely ineffective and suggested shutting it, and IIT Bombay's report found clogged filters, air leaks and maintenance trouble, and recommended running it only in winter (press accounts of the 2023 final report)"
+
+placeholders = []
+
+notes = """
+One 24-metre tower like Delhi's at Connaught Place (40 fans, about 1,000 m³ of air a second through
+filters), run in Bengaluru's four dirtiest months (December to March, from the city's own monthly
+shape), for the two years its price covers.
+
+How much it cuts: IIT Bombay's final report (September 2023) on the Connaught Place tower, as
+reported: about 12% for PM2.5 beyond 100 m, about 16% at 300 m and 500 m, and at best 18% about
+500 m downwind. Close to the tower (50 m) the fall was larger, 35-36% in one direction. The report
+itself was not reached; these figures are from the Indian Express and Hindustan Times accounts of it
+(evidence S; data/MISSING.md). The measure is taken to reach a 500 m radius, 0.785 km², with a 12-18%
+cut through all of it, which is generous.
+
+Who: the people living in 0.785 km², at urban Bangalore's 2011 density of 10,872 per km²: about
+8,540 people, 0.1% of the city. (IIT Bombay estimated 19,500 for the Delhi site, in the heart of
+the capital; that would double both the reach and the cost per person, leaving life-years per crore
+the same.)
+
+How long they are there: from 52% of the day (an adult who works 10 hours and commutes 1.5, Pant et
+al. 2017, Delhi) to all of it (someone who stays near home; 56% of Bangalore district's people are
+not working, Census 2011).
+
+Cost: Rs 20 crore for the Connaught Place tower including two years of running it (Delhi Pollution
+Control Committee, 2021), reported as Rs 22-25 crore in 2023. Land is not in it. Shared over the
+8,540 people it reaches.
+
+city-specific: the share covered (0.1%) and the cost per person both come from the people within 500 m at urban Bangalore's density (Census 2011); another city needs its own density at the tower's site.
+"""
+
+[exposure]
+covered = 0.001002
+hours = { dist = "uniform", p5 = 0.52, p95 = 1.0 }
+cut = { dist = "uniform", p5 = 0.12, p95 = 0.18 }
+months = [12, 1, 2, 3]
+
+[cost]
+driver = "person"
+once = { dist = "uniform", p5 = 23422, p95 = 29277 }
+currency = "INR"
+year = 2021
+partial = "It leaves out land and any running cost after the first two years; the Rs 20-25 crore paid for the Delhi tower and two years of operating it."
+
+[[evidence]]
+fields = ["exposure.cut"]
+source = "Indian Express (26 Oct 2023), 'Smog tower at Connaught Place ineffective, DPCC suggests shut down', reporting IIT Bombay's final report to the Delhi Pollution Control Committee"
+url = "https://indianexpress.com/article/cities/delhi/smog-tower-at-connaught-place-ineffective-dpcc-suggests-shut-down-8999744/"
+locator = "Paragraphs 5-6: 'the smog tower's capacity to reduce the concentration of PM 2.5 and PM 10 was 12% and 13% above a distance of 100 metres' and 'the effectiveness was around 16% both at distances of 300 m and 500 m'"
+key = "S"
+retrieved = "2026-11-27"
+derivation = "p5 = 0.12 (PM2.5 beyond 100 m); p95 = 0.18, the best case 'roughly 500m away and in a downwind direction', Hindustan Times (10 Nov 2023), 'Delhi's smog tower impact too little, too close: Report' (https://www.hindustantimes.com/cities/delhi-news/delhis-smog-tower-impact-too-little-too-close-report-101699553699207.html). Both are press accounts of the report, not the report itself."
+
+[[evidence]]
+fields = ["exposure.hours"]
+source = "Pant P, Habib G, Marshall JD, Peltier RE (2017), PM2.5 exposure in highly polluted cities: A case study from New Delhi, India, Environmental Research 156: 167-174"
+url = "https://depts.washington.edu/airqual/Marshall_76.pdf"
+locator = "Sec. 2 (study design), printed p. 168 (PDF p. 2): 'Most of the study subjects spent between 40 and 90 min in their daily commute, and between 8 and 10 h at work'"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "p5 = (24 - 10 - 1.5) / 24 = 0.52, a worker away from the zone at work and in transit; p95 = 1.0, someone who stays in the zone (55.86% of Bangalore district's people are non-workers, Census 2011 District Census Handbook, Important Statistics)."
+
+[[evidence]]
+fields = ["exposure.covered"]
+source = "Census of India 2011, District Census Handbook Bangalore, Part XII-B (Village and Town wise Primary Census Abstract)"
+url = "https://censusindia.mha.gov.in/nada/index.php/catalog/585/download/1988/DH_2011_2918_PART_B_DCHB_BANGALORE.pdf"
+locator = "District Primary Census Abstract, printed p. 26 (PDF p. 39): Bangalore District, Urban, area 804.83 sq km, total population 8,749,944"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "density 8,749,944 / 804.83 = 10,872 per km²; people within 500 m = pi x 0.5² x 10,872 = 8,539; covered = 8,539 / 8,520,435 (the city's population in data/cities.csv, Census 2011 Bruhat Bangalore U.A., which the engine uses) = 0.001002."
+
+[[evidence]]
+fields = ["cost.once"]
+source = "Indian Express (23 Aug 2021), 'Country's first smog tower in Delhi's Connaught Place, cost Rs 20 crore'"
+url = "https://indianexpress.com/article/cities/delhi/indias-first-smog-tower-inaugurated-in-delhi-7466677/"
+locator = "Paragraph 4: 'The total project cost, including two years of operational cost, is around Rs 20 crore, according to a senior official of the Delhi Pollution Control Committee (DPCC)'"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "per person reached: p5 = 200,000,000 / 8,539 = 23,422, p95 = 250,000,000 / 8,539 = 29,277, from people = 8,539 (see exposure.covered). 25 crore is the Hindustan Times figure of 10 Nov 2023 ('at a cost of around ₹25 crore'); the Indian Express of 26 Oct 2023 says Rs 22 crore. Price year 2021."

@@ -1,0 +1,114 @@
+# Every city: a free HEPA air purifier, with replacement filters, for households that want one.
+name = "Free HEPA purifiers for homes"
+kind = "exposure"
+scope = "city"
+who_reaches = "households in the city that accept a free purifier, while it is running"
+cities = "all"
+
+evidence_from = ["Dhaka", "Delhi"]
+evidence_note = "and field studies worldwide"   # where the numbers come from, when not this city
+start_year = 2027
+ramp_years = 0
+duration_years = 5
+lag = "epa20"
+
+p_success = 0.3
+p_success_basis = "judgement: below the air measures' middle value (0.5) because of adoption and use. Trials show purifiers lower indoor PM2.5 and blood pressure, but none shows fewer deaths; in Dalkhola (India) a blinded trial of a purifier at night plus an N95 found no fall in indoor PM2.5 or blood pressure with routine use (Yakkali et al. 2025, conference abstract), because people opened windows, switched it off for cold or noise, and worried about electricity. How little people run it is already in `hours`; these odds cover whether the cleaner air they do get cuts deaths as the risk curves say"
+
+placeholders = []
+
+notes = """
+The city gives a household a HEPA purifier sized for one room (the bedroom) and pays for
+replacement filters for five years (a design choice: the purifier's working life was not found at
+a source). The measure reaches only the people in the households that take it, and only while the
+purifier is running; the outdoor air does not change.
+
+How much it cuts: field studies of portable air cleaners in real homes find a mean fall of 49% in
+indoor PM2.5 (standard deviation 20%, 83 studies; Ebrahimifakhar et al. 2024). That is the cut
+while it runs. The Shanghai crossover trial of Chen et al. (2015) found 57% with windows and doors
+shut; Indian homes are leakier (Vyas et al. 2016, Delhi), so the field average is used.
+
+How long it runs: this is the weak point. In Dhaka, the only trial found that metered purifier use
+in homes given one free, households ran it 20 minutes a day on average, and 105 minutes a day if
+they also got an air-quality monitor (Chowdhury, Garg, Jagnani and Mattsson 2026). Those are the
+two ends of `hours`. Run all night, it would reach the 38% of the day urban Indians spend asleep
+(Time Use Survey 2019, 543 minutes), but no trial found people using it that much, so that figure
+is not used.
+
+Who takes it: from 6% to 58% of households. The low end is Delhi, where 14.5% of medium and high
+income households approached agreed to take part in a study and 44% of those accepted a free
+month's trial of an indoor monitor (Greenstone, Lee and Sahai 2021); the high end is Dhaka, where
+58% of households contacted were interested in a free monitor or purifier. The share reached hardly
+changes life-years per crore (cost and benefit both scale with it); it sets the total.
+
+Cost: Xiaomi Smart Air Purifier 4 Lite (true HEPA, for rooms of 25-43 m²) at Rs 10,999-11,499
+on Xiaomi India's store (November 2026), and its filter at Rs 2,999, replaced every 6-12 months as
+the maker advises. 2026 prices are used as 2025 rupees (the deflator stops at 2025). Electricity is
+paid by the household and is not in the funder's cost.
+
+Widened to every city (2026-11-27): written first for Bengaluru, but none of its numbers
+is about Bengaluru. The cut is a meta-analysis of field studies worldwide; how long it runs is
+the Dhaka trial; who takes it runs from Delhi to Dhaka; the price is Xiaomi's all-India retail
+price, per household. So every city gets the same numbers, and the evidence is borrowed in every
+city alike (Dhaka and Delhi, not the city scored); people per household is each city's own
+(data/city_households.csv). No source gives a threshold, so there is no min_share_pct (it is an
+exposure measure in any case).
+"""
+
+[exposure]
+covered = { dist = "uniform", p5 = 0.064, p95 = 0.58 }
+hours = { dist = "uniform", p5 = 0.0139, p95 = 0.0729 }
+cut = { dist = "normal", p5 = 0.161, p95 = 0.819 }
+
+[cost]
+driver = "household"
+once = { dist = "uniform", p5 = 10999, p95 = 11499 }
+annual = { dist = "uniform", p5 = 2999, p95 = 5998 }
+currency = "INR"
+year = 2025
+partial = "It leaves out electricity (paid by the household), the cost of running the hand-out, and the air-quality monitor that the upper end of use assumes."
+
+[[evidence]]
+fields = ["exposure.cut"]
+source = "Ebrahimifakhar A, Poursadegh M, Hu Y, Yuill DP, Luo Y (2024), A systematic review and meta-analysis of field studies of portable air cleaners: performance, user behavior, and by-product emissions, Science of the Total Environment 912: 168786"
+url = "https://pubmed.ncbi.nlm.nih.gov/38008326/"
+locator = "Abstract: '83 of the 148 papers measured reductions in fine particulates (PM2.5) and found a mean reduction of 49 % with standard deviation of 20 %. The aggregated results were approximately normally distributed'"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "normal with mean 0.49 and SD 0.20: p5 = 0.49 - 1.645 x 0.20 = 0.161, p95 = 0.49 + 1.645 x 0.20 = 0.819. Chen et al. 2015 (JACC 65: 2279, abstract: 57%, 96.2 to 41.3 µg/m³, sealed dormitory rooms) lies inside this range."
+
+[[evidence]]
+fields = ["exposure.hours"]
+source = "Chowdhury A, Garg T, Jagnani M, Mattsson M (2026), Residential Air Purifiers and the Value of Clean Air (working paper, version of 8 October 2026)"
+url = "https://ceg.hkust.edu.hk/upload/paper/Paper_+20261030_Martin+Mattsson.pdf"
+locator = "Sec. 5.1 'Baseline usage is very low' and Sec. 5.3 'Monitors raise usage', printed p. 16 (PDF p. 17): free purifier, no monitor or electricity compensation, 'average use was only 20 minutes per day'; with a monitor, '105 minutes per day on average'"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "p5 = 20 / 1440 = 0.0139; p95 = 105 / 1440 = 0.0729 (share of the day the purifier runs). Smart-socket metered use, Dhaka, winter 2023-24."
+
+[[evidence]]
+fields = ["exposure.covered"]
+source = "Chowdhury A, Garg T, Jagnani M, Mattsson M (2026), Residential Air Purifiers and the Value of Clean Air (working paper, version of 8 October 2026)"
+url = "https://ceg.hkust.edu.hk/upload/paper/Paper_+20261030_Martin+Mattsson.pdf"
+locator = "Footnote 6, printed p. 9 (PDF p. 10): 'Only 0.8% of contacted households owned a purifier, 73% had Wi-Fi, and 58% expressed interest'"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "p95 = 0.58 (Dhaka: households contacted that were interested in a free monitor or purifier). p5 = 0.145 x 0.44 = 0.064 from Greenstone, Lee and Sahai (2021), Indoor Air Quality, Information, and Socio-Economic Status: Evidence from Delhi, BFI working paper 2021-106 (https://bfi.uchicago.edu/wp-content/uploads/2021/01/BFI_WP_202106.pdf), PDF p. 5: of 8,877 households approached '85.5 percent declined or were unable to participate', and '56.0 percent of households turned down the free user trial with an IAQM' (a monitor, the nearest Indian measure of take-up of a free anti-pollution device)."
+
+[[evidence]]
+fields = ["cost.once"]
+source = "Xiaomi India store, Xiaomi Smart Air Purifier 4 Lite"
+url = "https://www.mi.com/in/product/xiaomi-smart-air-purifier-4-lite/buy/"
+locator = "Product page: 'Current Price ₹10999'; coverage '269sq.ft.- 463sq.ft.', 'True HEPA Filter'. The store listing https://store.mi.com/in/products/453-0-8-1-0-1 shows the same model at ₹11,499"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "p5 = Rs 10,999, p95 = Rs 11,499 (the two prices shown the same week). 2026 prices taken as 2025 rupees."
+
+[[evidence]]
+fields = ["cost.annual"]
+source = "Xiaomi India store, Xiaomi Smart Air Purifier 4 Lite Filter"
+url = "https://www.mi.com/in/product/xiaomi-smart-air-purifier-4-lite-filter/buy/"
+locator = "Product page: 'Current Price ₹2999'; 'It is recommended to replace the filter every 6–12 months.'"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "one to two filters a year: p5 = Rs 2,999, p95 = 2 x 2,999 = Rs 5,998. 2026 prices taken as 2025 rupees."

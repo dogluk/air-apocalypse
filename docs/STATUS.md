@@ -1,6 +1,6 @@
 # Where this stands
 
-Last updated 2026-11-25. New to the repo? Read [`../AGENTS.md`](../AGENTS.md) first.
+Last updated 2026-11-27. New to the repo? Read [`../AGENTS.md`](../AGENTS.md) first.
 
 ## In short
 
@@ -26,21 +26,32 @@ comes from (`origin`: inside the city, from anywhere, or a geographic split).
 `airhealth causes Kanpur` shows them side by side. A second pass re-read ~230 rows at source
 and found no wrong number.
 
+**Measures and ranking (built 2026-11-27).** A library of 22 measures
+(`health/interventions/library/`), each number read at source or flagged; `airhealth score CITY`
+scores them on every curve and every source study; `airhealth rank` ranks them per city and for
+all India (never averaging curves); `airhealth rank --sensitivity` shows which inputs reorder the
+ranking; ranking benchmarks in `health/benchmarks/RANKING.md`; a ranking tab on the dashboard.
+Design: [`specs/2026-11-12-intervention-ranking-design.md`](specs/2026-11-12-intervention-ranking-design.md).
+
+**Bengaluru end to end.** [`cities/bengaluru/index.html`](../cities/bengaluru/index.html): the
+air (monitors 2016-2025, satellites, gases), its sources, its health toll and the measures,
+generated from the repo. Design: [`specs/2026-11-27-bengaluru-page-design.md`](specs/2026-11-27-bengaluru-page-design.md).
+
 ## Next, in order
 
-1. **The measure library and engine.** Measure files (kind, scope, targets, exposure, cost
-   drivers), 2025 rupees, a common horizon with 3% discounting, runs over the covered
-   population only, regional measures, the first ~25 measures. Power plants sit inside
-   `industry` everywhere, so flue-gas desulphurisation measures need `source_raw` or a new
-   cause. Design: [`specs/2026-11-12-intervention-ranking-design.md`](specs/2026-11-12-intervention-ranking-design.md).
-2. **The ranking itself**: an all-India table, one table per city, benchmarks against
-   published cost rankings, a dashboard tab.
-3. **Reproduce GBD's own India burden** (969,726 outdoor-PM2.5 deaths in 2023; this tool gives
+1. **An open source-receptor table.** The stubble and coal tables are stand-ins (the stubble one
+   is about 14 times smaller than Lan et al. 2022's national figure), so every regional measure
+   is understated. District-level receiving changes from a published model would fix it.
+2. **Full costs for the top city measures.** The waste-burning ban and construction-dust controls
+   rank on enforcement-only costs (`partial_cost`).
+3. **Widen measures to more cities** where a per-city count can be read at source (leads in
+   `health/data/MISSING.md`; cheapest: diesel-generator kVA and kiln counts per city).
+4. **Reproduce GBD's own India burden** (969,726 outdoor-PM2.5 deaths in 2023; this tool gives
    1.61 million on the same curve, map and year). Needs GBD 2023's household air pollution
    file (GHDx record 594794, no login) and GBD's split between outdoor air and cooking smoke.
    Then a benchmark for `gbd2023`, and one for `gbd2019` against Pandey et al. 2021.
-4. **A GBD all-cause death source** (`--deaths gbd`), from one more IHME Results-tool query.
-5. Later: a cohort run to 2050, valuation presets, the Surat emissions-trading case, an
+5. **A GBD all-cause death source** (`--deaths gbd`), from one more IHME Results-tool query.
+6. Later: a cohort run to 2050, valuation presets, the Surat emissions-trading case, an
    emissions-to-concentration layer, a public web page.
 
 ## Gaps a person could close in minutes

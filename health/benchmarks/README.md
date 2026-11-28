@@ -6,6 +6,8 @@ Each case runs this tool with the curve, counterfactual and year of a published 
 
 Cases marked *local* use the IHME tier (files in `data_local/`, never committed); they are skipped where those files are absent. Their write-ups quote totals only.
 
+Benchmarks of the ranking against published cost rankings (cost per death, per µg/m³, and order) are in `RANKING.md`, written by `benchmarks/rank_run.py`.
+
 | Case | Measures | Published | Ours | Ratio | Expected |
 |---|---|---|---|---|---|
 | jaganathan2024_share | share | 24.9% of deaths | 26.0% of deaths | 1.044 | 1 ±10% |

@@ -7,6 +7,7 @@ the command line, so every number on the page is one the CLI would print. Nothin
 to disk and nothing leaves the machine. Standard library only.
 """
 import json
+import time
 import webbrowser
 from functools import cache
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -15,13 +16,15 @@ from urllib.parse import parse_qs, urlparse
 
 import numpy as np
 
-from . import baseline, curves, exposure, paths, places, report
+from . import baseline, causes, curves, exposure, paths, places, rank, report, score, simulate
 from .impact import Change, steady_state
 from .inputs import DEMOGRAPHIC, REGISTRY, Sources
 
 PAGE = Path(__file__).with_name("dashboard.html")
 SHAPES = paths.DATA / "districts.geojson"     # scripts/build_district_shapes.py
 SHAPE_AGE = 60
+OUT = paths.OUT / "rank"      # written by `airhealth rank --write`
+DASH_N = 500          # draws for a city computed on demand (stated on the page)
 STATE_MAPS = ("aqli", "acag_total", "gbd2019", "gbd2023")   # compared in the exposure table
 
 SHORT = {
@@ -136,6 +139,7 @@ def meta() -> dict:
                      sources=[dict(name=x.name, label=x.label, body=x.body) for x in i.sources])
                 for i in REGISTRY.values()],
         deaths_bases=list(baseline.DEATHS_BASES),
+        rank_cities=sorted(causes.known_cities()), rank_dash_n=DASH_N,
     )
 
 
@@ -169,6 +173,92 @@ def result(q: dict) -> dict:
     )
 
 
+def _slug(name: str) -> str:
+    return name.lower().replace(" ", "_")            # the file names `airhealth rank --write` makes
+
+
+def _rank_place(q: dict) -> tuple[bool, str]:
+    """(is India, the canonical city name or "India")."""
+    raw = (q.get("place") or "").strip()
+    if not raw:
+        raise ValueError("choose a place: India or one of the fifty cities")
+    if raw.lower() in ("india", "all india"):
+        return True, "India"
+    try:
+        name = places.resolve(raw, kind="city").name
+    except KeyError:
+        raise ValueError(f"unknown city {raw!r}") from None
+    if name not in causes.known_cities():
+        raise ValueError(f"{name} is not one of the fifty cities the ranking covers")
+    return False, name
+
+
+def _stamp(path: Path) -> str:
+    return time.strftime("%Y-%m-%d %H:%M", time.localtime(path.stat().st_mtime))
+
+
+def rank_legend() -> dict:
+    return dict(flags=[dict(flag=f, code=c, text=report.FLAG_LEGEND.get(c, c))
+                       for f, c in report.FLAG_CODES.items()],
+                evidence=report.EVIDENCE_LEGEND)
+
+
+def _city_now(name: str, curves_: list[str] | None, n: int) -> dict:
+    """A city ranked now, from its own measures only. A regional measure's ratio needs its whole
+    reach scored (about two minutes each), which a page load must not start: those rows show
+    as not scored, with the way to get them."""
+    scores = score.city(name, curves=curves_, n=n, seed=0, discount=simulate.DISCOUNT)
+    wanted = {s.measure for s in scores if s.scope == "region" and s.status == "scored"}
+    why = ("its whole reach is not scored on this page (about two minutes per measure); "
+           f"`airhealth rank --write` writes it, or run `airhealth rank {name}`")
+    context = rank._context(scores, None, map_name="acag_total", curves=curves_, n=n, seed=0,
+                            discount=simulate.DISCOUNT, deaths=None)
+    return rank.to_json(rank.from_scores(scores, name, context,
+                                         regional_missing={m: why for m in wanted}))
+
+
+def rank_result(q: dict, out: Path = OUT) -> dict:
+    """The ranking of the measure library for India or a city, as `airhealth rank --json` prints
+    it, plus where it came from. India, and any city asked for at its defaults, are read from
+    the files `airhealth rank --write` leaves in `out`; a city asked for with its own draws or
+    curves (or with no file) is computed now, on its own measures: regional measures are left
+    unscored, not run."""
+    india, name = _rank_place(q)
+    slug = "india" if india else _slug(name)
+    path = Path(out) / f"rank_{slug}.json"
+    custom = bool(q.get("n") or q.get("curves"))
+    if india or (path.exists() and not custom):
+        if not path.exists():
+            raise ValueError("run `airhealth rank --write` first; it takes several minutes")
+        res = json.loads(path.read_text())
+        res["source"] = f"file {path.name}, written {_stamp(path)}"
+    else:
+        names = [c.strip() for c in (q.get("curves") or "").split(",") if c.strip()] or None
+        n = int(q.get("n") or DASH_N)
+        if n < 10:
+            raise ValueError("n must be at least 10 draws")
+        res = _city_now(name, names, n)
+        res["source"] = f"computed now, {n} draws"
+    res["dash_n"] = DASH_N
+    note = report.stubble_note(x for t in res.get("tables", {}).values() for x in t.get("rows", ()))
+    res["notes"] = [note] if note else []
+    res["legend"] = rank_legend()
+    res["sensitivity_file"] = (Path(out) / f"sensitivity_{slug}.json").exists()
+    return res
+
+
+def sensitivity_result(q: dict, out: Path = OUT) -> dict:
+    """What reorders the ranking, from the file `airhealth rank PLACE --sensitivity --write` left."""
+    india, name = _rank_place(q)
+    path = Path(out) / f"sensitivity_{'india' if india else _slug(name)}.json"
+    if not path.exists():
+        raise ValueError(f"no sensitivity file for {name}; run `airhealth rank "
+                         f"{'' if india else name + ' '}--sensitivity --write` first")
+    res = json.loads(path.read_text())
+    res["source"] = f"file {path.name}, written {_stamp(path)}"
+    return res
+
+
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, *args):  # quiet
         pass
@@ -196,6 +286,10 @@ class Handler(BaseHTTPRequestHandler):
                 self._json(200, meta())
             elif url.path == "/api/result":
                 self._json(200, result({k: v[0] for k, v in parse_qs(url.query).items()}))
+            elif url.path == "/api/rank":
+                self._json(200, rank_result({k: v[0] for k, v in parse_qs(url.query).items()}))
+            elif url.path == "/api/sensitivity":
+                self._json(200, sensitivity_result({k: v[0] for k, v in parse_qs(url.query).items()}))
             else:
                 self._json(404, dict(error="not found"))
         except (KeyError, ValueError, curves.Unavailable, NotImplementedError) as e:

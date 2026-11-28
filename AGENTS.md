@@ -9,7 +9,19 @@ Read this file first. It is short, and it holds the rules that are easy to break
 
 ## Your first three moves
 
-**1. Get it running (about a minute).**
+**0. Just want to run it?** No clone needed (needs [uv](https://docs.astral.sh/uv/)):
+
+```
+uvx --from 'git+https://github.com/dogluk/air-apocalypse#subdirectory=health' airhealth burden Bengaluru
+```
+
+Without uv: `pipx run --spec 'git+https://github.com/dogluk/air-apocalypse#subdirectory=health' airhealth burden Bengaluru`,
+or `python3 -m venv .venv && .venv/bin/pip install 'git+https://github.com/dogluk/air-apocalypse#subdirectory=health'`
+then `.venv/bin/airhealth burden Bengaluru`, or clone and `pip install -e "health[dev]"` (move 1) to change the code.
+The installed package carries its own data, measure library and fonts (built from `health/setup.py`); the
+IHME curves stay unavailable unless `AIRHEALTH_LOCAL` points at a folder of IHME files.
+
+**1. Get it running (the install takes about fifteen seconds, the tests about three minutes).**
 
 ```
 python3 -m venv .venv
@@ -21,7 +33,11 @@ cd health
 ../.venv/bin/airhealth list curves
 ```
 
-Python 3.11 or newer. Every test should pass. Some tests skip: they need files from IHME
+Python 3.11 or newer (tested on 3.13). For the exact versions the tests passed with, install
+`health/requirements-lock.txt` first: `.venv/bin/pip install -r health/requirements-lock.txt -e health`.
+The health tests take about three minutes; the page tests (`cd ..` to the repository root, then
+`PYTHONPATH=health:cities .venv/bin/python -m pytest cities/tests -q`) about ten seconds.
+Every test should pass. Some tests skip: they need files from IHME
 (the Global Burden of Disease group) that cannot be shared here, and three of the eight
 risk curves are unavailable without them. Everything else works from a fresh clone. Add
 `--json` to any command for the same content as JSON.
@@ -78,12 +94,37 @@ Not solid, and you should say so when you use a result:
   calls at the end of [`docs/STATUS.md`](docs/STATUS.md).
 - **Every curve is stretched past its evidence.** No study has followed people who breathe
   air like Delhi's for years.
-- **The ranking of measures by cost does not exist yet.** Design:
-  [`docs/specs/2026-11-12-intervention-ranking-design.md`](docs/specs/2026-11-12-intervention-ranking-design.md).
+- **The measures are scored and ranked.** `airhealth rank [CITY]` ranks them (all India, or one city) by
+  expected life-years per crore, one table per curve; most measures are city-specific (a
+  `city-specific:` line in each one's notes names the number that keeps it there); three run in every
+  city (`home_purifiers`, `old_vehicle_retirement`, and `school_purifiers_india` in the 49 besides
+  Bengaluru), and ranks on different curves must be read side by side (the grid prints first), never
+  averaged. A library of 22 measures (13 written for Bengaluru, 1 general variant, 4 regional, 4
+  elsewhere) sits in `health/interventions/library/`, every number sourced or
+  flagged. `airhealth measures` lists them; `airhealth score CITY [--study S]` and
+  `airhealth score --region ID` score them on every curve, in life-years per crore of 2025
+  rupees. Read the flags: `partial_cost` (the cost leaves part out), `upper_bound_all_origins`,
+  `receptor_fallback` (the regional tables are stand-ins), `long_shot`, `placeholder`,
+  `odds_judgement`. Known gaps: the regional source-receptor tables are fallbacks (the crop-burning
+  one is about 14 times smaller than Lan et al. 2022's national figure, so stubble measures are likely
+  understated; it is not scaled, by rule 5, though `rank --sensitivity` shows a labelled what-if,
+  `whatif:stubble_lan2022`, beside the default), and masks for workers (`n95_winter`) use all-age death
+  rates, because the file names no age group (school purifiers name theirs, `ages = [5, 19]`, and are
+  scored with that group's own death rates). See "Measures" in `health/README.md` and the
+  design: [`docs/specs/2026-11-12-intervention-ranking-design.md`](docs/specs/2026-11-12-intervention-ranking-design.md).
 
-## Open work, roughly smallest first
+## Open work
 
-Each of these is one sitting. Say in your write-up what you read and what you could not
+**The full list is [`docs/open-work.md`](docs/open-work.md)** (also `docs/open-work.json`): every open
+item with a stable id (`OW-NNN`), the question, where to read it, the file it lands in, the check that
+proves it, and its size, ordered by how much it could move the ranking. Claim one by its id. The source
+of truth is [`health/open_work.toml`](health/open_work.toml); regenerate the two documents with
+`cd health && PYTHONPATH=. ../.venv/bin/python scripts/open_work.py` (add `--sensitivity PATH` for another
+sensitivity run). The rules to quote in your write-up:
+
+> No number enters code or data unless you read it at its source, and you record where (table, figure, page). Never average curves, studies or maps; show them side by side. A source that does not report something has not reported zero. Never tune an input to close a gap with a published figure; a labelled what-if run beside an unchanged default, or a spread shown instead of a point, is not tuning.
+
+The short list below is the same work, roughly smallest first. Each of these is one sitting. Say in your write-up what you read and what you could not
 check.
 
 1. **Close one gap in `health/data/MISSING.md`.** Three good ones:
@@ -106,8 +147,11 @@ check.
 4. **Reproduce GBD's India count.** Download GBD 2023's household air pollution estimates
    (GHDx record 594794; no login needed for that file), apply GBD's split between outdoor
    air and cooking smoke, and see how much of the gap above it explains.
-5. **The measure library and ranking** (the large one). "Next, in order" in `docs/STATUS.md`.
-   Talk to the maintainer before starting.
+5. **Make the ranking firmer.** `airhealth rank` exists (all-India and per city, one table per
+   curve, with `--sensitivity`); its weakest inputs are the regional source-receptor tables, which
+   are stand-ins (see `health/data/MISSING.md`, "Regional measures"). Replace one with a published
+   district-level result, or write one more library measure from
+   `health/interventions/library/_template.toml`, or close one of its leads in MISSING.md.
 
 Other gaps nobody has worked on are in `lit/gaps.md` (G2 to G7).
 
@@ -118,6 +162,7 @@ health/     airhealth: the package, its data (with sources), tests, benchmarks
 diwali/     finished study: ten cities, ten years of hourly PM2.5 around Diwali
 lit/        reading list, who is doing what, gaps nobody has filled
 bets/       interventions sorted by what the physics allows
+cities/     one city from monitors to measures: cities/bengaluru/index.html (generated; rebuild: PYTHONPATH=health:cities python -m citypage.build --city Bengaluru)
 docs/       STATUS.md and design notes (specs/)
 ```
 

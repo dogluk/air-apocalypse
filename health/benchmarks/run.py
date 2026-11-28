@@ -99,6 +99,8 @@ def readme(results: list[dict]) -> str:
            "case expected at 0.67 fails at 1.0.", "",
            "Cases marked *local* use the IHME tier (files in `data_local/`, never committed); "
            "they are skipped where those files are absent. Their write-ups quote totals only.", "",
+           "Benchmarks of the ranking against published cost rankings (cost per death, per µg/m³, "
+           "and order) are in `RANKING.md`, written by `benchmarks/rank_run.py`.", "",
            "| Case | Measures | Published | Ours | Ratio | Expected |",
            "|---|---|---|---|---|---|"]
     for r in results:

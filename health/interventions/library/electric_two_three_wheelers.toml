@@ -1,0 +1,75 @@
+# Bengaluru: a purchase subsidy that makes a quarter of two- and three-wheelers electric.
+name = "Electric scooters, motorbikes and autos for a quarter of Bengaluru's fleet"
+kind = "air"
+scope = "city"
+who_reaches = "everyone in Bengaluru, through the outdoor air"
+cities = ["Bengaluru"]
+
+start_year = 2027
+ramp_years = 5
+duration_years = 10
+lag = "epa20"
+
+p_success = 0.6
+p_success_basis = "judgement: electric two-wheelers are already selling and a subsidy can be paid reliably, but some buyers would have gone electric anyway, so not every rupee buys a switch"
+
+placeholders = []
+
+notes = """
+A purchase subsidy, at the national PM E-DRIVE rate, for enough electric two- and three-wheelers
+to make a quarter of Bengaluru's fleet electric. The quarter is the measure's design, not a figure
+from a source.
+
+The cut is Bengaluru's own. CSTEP's 2022 inventory finds two-wheelers make only 6.6% of road
+transport's tailpipe PM in Bengaluru, and autos, together with petrol cars, under 0.4%; heavy
+diesel vehicles make most of it. A quarter of 6.6% to 7.0% is the low end and most likely value.
+UrbanEmissions.Info's APnA study says more than 70% of transport PM2.5 comes from diesel vehicles,
+so two- and three-wheelers make at most 30%; a quarter of that is the high end. TERI found far
+bigger cuts for NCR, where two-wheelers are a larger share; that is not used here.
+
+The cost is the PM E-DRIVE subsidy per vehicle (Rs 2,679 crore for about 28 lakh e-2W and e-3W,
+about Rs 9,585 each; half that from April 2025, when the rate per kWh halved), times a quarter of
+Bengaluru's 2016 two- and three-wheeler registrations. Registrations include vehicles no longer
+on the road, so the count is high. Owners save on fuel; that is not counted.
+
+city-specific: the cut uses two- and three-wheelers' share of Bengaluru's transport PM (CSTEP, APnA Bengaluru) and the vehicle count is Bengaluru's 2016 registrations; the subsidy per vehicle (PM E-DRIVE) would transfer.
+"""
+
+[[targets]]
+cause = "transport"
+cut = { dist = "triangular", p5 = 0.0165, mode = 0.0175, p95 = 0.075 }
+
+[cost]
+driver = "unit"
+unit = "electric two- or three-wheeler"
+units = 1289750
+once = { dist = "uniform", p5 = 4792, p95 = 9585 }
+currency = "INR"
+year = 2024
+
+[[evidence]]
+fields = ["targets.transport.cut"]
+source = "CSTEP (2022), Emission inventory and pollution reduction strategies for Bengaluru"
+url = "https://web.archive.org/web/2023/https://cstep.in/drupal/sites/default/files/2022-02/EI_Report_Final_04Feb22.pdf"
+locator = "Sec. 3.2.2.8 'Transportation' and Figure 3-35, printed p. 43 (PDF p. 61): 'Two-wheelers contributed around 6.6% of the PM emission load'; Figure 3-35 bars 1031 (two-wheelers), 21, 3 and 34 (autos and petrol cars) of 15,518 t/yr in all"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "fleet share electrified 0.25 (the measure's design) x share of transport PM from two- and three-wheelers. Low: 0.25 x 0.066 = 0.0165. Mode: 0.25 x (1031 + 21 + 3 + 34) / 15518 = 0.25 x 0.070 = 0.0175 (counts petrol cars too, an upper reading). High: 0.25 x 0.30 = 0.075, where 0.30 is the most non-diesel vehicles can make if 'more than 70% of PM2.5 emissions originate from a small fraction of diesel operated vehicles' (UrbanEmissions.Info 2018, APnA Bengaluru report, Sec. 3.3, p. 14, https://urbanemissions.info/wp-content/uploads/docs/2018-12-UEinfo-APnA-Bengaluru-Web.pdf)."
+
+[[evidence]]
+fields = ["cost.once"]
+source = "Press Information Bureau (11 Sep 2024), Cabinet approves PM E-DRIVE scheme; PIB background note (9 Oct 2024), PM E-DRIVE Scheme: Driving Towards a Greener Future"
+url = "https://heavyindustries.gov.in/sites/default/files/2024-09/press_release_press_information_bureau_5.pdf"
+locator = "Press release p. 1: 'Subsidies/Demand incentives worth Rs.3,679 crore have been provided to incentivize e-2Ws, e-3Ws, e-ambulances, e-trucks and other emerging EVs. The scheme will support 24.79 lakh e-2Ws, 3.16 lakh e-3Ws'; 'Rs.500 crore for the deployment of e-ambulances'; 'Rs.500 crore has been allocated for incentivising e-trucks'. Background note p. 2 (https://static.pib.gov.in/WriteReadData/specificdocs/documents/2024/oct/doc2024109412701.pdf): 'Rs. 5,000 per kWh for e-2Ws/e-3Ws registered in FY 2024-25 and Rs. 2,500 per kWh for FY 2025-26'"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "p95 = (3679 - 500 - 500) crore / (24.79 + 3.16) lakh = Rs 9,585 per vehicle (FY 2024-25 rate); p5 = half, Rs 4,792 (the FY 2025-26 rate per kWh is half). Price year 2024."
+
+[[evidence]]
+fields = ["cost.units"]
+source = "UrbanEmissions.Info (2018), Air quality, emissions and source contributions analysis for the Greater Bengaluru region of India (APnA)"
+url = "https://urbanemissions.info/wp-content/uploads/docs/2018-12-UEinfo-APnA-Bengaluru-Web.pdf"
+locator = "Sec. 3.1, p. 10: 'total registered vehicles of 6.7 million in 2016 - with two-wheelers (73%), four-wheelers (15%), auto 3-wheeler auto-rickshaws (4%)'"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "0.25 (the measure's design) x 6.7 million x (0.73 + 0.04) = 1,289,750 vehicles."

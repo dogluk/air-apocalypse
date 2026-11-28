@@ -1,0 +1,72 @@
+# Every city: replacing every older (pre-BS-VI) truck and bus with a BS-VI one.
+name = "Retiring older trucks and buses"
+kind = "air"
+scope = "city"
+who_reaches = "everyone in the city, through the outdoor air"
+cities = "all"
+
+evidence_from = ["Delhi-NCR"]   # where the numbers come from, when not this city
+start_year = 2027
+ramp_years = 3
+duration_years = 10
+lag = "epa20"
+
+p_success = 0.3
+p_success_basis = "judgement: the national scrapping policy has had little uptake, and many trucks in a city are registered elsewhere and pass through, beyond the city's reach"
+
+placeholders = []
+
+notes = """
+All trucks and buses older than the BS-VI standard (India's newest exhaust norm, from 2020) are
+scrapped and replaced with BS-VI ones.
+
+Both numbers are borrowed from Delhi-NCR. TERI (2021) found that replacing all pre-BS-VI trucks
+and buses cuts transport's PM2.5 emissions by 32% if done by 2022, but only 6% by 2030, because
+the fleet renews itself anyway; a start in 2027 lies between, so the cut runs from 6% to 32%.
+Heavy diesel vehicles are a large share of Bengaluru's transport PM (CSTEP 2022: trucks and buses
+56.5% of tailpipe PM), so the NCR range is not obviously too high for Bengaluru.
+
+The cost is TERI's net cost for NCR (new vehicles, less fuel saved and scrap value; Rs 110 billion
+by 2022, Rs 292 billion by 2030, both discounted at 10%), divided by NCR's 70 million people and
+applied per person in Bengaluru. That is a society-wide cost, not only a funder's, and scaling by
+people assumes Bengaluru has as many old heavy vehicles per head as NCR. The cheaper cost goes with
+the bigger cut (2022) and the dearer with the smaller (2030), but the two are drawn independently
+here, which widens the range of the ratio.
+
+Widened to every city (2026-11-27): written first for Bengaluru, but neither number is
+Bengaluru's. The cut is TERI's for Delhi-NCR, a fraction of transport's share, and the cost is
+TERI's NCR net cost per person; Bengaluru's inventory was used only to judge the cut plausible.
+So every city gets the same numbers. Outside Delhi the evidence is borrowed from Delhi-NCR; in
+Delhi it is the city's own (NCR is larger than Delhi). Scaling the cost by people assumes each
+city has as many old heavy vehicles per head as NCR; cities with fewer get too high a cost, cities
+where through-traffic is heavy too low a one. No source gives a threshold share of transport
+below which the measure should not be scored, so there is no min_share_pct.
+"""
+
+[[targets]]
+cause = "transport"
+cut = { dist = "uniform", p5 = 0.06, p95 = 0.32 }
+
+[cost]
+driver = "person"
+once = { dist = "uniform", p5 = 1571, p95 = 4171 }
+currency = "INR"
+year = 2021
+
+[[evidence]]
+fields = ["targets.transport.cut"]
+source = "TERI (2021), Cost effectiveness of interventions for control of air pollution in Delhi"
+url = "https://teriin.org/sites/default/files/2021-12/Cost-effectiveness-of%20-interventions-for-control-of%20-air-pollution-in-Delhi.pdf"
+locator = "Section 6 'Transport', Figure 18 and text, printed p. 31 (PDF p. 42): 'Fleet modernization (replacing older vehicles with BS-VI) in trucks and buses leads to 32% and 6% reductions in PM2.5 emissions in NCR in 2022 and 2030, respectively'"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "p5 = 0.06 (2030), p95 = 0.32 (2022): a 2027 start lies between them."
+
+[[evidence]]
+fields = ["cost.once"]
+source = "TERI (2021), Cost effectiveness of interventions for control of air pollution in Delhi"
+url = "https://teriin.org/sites/default/files/2021-12/Cost-effectiveness-of%20-interventions-for-control-of%20-air-pollution-in-Delhi.pdf"
+locator = "Table 35 'Summary of intervention wise net cumulative costs', printed p. 58 (PDF p. 69): '100% Fleet Modernization of trucks and buses to BS VI by 2022, 2025 and 2030 | 110 | 203 | 292' billion Rs; NCR population 'over 65 million and 70 million in 2016 and 2019', Section 2, printed p. 5 (PDF p. 16); 10% discount rate, Section 5.1, printed p. 19"
+key = "O"
+retrieved = "2026-11-27"
+derivation = "p5 = 110e9 / 70e6 = Rs 1,571 per person; p95 = 292e9 / 70e6 = Rs 4,171 per person. Price year taken as 2021 (report dated December 2021)."

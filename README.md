@@ -16,6 +16,7 @@ Open notebooks, not a finished argument. Everything here is reproducible from fr
 | [`lit/`](lit/) | What's been published on Indian air quality, and the gap analysis: which questions the data can answer that nobody has asked. Also [who is measuring India's air](lit/landscape.md) | In progress |
 | [`bets/`](bets/) | Interventions, costed and sorted by whether the physics allows them | In progress |
 | [`health/`](health/) | `airhealth`: what a change in PM2.5 would do to deaths and life expectancy in any Indian state, district or city, across the risk curves and exposure maps that published estimates disagree on, with odds, cost and uncertainty for an intervention | First version — see its [README](health/README.md) |
+| [`cities/`](cities/) | One city followed from monitors to measures, as one self-contained page: [`cities/bengaluru/index.html`](cities/bengaluru/index.html). Rebuild: `PYTHONPATH=health:cities python -m citypage.build --city Bengaluru` | First version: Bengaluru |
 
 ## What the Diwali track found
 
@@ -48,6 +49,7 @@ physics permits it, kills most of them quickly. The survivors are mostly about
 If you are a model, or a person arriving cold, start with [`AGENTS.md`](AGENTS.md): how to
 get it running in a minute, the rules (the first is that no number goes in unless it was read
 at its source), what is not yet solid, and a list of open work sized for one sitting.
+The full list, each item with a stable id you can claim, is [`docs/open-work.md`](docs/open-work.md).
 
 ## Licence
 
