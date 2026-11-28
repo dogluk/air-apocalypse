@@ -2,14 +2,14 @@
 """Render docs/open-work.md to <out>/open-work/index.html (stdlib only; used by site/build.sh).
 
 Handles what that file uses: #-headings, paragraphs, '-' lists, '>' quotes, `code`, **bold**, [links](url).
-Relative links are pointed at the file on GitHub. Reuses the landing page's head assets and theme toggle.
+Relative links are pointed at the file on GitHub. Reuses the rendered landing page's head, header and footer (build.sh renders that first).
 """
 import html, re, sys
 from pathlib import Path
 
 root, out = Path(sys.argv[1]), Path(sys.argv[2])
 md = (root / "docs/open-work.md").read_text()
-landing = (root / "site/static/index.html").read_text()
+landing = (out / "index.html").read_text()   # the rendered landing page (site/render.py): head, header, footer
 GH = "https://github.com/dogluk/air-apocalypse/blob/main/"
 
 def inline(t):
