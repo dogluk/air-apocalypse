@@ -30,3 +30,12 @@ same licence. Some contents are copyright CPCB. Weather is ERA5 (Copernicus) via
 
 Fonts: fonts/ holds Young Serif and Instrument Sans under the SIL Open Font License
 (see fonts/OFL-*.txt).
+
+Figures and writing: the charts (health/charts/, diwali/charts/), the generated city pages
+(cities/) and the prose in this repository are released under Creative Commons Attribution 4.0
+(CC BY 4.0): https://creativecommons.org/licenses/by/4.0/. Credit "air-apocalypse, Akash Kulgod".
+Where a figure draws on data under another licence (ODbL, CC BY), that data keeps its own licence.
+
+Google Trends: the search-interest effect sizes in diwali/data/health_*.csv are derived from Google
+Trends ("Data source: Google Trends"). The raw Google Trends responses are not redistributed here;
+diwali/pull_trends.py fetches them.

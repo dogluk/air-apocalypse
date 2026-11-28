@@ -291,12 +291,10 @@ in `health/data/`. APnA and McDuffie are CC BY 4.0 (`causes.csv`, `apna_source_a
 
 Not settled:
 
-- [OW-034] `diwali/data/trends/*.json` (392 cached Google Trends responses, `diwali/pull_trends.py`). Wanted: the terms under which
-  Google Trends data may be redistributed. Tried: nothing beyond the repository's own notes, which give no licence;
-  `lit/reading.md` says only that the endpoint used is internal and the official API is in alpha. Would settle it: Google's
-  Trends terms of service or a written answer from Google. Until then the cached JSON is a redistribution of unlicensed
-  data; the derived `trend_cityyear.csv` (effect sizes, no raw series) is the safer thing to keep.
-- [OW-035] `health/charts/*.png` (seven chart images made by the model from the data above). No licence line of their own. The
-  inputs are CC BY / ODbL; the repository's MIT/ODbL line in the README is the only statement covering them.
+- [OW-034] Settled 2026-11-28: the raw Google Trends responses (`diwali/data/trends/*.json`) are no longer in the
+  repository (git-ignored; `diwali/pull_trends.py` fetches them), since Google gives no open licence to redistribute them.
+  The derived effect sizes (`diwali/data/health_*.csv`) stay, credited "Data source: Google Trends" (LICENSE).
+- [OW-035] Settled 2026-11-28: charts, generated city pages and prose are CC BY 4.0 (LICENSE, "Figures and writing");
+  data they draw on keeps its own licence.
 - Several `health/data` entries record "no licence stated" for Government of India documents (SRS, projections, census
   tables) and rely on reproducing facts with attribution. That is stated, not unclear, but it is not a licence grant.
