@@ -1,0 +1,14 @@
+<figure class="af af-cli"><div class="af-term"><p class="af-cmd"><span aria-hidden="true">$ </span>airhealth burden Bengaluru</p><pre tabindex="0" aria-label="Output of airhealth burden Bengaluru">Bengaluru, Karnataka (city): deaths attributable to PM2.5 above each curve&#x27;s own floor
+Population 8.5 M; all-cause deaths 64,795 a year (7.6 per 1,000). Steady state, per year.
+
+curve                 PM2.5 µg/m³  % of deaths  deaths/yr  life exp. yrs  life-years/yr
+--------------------  -----------  -----------  ---------  -------------  -------------
+loglinear_jaganathan   27.9 → 5.0        17.2%     11,155          +2.67        207,141
+loglinear_brown        27.9 → 2.0         2.4%      1,577          +0.32         25,766
+loglinear_vodonos      27.9 → 5.0        16.0%     10,336          +2.25        160,452
+gemm_ncd_lri           27.9 → 2.4        14.1%      9,168          +1.98        142,867
+aqli *                 27.9 → 5.0        14.7%      9,528          +2.24        176,942
+
+[...]
+Not run: gbd2019, gbd2023, gemm_5cod: need IHME files: put them in a data_local/ folder and set
+  AIRHEALTH_LOCAL to it (see IHME_DOWNLOADS.md in the repo).</pre></div><p class="af-src">What the one line prints on a machine with nothing but the tool: five curves, the footnotes left out, and its last line. The other three curves need IHME files that cannot be redistributed; the figure above was drawn with them present.</p></figure>

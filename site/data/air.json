@@ -1,0 +1,546 @@
+{
+ "toll": {
+  "pm25": 27.9,
+  "year": 2025,
+  "min": "1,577",
+  "max": "11,155",
+  "min_curve": "Brown 2022",
+  "max_curve": "Jaganathan 2024",
+  "fold": "7.1",
+  "share_min": "2.4",
+  "share_max": "17.2",
+  "who_multiple": "5.6"
+ },
+ "ladder": {
+  "n_scored": 17,
+  "n_fully_costed": 9,
+  "runs": "5,000",
+  "same_rank_everywhere": 8,
+  "top3_same": true,
+  "max_span": 3,
+  "measures": {
+   "waste_collection_burning_ban": {
+    "lo": "881",
+    "hi": "8,790",
+    "rank": "1",
+    "rank_costed": "—"
+   },
+   "construction_dust_controls": {
+    "lo": "631",
+    "hi": "6,300",
+    "rank": "2",
+    "rank_costed": "—"
+   },
+   "lpg_refill_subsidy": {
+    "lo": "72",
+    "hi": "724",
+    "rank": "3",
+    "rank_costed": "1"
+   },
+   "stubble_pes_upfront": {
+    "lo": "6.4",
+    "hi": "76",
+    "rank": "4–5",
+    "rank_costed": "—"
+   },
+   "road_paving": {
+    "lo": "6.2",
+    "hi": "62",
+    "rank": "4–5",
+    "rank_costed": "2"
+   },
+   "happy_seeder_subsidy": {
+    "lo": "4.4",
+    "hi": "52",
+    "rank": "6–7",
+    "rank_costed": "—"
+   },
+   "fgd_scrubbers": {
+    "lo": "4.3",
+    "hi": "51",
+    "rank": "6–7",
+    "rank_costed": "3"
+   },
+   "dg_set_replacement": {
+    "lo": "2.8",
+    "hi": "28",
+    "rank": "8",
+    "rank_costed": "4"
+   },
+   "electric_buses": {
+    "lo": "1.6",
+    "hi": "16",
+    "rank": "9",
+    "rank_costed": "5"
+   },
+   "road_vacuum_sweeping": {
+    "lo": "1.6",
+    "hi": "16",
+    "rank": "10",
+    "rank_costed": "6"
+   },
+   "electric_two_three_wheelers": {
+    "lo": "1.3",
+    "hi": "13",
+    "rank": "11",
+    "rank_costed": "7"
+   },
+   "old_vehicle_retirement": {
+    "lo": "1.2",
+    "hi": "12",
+    "rank": "12",
+    "rank_costed": "8"
+   },
+   "school_purifiers": {
+    "lo": "0.13",
+    "hi": "7.9",
+    "rank": "13–16",
+    "rank_costed": "—"
+   },
+   "punjab_out_of_rice": {
+    "lo": "0.67",
+    "hi": "7.9",
+    "rank": "13–14",
+    "rank_costed": "9"
+   },
+   "n95_winter": {
+    "lo": "0.5",
+    "hi": "5",
+    "rank": "13–15",
+    "rank_costed": "—"
+   },
+   "home_purifiers": {
+    "lo": "0.14",
+    "hi": "1.4",
+    "rank": "15–16",
+    "rank_costed": "—"
+   },
+   "smog_tower": {
+    "lo": "0.012",
+    "hi": "0.12",
+    "rank": "16–17",
+    "rank_costed": "—"
+   }
+  }
+ },
+ "library": {
+  "n": 22
+ },
+ "coverage": {
+  "cities": 50,
+  "wide": [
+   "home_purifiers",
+   "old_vehicle_retirement",
+   "school_purifiers_india"
+  ],
+  "single": [
+   "construction_dust_controls",
+   "dg_set_replacement",
+   "electric_buses",
+   "electric_two_three_wheelers",
+   "emissions_market",
+   "industrial_fuel_switch",
+   "lpg_refill_subsidy",
+   "n95_winter",
+   "road_paving",
+   "road_vacuum_sweeping",
+   "school_purifiers",
+   "smog_tower",
+   "waste_collection_burning_ban",
+   "winter_cloud_seeding"
+  ],
+  "in_bengaluru_only": 11,
+  "regional": [
+   "fgd_scrubbers",
+   "happy_seeder_subsidy",
+   "punjab_out_of_rice",
+   "stubble_pes_upfront"
+  ],
+  "counts": {
+   "construction_dust_controls": 1,
+   "dg_set_replacement": 1,
+   "electric_buses": 1,
+   "electric_two_three_wheelers": 1,
+   "emissions_market": 1,
+   "home_purifiers": 50,
+   "industrial_fuel_switch": 1,
+   "lpg_refill_subsidy": 1,
+   "n95_winter": 1,
+   "old_vehicle_retirement": 49,
+   "road_paving": 1,
+   "road_vacuum_sweeping": 1,
+   "school_purifiers": 1,
+   "school_purifiers_india": 49,
+   "smog_tower": 1,
+   "waste_collection_burning_ban": 1,
+   "winter_cloud_seeding": 1
+  }
+ },
+ "whatif": {
+  "stubble_pes_upfront": {
+   "words": "on Lan et al.'s smoke figure",
+   "lo": "89",
+   "hi": "1,060",
+   "rank": "3–4",
+   "rank_costed": "—",
+   "id": "whatif:stubble_lan2022",
+   "rank_worst_end": "",
+   "ends_lo": "",
+   "ends_hi": ""
+  },
+  "happy_seeder_subsidy": {
+   "words": "on Lan et al.'s smoke figure",
+   "lo": "61",
+   "hi": "724",
+   "rank": "4–5",
+   "rank_costed": "—",
+   "id": "whatif:stubble_lan2022",
+   "rank_worst_end": "",
+   "ends_lo": "",
+   "ends_hi": ""
+  },
+  "punjab_out_of_rice": {
+   "words": "on Lan et al.'s smoke figure",
+   "lo": "9.2",
+   "hi": "109",
+   "rank": "6–7",
+   "rank_costed": "2–3",
+   "id": "whatif:stubble_lan2022",
+   "rank_worst_end": "",
+   "ends_lo": "",
+   "ends_hi": ""
+  },
+  "waste_collection_burning_ban": {
+   "words": "at full cost",
+   "lo": "11",
+   "hi": "115",
+   "rank": "3",
+   "rank_costed": "3",
+   "id": "whatif:full_cost",
+   "rank_worst_end": "4–7",
+   "ends_lo": "4.7",
+   "ends_hi": "442"
+  },
+  "construction_dust_controls": {
+   "words": "at full cost",
+   "lo": "97",
+   "hi": "974",
+   "rank": "1",
+   "rank_costed": "1",
+   "id": "whatif:full_cost",
+   "rank_worst_end": "2",
+   "ends_lo": "27",
+   "ends_hi": "15,600"
+  }
+ },
+ "whatif_runs": "2,000",
+ "moves": {
+  "top": 5,
+  "n_all": 17,
+  "n_fully_costed": 9,
+  "still": 21,
+  "runs": "2,000",
+  "noise_robust": true,
+  "units": {
+   "effect:happy_seeder_subsidy": {
+    "all": 8,
+    "costed": 0,
+    "max_move": "5"
+   },
+   "effect:stubble_pes_upfront": {
+    "all": 8,
+    "costed": 0,
+    "max_move": "3"
+   },
+   "effect:road_paving": {
+    "all": 5,
+    "costed": 0,
+    "max_move": "3"
+   },
+   "effect:fgd_scrubbers": {
+    "all": 4,
+    "costed": 0,
+    "max_move": "2"
+   },
+   "cost:road_paving": {
+    "all": 1,
+    "costed": 0,
+    "max_move": "2"
+   },
+   "study": {
+    "all": 0,
+    "costed": 8,
+    "max_move": "8"
+   },
+   "odds": {
+    "all": 0,
+    "costed": 8,
+    "max_move": "6"
+   },
+   "cost:old_vehicle_retirement": {
+    "all": 0,
+    "costed": 8,
+    "max_move": "3"
+   },
+   "effect:electric_buses": {
+    "all": 0,
+    "costed": 0,
+    "max_move": "3"
+   },
+   "effect:electric_two_three_wheelers": {
+    "all": 0,
+    "costed": 8,
+    "max_move": "3"
+   },
+   "effect:old_vehicle_retirement": {
+    "all": 0,
+    "costed": 8,
+    "max_move": "3"
+   },
+   "cost:electric_two_three_wheelers": {
+    "all": 0,
+    "costed": 8,
+    "max_move": "2"
+   },
+   "cost:fgd_scrubbers": {
+    "all": 0,
+    "costed": 0,
+    "max_move": "2"
+   },
+   "cost:school_purifiers": {
+    "all": 0,
+    "costed": 0,
+    "max_move": "2"
+   },
+   "effect:dg_set_replacement": {
+    "all": 0,
+    "costed": 0,
+    "max_move": "2"
+   },
+   "effect:n95_winter": {
+    "all": 0,
+    "costed": 0,
+    "max_move": "2"
+   },
+   "effect:road_vacuum_sweeping": {
+    "all": 0,
+    "costed": 0,
+    "max_move": "2"
+   },
+   "cost:construction_dust_controls": {
+    "all": 0,
+    "costed": 0,
+    "max_move": "1"
+   },
+   "cost:n95_winter": {
+    "all": 0,
+    "costed": 0,
+    "max_move": "1"
+   },
+   "cost:punjab_out_of_rice": {
+    "all": 0,
+    "costed": 0,
+    "max_move": "1"
+   },
+   "cost:road_vacuum_sweeping": {
+    "all": 0,
+    "costed": 0,
+    "max_move": "1"
+   },
+   "cost:stubble_pes_upfront": {
+    "all": 0,
+    "costed": 0,
+    "max_move": "1"
+   },
+   "cost:waste_collection_burning_ban": {
+    "all": 0,
+    "costed": 0,
+    "max_move": "1"
+   },
+   "deaths": {
+    "all": 0,
+    "costed": 0,
+    "max_move": "1"
+   },
+   "discount": {
+    "all": 0,
+    "costed": 0,
+    "max_move": "1"
+   },
+   "effect:home_purifiers": {
+    "all": 0,
+    "costed": 0,
+    "max_move": "1"
+   },
+   "effect:punjab_out_of_rice": {
+    "all": 0,
+    "costed": 0,
+    "max_move": "1"
+   },
+   "effect:school_purifiers": {
+    "all": 0,
+    "costed": 0,
+    "max_move": "1"
+   },
+   "effect:waste_collection_burning_ban": {
+    "all": 0,
+    "costed": 0,
+    "max_move": "1"
+   },
+   "cost:home_purifiers": {
+    "all": 0,
+    "costed": 0,
+    "max_move": "0"
+   },
+   "cost:smog_tower": {
+    "all": 0,
+    "costed": 0,
+    "max_move": "0"
+   },
+   "effect:construction_dust_controls": {
+    "all": 0,
+    "costed": 0,
+    "max_move": "0"
+   },
+   "effect:lpg_refill_subsidy": {
+    "all": 0,
+    "costed": 0,
+    "max_move": "0"
+   },
+   "effect:smog_tower": {
+    "all": 0,
+    "costed": 0,
+    "max_move": "0"
+   },
+   "map": {
+    "all": 0,
+    "costed": 0,
+    "max_move": "0"
+   },
+   "monthly_curves": {
+    "all": 0,
+    "costed": 0,
+    "max_move": "0"
+   },
+   "seed": {
+    "all": 0,
+    "costed": 0,
+    "max_move": "1"
+   }
+  }
+ },
+ "stability": {
+  "top": 3,
+  "runs": "2,000",
+  "combos": 6,
+  "maps": 3,
+  "studies": 2,
+  "same_measures_every_combo": true,
+  "same_order_cells": 11,
+  "cells": 12,
+  "distinct_tops_all": 4,
+  "widest_move": 4,
+  "widest_move_measure": "HEPA purifiers in classrooms"
+ },
+ "smoke": {
+  "ours": "0.48",
+  "lan": "6.7",
+  "fold": "14",
+  "paper_ratio": "83",
+  "model_ratio": "1.4"
+ },
+ "day": {
+  "winter_peak": "52",
+  "winter_peak_hour": 20,
+  "winter_low": "32",
+  "winter_low_hour": 14,
+  "monsoon_low": "16",
+  "monsoon_high": "24"
+ },
+ "cities": {
+  "n": 50,
+  "year": 2023,
+  "dirtiest": "Delhi",
+  "dirtiest_pm": "99",
+  "cleanest": "Thiruvananthapuram",
+  "cleanest_pm": "23",
+  "dirtiest_share_min": "9",
+  "dirtiest_share_max": "54",
+  "above_40": 36,
+  "bengaluru_place": 40
+ },
+ "open_work": {
+  "n": 63,
+  "ordered_by": "noise-robust count of curves whose top changes (see sensitivity), then evidence weakness, then size",
+  "first": [
+   {
+    "id": "OW-025",
+    "title": "A stubble receptor table by receiving district for Punjab and Haryana fires alone",
+    "size": "bigger"
+   },
+   {
+    "id": "OW-028",
+    "title": "What the Happy Seeder subsidy did to burning",
+    "size": "bigger"
+   },
+   {
+    "id": "OW-064",
+    "title": "Odds that up-front stubble payments scale statewide",
+    "size": "bigger"
+   },
+   {
+    "id": "OW-053",
+    "title": "Happy Seeder: farmers' share of the machine price and the rent they pay",
+    "size": "one sitting"
+   },
+   {
+    "id": "OW-057",
+    "title": "Stubble payments: the cost of the agency that would run the scheme statewide",
+    "size": "one sitting"
+   },
+   {
+    "id": "OW-058",
+    "title": "Bengaluru-specific effect of road paving, sweeping and construction controls",
+    "size": "bigger"
+   },
+   {
+    "id": "OW-065",
+    "title": "Odds that road paving holds: how long the gain lasts",
+    "size": "bigger"
+   },
+   {
+    "id": "OW-040",
+    "title": "Road dust against construction dust per city, and each city's road length and contracts",
+    "size": "bigger"
+   }
+  ]
+ },
+ "city_pages": [
+  "ahmedabad",
+  "bengaluru",
+  "chennai",
+  "delhi",
+  "hyderabad",
+  "jaipur",
+  "kolkata",
+  "lucknow",
+  "mumbai",
+  "pune",
+  "surat"
+ ],
+ "meta": {
+  "model_commit": "a2db394",
+  "rank_commit": "19fb04c",
+  "generated": "2026-11-28",
+  "curves": [
+   "Brown 2022",
+   "GBD 2019",
+   "GEMM NCD+LRI",
+   "AQLI",
+   "GEMM 5 causes",
+   "GBD 2023",
+   "Vodonos 2018",
+   "Jaganathan 2024"
+  ]
+ }
+}
