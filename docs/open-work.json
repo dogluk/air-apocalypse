@@ -9,7 +9,10 @@
     "seeds": 3,
     "count": "noise-robust"
   },
-  "closed": [],
+  "closed": [
+    "OW-034",
+    "OW-035"
+  ],
   "items": [
     {
       "id": "OW-025",
@@ -1099,56 +1102,6 @@
       }
     },
     {
-      "id": "OW-034",
-      "title": "Redistribution terms for cached Google Trends responses",
-      "kind": "review",
-      "size": "one sitting",
-      "weakness": "none",
-      "question": "May the 392 cached Google Trends JSON responses under diwali/data/trends be redistributed?",
-      "read_at": "Google Trends terms of service, or a written answer from Google. The repository's notes give no licence.",
-      "lands_in": [
-        "diwali/README.md"
-      ],
-      "lands_field": "the licence table row for diwali/data/trends; or remove the JSON and keep trend_cityyear.csv",
-      "check": "Reviewer reads the cited terms; the diwali licence table names the terms or the files are gone from the tree.",
-      "affects": [],
-      "origin": [
-        "MISSING.md: Licences: diwali/data/trends"
-      ],
-      "priority": {
-        "count": 0,
-        "count_kind": null,
-        "unit": null,
-        "basis": "no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (one sitting)",
-        "order": 40
-      }
-    },
-    {
-      "id": "OW-035",
-      "title": "Licence line for the model-made chart images",
-      "kind": "review",
-      "size": "one sitting",
-      "weakness": "none",
-      "question": "Which licence applies to the seven PNGs in health/charts, given their inputs are CC BY and ODbL?",
-      "read_at": "The inputs' licences in sources.toml; the repository LICENSE.",
-      "lands_in": [
-        "health/charts"
-      ],
-      "lands_field": "a licence line (README or note) beside the images",
-      "check": "Reviewer confirms the line matches the inputs' terms; provenance test passes.",
-      "affects": [],
-      "origin": [
-        "MISSING.md: Licences: health/charts/*.png"
-      ],
-      "priority": {
-        "count": 0,
-        "count_kind": null,
-        "unit": null,
-        "basis": "no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (one sitting)",
-        "order": 41
-      }
-    },
-    {
       "id": "OW-043",
       "title": "Write one new intervention file with its size and cost read at source",
       "kind": "model build",
@@ -1171,7 +1124,7 @@
         "count_kind": null,
         "unit": null,
         "basis": "no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (one sitting)",
-        "order": 42
+        "order": 40
       }
     },
     {
@@ -1196,7 +1149,7 @@
         "count_kind": null,
         "unit": null,
         "basis": "no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (one sitting)",
-        "order": 43
+        "order": 41
       }
     },
     {
@@ -1221,7 +1174,7 @@
         "count_kind": null,
         "unit": null,
         "basis": "no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (one sitting)",
-        "order": 44
+        "order": 42
       }
     },
     {
@@ -1246,7 +1199,7 @@
         "count_kind": null,
         "unit": null,
         "basis": "no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (bigger)",
-        "order": 45
+        "order": 43
       }
     },
     {
@@ -1273,7 +1226,7 @@
         "count_kind": null,
         "unit": null,
         "basis": "no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (bigger)",
-        "order": 46
+        "order": 44
       }
     },
     {
@@ -1300,7 +1253,7 @@
         "count_kind": "noise-robust",
         "unit": "study",
         "basis": "study: changes the top 5 on 0 curves (noise-robust); then evidence weakness (none flagged), size (bigger)",
-        "order": 47
+        "order": 45
       }
     },
     {
@@ -1328,7 +1281,7 @@
         "count_kind": null,
         "unit": null,
         "basis": "no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (bigger)",
-        "order": 48
+        "order": 46
       }
     },
     {
@@ -1355,7 +1308,7 @@
         "count_kind": "noise-robust",
         "unit": "study",
         "basis": "study: changes the top 5 on 0 curves (noise-robust); then evidence weakness (none flagged), size (bigger)",
-        "order": 49
+        "order": 47
       }
     },
     {
@@ -1383,7 +1336,7 @@
         "count_kind": "noise-robust",
         "unit": "effect:electric_buses",
         "basis": "effect:electric_buses: changes the top 5 on 0 curves (noise-robust); then evidence weakness (none flagged), size (bigger)",
-        "order": 50
+        "order": 48
       }
     },
     {
@@ -1410,7 +1363,7 @@
         "count_kind": null,
         "unit": null,
         "basis": "no research unit in the sensitivity file (none of its research units is in this run); counted as 0; then evidence weakness (none flagged), size (bigger)",
-        "order": 51
+        "order": 49
       }
     },
     {
@@ -1436,7 +1389,7 @@
         "count_kind": null,
         "unit": null,
         "basis": "no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (bigger)",
-        "order": 52
+        "order": 50
       }
     },
     {
@@ -1463,7 +1416,7 @@
         "count_kind": "noise-robust",
         "unit": "effect:dg_set_replacement",
         "basis": "effect:dg_set_replacement: changes the top 5 on 0 curves (noise-robust); then evidence weakness (none flagged), size (bigger)",
-        "order": 53
+        "order": 51
       }
     },
     {
@@ -1490,7 +1443,7 @@
         "count_kind": null,
         "unit": null,
         "basis": "no research unit in the sensitivity file (none of its research units is in this run); counted as 0; then evidence weakness (none flagged), size (bigger)",
-        "order": 54
+        "order": 52
       }
     },
     {
@@ -1518,7 +1471,7 @@
         "count_kind": null,
         "unit": null,
         "basis": "no research unit in the sensitivity file (none of its research units is in this run); counted as 0; then evidence weakness (none flagged), size (bigger)",
-        "order": 55
+        "order": 53
       }
     },
     {
@@ -1546,7 +1499,7 @@
         "count_kind": "noise-robust",
         "unit": "effect:electric_two_three_wheelers",
         "basis": "effect:electric_two_three_wheelers: changes the top 5 on 0 curves (noise-robust); then evidence weakness (none flagged), size (bigger)",
-        "order": 56
+        "order": 54
       }
     },
     {
@@ -1574,7 +1527,7 @@
         "count_kind": "noise-robust",
         "unit": "effect:waste_collection_burning_ban",
         "basis": "effect:waste_collection_burning_ban: changes the top 5 on 0 curves (noise-robust); then evidence weakness (none flagged), size (bigger)",
-        "order": 57
+        "order": 55
       }
     },
     {
@@ -1604,7 +1557,7 @@
         "count_kind": "noise-robust",
         "unit": "effect:smog_tower",
         "basis": "effect:smog_tower: changes the top 5 on 0 curves (noise-robust); then evidence weakness (none flagged), size (bigger)",
-        "order": 58
+        "order": 56
       }
     },
     {
@@ -1629,7 +1582,7 @@
         "count_kind": null,
         "unit": null,
         "basis": "no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (bigger)",
-        "order": 59
+        "order": 57
       }
     },
     {
@@ -1655,7 +1608,7 @@
         "count_kind": null,
         "unit": null,
         "basis": "no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (bigger)",
-        "order": 60
+        "order": 58
       }
     },
     {
@@ -1681,7 +1634,7 @@
         "count_kind": null,
         "unit": null,
         "basis": "no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (bigger)",
-        "order": 61
+        "order": 59
       }
     },
     {
@@ -1706,7 +1659,7 @@
         "count_kind": null,
         "unit": null,
         "basis": "no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (bigger)",
-        "order": 62
+        "order": 60
       }
     },
     {
@@ -1731,7 +1684,7 @@
         "count_kind": null,
         "unit": null,
         "basis": "no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (bigger)",
-        "order": 63
+        "order": 61
       }
     },
     {
@@ -1756,7 +1709,7 @@
         "count_kind": null,
         "unit": null,
         "basis": "no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (bigger)",
-        "order": 64
+        "order": 62
       }
     },
     {
@@ -1786,7 +1739,7 @@
         "count_kind": "noise-robust",
         "unit": "map",
         "basis": "map: changes the top 5 on 0 curves (noise-robust); then evidence weakness (none flagged), size (bigger)",
-        "order": 65
+        "order": 63
       }
     }
   ]

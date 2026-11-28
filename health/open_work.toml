@@ -494,6 +494,8 @@ origin = ["MISSING.md: IIT Kanpur's report", "model flag: [S] numbers"]
 
 [[item]]
 id = "OW-034"
+status = "done"
+closed_by = "4901ca7"
 title = "Redistribution terms for cached Google Trends responses"
 kind = "review"
 size = "one sitting"
@@ -508,6 +510,8 @@ origin = ["MISSING.md: Licences: diwali/data/trends"]
 
 [[item]]
 id = "OW-035"
+status = "done"
+closed_by = "4901ca7"
 title = "Licence line for the model-made chart images"
 kind = "review"
 size = "one sitting"

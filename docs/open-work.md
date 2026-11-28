@@ -12,7 +12,7 @@ Say in your write-up what you read and what you could not check. [AGENTS.md](../
 
 Order: by the noise-robust count of curves whose top 5 changes when the inputs an item touches are moved (largest over those inputs; a noise-robust curve is one where a measure outside the swaps of the other random seeds that run made (3 other seeds in this run) enters or leaves and moves further than those seeds move it), taken from the sensitivity run for Bengaluru generated 2026-11-28 (file: `health/out/rank/sensitivity_bengaluru.json`). The run may be stale: re-run it after the library or data change, then regenerate this list. Ties go to the weaker evidence, then the smaller item. Items that touch nothing in that city's run count as 0.
 
-65 open items. Kinds: desk lookup, data build, model build, fieldwork, review. Size: one sitting, or bigger.
+63 open items. Kinds: desk lookup, data build, model build, fieldwork, review. Size: one sitting, or bigger.
 
 ## Items
 
@@ -523,32 +523,6 @@ Order: by the noise-robust count of curves whose top 5 changes when the inputs a
 - Priority (#39): effect:n95_winter: changes the top 5 on 0 curves (noise-robust); then evidence weakness (none flagged), size (one sitting)
 - Origin: MISSING.md: Children's share of air-pollution deaths, for school measures (n95_winter part)
 
-### OW-034: Redistribution terms for cached Google Trends responses
-
-- Kind: review
-- Size: one sitting
-- Question: May the 392 cached Google Trends JSON responses under diwali/data/trends be redistributed?
-- Where to read it: Google Trends terms of service, or a written answer from Google. The repository's notes give no licence.
-- Lands in: `diwali/README.md`: the licence table row for diwali/data/trends; or remove the JSON and keep trend_cityyear.csv
-- Check: Reviewer reads the cited terms; the diwali licence table names the terms or the files are gone from the tree.
-- Affects: no input of the ranking
-- Weakest evidence it replaces: none flagged
-- Priority (#40): no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (one sitting)
-- Origin: MISSING.md: Licences: diwali/data/trends
-
-### OW-035: Licence line for the model-made chart images
-
-- Kind: review
-- Size: one sitting
-- Question: Which licence applies to the seven PNGs in health/charts, given their inputs are CC BY and ODbL?
-- Where to read it: The inputs' licences in sources.toml; the repository LICENSE.
-- Lands in: `health/charts`: a licence line (README or note) beside the images
-- Check: Reviewer confirms the line matches the inputs' terms; provenance test passes.
-- Affects: no input of the ranking
-- Weakest evidence it replaces: none flagged
-- Priority (#41): no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (one sitting)
-- Origin: MISSING.md: Licences: health/charts/*.png
-
 ### OW-043: Write one new intervention file with its size and cost read at source
 
 - Kind: model build
@@ -559,7 +533,7 @@ Order: by the noise-robust count of curves whose top 5 changes when the inputs a
 - Check: Measure-file validation (test_library, airhealth measures) passes; every number has one evidence entry or is a placeholder; airhealth run shows it.
 - Affects: no input of the ranking
 - Weakest evidence it replaces: none flagged
-- Priority (#42): no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (one sitting)
+- Priority (#40): no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (one sitting)
 - Origin: AGENTS.md open work 2; AGENTS.md open work 5
 
 ### OW-047: G2: are forecast AQI series for GRAP archived?
@@ -572,7 +546,7 @@ Order: by the noise-robust count of curves whose top 5 changes when the inputs a
 - Check: Reviewer opens the named archive; if it exists, a follow-up item for the fuzzy regression discontinuity is added to open_work.toml.
 - Affects: no input of the ranking
 - Weakest evidence it replaces: none flagged
-- Priority (#43): no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (one sitting)
+- Priority (#41): no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (one sitting)
 - Origin: lit/gaps.md: G2
 
 ### OW-048: G3: a boundary-layer height source that contains aerosol feedback
@@ -585,7 +559,7 @@ Order: by the noise-robust count of curves whose top 5 changes when the inputs a
 - Check: Reviewer opens the named archive; the Diwali ERA5 analysis is not extended until the line exists.
 - Affects: no input of the ranking
 - Weakest evidence it replaces: none flagged
-- Priority (#44): no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (one sitting)
+- Priority (#42): no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (one sitting)
 - Origin: lit/gaps.md: G3
 
 ### OW-001: Burnett et al. 2022 Fusion curve parameters
@@ -598,7 +572,7 @@ Order: by the noise-robust count of curves whose top 5 changes when the inputs a
 - Check: Provenance test (test_provenance) passes with the new file; a new case in benchmarks/cases.toml reproduces the paper's published relative risks inside its stated band.
 - Affects: no input of the ranking
 - Weakest evidence it replaces: none flagged
-- Priority (#45): no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (bigger)
+- Priority (#43): no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (bigger)
 - Origin: MISSING.md: Burnett et al. 2022 Fusion
 
 ### OW-004: City populations after Census 2011
@@ -611,7 +585,7 @@ Order: by the noise-robust count of curves whose top 5 changes when the inputs a
 - Check: Provenance test passes; airhealth rank Bengaluru --sensitivity re-run shows the change in life-years per crore (a city's population scales deaths).
 - Affects: table:cities.csv
 - Weakest evidence it replaces: none flagged
-- Priority (#46): no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (bigger)
+- Priority (#44): no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (bigger)
 - Origin: MISSING.md: City populations after 2011
 
 ### OW-005: Cause shares for ages 25-29
@@ -624,7 +598,7 @@ Order: by the noise-robust count of curves whose top 5 changes when the inputs a
 - Check: Provenance test passes; the GEMM-workbook benchmark in test_benchmarks moves toward 1.0 and stays inside its stated band without any value tuned to it.
 - Affects: table:cause_share_ncd_lri.csv
 - Weakest evidence it replaces: none flagged
-- Priority (#47): study: changes the top 5 on 0 curves (noise-robust); then evidence weakness (none flagged), size (bigger)
+- Priority (#45): study: changes the top 5 on 0 curves (noise-robust); then evidence weakness (none flagged), size (bigger)
 - Origin: MISSING.md: Cause shares for ages 25-29
 
 ### OW-008: Reproduce GBD 2023's 969,726 India deaths from outdoor PM2.5
@@ -637,7 +611,7 @@ Order: by the noise-robust count of curves whose top 5 changes when the inputs a
 - Check: Named benchmark band: the new case passes only near the expected ratio (test_benchmarks); the gap is not closed by tuning any input (AGENTS.md rule 5).
 - Affects: no input of the ranking
 - Weakest evidence it replaces: none flagged
-- Priority (#48): no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (bigger)
+- Priority (#46): no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (bigger)
 - Origin: MISSING.md: GBD's attributable deaths for India; AGENTS.md open work 4; AGENTS.md: what is not solid (GBD count not reproduced)
 
 ### OW-015: Unsized PM dispersion results (Mumbai, Maharashtra, Hyderabad, Bengaluru reports)
@@ -650,7 +624,7 @@ Order: by the noise-robust count of curves whose top 5 changes when the inputs a
 - Check: Provenance test and test_causes pass; no row has size_fraction other than PM2.5.
 - Affects: table:causes.csv
 - Weakest evidence it replaces: none flagged
-- Priority (#49): study: changes the top 5 on 0 curves (noise-robust); then evidence weakness (none flagged), size (bigger)
+- Priority (#47): study: changes the top 5 on 0 curves (noise-robust); then evidence weakness (none flagged), size (bigger)
 - Origin: MISSING.md: Mumbai AERMOD column and the other dispersion results
 
 ### OW-016: Buses' own share of Bengaluru's transport PM2.5
@@ -663,7 +637,7 @@ Order: by the noise-robust count of curves whose top 5 changes when the inputs a
 - Check: Measure-file validation (test_library, airhealth measures) passes; airhealth rank Bengaluru --sensitivity shows electric_buses' rank change.
 - Affects: measure:electric_buses
 - Weakest evidence it replaces: none flagged
-- Priority (#50): effect:electric_buses: changes the top 5 on 0 curves (noise-robust); then evidence weakness (none flagged), size (bigger)
+- Priority (#48): effect:electric_buses: changes the top 5 on 0 curves (noise-robust); then evidence weakness (none flagged), size (bigger)
 - Origin: MISSING.md: Buses' share of Bengaluru's transport PM2.5; model flag: evidence_from Delhi-NCR
 
 ### OW-030: Patna: how many brick kilns are already zig-zag
@@ -676,7 +650,7 @@ Order: by the noise-robust count of curves whose top 5 changes when the inputs a
 - Check: Measure-file validation passes; rank --sensitivity re-run shows zigzag_kilns' change; test_library's zigzag test updated.
 - Affects: measure:zigzag_kilns
 - Weakest evidence it replaces: none flagged
-- Priority (#51): no research unit in the sensitivity file (none of its research units is in this run); counted as 0; then evidence weakness (none flagged), size (bigger)
+- Priority (#49): no research unit in the sensitivity file (none of its research units is in this run); counted as 0; then evidence weakness (none flagged), size (bigger)
 - Origin: MISSING.md: Patna's brick kilns
 
 ### OW-031: A practices-only brick kiln measure (Brooks et al. 2025)
@@ -689,7 +663,7 @@ Order: by the noise-robust count of curves whose top 5 changes when the inputs a
 - Check: Measure-file validation (test_library) passes; airhealth run and rank Patna list it with its flags.
 - Affects: no input of the ranking
 - Weakest evidence it replaces: none flagged
-- Priority (#52): no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (bigger)
+- Priority (#50): no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (bigger)
 - Origin: MISSING.md: Brooks N et al. 2025; AGENTS.md open work 2
 
 ### OW-036: Diesel generator capacity (kVA) per city
@@ -702,7 +676,7 @@ Order: by the noise-robust count of curves whose top 5 changes when the inputs a
 - Check: Measure-file validation passes for each new file; rank <city> lists the measure.
 - Affects: measure:dg_set_replacement
 - Weakest evidence it replaces: none flagged
-- Priority (#53): effect:dg_set_replacement: changes the top 5 on 0 curves (noise-robust); then evidence weakness (none flagged), size (bigger)
+- Priority (#51): effect:dg_set_replacement: changes the top 5 on 0 curves (noise-robust); then evidence weakness (none flagged), size (bigger)
 - Origin: MISSING.md: Measures kept to one city: dg_set_replacement
 
 ### OW-037: Brick kilns per city airshed
@@ -715,7 +689,7 @@ Order: by the noise-robust count of curves whose top 5 changes when the inputs a
 - Check: Measure-file validation passes for each new file; rank <city> lists the measure.
 - Affects: measure:zigzag_kilns
 - Weakest evidence it replaces: none flagged
-- Priority (#54): no research unit in the sensitivity file (none of its research units is in this run); counted as 0; then evidence weakness (none flagged), size (bigger)
+- Priority (#52): no research unit in the sensitivity file (none of its research units is in this run); counted as 0; then evidence weakness (none flagged), size (bigger)
 - Origin: MISSING.md: Measures kept to one city: zigzag_kilns
 
 ### OW-038: Solid-fuel industrial plants per city (emissions market and fuel switch)
@@ -728,7 +702,7 @@ Order: by the noise-robust count of curves whose top 5 changes when the inputs a
 - Check: Measure-file validation passes for each new file; rank <city> lists the measure.
 - Affects: measure:emissions_market, measure:industrial_fuel_switch
 - Weakest evidence it replaces: none flagged
-- Priority (#55): no research unit in the sensitivity file (none of its research units is in this run); counted as 0; then evidence weakness (none flagged), size (bigger)
+- Priority (#53): no research unit in the sensitivity file (none of its research units is in this run); counted as 0; then evidence weakness (none flagged), size (bigger)
 - Origin: MISSING.md: Measures kept to one city: emissions_market, industrial_fuel_switch
 
 ### OW-039: Bus fleets, two- and three-wheeler shares and fleets per city
@@ -741,7 +715,7 @@ Order: by the noise-robust count of curves whose top 5 changes when the inputs a
 - Check: Measure-file validation passes for each new file; rank <city> lists the measures.
 - Affects: measure:electric_buses, measure:electric_two_three_wheelers
 - Weakest evidence it replaces: none flagged
-- Priority (#56): effect:electric_two_three_wheelers: changes the top 5 on 0 curves (noise-robust); then evidence weakness (none flagged), size (bigger)
+- Priority (#54): effect:electric_two_three_wheelers: changes the top 5 on 0 curves (noise-robust); then evidence weakness (none flagged), size (bigger)
 - Origin: MISSING.md: Measures kept to one city: electric_buses, electric_two_three_wheelers
 
 ### OW-041: LPG and waste-burning cuts and costs not tied to one Bengaluru plan
@@ -754,7 +728,7 @@ Order: by the noise-robust count of curves whose top 5 changes when the inputs a
 - Check: Measure-file validation passes for each new file; rank <city> lists the measures.
 - Affects: measure:lpg_refill_subsidy, measure:waste_collection_burning_ban
 - Weakest evidence it replaces: none flagged
-- Priority (#57): effect:waste_collection_burning_ban: changes the top 5 on 0 curves (noise-robust); then evidence weakness (none flagged), size (bigger)
+- Priority (#55): effect:waste_collection_burning_ban: changes the top 5 on 0 curves (noise-robust); then evidence weakness (none flagged), size (bigger)
 - Origin: MISSING.md: Measures kept to one city: lpg_refill_subsidy, waste_collection_burning_ban
 
 ### OW-042: Urban work participation, monthly shape and density per city (masks, smog tower, schools)
@@ -767,7 +741,7 @@ Order: by the noise-robust count of curves whose top 5 changes when the inputs a
 - Check: Measure-file validation passes for each new file; rank <city> lists the measures.
 - Affects: measure:n95_winter, measure:smog_tower, measure:school_purifiers, measure:school_purifiers_india
 - Weakest evidence it replaces: none flagged
-- Priority (#58): effect:smog_tower: changes the top 5 on 0 curves (noise-robust); then evidence weakness (none flagged), size (bigger)
+- Priority (#56): effect:smog_tower: changes the top 5 on 0 curves (noise-robust); then evidence weakness (none flagged), size (bigger)
 - Origin: MISSING.md: Measures kept to one city: n95_winter, smog_tower, school_purifiers
 
 ### OW-044: Specialist review of the method and its unreviewed calls
@@ -780,7 +754,7 @@ Order: by the noise-robust count of curves whose top 5 changes when the inputs a
 - Check: Reviewer's written comments linked from STATUS.md; any code change they cause has a test, and the benchmarks stay inside their bands.
 - Affects: no input of the ranking
 - Weakest evidence it replaces: none flagged
-- Priority (#59): no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (bigger)
+- Priority (#57): no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (bigger)
 - Origin: AGENTS.md: what is not solid (no specialist has reviewed the method)
 
 ### OW-045: G1: table of firecracker bans by state and year
@@ -793,7 +767,7 @@ Order: by the noise-robust count of curves whose top 5 changes when the inputs a
 - Check: Every row has a source and locator, and the table covers every state of the ten Diwali cities for every year in trend_cityyear.csv (a test on the file).
 - Affects: no input of the ranking
 - Weakest evidence it replaces: none flagged
-- Priority (#60): no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (bigger)
+- Priority (#58): no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (bigger)
 - Origin: lit/gaps.md: G1; AGENTS.md open work 3
 
 ### OW-046: G1: difference-in-differences on the firecracker bans, PM2.5 and SO2
@@ -806,7 +780,7 @@ Order: by the noise-robust count of curves whose top 5 changes when the inputs a
 - Check: A test that the design recovers a planted effect on simulated data; the result is reported with its intervals, and a null is stated as ambiguous between ineffective bans and weak enforcement.
 - Affects: no input of the ranking
 - Weakest evidence it replaces: none flagged
-- Priority (#61): no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (bigger)
+- Priority (#59): no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (bigger)
 - Origin: lit/gaps.md: G1; AGENTS.md open work 3
 
 ### OW-049: G4: how much monitor siting moves the city number
@@ -819,7 +793,7 @@ Order: by the noise-robust count of curves whose top 5 changes when the inputs a
 - Check: A test on the siting classifier with fixture coordinates; the result is reported with intervals and compared with the cross-station median the repo already uses.
 - Affects: no input of the ranking
 - Weakest evidence it replaces: none flagged
-- Priority (#62): no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (bigger)
+- Priority (#60): no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (bigger)
 - Origin: lit/gaps.md: G4
 
 ### OW-050: G5: the diurnal PM2.5 distribution over the full decade
@@ -832,7 +806,7 @@ Order: by the noise-robust count of curves whose top 5 changes when the inputs a
 - Check: A test that the decade table reproduces the festival-window numbers already published (4x at midnight, 12x in Chennai) when cut to that window.
 - Affects: no input of the ranking
 - Weakest evidence it replaces: none flagged
-- Priority (#63): no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (bigger)
+- Priority (#61): no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (bigger)
 - Origin: lit/gaps.md: G5
 
 ### OW-051: G6: the multi-pollutant source fingerprint beyond Diwali
@@ -845,7 +819,7 @@ Order: by the noise-robust count of curves whose top 5 changes when the inputs a
 - Check: A test that the ratio method recovers the known Diwali SO2 signature and fails, as expected, on aged regional air.
 - Affects: no input of the ranking
 - Weakest evidence it replaces: none flagged
-- Priority (#64): no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (bigger)
+- Priority (#62): no research unit in the sensitivity file (it names no research unit); counted as 0; then evidence weakness (none flagged), size (bigger)
 - Origin: lit/gaps.md: G6
 
 ### OW-052: G7: what IHME changed in its exposure map between GBD rounds
@@ -858,5 +832,5 @@ Order: by the noise-robust count of curves whose top 5 changes when the inputs a
 - Check: The state means for GBD 2023 are computed from the IHME file and printed beside ACAG and AQLI in airhealth compare; a test pins the India figure.
 - Affects: table:exposure_gbd2019.csv, table:exposure_acag_total.csv, table:exposure_aqli.csv
 - Weakest evidence it replaces: none flagged
-- Priority (#65): map: changes the top 5 on 0 curves (noise-robust); then evidence weakness (none flagged), size (bigger)
+- Priority (#63): map: changes the top 5 on 0 curves (noise-robust); then evidence weakness (none flagged), size (bigger)
 - Origin: lit/gaps.md: G7
