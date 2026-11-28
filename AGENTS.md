@@ -162,8 +162,9 @@ health/     airhealth: the package, its data (with sources), tests, benchmarks
 diwali/     finished study: ten cities, ten years of hourly PM2.5 around Diwali
 lit/        reading list, who is doing what, gaps nobody has filled
 bets/       interventions sorted by what the physics allows
-cities/     one city from monitors to measures: cities/bengaluru/index.html (generated; rebuild: PYTHONPATH=health:cities python -m citypage.build --city Bengaluru)
-docs/       STATUS.md and design notes (specs/)
+cities/     eleven city pages + an index, monitors to measures (generated; rebuild: PYTHONPATH=health:cities python -m citypage.build --all)
+site/       airhealth.dev: landing templates, figures.py, build.sh and deploy.sh (see site/README.md)
+docs/       STATUS.md, open-work.md (claimable items, OW-NNN) and design notes (specs/)
 ```
 
 ## Sending work back

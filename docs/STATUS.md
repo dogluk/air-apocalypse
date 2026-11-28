@@ -1,14 +1,15 @@
 # Where this stands
 
-Last updated 2026-11-27. New to the repo? Read [`../AGENTS.md`](../AGENTS.md) first.
+Last updated 2026-11-28. New to the repo? Read [`../AGENTS.md`](../AGENTS.md) first.
 
 ## In short
 
 **What is being built.** A calculator: "if PM2.5 in place X goes from A to B, how many deaths
 a year are avoided and how many years of life are gained?" It answers on several published
-risk curves side by side, never one, because they disagree by several times. Next it is
-being extended to rank measures by expected life-years per rupee across ~50 Indian cities,
-long shots included. The first ranking is meant for researchers who can check it.
+risk curves side by side, never one, because they disagree by several times. On top of it, a
+library of measures ranked by expected life-years per rupee, city by city, long shots included,
+and an account of which uncertainties reorder that ranking. It is meant for researchers who can
+check it and for people deciding what to fund or build.
 
 **Where it is.** India, every state and **50 cities** (APnA's 49 airsheds plus Delhi), from the
 command line and a local dashboard. Eight curves (three need IHME files that cannot be
@@ -33,9 +34,20 @@ all India (never averaging curves); `airhealth rank --sensitivity` shows which i
 ranking; ranking benchmarks in `health/benchmarks/RANKING.md`; a ranking tab on the dashboard.
 Design: [`specs/2026-11-12-intervention-ranking-design.md`](specs/2026-11-12-intervention-ranking-design.md).
 
-**Bengaluru end to end.** [`cities/bengaluru/index.html`](../cities/bengaluru/index.html): the
-air (monitors 2016-2025, satellites, gases), its sources, its health toll and the measures,
-generated from the repo. Design: [`specs/2026-11-27-bengaluru-page-design.md`](specs/2026-11-27-bengaluru-page-design.md).
+**City pages.** `cities/<slug>/index.html` for eleven cities plus an index
+(`python -m citypage.build --all`): the air (monitors 2016-2025, satellites, gases), its sources,
+its health toll and the measures, generated from the repo. Design:
+[`specs/2026-11-27-bengaluru-page-design.md`](specs/2026-11-27-bengaluru-page-design.md).
+
+**Site: [airhealth.dev](https://airhealth.dev).** Built from `site/` (see
+[`site/README.md`](../site/README.md)): the landing page renders from templates and
+`site/data/air.json`, written by `site/figures.py` from the canonical model runs; the city pages
+and [`open-work`](https://airhealth.dev/open-work/) come from the repo on every build.
+`bash site/deploy.sh` publishes it (Cloudflare Pages). One line runs the model with no clone:
+`uvx --from 'git+https://github.com/dogluk/air-apocalypse#subdirectory=health' airhealth burden Bengaluru`.
+
+**Open work.** [`open-work.md`](open-work.md): every open item with a stable id (OW-NNN), what
+to find, where to read it and the check that proves it, ordered by how much it moves the ranking.
 
 ## Next, in order
 
