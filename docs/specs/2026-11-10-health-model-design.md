@@ -73,7 +73,7 @@ source before it enters code or data (see "Provenance rule").
 ## How it is made (decided)
 
 - A Python library in this repo, run from the terminal, producing numbers and charts.
-- A page on dogl.uk later, reading the same intervention files.
+- A public site later (now airhealth.dev), reading the same intervention files.
 - IHME's licence problem is acknowledged and deferred: use the data locally for now.
 
 Everything below this line is a modelling call, not yet reviewed by a specialist, unless marked otherwise.

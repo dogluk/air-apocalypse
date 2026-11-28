@@ -21,3 +21,6 @@ health/dist/
 
 # Google Trends raw responses: Google gives no open licence to redistribute them (fetch with diwali/pull_trends.py).
 diwali/data/trends/
+
+# Generated site (bash site/build.sh)
+site/dist/
